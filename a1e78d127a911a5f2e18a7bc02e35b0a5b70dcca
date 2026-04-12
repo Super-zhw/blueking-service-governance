@@ -1,0 +1,23 @@
+apps/bkms-server/pkg/handler/stores.go
+  022647d2b808218b 27-29,70-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "a1e78d127a911a5f2e18a7bc02e35b0a5b70dcca",
+  "prompts": {
+    "022647d2b808218b": {
+      "agent_id": {
+        "tool": "codebuddy",
+        "id": "cursor-20260408T075216Z-61314",
+        "model": "claude-4.6-sonnet"
+      },
+      "human_author": "narasux",
+      "messages": [],
+      "total_additions": 23,
+      "total_deletions": 16,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    }
+  }
+}
