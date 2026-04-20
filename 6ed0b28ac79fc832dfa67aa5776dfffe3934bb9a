@@ -1,0 +1,31 @@
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/validator.go
+  dfbf3ec58ce16ae8 62-77
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/bkmonitor_suite_test.go
+  dfbf3ec58ce16ae8 1-13
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/user_group_test.go
+  dfbf3ec58ce16ae8 1-91,93-434
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  dfbf3ec58ce16ae8 181-358
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/user_group.go
+  dfbf3ec58ce16ae8 1-94,96-113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "6ed0b28ac79fc832dfa67aa5776dfffe3934bb9a",
+  "prompts": {
+    "dfbf3ec58ce16ae8": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019d95ac60ff710597ce79062790f69e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 993,
+      "total_deletions": 0,
+      "accepted_lines": 996,
+      "overriden_lines": 2
+    }
+  }
+}
