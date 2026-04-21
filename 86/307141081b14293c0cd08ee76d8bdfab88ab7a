@@ -1,0 +1,29 @@
+apps/bkms-server/pkg/bkmonitor/user_group_service_test.go
+  dfbf3ec58ce16ae8 5-6,8,14,16,161,169-234,236-268,270-297,299-328,330-337
+apps/bkms-server/pkg/bkmonitor/user_group_service.go
+  dfbf3ec58ce16ae8 139,141,150,155-156,158,160-165,167-170,172-173,176-180
+apps/bkms-server/pkg/bkmonitor/export_test.go
+  dfbf3ec58ce16ae8 7,22-30
+apps/bkms-server/pkg/handler/env.go
+  dfbf3ec58ce16ae8 80-81,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "86307141081b14293c0cd08ee76d8bdfab88ab7a",
+  "prompts": {
+    "dfbf3ec58ce16ae8": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019d95ac60ff710597ce79062790f69e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 332,
+      "total_deletions": 65,
+      "accepted_lines": 206,
+      "overriden_lines": 9
+    }
+  }
+}
