@@ -1,0 +1,31 @@
+apps/bkms-server/pkg/handler/workspace.go
+  dfbf3ec58ce16ae8 543,606
+apps/bkms-server/pkg/bkmonitor/module.go
+  dfbf3ec58ce16ae8 24
+apps/bkms-server/pkg/bkmonitor/user_group_service_test.go
+  dfbf3ec58ce16ae8 1-155,157-164
+apps/bkms-server/pkg/bkmonitor/user_group_service.go
+  dfbf3ec58ce16ae8 1-17,19-21,23-29,31,41-42,45-46,50-65,69,74,76-88,90-100,105-108,110-113,121-122,127-128,130-143,146-153,155-159,170-173,181-182,184-185,187-199,201-215,217-229,233-234,236,239-254,256-262,264-267,269-281,283-299,305,307-311,313-316,318-320,322-323,325-329,331-338,340-357,361-395,397-415,419,421-422,424-425,430-431,438-442,452-464,466-480,482-491,493-494,500-502,505,510,512-514,519-531,533-543,545-547,554-555,558,563-567,572-595,597
+apps/bkms-server/pkg/bkmonitor/export_test.go
+  dfbf3ec58ce16ae8 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "853e5a9010b6087f6ce406a1fa01a7b50bdcd214",
+  "prompts": {
+    "dfbf3ec58ce16ae8": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019d95ac60ff710597ce79062790f69e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 1071,
+      "total_deletions": 113,
+      "accepted_lines": 627,
+      "overriden_lines": 0
+    }
+  }
+}
