@@ -1,0 +1,29 @@
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/tencentcmdb.go
+  5eba70107c246041 1-31,33-34,37-44,46-59,61-71,73-117
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/client.go
+  5eba70107c246041 1-7,9,11,14
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/business.go
+  5eba70107c246041 1-29,31-34,36-41,43-44,46-47,49,67,69-70,72-75,77-78,82-83,85-86,88
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/types.go
+  5eba70107c246041 1-19,21-22,24-26,28-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "477b22ea576d5678bdf7b627fc65e762f53acfa5",
+  "prompts": {
+    "5eba70107c246041": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019dd72a4fd571ba9c00799633b94958",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 516,
+      "total_deletions": 14,
+      "accepted_lines": 543,
+      "overriden_lines": 27
+    }
+  }
+}
