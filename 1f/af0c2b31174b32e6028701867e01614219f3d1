@@ -1,0 +1,25 @@
+apps/bkms-server/api/bkcmdb.proto
+  5eba70107c246041 8,20-24,37,40
+apps/bkms-server/pkg/handler/bkcmdb.go
+  5eba70107c246041 3-15,17-21,27-28,30,32-44,66,76,78-81,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "1faf0c2b31174b32e6028701867e01614219f3d1",
+  "prompts": {
+    "5eba70107c246041": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019dd72a4fd571ba9c00799633b94958",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 181,
+      "total_deletions": 136,
+      "accepted_lines": 348,
+      "overriden_lines": 41
+    }
+  }
+}
