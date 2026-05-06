@@ -1,0 +1,39 @@
+apps/bkms-server/pkg/workspace/cmdb.go
+  5eba70107c246041 1-30,32,34-51,53,55,57-60,62,64-66,68-73,75-86,88-103,105-112,114-126,128-131,133-147,151-163,165-194
+apps/bkms-server/pkg/config/types.go
+  5eba70107c246041 214-217
+apps/bkms-server/pkg/handler/workspace.go
+  5eba70107c246041 332-341,347-353,441,704-740,742
+apps/bkms-server/pkg/infras/cloudapi/bkcmdb/bkcmdb.go
+  5eba70107c246041 10,33-38
+apps/bkms-server/pkg/infras/cloudapi/bkcmdb/business.go
+  5eba70107c246041 119-152
+apps/bkms-server/pkg/infras/cloudapi/bkcmdb/stub.go
+  5eba70107c246041 1-61
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/stub.go
+  5eba70107c246041 1-99
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/tencentcmdb.go
+  5eba70107c246041 13,35-40
+apps/bkms-server/pkg/handler/bkcmdb.go
+  5eba70107c246041 10,18,20,23,25,28-41,43-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "8b19d188004c7de44e4e4d8368fd8de9e69a4e3e",
+  "prompts": {
+    "5eba70107c246041": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019dd72a4fd571ba9c00799633b94958",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 1090,
+      "total_deletions": 225,
+      "accepted_lines": 673,
+      "overriden_lines": 19
+    }
+  }
+}
