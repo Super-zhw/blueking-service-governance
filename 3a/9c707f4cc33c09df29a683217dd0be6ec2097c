@@ -1,0 +1,27 @@
+apps/bkms-server/pkg/handler/bkcmdb.go
+  5eba70107c246041 25
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/business.go
+  5eba70107c246041 48,51-54,56-69,74,77-78,80-81
+apps/bkms-server/pkg/handler/workspace.go
+  5eba70107c246041 22,341-343
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "3a9c707f4cc33c09df29a683217dd0be6ec2097c",
+  "prompts": {
+    "5eba70107c246041": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019dd72a4fd571ba9c00799633b94958",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 68,
+      "total_deletions": 26,
+      "accepted_lines": 32,
+      "overriden_lines": 20
+    }
+  }
+}
