@@ -1,0 +1,22 @@
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/business.go
+  s_20546e71220d32::t_e20bef00c2b32e 9,11,33,39-40,44-66
+apps/bkms-server/pkg/infras/cloudapi/tencentcmdb/tencentcmdb.go
+  s_20546e71220d32::t_03978e5bb63c5e 62,66-67,87,90,95
+  s_20546e71220d32::t_f1c6632147ad6b 73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "dbc466269fb62c2e255a7d673022ddf7c0d38383",
+  "prompts": {},
+  "sessions": {
+    "s_20546e71220d32": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e01be84277c09a13760f1cc4f60af",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
