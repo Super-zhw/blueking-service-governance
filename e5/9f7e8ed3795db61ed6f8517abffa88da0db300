@@ -1,0 +1,14 @@
+apps/bkms-server/tests/apis/helm-chart-builds/02-create-helm-chart-build.bru
+  h_83f239dc907c66 15-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "e59f7e8ed3795db61ed6f8517abffa88da0db300",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

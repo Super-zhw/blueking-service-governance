@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/helmchart/build/build.go
+  h_83f239dc907c66 120,131,145,168,209,222
+apps/bkms-server/api/helm_chart.proto
+  h_83f239dc907c66 24-25
+apps/bkms-server/pkg/handler/helm_chart.go
+  h_83f239dc907c66 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "b12bff9d0dab331949ad64cd57ad07c13ae8d38f",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
