@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/infras/cloudapi/bscp/bscp.go
+  s_9cc14c08eecf03::t_ae76b8c9832c39 488-495,497-508
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "162a53aa2a953a2d3d03d7818f6cf8b57c07873e",
+  "prompts": {},
+  "sessions": {
+    "s_9cc14c08eecf03": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e059a75477a87a8e901062d41ca13",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
