@@ -1,0 +1,34 @@
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/developer.json
+  s_9cc14c08eecf03::t_76345de284f087 1-48
+apps/authmanager/pkg/auth_server.go
+  s_9cc14c08eecf03::t_d9d8e9d442bdcc 425-430,433-435
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/operator.json
+  s_9cc14c08eecf03::t_ffeb70f325978d 1-48
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/sre.json
+  s_9cc14c08eecf03::t_b06a0cf67bfa24 1-48
+apps/authmanager/pkg/iam/service.go
+  s_9cc14c08eecf03::t_57110b33eb2863 29,62-67,70-71,787-794,797
+apps/bkms-server/pkg/handler/bscp.go
+  s_9cc14c08eecf03::t_23ea9a83e40abb 253-257,265-269,271-301,304-324
+  s_9cc14c08eecf03::t_c604004a5d748a 270
+apps/authmanager/pkg/iam/role/scopes/bscp.go
+  s_9cc14c08eecf03::t_56796c970ef2c5 1-14,17-30,33-37
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/admin.json
+  s_9cc14c08eecf03::t_1c5454831f3050 1-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "964ee932b598230442ef75843475c9ab321df00d",
+  "prompts": {},
+  "sessions": {
+    "s_9cc14c08eecf03": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e059a75477a87a8e901062d41ca13",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
