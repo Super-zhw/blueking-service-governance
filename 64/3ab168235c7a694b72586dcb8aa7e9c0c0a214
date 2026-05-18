@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/deploy/helm/deploy.go
+  h_83f239dc907c66 445-448
+apps/bkms-server/pkg/bkintegrations/bkci/assets/pipeline_templates/helm_git_build.json
+  h_83f239dc907c66 330
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "643ab168235c7a694b72586dcb8aa7e9c0c0a214",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
