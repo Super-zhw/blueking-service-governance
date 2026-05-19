@@ -1,0 +1,33 @@
+apps/bkms-server/pkg/deploy/helm/validator.go
+  h_83f239dc907c66 22-44
+apps/bkms-server/pkg/deploy/helm/repo_config.go
+  h_83f239dc907c66 1-40
+apps/bkms-server/pkg/handler/deploy_helm.go
+  h_83f239dc907c66 82,371
+apps/bkms-server/pkg/deploy/helm/deploy_test.go
+  h_83f239dc907c66 78-96,238-294
+  s_c1fdbc965177cb::t_49a14862c21709 63,100,117,131,142,153,164,175,186,198,209,219,229
+apps/bkms-server/pkg/deploy/helm/deploy.go
+  h_83f239dc907c66 25-26,29,49-51,56-57,59-63,68,74,86,91,98,106,112,118,133-135,140-141,143-147,152,164,169,175,182,188,194,220-221,483,518
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "34d48ef242773d1a4020fe86d9bf5ecd2db63be5",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_c1fdbc965177cb": {
+      "agent_id": {
+        "tool": "codebuddy",
+        "id": "cursor-20260513T092919Z-67995",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

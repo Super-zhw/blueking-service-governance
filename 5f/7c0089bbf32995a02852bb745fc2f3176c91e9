@@ -1,0 +1,21 @@
+apps/bkms-server/pkg/workspace/dependency.go
+  s_20546e71220d32::t_e5fa42b6e6c1d9 10,17,23-27,29,73-80,143-167
+apps/bkms-server/pkg/handler/workspace.go
+  s_20546e71220d32::t_996f74814aa16c 328-330,332-334,336
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "5f7c0089bbf32995a02852bb745fc2f3176c91e9",
+  "prompts": {},
+  "sessions": {
+    "s_20546e71220d32": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e01be84277c09a13760f1cc4f60af",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
