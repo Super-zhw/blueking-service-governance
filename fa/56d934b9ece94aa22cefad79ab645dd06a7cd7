@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/topology/service.go
+  h_83f239dc907c66 13-14,16-17,22,29-30,36-38,42-44,174,177-178,182,193-195,198-202,207-235
+apps/bkms-server/pkg/store/registry.go
+  h_83f239dc907c66 295-296
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "fa56d934b9ece94aa22cefad79ab645dd06a7cd7",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
