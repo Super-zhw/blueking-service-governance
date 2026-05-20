@@ -1,0 +1,19 @@
+apps/bkms-server/api/workspace.proto
+  s_9d4708be2a1251::t_5d6790993a5aa0 216-217,219,221,226
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "5cffab0fed833b7c360b9c6ce5a3ef2251a33c83",
+  "prompts": {},
+  "sessions": {
+    "s_9d4708be2a1251": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e446a77907eab81f061a62fa3da1b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
