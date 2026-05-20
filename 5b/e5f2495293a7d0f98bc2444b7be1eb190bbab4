@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/topology/manifest_test.go
+  h_83f239dc907c66 33-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "5be5f2495293a7d0f98bc2444b7be1eb190bbab4",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

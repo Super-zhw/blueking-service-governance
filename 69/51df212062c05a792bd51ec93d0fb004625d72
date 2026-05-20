@@ -1,0 +1,11 @@
+apps/bkms-server/pkg/topology/service.go
+  h_83f239dc907c66 13-14,16-17,22,29-30,36-38,42-44,174,177-178,181,192-194,197-201,206-234
+apps/bkms-server/pkg/store/registry.go
+  h_83f239dc907c66 295-296
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "6951df212062c05a792bd51ec93d0fb004625d72",
+  "prompts": {}
+}

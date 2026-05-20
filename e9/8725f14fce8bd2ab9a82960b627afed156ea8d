@@ -1,0 +1,29 @@
+apps/bkms-server/pkg/topology/manifest.go
+  h_83f239dc907c66 30,33,37
+apps/bkms-server/pkg/topology/service.go
+  h_83f239dc907c66 30,38,44,183,199,206,213-216,219,222-224,226
+  s_f1109838f38bbf::t_952ae8d8e95f5e 27-29,41-43
+apps/bkms-server/pkg/infras/kubernetes/manifest/masker.go
+  h_83f239dc907c66 20,44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.10",
+  "base_commit_sha": "e98725f14fce8bd2ab9a82960b627afed156ea8d",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_f1109838f38bbf": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e3e4d-a445-7011-aac5-7d7918ea71b5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
