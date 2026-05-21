@@ -1,0 +1,25 @@
+apps/bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  s_835071079b5016::t_f7215291835837 330,334-342,352
+  h_83f239dc907c66 325-326,331-333,343-351,353
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "2ee206434a48fbd42453ce599f818e453e360b59",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_835071079b5016": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e3f79-d419-7582-b991-1dc7117c52ac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
