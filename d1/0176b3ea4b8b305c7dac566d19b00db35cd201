@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  h_83f239dc907c66 311
+apps/bkms-server/pkg/infras/cloudapi/bkci/utils.go
+  h_83f239dc907c66 63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "d10176b3ea4b8b305c7dac566d19b00db35cd201",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
