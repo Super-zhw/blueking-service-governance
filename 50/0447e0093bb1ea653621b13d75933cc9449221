@@ -1,0 +1,72 @@
+apps/bkms-server/pkg/deploy/helm/postrenderer/component_test.go
+  s_9c4aa7e77f8ddb::t_fe732229fe5313 1-505
+apps/bkms-server/pkg/app/helmcomponent/serializer/helm_app_component.go
+  s_13aa5dd83c1ae7::t_db90afc0654f74 1-128
+apps/bkms-server/design_notes/helm_component.md
+  h_83f239dc907c66 1-118
+apps/bkms-server/pkg/app/helmcomponent/router.go
+  s_13aa5dd83c1ae7::t_05544f0e311f48 1-23
+apps/bkms-server/pkg/storereg/registry.go
+  s_13aa5dd83c1ae7::t_be461d210ca11e 15
+  h_83f239dc907c66 69,162
+apps/bkms-server/pkg/app/helmcomponent/store_test.go
+  s_13aa5dd83c1ae7::t_05544f0e311f48 1-269
+apps/bkms-server/pkg/deploy/helm/postrenderer/chain_test.go
+  s_9c4aa7e77f8ddb::t_fe732229fe5313 1-89
+apps/bkms-server/pkg/deploy/helm/postrenderer/component.go
+  s_9c4aa7e77f8ddb::t_fe732229fe5313 1-241
+apps/bkms-server/pkg/deploy/helm/postrenderer/lane_test.go
+  s_9c4aa7e77f8ddb::t_fe732229fe5313 1-425
+apps/bkms-server/pkg/deploy/helm/postrenderer/lane.go
+  s_9c4aa7e77f8ddb::t_fe732229fe5313 1-124
+apps/bkms-server/pkg/app/helmcomponent/entities.go
+  s_13aa5dd83c1ae7::t_559d87fdfa5fa4 1
+  s_13aa5dd83c1ae7::t_05544f0e311f48 2-75
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder.go
+  h_83f239dc907c66 1
+  s_9c4aa7e77f8ddb::t_fac18252875ad8 2-118
+apps/bkms-server/pkg/deploy/helm/deploy.go
+  h_83f239dc907c66 102,105,174,177
+  s_9c4aa7e77f8ddb::t_037cd2f67ea1e9 27,103,175
+apps/bkms-server/pkg/deploy/helm/postrenderer/chain.go
+  s_9c4aa7e77f8ddb::t_fe732229fe5313 1-44
+apps/bkms-server/pkg/app/helmcomponent/handler/helm_app_component.go
+  s_13aa5dd83c1ae7::t_db90afc0654f74 1-11,14-243
+  s_13aa5dd83c1ae7::t_be461d210ca11e 12-13
+apps/bkms-server/pkg/app/helmcomponent/store.go
+  s_13aa5dd83c1ae7::t_05544f0e311f48 1-175
+apps/bkms-server/pkg/deploy/helm/postrenderer/postrenderer_suite_test.go
+  s_9c4aa7e77f8ddb::t_0e26d84288e863 1-13
+apps/bkms-server/pkg/bkmssrv/server.go
+  s_13aa5dd83c1ae7::t_be461d210ca11e 11-12
+  s_13aa5dd83c1ae7::t_3c635c2e1bc4e2 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "500447e0093bb1ea653621b13d75933cc9449221",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_13aa5dd83c1ae7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e3f79-e571-7a81-b8df-853b2cf52a91",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    },
+    "s_9c4aa7e77f8ddb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4370-a53e-7d33-8aee-5716c7128a77",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
