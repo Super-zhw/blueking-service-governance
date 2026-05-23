@@ -1,0 +1,21 @@
+apps/bkms-server/configs/config.yaml
+  s_a810e34e64776e::t_49a332b6183ebb 133-135
+apps/bkms-server/tests/configs/config.yaml
+  s_a810e34e64776e::t_baeab9527f3aa0 124-126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "a00211909e469beae044e2a0222fe9a813c76b4e",
+  "prompts": {},
+  "sessions": {
+    "s_a810e34e64776e": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e3f18cd007f48b18c27c4e674b80e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

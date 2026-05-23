@@ -1,0 +1,22 @@
+apps/bkms-server/pkg/handler/bscp_config.go
+  s_b0f5f6e14e8ef9::t_63f6a0362ce0b1 142,275,280,286-287,289-290,294-296,298-300,302
+  s_b0f5f6e14e8ef9::t_c0d96bf2f78743 293
+apps/bkms-server/pkg/app/component/bscp/service.go
+  s_b0f5f6e14e8ef9::t_953b1db5dfc480 1-23,26-28,32-34,36-53,55-68,70-89,91-100,102-123,125-135,137-197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "3ccfe0594d6ac32e2f1971df4ffb3ea6cf40099e",
+  "prompts": {},
+  "sessions": {
+    "s_b0f5f6e14e8ef9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e551bce7f7e8bb8feebe7cbe5878b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
