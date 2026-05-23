@@ -1,0 +1,21 @@
+apps/bkms-server/pkg/app/component/bscp/bscp_suite_test.go
+  s_a810e34e64776e::t_8c4f9d5e3f9834 1-27
+apps/bkms-server/pkg/app/component/bscp/store_test.go
+  s_a810e34e64776e::t_6f062ec0cae547 1-297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "2dc55d9b377e6c5289dd4f148bfe14ae452016f0",
+  "prompts": {},
+  "sessions": {
+    "s_a810e34e64776e": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e3f18cd007f48b18c27c4e674b80e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
