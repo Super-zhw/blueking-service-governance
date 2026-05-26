@@ -1,0 +1,44 @@
+apps/bkms-server/pkg/app/appmodel/workload/builder.go
+  s_a810e34e64776e::t_7a998cb93fb384 351-352
+  s_a810e34e64776e::t_e645626ab8b4d5 26
+  s_a810e34e64776e::t_09a5d7e8d94915 347-350,353
+apps/bkms-server/pkg/handler/bscp_config.go
+  s_a810e34e64776e::t_a82152ff073f06 1-179
+apps/bkms-server/pkg/handler/service_factories.go
+  s_a810e34e64776e::t_5009aba4fed133 49
+  s_a810e34e64776e::t_9b1914366c6fa6 69
+apps/bkms-server/pkg/app/component/bscp/trpc_inject.go
+  s_a810e34e64776e::t_d760e87f4be11e 1-11
+apps/bkms-server/pkg/app/component/bscp/entities.go
+  s_a810e34e64776e::t_d6075855555c21 68
+  s_a810e34e64776e::t_bea0dc986691d0 1-67,69-83
+apps/bkms-server/pkg/app/component/bscp/store.go
+  s_a810e34e64776e::t_3251ff0267d384 1-182
+apps/bkms-server/pkg/handler/app_trpc.go
+  s_a810e34e64776e::t_c145c874706a00 38-42
+apps/bkms-server/pkg/app/component/assets/comps/BscpVolume_v1.0.0.yaml
+  s_a810e34e64776e::t_00848389ce2913 1-44
+apps/bkms-server/pkg/app/component/bscp/module.go
+  s_a810e34e64776e::t_3016fccebd7f3a 1-14
+apps/bkms-server/api/bscp.proto
+  s_a810e34e64776e::t_63571e6e3aad3b 98-212
+  s_a810e34e64776e::t_b074ac5e185bbc 5
+apps/bkms-server/api/bkmsserver.proto
+  s_a810e34e64776e::t_d042feca06420e 1111-1134,1140-1144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "df565625fc49a2595fcf0eaadea2ce570cd34a12",
+  "prompts": {},
+  "sessions": {
+    "s_a810e34e64776e": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e3f18cd007f48b18c27c4e674b80e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
