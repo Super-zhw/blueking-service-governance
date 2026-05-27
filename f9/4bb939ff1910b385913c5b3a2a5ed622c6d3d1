@@ -1,0 +1,27 @@
+apps/bkms-server/docs/reqs/迁移应用网络API到Gin框架.md
+  s_a8d233cf255719::t_2cc1692b48d8dc 7
+  s_a8d233cf255719::t_a99a5bbe368e7c 1-6,8-158
+apps/bkms-server/tests/apis/v2/bkintegrations/README.md
+  s_a8d233cf255719::t_bb38c5e98c8e05 1-51
+apps/bkms-server/docs/reqs/迁移外部平台集成API到Gin框架.md
+  s_a8d233cf255719::t_d0ff6739e83238 7
+  s_a8d233cf255719::t_a9284bf50c8dd7 1-6,8-161
+apps/bkms-server/docs/reqs/trpc迁移Gin_huiwen.md
+  s_a8d233cf255719::t_cc2fed38a41e3d 1-268
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "f94bb939ff1910b385913c5b3a2a5ed622c6d3d1",
+  "prompts": {},
+  "sessions": {
+    "s_a8d233cf255719": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e633d0b917a2a999bf597c69f8731",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
