@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/bkintegrations/bkci/assets/pipeline_templates/helm_git_build.json
+  h_83f239dc907c66 330
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "19886023b6dbfdffe9319291c47502f658156497",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
