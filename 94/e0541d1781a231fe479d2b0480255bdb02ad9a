@@ -1,0 +1,27 @@
+apps/bkms-server/pkg/deploy/instancelog/service_test.go
+  s_c01839d255a00c::t_7c28c083e6f469 171,204,235
+  h_83f239dc907c66 6-7,13-14,20,117-170,172-203,205-234,236-247
+apps/bkms-server/pkg/deploy/instancelog/service.go
+  h_83f239dc907c66 12,113-123,148-160,178-199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "94e0541d1781a231fe479d2b0480255bdb02ad9a",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_c01839d255a00c": {
+      "agent_id": {
+        "tool": "codebuddy",
+        "id": "cursor-20260528T085625Z-22563",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
