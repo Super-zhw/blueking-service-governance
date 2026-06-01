@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/instance/serializer/instance.go
+  h_83f239dc907c66 1-434
+apps/bkms-server/pkg/instance/handler/instance.go
+  h_83f239dc907c66 1-940
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d8da17e854484e5456b3fff29f46a1ef2899df03",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
