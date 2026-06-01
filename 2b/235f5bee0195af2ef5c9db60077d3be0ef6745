@@ -1,0 +1,19 @@
+apps/bkms-server/design_notes/bscp_config.md
+  s_ee1475003a8a27::t_bd483c17eb7c9d 76,190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2b235f5bee0195af2ef5c9db60077d3be0ef6745",
+  "prompts": {},
+  "sessions": {
+    "s_ee1475003a8a27": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e82283fd07e8f84c31e8ccba99216",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

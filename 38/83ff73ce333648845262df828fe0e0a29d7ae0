@@ -1,0 +1,19 @@
+apps/bkms-server/.agents/skills/bkms-gin-migrate/SKILL.md
+  s_46aaeafb3be02c::t_13bce80f51401f 196-227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3883ff73ce333648845262df828fe0e0a29d7ae0",
+  "prompts": {},
+  "sessions": {
+    "s_46aaeafb3be02c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e832263ce776a82de65d446c47459",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
