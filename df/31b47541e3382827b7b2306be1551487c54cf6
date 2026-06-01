@@ -1,0 +1,29 @@
+apps/bkms-server/pkg/common/auth/auth.go
+  h_83f239dc907c66 9,41-75
+apps/bkms-server/pkg/deploy/handler/helm_deploy.go
+  s_6c81edda5e306a::t_4fab08e12d4407 218,354-357
+  h_83f239dc907c66 1-217,219-353,358-695
+apps/bkms-server/pkg/bkmssrv/server.go
+  h_83f239dc907c66 16-17,56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "df31b47541e3382827b7b2306be1551487c54cf6",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_6c81edda5e306a": {
+      "agent_id": {
+        "tool": "codebuddy",
+        "id": "cursor-20260530T124152Z-3480",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
