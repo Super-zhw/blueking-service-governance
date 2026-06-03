@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/envvars/serializer/common.go
+  h_83f239dc907c66 3,5-6
+apps/bkms-server/pkg/app/serializer/app.go
+  h_83f239dc907c66 13,38
+apps/bkms-server/pkg/envvars/serializer/scoped_env_var.go
+  h_83f239dc907c66 18,71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "577f647797fd2903cd55c91267b1dd3ad13b70bc",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
