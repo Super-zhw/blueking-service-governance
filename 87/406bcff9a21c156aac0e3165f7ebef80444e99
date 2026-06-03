@@ -1,0 +1,22 @@
+bkms-cli/pkg/utils/output/output.go
+  s_83de4e738a8c1e::t_92d3baba5dffc8 157-181
+  s_83de4e738a8c1e::t_7fd6169a193071 11,113-114,119-126,130
+bkms-cli/pkg/utils/output/output_test.go
+  s_83de4e738a8c1e::t_4fcba98a820ab2 338-357,360-363,366-368,371-385,388-389
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "87406bcff9a21c156aac0e3165f7ebef80444e99",
+  "prompts": {},
+  "sessions": {
+    "s_83de4e738a8c1e": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e8c41539878b386f77b12bdac658b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
