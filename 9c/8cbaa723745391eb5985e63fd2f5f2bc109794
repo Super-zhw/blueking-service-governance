@@ -1,0 +1,26 @@
+apps/bkms-server/pkg/env/serializer/env.go
+  h_83f239dc907c66 13
+apps/bkms-server/pkg/topology/serializer/topology.go
+  h_83f239dc907c66 8
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  h_83f239dc907c66 7
+apps/bkms-server/pkg/instancelog/handler/download.go
+  h_83f239dc907c66 11
+apps/bkms-server/pkg/envvars/serializer/common.go
+  h_83f239dc907c66 3-4,6
+apps/bkms-server/pkg/instance/serializer/instance.go
+  h_83f239dc907c66 11
+apps/bkms-server/pkg/app/networking/serializer/networking.go
+  h_83f239dc907c66 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9c8cbaa723745391eb5985e63fd2f5f2bc109794",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
