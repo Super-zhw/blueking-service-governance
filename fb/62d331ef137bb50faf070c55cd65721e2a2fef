@@ -1,0 +1,18 @@
+apps/bkms-server/tests/apis/v2/helm-chart-builds/07-list-app-helm-charts.bru
+  h_83f239dc907c66 40
+apps/bkms-server/tests/apis/v2/helm-chart-builds/08-list-chart-versions.bru
+  h_83f239dc907c66 40
+apps/bkms-server/tests/apis/v2/helm-chart-builds/folder.bru
+  h_83f239dc907c66 32,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "fb62d331ef137bb50faf070c55cd65721e2a2fef",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

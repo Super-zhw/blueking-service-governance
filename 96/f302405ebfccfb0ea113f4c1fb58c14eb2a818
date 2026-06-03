@@ -1,0 +1,22 @@
+apps/bkms-server/pkg/deploy/helm/postrenderer/lane.go
+  h_83f239dc907c66 17,88
+apps/bkms-server/pkg/deploy/helm/postrenderer/component_test.go
+  h_83f239dc907c66 22,53,102,155,201,252,302,335,383,426
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder_test.go
+  h_83f239dc907c66 58,99,120
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder.go
+  h_83f239dc907c66 31,36,48,50,82,99,106,120,175,178,183,186,189,191
+apps/bkms-server/pkg/deploy/helm/postrenderer/component.go
+  h_83f239dc907c66 21-22,25-26,40,103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "96f302405ebfccfb0ea113f4c1fb58c14eb2a818",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
