@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/instance/serializer/instance.go
+  s_7384f1f0690260::t_e751be4d7915ca 218-220
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "6bad3a697a7de517dd024f57f061785154be80e6",
+  "prompts": {},
+  "sessions": {
+    "s_7384f1f0690260": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e90b2df0c7eba8f3042808523069f",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

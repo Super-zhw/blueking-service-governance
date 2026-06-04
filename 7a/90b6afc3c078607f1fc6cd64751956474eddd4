@@ -1,0 +1,29 @@
+apps/bkms-server/tests/apis/v2/bscp-config/patch-bscp-env-config.bru
+  s_ee1475003a8a27::t_e0623d7771fa25 12
+apps/bkms-server/tests/apis/v2/bscp-config/delete-bscp-env-config.bru
+  s_ee1475003a8a27::t_bc1c4bb3ac5236 12
+apps/bkms-server/design_notes/bscp_config.md
+  s_ee1475003a8a27::t_f82b7325cc4b0d 182
+apps/bkms-server/pkg/app/component/bscp/router.go
+  s_ee1475003a8a27::t_b52168720dbdf6 35-38
+apps/bkms-server/tests/apis/v2/bscp-config/create-bscp-env-config.bru
+  s_ee1475003a8a27::t_56a58743fd8cab 12
+apps/bkms-server/tests/apis/v2/bscp-config/get-bscp-env-config.bru
+  s_ee1475003a8a27::t_dcb76f8ee7b325 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "7a90b6afc3c078607f1fc6cd64751956474eddd4",
+  "prompts": {},
+  "sessions": {
+    "s_ee1475003a8a27": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e82283fd07e8f84c31e8ccba99216",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
