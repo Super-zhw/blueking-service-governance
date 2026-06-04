@@ -1,0 +1,18 @@
+apps/bkms-server/tests/apis/v2/helm-chart-builds/folder.bru
+  h_83f239dc907c66 32,41-42
+apps/bkms-server/tests/docker-compose.yaml
+  h_83f239dc907c66 182-187,197-203
+apps/bkms-server/tests/apis/v2/helm-chart-builds/09-get-helm-chart-files.bru
+  h_83f239dc907c66 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b3a5f88efaff2452dd2cf59731e8191cb23a5dc8",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
