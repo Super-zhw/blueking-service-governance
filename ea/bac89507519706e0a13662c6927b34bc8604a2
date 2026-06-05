@@ -1,0 +1,22 @@
+apps/bkms-server/pkg/deploy/handler/appmodel_deploy_steps.go
+  h_83f239dc907c66 39,75,96,132,142,181,205,214,232,241,269
+apps/bkms-server/pkg/deploy/serializer/helm_deploy.go
+  h_83f239dc907c66 7,14,16,22,24
+apps/bkms-server/pkg/deploy/router.go
+  h_83f239dc907c66 23-25
+apps/bkms-server/pkg/deploy/serializer/appmodel_deploy.go
+  h_83f239dc907c66 6,14,16,22,24,32,34
+apps/bkms-server/pkg/deploy/handler/helpers.go
+  h_83f239dc907c66 16,37-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "eabac89507519706e0a13662c6927b34bc8604a2",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
