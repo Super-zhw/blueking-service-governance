@@ -1,0 +1,19 @@
+bkms-cli/pkg/client/deploy.go
+  s_a9618923caebbd::t_4e673a76801cbe 115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "259ba0af304ff9cbc6963c0b4eab54daf58155c8",
+  "prompts": {},
+  "sessions": {
+    "s_a9618923caebbd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ea65efa7d7888a6b6543916c6cdf7",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
