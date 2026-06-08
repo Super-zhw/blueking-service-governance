@@ -1,0 +1,29 @@
+bkms-cli/pkg/client/deploy.go
+  s_a9618923caebbd::t_49d4fd4187c9b2 62
+apps/bkms-server/tests/apis/audit/list-operation-records.bru
+  s_a9618923caebbd::t_e27ad0554448ef 21
+apps/bkms-server/tests/apis/helm-chart-builds/06-list-helm-chart-build-records.bru
+  s_a9618923caebbd::t_2fd61a46905ec4 20
+apps/bkms-server/pkg/deploy/serializer/helm_deploy.go
+  s_a9618923caebbd::t_1f7a37fab2ef5c 160
+apps/bkms-server/tests/apis/helm-chart-builds/07-list-app-helm-charts.bru
+  s_a9618923caebbd::t_34eb887641312f 20
+apps/bkms-server/pkg/deploy/serializer/helm_deploy_test.go
+  s_a9618923caebbd::t_03d16fb8b18aaa 199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "831f4c02173d3746bcfc5b09f61e4b292193d76a",
+  "prompts": {},
+  "sessions": {
+    "s_a9618923caebbd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ea65efa7d7888a6b6543916c6cdf7",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
