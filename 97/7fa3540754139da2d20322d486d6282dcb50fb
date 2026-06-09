@@ -1,0 +1,56 @@
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/08-get-trpc-snapshot-app-not-found.bru
+  s_9fbd0559413fc6::t_9c8089f8829113 1-30
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/10-latest-status-taf-wrong-app-type.bru
+  s_9fbd0559413fc6::t_e3c5f534218bca 1-31
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/09-latest-status-trpc-wrong-app-type.bru
+  s_9fbd0559413fc6::t_375cb30a148a80 1-32
+apps/bkms-server/tests/README.md
+  h_83f239dc907c66 27-42,72-74
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/05-create-trpc-app-not-found.bru
+  s_9fbd0559413fc6::t_77b530109d37fc 1-37
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/04-create-v2.bru
+  h_83f239dc907c66 23,25,38,41
+apps/bkms-server/pkg/deploy/serializer/appmodel_deploy.go
+  h_83f239dc907c66 90,181
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/folder.bru
+  h_83f239dc907c66 16
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/folder.bru
+  h_83f239dc907c66 16
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/02-list-trpc-wrong-app-type.bru
+  s_9fbd0559413fc6::t_48f911506c0f6a 1-32
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/03-create-trpc-missing-image-tag.bru
+  s_9fbd0559413fc6::t_2207c369444937 1-36
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/04-create-trpc-replicas-zero.bru
+  s_9fbd0559413fc6::t_8e9444d15f3efc 1-37
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/06-delete-trpc-wrong-app-type.bru
+  s_9fbd0559413fc6::t_0af7e38ebfaec7 1-31
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/07-list-trpc-snapshots-invalid-pagesize.bru
+  s_9fbd0559413fc6::t_1eb5a3a314fd9d 1-30
+apps/bkms-server/tests/apis/appmodel-deploys/failure-case/folder.bru
+  h_83f239dc907c66 16-17
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/folder.bru
+  h_83f239dc907c66 15
+apps/bkms-server/tests/docker-compose.yaml
+  h_83f239dc907c66 134-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "977fa3540754139da2d20322d486d6282dcb50fb",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_9fbd0559413fc6": {
+      "agent_id": {
+        "tool": "codebuddy",
+        "id": "cursor-20260608T124347Z-22086",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
