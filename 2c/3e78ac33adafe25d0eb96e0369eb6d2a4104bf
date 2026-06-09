@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/infras/cloudapi/bkhcm/bkhcm.go
+  s_30f35114f152c5::t_35774634852d7d 9,86-87,184-186
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2c3e78ac33adafe25d0eb96e0369eb6d2a4104bf",
+  "prompts": {},
+  "sessions": {
+    "s_30f35114f152c5": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eab9d0336740fb1e410f78f811e2e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
