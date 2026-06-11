@@ -1,0 +1,26 @@
+apps/bkms-server/tests/apis/common.js
+  h_83f239dc907c66 622-654,895
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/folder.bru
+  h_83f239dc907c66 92-103
+apps/bkms-server/tests/compose-replace-binary.yaml
+  h_83f239dc907c66 1-22
+apps/bkms-server/tests/README.md
+  h_83f239dc907c66 87-93,103,114-119
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/folder.bru
+  h_83f239dc907c66 98-109
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/04-create-v2.bru
+  h_83f239dc907c66 22-26
+apps/bkms-server/tests/justfile
+  h_83f239dc907c66 5,13,32-35,49-61,75-86,116-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3781b68ad82524c47b6cdd50328af61b0599a52f",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
