@@ -1,0 +1,31 @@
+apps/bkms-server/tests/apis/apps/cfgmgt/init-metadata.bru
+  s_84f1ee80a2644a::t_34bb2e8fabd842 8
+apps/bkms-server/tests/apis/apps/cfgmgt/list-env-bindings.bru
+  s_84f1ee80a2644a::t_54d0bef61337c7 8
+apps/bkms-server/tests/apis/apps/cfgmgt/patch-metadata.bru
+  s_84f1ee80a2644a::t_d42797b5885a92 8
+apps/bkms-server/tests/apis/apps/cfgmgt/get-env-binding.bru
+  s_84f1ee80a2644a::t_50abf11b59d6df 8
+apps/bkms-server/tests/apis/apps/cfgmgt/patch-env-binding.bru
+  s_84f1ee80a2644a::t_29119911a7420c 8
+apps/bkms-server/tests/apis/apps/cfgmgt/delete-env-binding.bru
+  s_84f1ee80a2644a::t_822eac41124630 8
+apps/bkms-server/tests/apis/apps/cfgmgt/create-env-binding.bru
+  s_84f1ee80a2644a::t_7a4f35e171eb7a 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d64c518457f2450d7b4e0c8eb74acce4a339b06a",
+  "prompts": {},
+  "sessions": {
+    "s_84f1ee80a2644a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb56f9d3575f5823a5bfddc780134",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

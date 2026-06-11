@@ -1,0 +1,23 @@
+apps/bkms-server/pkg/extension/appcfgmgt/service/manager_test.go
+  s_98575d4c4bf88c::t_7525408c83e8a3 265
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_detail.go
+  s_98575d4c4bf88c::t_4be24125da2de4 7-8,40,42,50-52,56
+  s_98575d4c4bf88c::t_de483cf9ee787e 24,27,30,33
+  s_98575d4c4bf88c::t_7d6b4f003e9a65 11-23,25-26,28-29,31-32,34-36,58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "536bf6b7675896e534b09bfc8dab0f0612b42f29",
+  "prompts": {},
+  "sessions": {
+    "s_98575d4c4bf88c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb072385b7ecfa2a4622fe2118480",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
