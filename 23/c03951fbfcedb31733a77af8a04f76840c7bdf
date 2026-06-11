@@ -1,0 +1,23 @@
+apps/bkms-server/tests/apis/bkhcm/create-load-balancer-application.bru
+  s_bce312d9f7c438::t_2779fac0533e51 15-17,19-20,22-23
+apps/bkms-server/tests/apis/bkhcm/list-subnets.bru
+  s_bce312d9f7c438::t_73d9630f490055 8
+apps/bkms-server/tests/apis/bkhcm/list-vpcs.bru
+  s_bce312d9f7c438::t_8406762a05c113 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "23c03951fbfcedb31733a77af8a04f76840c7bdf",
+  "prompts": {},
+  "sessions": {
+    "s_bce312d9f7c438": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eac6b4da7702a8d214afe49f6251c",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
