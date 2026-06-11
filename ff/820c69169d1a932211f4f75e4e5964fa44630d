@@ -1,0 +1,37 @@
+apps/bkms-server/pkg/extension/appcfgmgt/handler/metadata.go
+  s_98575d4c4bf88c::t_f18358606ff5ef 1-166,168-179,181-194
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_binding.go
+  s_98575d4c4bf88c::t_548cf7c256624c 19
+apps/bkms-server/pkg/extension/appcfgmgt/service/manager.go
+  s_98575d4c4bf88c::t_d051a718c7c0db 45,47-48,50-51,53,57-58,67,77-78,86-87,92,96-98,100-101,103,108-110,142-143,183-184,187-188,198-199,204-205,208-209,211,214,222,224-225,244-247
+apps/bkms-server/pkg/extension/appcfgmgt/service/types.go
+  s_98575d4c4bf88c::t_3b152693c6f79b 21-22
+apps/bkms-server/pkg/extension/appcfgmgt/model/metadata_store.go
+  s_98575d4c4bf88c::t_dec8a5b483b810 1-157
+apps/bkms-server/pkg/workload/appmodelcore/workload/builder.go
+  s_98575d4c4bf88c::t_71c76a8ae6de51 138,140-142
+apps/bkms-server/pkg/extension/appcfgmgt/model/module.go
+  s_98575d4c4bf88c::t_444c13cb4b8492 14
+apps/bkms-server/pkg/extension/appcfgmgt/model/metadata_store_test.go
+  s_98575d4c4bf88c::t_99ee9fbd123b71 15-16,39,41,69-71,79,85,91,101,114,135,137,144,158,170,172,175,189,204,209,211
+apps/bkms-server/pkg/extension/appcfgmgt/router.go
+  s_98575d4c4bf88c::t_3c562060ccba05 10-15,17,19,21,29-31,34-38
+apps/bkms-server/pkg/extension/appcfgmgt/model/metadata.go
+  s_98575d4c4bf88c::t_4c48e1dcc621fe 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ff820c69169d1a932211f4f75e4e5964fa44630d",
+  "prompts": {},
+  "sessions": {
+    "s_98575d4c4bf88c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb072385b7ecfa2a4622fe2118480",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
