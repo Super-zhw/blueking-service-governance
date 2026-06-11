@@ -1,0 +1,54 @@
+apps/bkms-server/pkg/extension/appcfgmgt/model/module.go
+  s_98575d4c4bf88c::t_ce8f66b9c96a09 1,13-15
+  s_98575d4c4bf88c::t_85026d5286672b 2-12,16-17
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_binding_store.go
+  s_98575d4c4bf88c::t_d9e702c30f8e5a 1-179
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_detail.go
+  s_98575d4c4bf88c::t_f0ea55b16fd79d 1,10,12,16-21,24-26,29-31,37-39,41-42,44,47-48,50,53,56
+apps/bkms-server/pkg/extension/appcfgmgt/model/envs_meta_store_test.go
+  s_98575d4c4bf88c::t_11a4ea49fea04f 1-215
+apps/bkms-server/pkg/extension/appcfgmgt/model/envs_meta.go
+  s_98575d4c4bf88c::t_51853bdae370a7 1-52
+apps/bkms-server/pkg/extension/appcfgmgt/model/store.go
+  s_98575d4c4bf88c::t_5aea43658bffd6 1-158
+apps/bkms-server/pkg/extension/appcfgmgt/service/manager.go
+  s_98575d4c4bf88c::t_74bf3ff3ed0a45 1-43
+apps/bkms-server/pkg/extension/appcfgmgt/service/credential.go
+  s_98575d4c4bf88c::t_9c467f4d9b7709 1-45,47-81,83-131
+apps/bkms-server/pkg/extension/appcfgmgt/router.go
+  s_98575d4c4bf88c::t_157d705e7beaa8 1-2,7,10,12-15,18-19,21,23-37,40,42-51
+apps/bkms-server/pkg/extension/appcfgmgt/model/suite_test.go
+  s_98575d4c4bf88c::t_b9ea129feb3343 1-27
+apps/bkms-server/pkg/extension/appcfgmgt/service/envs_meta.go
+  s_98575d4c4bf88c::t_958551b4f5c46e 1-57
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_binding.go
+  s_98575d4c4bf88c::t_be2be4cf944ad7 1-51
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_binding_store_test.go
+  s_98575d4c4bf88c::t_b51fce57597123 1-264
+apps/bkms-server/pkg/extension/appcfgmgt/model/envs_meta_store.go
+  s_98575d4c4bf88c::t_9a2fd1e0c70644 1-157
+apps/bkms-server/pkg/extension/appcfgmgt/model/store_test.go
+  s_98575d4c4bf88c::t_c87df8a76be4c1 1-182
+apps/bkms-server/pkg/extension/appcfgmgt/service/env_binding.go
+  s_98575d4c4bf88c::t_98ab2fafd1eece 1-222
+apps/bkms-server/pkg/extension/appcfgmgt/serializer/serializer.go
+  s_98575d4c4bf88c::t_a26b7200356712 1-156
+apps/bkms-server/pkg/extension/appcfgmgt/service/types.go
+  s_98575d4c4bf88c::t_776275219fafa7 1-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9f2d09e514e1bfb7cbcfe8ea5d6deff439e05953",
+  "prompts": {},
+  "sessions": {
+    "s_98575d4c4bf88c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb072385b7ecfa2a4622fe2118480",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
