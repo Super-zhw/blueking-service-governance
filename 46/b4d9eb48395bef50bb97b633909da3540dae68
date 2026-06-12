@@ -1,0 +1,33 @@
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/04-create-v2.bru
+  s_84f1ee80a2644a::t_0cbd47d703da49 59-69,71
+  s_84f1ee80a2644a::t_c34aa0a35c6227 73
+  s_84f1ee80a2644a::t_1026859e9aefcb 57
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/06-rollback.bru
+  s_84f1ee80a2644a::t_a2ac40ff3d79c6 24-26,28-40,45-49
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/03-list-and-get.bru
+  s_84f1ee80a2644a::t_bd03cbb8a3396a 29
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/02-create-v1.bru
+  s_84f1ee80a2644a::t_0a637dcde44ad0 27,38
+  s_84f1ee80a2644a::t_de46895907f15b 28-31,33,39-48,50
+  s_84f1ee80a2644a::t_3086b8b847fb96 52
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/05-preview-rollback.bru
+  s_84f1ee80a2644a::t_0fc51fbbc07b14 19-23
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/07-delete.bru
+  s_84f1ee80a2644a::t_e197521dbb344c 8,20-22,24-31,36-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "46b4d9eb48395bef50bb97b633909da3540dae68",
+  "prompts": {},
+  "sessions": {
+    "s_84f1ee80a2644a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb56f9d3575f5823a5bfddc780134",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
