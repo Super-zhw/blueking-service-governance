@@ -1,0 +1,37 @@
+apps/bkms-server/tests/apis/bcs/get-project.bru
+  s_d2b58f8d761036::t_b44acb503a8eda 8,26-27
+apps/bkms-server/tests/apis/bscp/get-config.bru
+  s_d2b58f8d761036::t_8329f35f687c43 27-33
+apps/bkms-server/tests/apis/bcs/list-clusters-by-project.bru
+  s_d2b58f8d761036::t_0f5d6d23143166 8,27
+apps/bkms-server/tests/apis/bkcc/list-authorized-businesses.bru
+  s_d2b58f8d761036::t_d998dd46ad1dba 23-30
+apps/bkms-server/tests/apis/bcs/list-namespaces-by-cluster.bru
+  s_d2b58f8d761036::t_e277c55256b11f 8
+apps/bkms-server/tests/apis/bkmonitor/create-env-apm.bru
+  s_d2b58f8d761036::t_e88f6f2b0b78b7 21
+apps/bkms-server/tests/apis/bcs/list-authorized-projects.bru
+  s_d2b58f8d761036::t_52b9da6f2911a5 27-29
+apps/bkms-server/tests/apis/bkmonitor/get-apm-service-name.bru
+  s_d2b58f8d761036::t_66f65230cf91a0 21-22
+apps/bkms-server/tests/apis/bkmonitor/get-env-apm.bru
+  s_d2b58f8d761036::t_6c9d3e62c66891 21
+apps/bkms-server/tests/apis/bkmonitor/list-apms.bru
+  s_d2b58f8d761036::t_7d21b65c61fe23 26,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "634577c63d74a86202c76f47a7f7b8d16002d80f",
+  "prompts": {},
+  "sessions": {
+    "s_d2b58f8d761036": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb5bba81675efae1c5a98a2fd3d6a",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
