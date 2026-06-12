@@ -1,0 +1,40 @@
+apps/bkms-server/tests/configs/config.yaml
+  s_d2b58f8d761036::t_1553004c444ea5 117-119
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/stub.go
+  s_d2b58f8d761036::t_5d9ff0200e2bd5 18,30,104-153,155-160,163-172,175
+apps/bkms-server/pkg/observability/bkmonitor/user_group_service.go
+  s_d2b58f8d761036::t_13b4f2cdfb1ced 47
+apps/bkms-server/pkg/infras/cloudapi/bscp/stub.go
+  s_d2b58f8d761036::t_c89d3ce2e3a9aa 22-23,30-31,42,50,60
+  s_d2b58f8d761036::t_0c9e71eb7b8102 134,136-168
+apps/bkms-server/pkg/infras/cloudapi/bscp/types.go
+  s_d2b58f8d761036::t_b3f3da526447a0 208-215
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/client.go
+  s_d2b58f8d761036::t_e5318a9e0cb1d1 22-27,29-35,37-51,58-63
+  s_d2b58f8d761036::t_0475a6c78c554e 10
+apps/bkms-server/pkg/common/config/types.go
+  s_d2b58f8d761036::t_b01d3cdaf727b1 221-223
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  s_d2b58f8d761036::t_9144b37c3100d9 109-111
+apps/bkms-server/pkg/observability/bkmonitor/user_group_service_test.go
+  s_d2b58f8d761036::t_53a191e7e6c09d 91,134
+apps/bkms-server/pkg/infras/cloudapi/bscp/bscp.go
+  s_d2b58f8d761036::t_f6a7f9f6fa52d4 32-49,52-55,57-62
+  s_d2b58f8d761036::t_8add370e44d32a 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d27e55af8c19366b70968a194852a272ab41dbf6",
+  "prompts": {},
+  "sessions": {
+    "s_d2b58f8d761036": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb5bba81675efae1c5a98a2fd3d6a",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
