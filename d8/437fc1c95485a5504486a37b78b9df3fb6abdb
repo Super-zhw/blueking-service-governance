@@ -1,0 +1,28 @@
+apps/bkms-server/tests/justfile
+  h_83f239dc907c66 151-152,156-173,191-197,202-203,207-209,214,220-222,224-225
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/07-create-deploy-with-image-tag-v2.bru
+  h_83f239dc907c66 26-29
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/08-delete.bru
+  h_83f239dc907c66 19-22
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/07-create-deploy-with-image-tag-v2.bru
+  h_83f239dc907c66 26-29
+apps/bkms-server/pkg/deploy/appmodel/service/service.go
+  h_83f239dc907c66 101,135
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/03-create-deploy-with-image-tag-v1.bru
+  h_83f239dc907c66 26-29
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/08-delete.bru
+  h_83f239dc907c66 19-22
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/03-create-deploy-with-image-tag-v1.bru
+  h_83f239dc907c66 26-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d8437fc1c95485a5504486a37b78b9df3fb6abdb",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
