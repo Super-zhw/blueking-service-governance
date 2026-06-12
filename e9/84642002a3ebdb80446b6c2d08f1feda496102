@@ -1,0 +1,64 @@
+apps/bkms-server/tests/apis/bkmonitor/get-apm-service-name.bru
+  s_d2b58f8d761036::t_f9e4ba1ca5e1b3 1-29
+apps/bkms-server/tests/apis/bkmonitor/create-env-apm.bru
+  s_d2b58f8d761036::t_9638cefdf7130a 1-30
+apps/bkms-server/tests/apis/bkmonitor/list-apms.bru
+  s_d2b58f8d761036::t_b9fefdf848df36 1-38
+apps/bkms-server/tests/apis/bkcc/folder.bru
+  s_d2b58f8d761036::t_794b9b7afacf5c 1-12
+apps/bkms-server/pkg/infras/cloudapi/kubeinsight/stub.go
+  s_d2b58f8d761036::t_0bc38f3571cb21 1-85
+apps/bkms-server/tests/apis/bkmonitor/bind-apm-to-env.bru
+  s_d2b58f8d761036::t_6c87f6eb873ed8 1-27
+apps/bkms-server/tests/apis/bkcc/list-authorized-businesses.bru
+  s_d2b58f8d761036::t_181fb0c9d0af1a 1-38
+apps/bkms-server/tests/apis/bscp/list-configs.bru
+  s_d2b58f8d761036::t_fa5fea22e6f228 1-34
+apps/bkms-server/tests/apis/bkmonitor/get-env-apm.bru
+  s_d2b58f8d761036::t_50d365799b5567 1-30
+apps/bkms-server/tests/apis/bcs/get-project.bru
+  s_d2b58f8d761036::t_1b4c8cf7a31b7b 1-34
+apps/bkms-server/tests/apis/kube-insight/folder.bru
+  s_d2b58f8d761036::t_fcb8268faf5357 1-12
+apps/bkms-server/tests/apis/bscp/list-services.bru
+  s_d2b58f8d761036::t_e3e7ce3e63ea06 1-33
+apps/bkms-server/tests/apis/bcs/folder.bru
+  s_d2b58f8d761036::t_6a0f2140ba2976 1-12
+apps/bkms-server/tests/apis/bcs/list-clusters-by-project.bru
+  s_d2b58f8d761036::t_019f8ab96a5c62 1-37
+apps/bkms-server/tests/apis/bscp/folder.bru
+  s_d2b58f8d761036::t_72b30576a0c045 1-12
+apps/bkms-server/tests/apis/bkmonitor/folder.bru
+  s_d2b58f8d761036::t_2cac8218c9886d 1-12
+apps/bkms-server/tests/apis/kube-insight/get-latest-env-report.bru
+  s_d2b58f8d761036::t_179634ec916d97 1-34
+apps/bkms-server/tests/apis/bscp/list-bizs.bru
+  s_d2b58f8d761036::t_39382cb9d86ad7 1-32
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/stub.go
+  s_d2b58f8d761036::t_bf74e7be7ce41a 14-18,22-23,26-30,33-34
+  s_d2b58f8d761036::t_49183cde95e5a9 1-13,19-21,24-25,31-32,35-103
+apps/bkms-server/pkg/infras/cloudapi/bscp/stub.go
+  s_d2b58f8d761036::t_6188f2cfbd622a 1-24,26-32,34-44,46-52,54-122,124-137
+apps/bkms-server/tests/apis/bcs/list-authorized-projects.bru
+  s_d2b58f8d761036::t_3b3b5b297df6b0 1-37
+apps/bkms-server/tests/apis/bscp/get-config.bru
+  s_d2b58f8d761036::t_bb870804fef076 1-40
+apps/bkms-server/tests/apis/bcs/list-namespaces-by-cluster.bru
+  s_d2b58f8d761036::t_31a792700d319f 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e984642002a3ebdb80446b6c2d08f1feda496102",
+  "prompts": {},
+  "sessions": {
+    "s_d2b58f8d761036": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb5bba81675efae1c5a98a2fd3d6a",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
