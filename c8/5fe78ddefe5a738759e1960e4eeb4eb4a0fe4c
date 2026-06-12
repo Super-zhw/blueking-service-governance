@@ -1,0 +1,30 @@
+apps/bkms-server/tests/README.md
+  h_83f239dc907c66 27-28
+apps/bkms-server/tests/apis/helpers/appmodel.js
+  h_83f239dc907c66 24
+apps/bkms-server/tests/justfile
+  h_83f239dc907c66 88,91-92,103-104,109
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/07-create-deploy-with-image-tag-v2.bru
+  h_83f239dc907c66 2,8,15,29-31,33-34,36-38,42,44-45,48-49
+apps/bkms-server/AGENTS.md
+  h_83f239dc907c66 57
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/02-create-deploy-with-image-tag-v1.bru
+  h_83f239dc907c66 2
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/04-create-deploy-with-image-tag-v2.bru
+  h_83f239dc907c66 1-82
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/03-create-deploy-with-image-tag-v1.bru
+  h_83f239dc907c66 2,8,15,29-31,33,35-36,40,42-43
+apps/bkms-server/tests/apis/helpers/helm.js
+  h_83f239dc907c66 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c85fe78ddefe5a738759e1960e4eeb4eb4a0fe4c",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
