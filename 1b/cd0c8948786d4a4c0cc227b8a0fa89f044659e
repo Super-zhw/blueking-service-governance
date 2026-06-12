@@ -1,0 +1,27 @@
+apps/bkms-server/pkg/bkintegrations/handler/bcs.go
+  s_d2b58f8d761036::t_4bed08db4141b6 171-172
+  s_d2b58f8d761036::t_831965c6772010 173-174,176-177
+apps/bkms-server/pkg/bkintegrations/serializer/bcs.go
+  s_d2b58f8d761036::t_b8ee52ae53d72a 46-47
+  s_d2b58f8d761036::t_fcea15b5b2cf00 48-49,51-52
+apps/bkms-server/pkg/bkintegrations/serializer/kubeinsight.go
+  s_d2b58f8d761036::t_b3ec8e6b085a77 15-35,37-51,53-71
+  s_d2b58f8d761036::t_08393f199bffb7 36
+  s_d2b58f8d761036::t_42cf5a610bb2b2 52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1bcd0c8948786d4a4c0cc227b8a0fa89f044659e",
+  "prompts": {},
+  "sessions": {
+    "s_d2b58f8d761036": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb5bba81675efae1c5a98a2fd3d6a",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
