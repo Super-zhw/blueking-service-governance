@@ -1,0 +1,21 @@
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor_test.go
+  s_b7613983d19f8b::t_c9c32f9c5c521a 19,26,28,35-54,58,68,78,88
+apps/bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  s_b7613983d19f8b::t_3a1e7c3d0ce66d 429
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c86bb89fac277c0d04d175c06cd04af4c7eb356c",
+  "prompts": {},
+  "sessions": {
+    "s_b7613983d19f8b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eca583fd3715da5000bed0156b111",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
