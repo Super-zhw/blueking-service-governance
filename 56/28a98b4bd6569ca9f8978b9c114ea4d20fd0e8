@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/stub.go
+  s_34fc91a9cf7605::t_31fd2144fffe50 6,39-45,65,73-80,87,105,117-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5628a98b4bd6569ca9f8978b9c114ea4d20fd0e8",
+  "prompts": {},
+  "sessions": {
+    "s_34fc91a9cf7605": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ecaa217627b6083ea113f3265133b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
