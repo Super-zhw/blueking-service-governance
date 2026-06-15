@@ -1,0 +1,14 @@
+apps/bkms-server/tests/docker-compose.yaml
+  h_83f239dc907c66 215-216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "b06f214fa8a542b4f83377cf95587860d38a8efa",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
