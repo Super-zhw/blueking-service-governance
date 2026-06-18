@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/observability/bkmonitor/promql_builder.go
+  s_7d29d4b5c6221a::t_1af96f75f76f82 66-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "f83e7b5e7887dfc3b52d07f43cc8d93106e2d9e3",
+  "prompts": {},
+  "sessions": {
+    "s_7d29d4b5c6221a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ed8ccb66776659f60e3001b9f1868",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
