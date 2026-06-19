@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/infras/cloudapi/iam/grade_manager.go
+  h_83f239dc907c66 142-144
+apps/bkms-server/pkg/infras/cloudapi/iam/user_group.go
+  h_83f239dc907c66 1-258
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "2628324ab3c32f4ec3e39ba8f5a33bedc80f5cc3",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
