@@ -1,0 +1,46 @@
+apps/bkms-server/pkg/observability/bkmonitor/promql_constants.go
+  s_caf43941a8ea5d::t_c70cdcaf9a1534 1-35
+apps/bkms-server/pkg/observability/bkmonitor/promql_builder.go
+  s_caf43941a8ea5d::t_58769949697fbe 1,9
+apps/bkms-server/pkg/observability/bkmonitor/user_group_service.go
+  s_caf43941a8ea5d::t_e98d9d3c99225b 1
+apps/bkms-server/pkg/observability/bkmonitor/utils.go
+  s_caf43941a8ea5d::t_5729d803407b43 1
+apps/bkms-server/pkg/observability/bkmonitor/apm_store.go
+  s_caf43941a8ea5d::t_f2556a7a9112f8 1
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  s_caf43941a8ea5d::t_fcacaff330be77 131,150-151,172-175,181-185
+apps/bkms-server/pkg/bkintegrations/serializer/serializer_suite_test.go
+  s_caf43941a8ea5d::t_bb00ab626c600d 1-13
+apps/bkms-server/pkg/observability/bkmonitor/module.go
+  s_caf43941a8ea5d::t_7505b42b9a6e0f 1
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor_test.go
+  s_caf43941a8ea5d::t_9095c93cae3b32 4-7,12-13,17,24,27,30,79-86,89-108,111-122,124-135,139-143,147-152,154-167,169-172,174-182,184-185
+  s_caf43941a8ea5d::t_5f025675ee6b03 14-16,18-23,25-26,28-29,31-32,36-37,41-42,46-47,51-52,56-57,61-62,66-72,77-78,87-88,109-110,136-138,144-146,168
+apps/bkms-server/pkg/observability/bkmonitor/metric_time_series.go
+  s_caf43941a8ea5d::t_18cc59964942fc 30-32
+  s_caf43941a8ea5d::t_3d812ee1bc9d8a 29
+apps/bkms-server/pkg/observability/bkmonitor/telemetry_config.go
+  s_caf43941a8ea5d::t_43289351f96c03 1
+apps/bkms-server/pkg/observability/bkmonitor/types.go
+  s_caf43941a8ea5d::t_d7d42b051130a9 2-5,31-129
+  s_caf43941a8ea5d::t_efcd616c48cfb8 1,6-30
+apps/bkms-server/pkg/observability/bkmonitor/apm_service.go
+  s_caf43941a8ea5d::t_6c0b5481a79f96 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "e58695d7ad2e2436b4df13c0f6429ff47f0d25bd",
+  "prompts": {},
+  "sessions": {
+    "s_caf43941a8ea5d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eee52f9937f88bed83182d82b68b6",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
