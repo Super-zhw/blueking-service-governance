@@ -1,0 +1,68 @@
+apps/bkms-server/pkg/workload/instance/handler/instance.go
+  h_83f239dc907c66 19,177,241,313,372
+apps/bkms-server/pkg/core/workspace/handler/workspace.go
+  h_83f239dc907c66 20,76,151,159,161,167-170,249,259,319,376,660,668,674-675,726,729,736,745,753-754,884
+apps/bkms-server/.specify/memory/constitution.md
+  h_83f239dc907c66 260
+apps/bkms-server/pkg/bkintegrations/iam/dto.go
+  h_83f239dc907c66 16
+apps/bkms-server/pkg/observability/bkmonitor/user_group_service.go
+  h_83f239dc907c66 16,24-25,54-55,63,68,277-278,282-283,288,292,350,411
+apps/authmanager/pkg/config/config.go
+  h_83f239dc907c66 19
+apps/bkms-server/cmd/root.go
+  h_83f239dc907c66 26-27
+apps/bkms-server/pkg/extension/bscpcfg/service/permission.go
+  h_83f239dc907c66 9,14,33,36,39,41,49-50,55
+apps/bkms-server/README.md
+  h_83f239dc907c66 79,83
+apps/bkms-server/tests/configs/config.yaml
+  h_83f239dc907c66 125
+apps/bkms-server/pkg/build/autodeploy/handler/build_auto_deploy.go
+  h_83f239dc907c66 12,92
+apps/bkms-server/pkg/observability/bkmonitor/user_group_service_test.go
+  h_83f239dc907c66 15,161,195,225
+apps/bkms-server/pkg/core/env/handler/env.go
+  h_83f239dc907c66 17,68,118,176,426
+apps/bkms-server/pkg/core/workspace/dependency.go
+  h_83f239dc907c66 18,125,128,135
+apps/bkms-server/pkg/common/config/types.go
+  h_83f239dc907c66 263-264
+apps/bkms-server/pkg/core/app/handler/app.go
+  h_83f239dc907c66 24,67,284
+apps/bkms-server/cmd/migration/migrate_iam_builtin_roles.go
+  h_83f239dc907c66 1-67
+apps/bkms-server/design_notes/permission.md
+  h_83f239dc907c66 3-4,14,23,25,29,32,35,38,40-43,54,60,132,194,280,286-289,315,321,336,341,362,364,368,370,398,402,413,419,421,430,432,434,436-448,450,453-457,460-466,468-472,476,478-479,481,496,508
+apps/bkms-server/pkg/deploy/handler/helpers.go
+  h_83f239dc907c66 13,53
+apps/bkms-server/pkg/server/task/workspace.go
+  h_83f239dc907c66 12,17,89,91,94,98
+apps/bkms-server/configs/config.yaml
+  h_83f239dc907c66 166
+apps/bkms-server/pkg/common/bkerrs/iam.go
+  h_83f239dc907c66 9,17
+apps/bkms-server/cmd/migration/migrate_iam_data.go
+  h_83f239dc907c66 1-197
+apps/bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  h_83f239dc907c66 17,249
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  h_83f239dc907c66 113
+apps/bkms-server/pkg/server/ginutils/perm/validate.go
+  h_83f239dc907c66 14-15,61,112,160
+apps/bkms-server/cmd/migration/suite_test.go
+  h_83f239dc907c66 1-13
+apps/bkms-server/cmd/migration/migrate_iam_test.go
+  h_83f239dc907c66 1-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "eb35e697d474bf6656667efd380836d5574272ac",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

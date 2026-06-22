@@ -1,0 +1,40 @@
+apps/bkms-server/pkg/core/app/handler/app.go
+  h_83f239dc907c66 24,67,274,284
+apps/bkms-server/pkg/server/task/workspace.go
+  h_83f239dc907c66 12,17,89,91,94,98,103,106,131
+apps/bkms-server/pkg/core/workspace/handler/workspace.go
+  h_83f239dc907c66 20,62,76,151,159,161,167-170,249,259,319,376,660,662,668,674-675,726,729-730,736,745,753-754,884
+apps/bkms-server/pkg/infras/perm/action.go
+  h_83f239dc907c66 3
+apps/bkms-server/pkg/infras/perm/stub.go
+  h_83f239dc907c66 23
+apps/bkms-server/cmd/migration/migrate_iam_data.go
+  h_83f239dc907c66 1-197
+apps/bkms-server/pkg/bkintegrations/iam/dto.go
+  h_83f239dc907c66 8-10,15,32-33
+apps/bkms-server/pkg/infras/perm/types.go
+  h_83f239dc907c66 3-4
+apps/bkms-server/pkg/infras/perm/perm.go
+  h_83f239dc907c66 21-22
+apps/bkms-server/pkg/server/ginutils/perm/validate.go
+  h_83f239dc907c66 14-15,61,64,66,68,112,115,117,119,121,160,163,165,167
+apps/bkms-server/pkg/infras/perm/roles.go
+  h_83f239dc907c66 6
+apps/bkms-server/pkg/observability/metrics/metrics.go
+  h_83f239dc907c66 135
+apps/bkms-server/pkg/bkintegrations/iam/service.go
+  h_83f239dc907c66 45-47
+apps/bkms-server/pkg/infras/perm/local.go
+  h_83f239dc907c66 64,282-283,308,310,327,358
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "21e966125d59ad6c548b056db4938985f95f33b9",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
