@@ -1,0 +1,22 @@
+manifests/helm/bkms-server/templates/ingress.yaml
+  s_426c3b1e752c72::t_6a4855914698a7 23,25,27,54,56,58
+  s_426c3b1e752c72::t_2391f6b7da788a 3,12,26,28,33,43,57,59
+manifests/helm/bkms-server/values.yaml
+  s_426c3b1e752c72::t_3dd90242babecc 78-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "ccef07e16b3be234a3ce93390b4cbec8d50cd0ec",
+  "prompts": {},
+  "sessions": {
+    "s_426c3b1e752c72": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ecf132d2673b88932b60b8160c8ab",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
