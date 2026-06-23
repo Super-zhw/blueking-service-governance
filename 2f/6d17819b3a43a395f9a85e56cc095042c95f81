@@ -1,0 +1,22 @@
+apps/bkms-server/cmd/migration/migrate_iam_data.go
+  h_83f239dc907c66 10-11,13-21,49-59,62-67,69-82,132-135,137-150,152,154-155,158,160-176,178-184,223-240,245-261,266-300,302-305,322,326,330-351,355,357-358,360,368,371,376,381-395
+apps/bkms-server/pkg/bkintegrations/bkiam/role/store.go
+  h_83f239dc907c66 61,69,76,106,115,146-147,159,162,165-166
+apps/bkms-server/pkg/bkintegrations/bkiam/role/models.go
+  h_83f239dc907c66 11,13,24,26,30,35-36
+apps/bkms-server/pkg/bkintegrations/bkiam/role/store_test.go
+  h_83f239dc907c66 42,198,206
+apps/bkms-server/design_notes/permission.md
+  h_83f239dc907c66 179,181,490
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.10",
+  "base_commit_sha": "2f6d17819b3a43a395f9a85e56cc095042c95f81",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
