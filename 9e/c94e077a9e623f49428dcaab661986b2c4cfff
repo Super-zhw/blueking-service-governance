@@ -1,0 +1,63 @@
+apps/bkms-server/pkg/observability/bkmonitor/promql_constants.go
+  s_caf43941a8ea5d::t_c70cdcaf9a1534 1-35
+apps/bkms-server/pkg/observability/bkmonitor/promql_builder.go
+  s_caf43941a8ea5d::t_58769949697fbe 1,9
+apps/bkms-server/pkg/observability/bkmonitor/user_group_service.go
+  s_caf43941a8ea5d::t_e98d9d3c99225b 1
+apps/bkms-server/pkg/observability/bkmonitor/utils.go
+  s_caf43941a8ea5d::t_5729d803407b43 1
+apps/bkms-server/pkg/observability/bkmonitor/apm_store.go
+  s_caf43941a8ea5d::t_f2556a7a9112f8 1
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  s_caf43941a8ea5d::t_fcacaff330be77 131,150-151,189-192,201-205
+apps/bkms-server/pkg/bkintegrations/serializer/serializer_suite_test.go
+  s_caf43941a8ea5d::t_bb00ab626c600d 1-13
+apps/bkms-server/pkg/observability/bkmonitor/module.go
+  s_caf43941a8ea5d::t_7505b42b9a6e0f 1
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor_test.go
+  s_caf43941a8ea5d::t_9095c93cae3b32 4,7,10-11,67-68,72,79,82,85,134-141,144-163,166-177,179-190,194-198,202-207,209-222,224-227,229-237,239-240
+  s_caf43941a8ea5d::t_5f025675ee6b03 69-71,73-78,80-81,83-84,86-87,91-92,96-97,101-102,106-107,111-112,116-117,121-127,132-133,142-143,164-165,191-193,199-201,223
+  s_caf43941a8ea5d::t_4ca9a303700ac2 8
+apps/bkms-server/pkg/observability/bkmonitor/metric_time_series.go
+  s_caf43941a8ea5d::t_18cc59964942fc 30-32
+  s_caf43941a8ea5d::t_3d812ee1bc9d8a 29
+  s_b48b85272a0f71::t_0f2c0ce81111fd 103,106-110
+apps/bkms-server/pkg/observability/bkmonitor/telemetry_config.go
+  s_caf43941a8ea5d::t_43289351f96c03 1
+apps/bkms-server/pkg/observability/bkmonitor/types.go
+  s_caf43941a8ea5d::t_d7d42b051130a9 2-3,8-9,35-112,115-135
+  s_caf43941a8ea5d::t_efcd616c48cfb8 1,10-34
+  s_b48b85272a0f71::t_5247fa6547ccb5 4-7,113-114
+apps/bkms-server/pkg/observability/bkmonitor/apm_service.go
+  s_caf43941a8ea5d::t_6c0b5481a79f96 1
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  s_b48b85272a0f71::t_0de0cae45fe74f 593-596,598-599,601-602,604-605,607-608,610-613
+  s_b48b85272a0f71::t_ae5181bafa390e 597,600,603,606,609,628-629
+apps/bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  s_b48b85272a0f71::t_5d2106fe00f2d3 437,441-446,448-449
+  s_b48b85272a0f71::t_680e07ab2156ef 440,447
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "9ec94e077a9e623f49428dcaab661986b2c4cfff",
+  "prompts": {},
+  "sessions": {
+    "s_b48b85272a0f71": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eef27f29675d08bbb849a620ad199",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_caf43941a8ea5d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eee52f9937f88bed83182d82b68b6",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
