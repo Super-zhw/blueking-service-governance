@@ -1,0 +1,62 @@
+apps/bkms-server/pkg/bkintegrations/iam/scope/bcs.go
+  h_83f239dc907c66 1-28
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkci_test.go
+  h_83f239dc907c66 1-43
+apps/bkms-server/pkg/bkintegrations/iam/role/builtin.go
+  h_83f239dc907c66 1-24
+apps/bkms-server/pkg/bkintegrations/iam/role/types.go
+  h_83f239dc907c66 1-44
+apps/bkms-server/pkg/bkintegrations/iam/scope/bcs_test.go
+  h_83f239dc907c66 1-42
+apps/bkms-server/pkg/bkintegrations/iam/scope/template/embed.go
+  h_83f239dc907c66 1-7
+apps/bkms-server/pkg/bkintegrations/iam/scope/generator.go
+  h_83f239dc907c66 1-58
+apps/bkms-server/pkg/bkintegrations/iam/scope/bklog.go
+  h_83f239dc907c66 1-29
+apps/bkms-server/pkg/bkintegrations/iam/role/store.go
+  h_83f239dc907c66 1-184
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkms.go
+  h_83f239dc907c66 1-28
+apps/bkms-server/pkg/bkintegrations/iam/role/utils.go
+  h_83f239dc907c66 1-13
+apps/bkms-server/pkg/bkintegrations/iam/scope/scope_suite_test.go
+  h_83f239dc907c66 1-40
+apps/bkms-server/pkg/bkintegrations/iam/role/role_suite_test.go
+  h_83f239dc907c66 1-27
+apps/bkms-server/pkg/bkintegrations/iam/scope/bscp.go
+  h_83f239dc907c66 1-38
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkms_test.go
+  h_83f239dc907c66 1-52
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkci.go
+  h_83f239dc907c66 1-28
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkmonitor.go
+  h_83f239dc907c66 1-28
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkrepo.go
+  h_83f239dc907c66 1-28
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkmonitor_test.go
+  h_83f239dc907c66 1-37
+apps/bkms-server/pkg/bkintegrations/iam/scope/bkrepo_test.go
+  h_83f239dc907c66 1-42
+apps/bkms-server/design_notes/permission.md
+  h_83f239dc907c66 3,18-23,38-40,43,123,125-185,198,200,206,210,215
+apps/bkms-server/pkg/bkintegrations/iam/actions/actions.go
+  h_83f239dc907c66 1-322
+apps/bkms-server/pkg/bkintegrations/iam/scope/template/tpl.go
+  h_83f239dc907c66 1-27
+apps/bkms-server/pkg/bkintegrations/iam/role/store_test.go
+  h_83f239dc907c66 1-226
+apps/bkms-server/pkg/bkintegrations/iam/scope/bklog_test.go
+  h_83f239dc907c66 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "b7bb4ad5e25d690949cd858a06faf93aa970b4ac",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

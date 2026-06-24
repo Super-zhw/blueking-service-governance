@@ -1,0 +1,20 @@
+apps/bkms-server/cmd/migration/migrate_iam_system_model.go
+  h_83f239dc907c66 12,38-42,53
+apps/bkms-server/pkg/bkintegrations/bkiam/migrate/driver.go
+  h_83f239dc907c66 32-34,41,43-49
+apps/bkms-server/pkg/infras/cloudapi/iam/client_test.go
+  h_83f239dc907c66 64,70
+apps/bkms-server/pkg/infras/cloudapi/iam/client.go
+  h_83f239dc907c66 159,175-182
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.10",
+  "base_commit_sha": "091ccbecc55325085f04a8f8d5c45556c57257ff",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

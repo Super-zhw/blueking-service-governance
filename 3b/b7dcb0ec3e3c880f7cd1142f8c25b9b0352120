@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/infras/authmanager/authmanager_test.go
+  h_83f239dc907c66 1-55
+apps/bkms-server/pkg/infras/perm/manager_test.go
+  h_83f239dc907c66 1-36
+apps/bkms-server/pkg/infras/authmanager/authmanager_suite_test.go
+  h_83f239dc907c66 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "3bb7dcb0ec3e3c880f7cd1142f8c25b9b0352120",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

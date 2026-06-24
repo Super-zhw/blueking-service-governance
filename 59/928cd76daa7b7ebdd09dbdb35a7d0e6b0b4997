@@ -1,0 +1,32 @@
+apps/bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  s_3bf35482d53970::t_263e7d035fddf7 424
+  s_3bf35482d53970::t_7727efe4cfcb0c 373
+  s_3bf35482d53970::t_eb732d810b98da 420-423,425-428
+  s_3bf35482d53970::t_c655f12a7ea30f 418
+apps/bkms-server/pkg/observability/bkmonitor/promql_builder.go
+  s_3bf35482d53970::t_408d2d3cee8b2f 24-31,35,39-42,45-48
+  s_3bf35482d53970::t_54fd998dcdc099 6-7
+  s_3bf35482d53970::t_f65074c64415e4 20-21,34,43,49,51
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  s_3bf35482d53970::t_7cc56828953feb 136-139,152-156,169-171
+apps/bkms-server/pkg/observability/bkmonitor/metric_time_series.go
+  s_3bf35482d53970::t_344ea0b7a154aa 8,37,48-54,57,86
+  s_3bf35482d53970::t_fb73599801af9f 41-43
+  s_3bf35482d53970::t_f860128503bb70 39-40,44-45,58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "59928cd76daa7b7ebdd09dbdb35a7d0e6b0b4997",
+  "prompts": {},
+  "sessions": {
+    "s_3bf35482d53970": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ef26eb0ca7a338370ebfbaa9ebadf",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

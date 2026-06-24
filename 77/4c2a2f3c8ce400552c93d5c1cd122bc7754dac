@@ -1,0 +1,27 @@
+apps/bkms-server/pkg/observability/bkmonitor/metric_time_series.go
+  s_b48b85272a0f71::t_0f2c0ce81111fd 103,106-110
+apps/bkms-server/pkg/observability/bkmonitor/types.go
+  s_b48b85272a0f71::t_5247fa6547ccb5 4-7,113-114
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  s_b48b85272a0f71::t_0de0cae45fe74f 593-596,598-599,601-602,604-605,607-608,610-613
+  s_b48b85272a0f71::t_ae5181bafa390e 597,600,603,606,609,628-629
+apps/bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  s_b48b85272a0f71::t_5d2106fe00f2d3 437,441-446,448-449
+  s_b48b85272a0f71::t_680e07ab2156ef 440,447
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "774c2a2f3c8ce400552c93d5c1cd122bc7754dac",
+  "prompts": {},
+  "sessions": {
+    "s_b48b85272a0f71": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eef27f29675d08bbb849a620ad199",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
