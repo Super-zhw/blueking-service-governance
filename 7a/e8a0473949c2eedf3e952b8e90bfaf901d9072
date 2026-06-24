@@ -1,0 +1,14 @@
+manifests/helm/bkms-server/values.yaml
+  h_83f239dc907c66 225-236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.10",
+  "base_commit_sha": "7ae8a0473949c2eedf3e952b8e90bfaf901d9072",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
