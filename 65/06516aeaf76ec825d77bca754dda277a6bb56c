@@ -7,7 +7,7 @@ apps/bkms-server/tests/configs/config.yaml
 apps/bkms-server/tests/utdeps/config_ci_ut.yml
   h_d56f85e7c6980c 117
 apps/bkms-server/pkg/extension/depservice/provider/redis/provider.go
-  h_d56f85e7c6980c 90,113,134,164-170,192,196-201
+  h_d56f85e7c6980c 57,90,113,134,164-170,192,196-201
 ---
 {
   "schema_version": "authorship/3.0.0",
