@@ -9,7 +9,7 @@ apps/bkms-server/pkg/extension/depservice/reconcile.go
 apps/bkms-server/pkg/extension/depservice/model/instance.go
   h_d56f85e7c6980c 34-35,42-62,102-104
 apps/bkms-server/pkg/extension/depservice/provider/redis/provider.go
-  h_d56f85e7c6980c 1-56,58-224
+  h_d56f85e7c6980c 1-233
 apps/bkms-server/pkg/extension/depservice/manager.go
   h_d56f85e7c6980c 5,8,13,88-89,91,94-97,100-104,108-115,117-118,121-131,144,157,165,170-172,175-180,183,186
 apps/bkms-server/pkg/extension/depservice/model/instance_store.go
@@ -22,6 +22,12 @@ apps/bkms-server/pkg/extension/depservice/provider/redis/params.go
   h_d56f85e7c6980c 27-28,31-35,44-51,55-59
 apps/bkms-server/pkg/infras/cloudapi/dbm/dbm.go
   h_d56f85e7c6980c 18,24,39-41,47-48,68,78,92-93,97,135,143
+apps/bkms-server/configs/config.yaml
+  h_d56f85e7c6980c 41-42
+apps/bkms-server/tests/configs/config.yaml
+  h_d56f85e7c6980c 27-28
+apps/bkms-server/pkg/extension/depservice/provider/redis/provider_test.go
+  h_d56f85e7c6980c 1-231
 ---
 {
   "schema_version": "authorship/3.0.0",
