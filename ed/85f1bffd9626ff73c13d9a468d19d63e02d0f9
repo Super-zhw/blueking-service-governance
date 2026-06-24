@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/extension/component/polaris/README.md
+  h_d56f85e7c6980c 1-13
+apps/bkms-server/pkg/extension/component/portpool/README.md
+  h_d56f85e7c6980c 23-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "ed85f1bffd9626ff73c13d9a468d19d63e02d0f9",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
