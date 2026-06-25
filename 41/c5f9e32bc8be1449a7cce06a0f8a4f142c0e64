@@ -9,7 +9,7 @@ apps/bkms-server/pkg/extension/depservice/reconcile.go
 apps/bkms-server/pkg/extension/depservice/model/instance.go
   h_d56f85e7c6980c 34-35,42-62,102-104
 apps/bkms-server/pkg/extension/depservice/provider/redis/provider.go
-  h_d56f85e7c6980c 1-233
+  h_d56f85e7c6980c 1-233,1-56,58-224
 apps/bkms-server/pkg/extension/depservice/manager.go
   h_d56f85e7c6980c 5,8,13,88-89,91,94-97,100-104,108-115,117-118,121-131,144,157,165,170-172,175-180,183,186
 apps/bkms-server/pkg/extension/depservice/model/instance_store.go
