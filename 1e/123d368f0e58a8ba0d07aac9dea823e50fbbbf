@@ -1,0 +1,25 @@
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor_test.go
+  s_053f8bf9f62658::t_320c483f0377b7 141-149,155
+apps/bkms-server/pkg/bkintegrations/serializer/common.go
+  s_053f8bf9f62658::t_78e07117abb7ce 5
+  s_053f8bf9f62658::t_fea7941c4dc71a 48-49,53-57,65-66
+  s_053f8bf9f62658::t_7b5437ee825769 52
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  s_053f8bf9f62658::t_1e8dc38fa4d707 143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "1e123d368f0e58a8ba0d07aac9dea823e50fbbbf",
+  "prompts": {},
+  "sessions": {
+    "s_053f8bf9f62658": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019efec87df2740db80cc97c7766e694",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
