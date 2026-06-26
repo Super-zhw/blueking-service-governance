@@ -1,0 +1,49 @@
+apps/bkms-server/pkg/bkintegrations/bkci/pipeline_tmpl.go
+  s_ffd62bd4199e39::t_b2ddef98b60123 24,26
+  s_ffd62bd4199e39::t_176e45cf2cf1dc 21-23,25,27
+  h_83f239dc907c66 20,30-31,33-34,41,50-52,83
+  s_ffd62bd4199e39::t_5cfba697fe1059 4-5,11,28,32,35-40,42-45,84-87
+apps/bkms-server/pkg/common/config/types.go
+  s_ffd62bd4199e39::t_f4f61201f88929 169-170
+apps/bkms-server/pkg/bkintegrations/bkci/assets/pipeline_templates/dockerfile.json
+  s_ffd62bd4199e39::t_08aa0dfa792bb2 196-198,206
+apps/bkms-server/pkg/bkintegrations/bkci/pipeline_tmpl_test.go
+  s_ffd62bd4199e39::t_bca89e9133d902 8-9,14-16,18,21,25-26,32-33,35,38,40-41,45-47,50-55,59-61,63,66-69
+  h_83f239dc907c66 27-31,39,42-44,48-49,62,64-65
+  s_ffd62bd4199e39::t_2f99228b321d0d 1-7,10-11,13,17,23,36-37,70-71
+  s_ffd62bd4199e39::t_b556221648ae85 12,19-20,22,24,34,56-58
+apps/bkms-server/pkg/common/config/config_test.go
+  s_ffd62bd4199e39::t_84c77a14c97de8 73,110-111,156
+apps/bkms-server/configs/config.yaml
+  h_83f239dc907c66 74
+  s_ffd62bd4199e39::t_23af35cf418601 73
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  h_83f239dc907c66 51
+  s_ffd62bd4199e39::t_cfadf7a687129e 50
+apps/bkms-server/tests/configs/config.yaml
+  s_ffd62bd4199e39::t_cd985d99bdced4 47
+  h_83f239dc907c66 48
+apps/bkms-server/pkg/bkintegrations/bkci/assets/pipeline_templates/helm_git_build.json
+  s_ffd62bd4199e39::t_6fd19bcbda3120 192-194,203
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "485505372bc0de1cd209959c47a4bbb5ebd2bd78",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_ffd62bd4199e39": {
+      "agent_id": {
+        "tool": "codebuddy",
+        "id": "cursor-20260622T071910Z-61579",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
