@@ -1,0 +1,33 @@
+apps/bkms-server/pkg/server/task/appmodel_deploy.go
+  s_88e44891cd4964::t_a8edebe7d36925 17
+  s_88e44891cd4964::t_362018b33f7c7b 181-184
+  s_88e44891cd4964::t_328309455e4b4f 185-187
+apps/bkms-server/pkg/server/task/helm_deploy.go
+  s_88e44891cd4964::t_9324f2ae53ea83 27
+  s_88e44891cd4964::t_e4e9d5b52b23fa 153-156
+  s_88e44891cd4964::t_72e933b49737e4 20
+apps/bkms-server/pkg/observability/metrics/metrics.go
+  s_88e44891cd4964::t_a8d0fac215cfd6 147-246
+apps/bkms-server/pkg/observability/metrics/middleware.go
+  s_88e44891cd4964::t_7084891826f0a0 1-27
+apps/bkms-server/pkg/deploy/handler/appmodel_deploy_steps.go
+  s_88e44891cd4964::t_e278311028d7e7 114
+apps/bkms-server/pkg/observability/metrics/README.md
+  s_88e44891cd4964::t_0b9fd0410f36a1 25-49,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "82be24f4e607e072148f2c32cbefd7dcd61325a6",
+  "prompts": {},
+  "sessions": {
+    "s_88e44891cd4964": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f126f1f2979b6a4bbef5e41aa22fa",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
