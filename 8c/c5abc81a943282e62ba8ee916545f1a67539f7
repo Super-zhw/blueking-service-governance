@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/bkintegrations/handler/bcs.go
+  s_9fa547bbf41ceb::t_1430465e125cf5 166-178,215-225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8cc5abc81a943282e62ba8ee916545f1a67539f7",
+  "prompts": {},
+  "sessions": {
+    "s_9fa547bbf41ceb": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eaf75135d7a1a9d38bf386c968548",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

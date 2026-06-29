@@ -1,0 +1,16 @@
+manifests/helm/bkms-server/Chart.yaml
+  h_83f239dc907c66 5-6
+manifests/helm/bkms-server/values.yaml
+  h_83f239dc907c66 201-202
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "67067b38c8024536b9f2dc740652e3851d79e62a",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+apps/bkms-server/pkg/core/app/appcfg/handler/app_config_file_version.go
+  h_d56f85e7c6980c 21,84,131,189,275
+apps/bkms-server/pkg/misc/audit/handler/operation_record.go
+  h_d56f85e7c6980c 31,94
+apps/bkms-server/pkg/build/chart/handler/helm_chart.go
+  h_d56f85e7c6980c 40,108,153,239,292,344,390
+apps/bkms-server/pkg/core/app/appcfg/handler/app_config_file.go
+  h_d56f85e7c6980c 40,119,205,254,311,377,417,457
+apps/bkms-server/pkg/observability/instancelog/handler/download.go
+  h_d56f85e7c6980c 52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ad77520a547037c606e330bab0355da1b703e581",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

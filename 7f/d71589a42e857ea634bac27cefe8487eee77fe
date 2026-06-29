@@ -1,0 +1,29 @@
+apps/bkms-server/tests/apis/apps/appspec/annotations/update-default-should-fail-when-key-reserved.bru
+  s_1ce9b0d13d5a51::t_4a8e1e9e272ea5 28
+apps/bkms-server/tests/apis/apps/appspec/labels/get-empty-default.bru
+  s_1ce9b0d13d5a51::t_1df085b6bcf256 31
+apps/bkms-server/tests/apis/apps/appspec/annotations/get-empty-default.bru
+  s_1ce9b0d13d5a51::t_df81ea08b61c75 31
+apps/bkms-server/tests/apis/apps/appspec/labels/update-default-should-fail-when-key-invalid.bru
+  s_1ce9b0d13d5a51::t_db2a2e98c765cd 28
+apps/bkms-server/tests/apis/apps/appspec/annotations/update-default-should-fail-when-key-invalid.bru
+  s_1ce9b0d13d5a51::t_9c57bf731d2163 28
+apps/bkms-server/tests/apis/apps/appspec/labels/update-default-should-fail-when-key-reserved.bru
+  s_1ce9b0d13d5a51::t_db1e32dd2e40b1 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7fd71589a42e857ea634bac27cefe8487eee77fe",
+  "prompts": {},
+  "sessions": {
+    "s_1ce9b0d13d5a51": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e91f4971e7659a303c2c3decc5fef",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

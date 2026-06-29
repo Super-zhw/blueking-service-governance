@@ -1,0 +1,20 @@
+apps/bkms-server/tests/docker-compose.yaml
+  h_83f239dc907c66 40
+apps/bkms-server/tests/docker-compose.podman.yaml
+  h_83f239dc907c66 1-12
+apps/bkms-server/tests/README.md
+  h_83f239dc907c66 90-91,106,112,120-141
+apps/bkms-server/tests/justfile
+  h_83f239dc907c66 6-7,9,20,53,63,65-73,87-93,100-101,104,110-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0d84c514e71e30857a2435a63de323746d60ee0b",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

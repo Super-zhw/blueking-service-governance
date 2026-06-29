@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/extension/component/polaris/handler/polaris.go
+  h_d56f85e7c6980c 185,272-278,284,286,379
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f1012ba541e4ce681d9cd0d6aefdb7ae53b21918",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

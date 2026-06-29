@@ -1,0 +1,120 @@
+apps/bkms-server/pkg/observability/bkmonitor/promql_builder.go
+  s_caf43941a8ea5d::t_58769949697fbe 1,43
+  s_3bf35482d53970::t_408d2d3cee8b2f 57-64,68,72-75,78-81
+  s_3bf35482d53970::t_54fd998dcdc099 6-7
+  s_3bf35482d53970::t_f65074c64415e4 53-54,67,76,82,84
+apps/bkms-server/pkg/observability/bkmonitor/user_group_service.go
+  s_caf43941a8ea5d::t_e98d9d3c99225b 1
+apps/bkms-server/pkg/observability/bkmonitor/utils.go
+  s_caf43941a8ea5d::t_5729d803407b43 1
+apps/bkms-server/pkg/observability/bkmonitor/apm_store.go
+  s_caf43941a8ea5d::t_f2556a7a9112f8 1
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  s_caf43941a8ea5d::t_fcacaff330be77 129,187-190,199-203
+  s_3bf35482d53970::t_7cc56828953feb 143-145,162-164
+  s_053f8bf9f62658::t_8c6c43f3dcaba1 152-153
+  s_053f8bf9f62658::t_a86342558ffc94 133-142
+  s_053f8bf9f62658::t_1e8dc38fa4d707 143
+apps/bkms-server/pkg/bkintegrations/serializer/serializer_suite_test.go
+  s_caf43941a8ea5d::t_bb00ab626c600d 1-13
+apps/bkms-server/pkg/observability/bkmonitor/module.go
+  s_caf43941a8ea5d::t_7505b42b9a6e0f 1
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor_test.go
+  s_caf43941a8ea5d::t_9095c93cae3b32 4,7,9-10,130-131,143,150,157,265-272,275-294,297-308,310-321,325-329,333-338,340-353,355-358,360-368,370-371
+  s_caf43941a8ea5d::t_5f025675ee6b03 273-274,295-296,322-324,330-332,354
+  s_b48b85272a0f71::t_d2c24ce4ff797e 17-24,26-28,30-32,34-35,37-40,42,44-55,57-84,86-104,108-116,118-120,122-125
+  s_053f8bf9f62658::t_9ab90aeb857d25 136
+  s_053f8bf9f62658::t_bf0c9841fadeb3 132-135,137-140,151-154,158-222,224-264
+  s_053f8bf9f62658::t_eae7edef36dde3 6,8,11,14
+  s_053f8bf9f62658::t_320c483f0377b7 141-149,155
+apps/bkms-server/pkg/observability/bkmonitor/metric_time_series.go
+  s_b48b85272a0f71::t_0f2c0ce81111fd 98,101-105
+  s_3bf35482d53970::t_344ea0b7a154aa 8,37,48-54,57,86
+  s_3bf35482d53970::t_fb73599801af9f 41-43
+  s_3bf35482d53970::t_f860128503bb70 39-40,44-45,58
+apps/bkms-server/pkg/observability/bkmonitor/telemetry_config.go
+  s_caf43941a8ea5d::t_43289351f96c03 1
+apps/bkms-server/pkg/observability/bkmonitor/types.go
+  s_caf43941a8ea5d::t_d7d42b051130a9 2-3,10-11,37-58,93-116,119-150,153-173
+  s_caf43941a8ea5d::t_efcd616c48cfb8 1,12-36
+  s_b48b85272a0f71::t_5247fa6547ccb5 4,7-9,151-152
+apps/bkms-server/pkg/observability/bkmonitor/apm_service.go
+  s_caf43941a8ea5d::t_6c0b5481a79f96 1
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  s_b48b85272a0f71::t_0de0cae45fe74f 593-596,598-599,601-602,604-605,607-608,610-613
+  s_b48b85272a0f71::t_ae5181bafa390e 597,600,603,606,609,628-629
+apps/bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  s_b48b85272a0f71::t_5d2106fe00f2d3 437,441-446,448-449
+  s_b48b85272a0f71::t_680e07ab2156ef 440,447
+  s_3bf35482d53970::t_263e7d035fddf7 421
+  s_3bf35482d53970::t_7727efe4cfcb0c 373
+  s_3bf35482d53970::t_eb732d810b98da 417-420,422-425
+  s_3bf35482d53970::t_c655f12a7ea30f 415
+  s_35253d280760be::t_9aec5cc353b439 390
+  s_053f8bf9f62658::t_ad16a5396ca27d 389
+apps/bkms-server/pkg/bkintegrations/serializer/bcs_test.go
+  s_b48b85272a0f71::t_963e107e1855ba 4,9,12-18,20,22-27,29-43,45-51,54-55,57-60,64-68,70,72-83,85,88-89,91-94,98-103,105-107,109-112,114-128,130-135,139-156,159-160,162-165
+apps/bkms-server/pkg/bkintegrations/serializer/bkci_test.go
+  s_b48b85272a0f71::t_145c10758d9a6e 4,9,12-19,21-25,27-38,40,43-44,46-49,53-60,63-70,73-90,92-94,97-98,100-104,108-112,115-123,125-134,136-141,144-155,157-171,176-178,180-183,187-193,195-211
+apps/bkms-server/pkg/bkintegrations/serializer/bscp_test.go
+  s_b48b85272a0f71::t_1fbddc37e037c5 4,9,12-16,19-27,29,33-34,36-39,43-46,49-58,63-66,69-78,80,84-89,91-93,95-96,98-113,116-117,119-122
+apps/bkms-server/pkg/bkintegrations/serializer/bkhcm_test.go
+  s_b48b85272a0f71::t_46d89dc8c10cbb 4,9,12-43,46-47,49-52,56-88,92-121,125-159,161,163-169,171-173,175-176,179-180,182-185
+apps/bkms-server/pkg/bkintegrations/serializer/kubeinsight_test.go
+  s_b48b85272a0f71::t_26474ee7020df4 4,9,12-49,51,53-56,58-64,66-68,70-74,76-82,84-87,89-92,94-100,102-103,105-108,111-121,123-128
+apps/bkms-server/pkg/bkintegrations/serializer/bkcc_test.go
+  s_b48b85272a0f71::t_fbc0d0dd150483 4,9,12-18,20,22,24,26-28,30-38,40-42,44-45,47,49,51,54,56,59-66,68-69,71-74
+apps/bkms-server/pkg/bkintegrations/serializer/common.go
+  s_053f8bf9f62658::t_0b312bed8c33ad 11-13,38-41,42-47,58-64
+  s_053f8bf9f62658::t_78e07117abb7ce 5
+  s_053f8bf9f62658::t_fea7941c4dc71a 48-49,53-57,65-66
+  s_053f8bf9f62658::t_7b5437ee825769 52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "9e4bac8204a1876f9666a4aa8a52d3b16d175f20",
+  "prompts": {},
+  "sessions": {
+    "s_053f8bf9f62658": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019efec87df2740db80cc97c7766e694",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_35253d280760be": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ef292382e7fceb46dab7c9ff2a31e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_3bf35482d53970": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ef26eb0ca7a338370ebfbaa9ebadf",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_b48b85272a0f71": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eef27f29675d08bbb849a620ad199",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_caf43941a8ea5d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eee52f9937f88bed83182d82b68b6",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

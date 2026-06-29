@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/workload/topology/builder.go
+  h_83f239dc907c66 11,137-138,147-148,191,196,210,212,251,253
+apps/bkms-server/pkg/workload/topology/integration_test.go
+  h_83f239dc907c66 72-77,142-143,202,211-213,218-220,664-732,903-904,911,949-950,964
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4c35a61980c85a0ff012ffa579cf66094c08dc98",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+apps/bkms-server/pkg/workload/appmodelcore/workload/builder_test.go
+  s_afd5520d925e56::t_7a0a8fe9a811d8 148,157-167
+apps/bkms-server/pkg/workload/appmodelcore/workload/builder.go
+  s_afd5520d925e56::t_46b8771a05eea3 240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7a12e1a8eb3e8994d5106d5eea260107558d822b",
+  "prompts": {},
+  "sessions": {
+    "s_afd5520d925e56": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eba99a5467cd98be5d5ef6f91096d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

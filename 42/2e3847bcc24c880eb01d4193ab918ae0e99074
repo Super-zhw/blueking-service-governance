@@ -1,0 +1,36 @@
+apps/bkms-server/pkg/infras/perm/action.go
+  h_83f239dc907c66 1-41
+apps/bkms-server/pkg/infras/perm/types.go
+  h_83f239dc907c66 1-23
+apps/bkms-server/pkg/infras/authmanager/bridge.go
+  h_83f239dc907c66 1-285
+apps/bkms-server/pkg/infras/perm/perm.go
+  h_83f239dc907c66 1-134
+apps/bkms-server/pkg/infras/perm/stub_test.go
+  h_83f239dc907c66 1-81
+apps/bkms-server/pkg/infras/perm/perm_suite_test.go
+  h_83f239dc907c66 1-14
+apps/bkms-server/pkg/infras/perm/stub.go
+  h_83f239dc907c66 1-273
+apps/bkms-server/pkg/infras/authmanager/authmanager.go
+  h_83f239dc907c66 15,105-114
+apps/bkms-server/pkg/infras/perm/local.go
+  h_83f239dc907c66 1-413
+apps/bkms-server/pkg/infras/perm/local_test.go
+  h_83f239dc907c66 1-343
+apps/bkms-server/pkg/infras/perm/roles.go
+  h_83f239dc907c66 1-39
+apps/bkms-server/pkg/common/config/types.go
+  h_83f239dc907c66 266-268,299-309,361-362
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "422e3847bcc24c880eb01d4193ab918ae0e99074",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

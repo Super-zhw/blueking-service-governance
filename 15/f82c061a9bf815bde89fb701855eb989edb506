@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/extension/addon/gpa/types.go
+  h_d56f85e7c6980c 28-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "15f82c061a9bf815bde89fb701855eb989edb506",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

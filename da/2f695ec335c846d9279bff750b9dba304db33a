@@ -1,0 +1,43 @@
+apps/bkms-server/pkg/workload/bscpcfg/builder_test.go
+  s_afd5520d925e56::t_9c37ba77ee8c65 14-16,66-68,84-86
+apps/bkms-server/pkg/workload/bscpcfg/inject_test.go
+  s_afd5520d925e56::t_51903bbf9d671b 8,37,51,56,59,63-64,66,72,75-76,94-97,100,103,106,129,157,191-195,199,251
+  s_afd5520d925e56::t_185248a8218e93 28,39,50,53-55,57-58,60-62,65,67,69-71,73-74,77-80,82-83,92,98-99,101-102,104,113-115,118-121,127-128,130,137-140,156,159,201
+  s_afd5520d925e56::t_1781abcbda7625 1-7,9-25,213-250,252-318,320-322
+  s_afd5520d925e56::t_4aee8893307837 319
+  s_afd5520d925e56::t_ee67e57d372937 26-27,29-31,33-36,38,40-49,141-144,146-149,151-155,158,160-190,196-198,200,202-212
+  s_afd5520d925e56::t_9abe27062e9505 81,84-86,88-91,109-112
+  s_afd5520d925e56::t_07b132fca3296b 105,107-108
+  s_afd5520d925e56::t_b2f42d19d889f8 116-117,123-126,131-136
+apps/bkms-server/pkg/workload/bscpcfg/builder.go
+  s_afd5520d925e56::t_e65b51bcc1abeb 1-43,46-55,58-72,74-107,109-114,116-136
+apps/bkms-server/pkg/workload/bscpcfg/suite_test.go
+  s_afd5520d925e56::t_84527ce3fc792a 1-13
+apps/bkms-server/pkg/workload/bscpcfg/inject.go
+  s_afd5520d925e56::t_f8967f94157f66 56-58,60,69-70
+  s_afd5520d925e56::t_0d0ce246d7a3b2 17,53-54,61
+  s_afd5520d925e56::t_0b92ea6064d55b 13-16,18-21,45
+  s_afd5520d925e56::t_8d18906c1640dc 55
+  s_afd5520d925e56::t_9a004c5247f3f9 7,22,28,31,35,38-39,41-42,44,47-52,62,93
+  s_afd5520d925e56::t_a9652a683982eb 63,71-81,83-92
+  s_afd5520d925e56::t_b086e3d62c29c9 8,24-25,29-30,33,36
+  s_afd5520d925e56::t_afe0b8f1668950 64-68
+apps/bkms-server/pkg/workload/appmodelcore/workload/builder.go
+  s_afd5520d925e56::t_7e01eb7febc5c1 226,247,249-250
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "da2f695ec335c846d9279bff750b9dba304db33a",
+  "prompts": {},
+  "sessions": {
+    "s_afd5520d925e56": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eba99a5467cd98be5d5ef6f91096d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

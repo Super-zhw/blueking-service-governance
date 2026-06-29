@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/extension/component/portpool/README.md
+  h_d56f85e7c6980c 23-28
+apps/bkms-server/pkg/extension/addon/gpa/store.go
+  h_d56f85e7c6980c 30-31
+apps/bkms-server/pkg/extension/component/polaris/README.md
+  h_d56f85e7c6980c 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "3959c874c34ee977d752b31ca3b49ec9f3270c51",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
