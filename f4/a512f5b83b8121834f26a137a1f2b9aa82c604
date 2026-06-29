@@ -1,0 +1,21 @@
+apps/bkms-server/pkg/extension/bscpcfg/handler/metadata.go
+  s_798fa2e5a241a9::t_76fa9f489ce1e5 62-66
+apps/bkms-server/pkg/extension/bscpcfg/service/manager.go
+  s_798fa2e5a241a9::t_0d3ea99931bf14 74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "f4a512f5b83b8121834f26a137a1f2b9aa82c604",
+  "prompts": {},
+  "sessions": {
+    "s_798fa2e5a241a9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112ef3f072eca96b6be248d1162d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

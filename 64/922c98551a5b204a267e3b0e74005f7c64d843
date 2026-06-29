@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/workload/bscpcfg/inject_map.go
+  s_798fa2e5a241a9::t_240bde7c1580f8 34
+  s_798fa2e5a241a9::t_4723767aa94eb5 1-33,35-175
+apps/bkms-server/pkg/workload/bscpcfg/inject_map_test.go
+  s_798fa2e5a241a9::t_baf224094c8d25 173-177,179-193,199-201,203-204,207-212,216,228-242,250,253-257,259-274
+  s_798fa2e5a241a9::t_d75553c2ee6009 1-172,178,194-198,202,205-206,213-215,217-227,243-249,251-252,258,275-346
+  s_798fa2e5a241a9::t_fdc8321b1ba880 347-349
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "64922c98551a5b204a267e3b0e74005f7c64d843",
+  "prompts": {},
+  "sessions": {
+    "s_798fa2e5a241a9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112ef3f072eca96b6be248d1162d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
