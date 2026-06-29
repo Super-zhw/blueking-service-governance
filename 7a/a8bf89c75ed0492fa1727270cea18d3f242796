@@ -1,0 +1,25 @@
+apps/bkms-server/tests/apis/apps/bscpcfg/get-env-binding.bru
+  s_798fa2e5a241a9::t_2230271ad096ce 17,25
+apps/bkms-server/tests/apis/apps/bscpcfg/patch-metadata.bru
+  s_798fa2e5a241a9::t_30a6fb3b864dfd 15-16,24,28,32
+apps/bkms-server/tests/apis/apps/bscpcfg/list-env-bindings.bru
+  s_798fa2e5a241a9::t_a1b9e437cbf053 26
+apps/bkms-server/tests/apis/apps/bscpcfg/create-env-binding.bru
+  s_798fa2e5a241a9::t_8d0bcc0d0c4c80 9,17,26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "7aa8bf89c75ed0492fa1727270cea18d3f242796",
+  "prompts": {},
+  "sessions": {
+    "s_798fa2e5a241a9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112ef3f072eca96b6be248d1162d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
