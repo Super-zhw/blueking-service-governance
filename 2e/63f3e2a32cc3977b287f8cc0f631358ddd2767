@@ -1,0 +1,28 @@
+apps/bkms-server/pkg/bkintegrations/iam/service_test.go
+  h_83f239dc907c66 1-463
+apps/bkms-server/pkg/bkintegrations/iam/migrate/driver.go
+  h_83f239dc907c66 1-110
+apps/bkms-server/pkg/bkintegrations/iam/migrate/migrate.go
+  h_83f239dc907c66 1-70
+apps/bkms-server/design_notes/permission.md
+  h_83f239dc907c66 3-4,23-25,38,121,187,189-309,316-318,322,324,330,334,340
+apps/bkms-server/pkg/bkintegrations/iam/iam_suite_test.go
+  h_83f239dc907c66 1-14
+apps/bkms-server/pkg/bkintegrations/iam/dto.go
+  h_83f239dc907c66 1-101
+apps/bkms-server/pkg/bkintegrations/iam/migrate/migrations/embed.go
+  h_83f239dc907c66 1-10
+apps/bkms-server/pkg/bkintegrations/iam/service.go
+  h_83f239dc907c66 1-710
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "2e63f3e2a32cc3977b287f8cc0f631358ddd2767",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

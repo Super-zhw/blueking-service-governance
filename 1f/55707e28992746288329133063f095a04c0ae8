@@ -1,0 +1,30 @@
+apps/bkms-server/pkg/extension/depservice/provider/redis/provider.go
+  h_d56f85e7c6980c 1-224
+apps/bkms-server/pkg/infras/cloudapi/dbm/redis.go
+  h_d56f85e7c6980c 161
+apps/bkms-server/pkg/extension/depservice/provider/redis/params.go
+  h_d56f85e7c6980c 27-28,31-35,44-51,55-59
+apps/bkms-server/pkg/infras/cloudapi/dbm/dbm.go
+  h_d56f85e7c6980c 18,24,39-41,47-48,68,78,92-93,97,135,143
+apps/bkms-server/pkg/infras/cloudapi/dbm/client.go
+  h_d56f85e7c6980c 8,10,12,14,21,24
+apps/bkms-server/pkg/common/config/types.go
+  h_d56f85e7c6980c 36
+apps/bkms-server/pkg/extension/depservice/model/instance.go
+  h_d56f85e7c6980c 34-35,42-65,105-107
+apps/bkms-server/pkg/extension/depservice/manager.go
+  h_d56f85e7c6980c 5,8,13,88-89,91,94-97,100-104,108-115,117-119,121-122,124-134,149-151,171,176-178,181-188,191,194
+apps/bkms-server/pkg/extension/depservice/model/instance_store.go
+  h_d56f85e7c6980c 147-161,511-553
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "1f55707e28992746288329133063f095a04c0ae8",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+apps/bkms-server/pkg/infras/perm/local_test.go
+  h_83f239dc907c66 10-11,37,39-41,52,59,65,72
+apps/bkms-server/pkg/server/task/workspace.go
+  h_83f239dc907c66 12,91,94,98
+apps/bkms-server/pkg/infras/perm/manager_test.go
+  h_83f239dc907c66 11,45
+apps/bkms-server/pkg/infras/cloudapi/iam/client.go
+  h_83f239dc907c66 4,127,141,159,167
+apps/bkms-server/pkg/infras/perm/types.go
+  h_83f239dc907c66 4
+apps/bkms-server/pkg/bkintegrations/bkiam/dto_test.go
+  h_83f239dc907c66 1-56
+apps/bkms-server/design_notes/permission.md
+  h_83f239dc907c66 111-113,189,294,458,463
+apps/bkms-server/pkg/infras/perm/perm.go
+  h_83f239dc907c66 11-12,21,92,94,144,153
+apps/bkms-server/pkg/bkintegrations/bkiam/dto.go
+  h_83f239dc907c66 5-6,16,18,21
+apps/bkms-server/pkg/infras/perm/local.go
+  h_83f239dc907c66 9-10,22-25,50,318,321,325,330,349,352,356,361,397,406
+apps/bkms-server/pkg/bkintegrations/bkiam/service.go
+  h_83f239dc907c66 1,11-13,364,379,383,399,409,421,425,438,443,461,472,486,490,503,508,526,537
+apps/bkms-server/pkg/bkintegrations/bkiam/iam_suite_test.go
+  h_83f239dc907c66 1,10
+apps/bkms-server/pkg/extension/bscpcfg/service/permission.go
+  h_83f239dc907c66 9,33,36,39
+apps/bkms-server/cmd/migration/migrate_iam_system_model.go
+  h_83f239dc907c66 1-67
+apps/bkms-server/pkg/infras/perm/stub.go
+  h_83f239dc907c66 10-11,259,267
+apps/bkms-server/pkg/bkintegrations/bkiam/service_test.go
+  h_83f239dc907c66 1,11,282,286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.10",
+  "base_commit_sha": "15bbca3eec703a8518a58d4448ce3ce33032a836",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

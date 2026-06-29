@@ -1,0 +1,23 @@
+apps/bkms-server/pkg/extension/bscpcfg/handler/env_binding.go
+  s_798fa2e5a241a9::t_70be9f3ef3551d 250-251,253,257,259
+  s_798fa2e5a241a9::t_783cd404f7956b 254
+  s_798fa2e5a241a9::t_85ede79f047524 256
+  s_798fa2e5a241a9::t_77cd00ff83c668 258
+  s_798fa2e5a241a9::t_757baf657b62b1 260-262
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "0ecd7893b3da56993ce4188e607d8ab9f13e3f1f",
+  "prompts": {},
+  "sessions": {
+    "s_798fa2e5a241a9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112ef3f072eca96b6be248d1162d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

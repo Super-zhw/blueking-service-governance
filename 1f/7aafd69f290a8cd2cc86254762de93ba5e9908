@@ -1,0 +1,26 @@
+manifests/helm/bkms-server/Chart.yaml
+  h_83f239dc907c66 5-6
+manifests/helm/bkms-server/values.yaml
+  h_83f239dc907c66 167,169-181
+manifests/helm/bkms-server/templates/serviceaccount.yaml
+  h_83f239dc907c66 1-39
+manifests/helm/bkms-server/templates/worker-deployment.yaml
+  h_83f239dc907c66 18-27
+manifests/helm/bkms-server/templates/migrate-iam-job.yaml
+  h_83f239dc907c66 1-40
+manifests/helm/bkms-server/templates/web-deployment.yaml
+  h_83f239dc907c66 18-27
+manifests/helm/bkms-server/templates/_helpers.tpl
+  h_83f239dc907c66 57-58,60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "1f7aafd69f290a8cd2cc86254762de93ba5e9908",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

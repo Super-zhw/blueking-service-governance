@@ -1,0 +1,23 @@
+apps/bkms-server/pkg/deploy/helm/postrenderer/bscp_test.go
+  s_ee0176df288914::t_c04ed729663529 1-442
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder_test.go
+  s_ee0176df288914::t_22131f4c4e2257 142,159
+apps/bkms-server/pkg/deploy/helm/postrenderer/bscp.go
+  s_ee0176df288914::t_95c797174f2545 1,14,16,20,35,40,51,54,68-72,74-75,81,85-86,117-118,128-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "356db3b2d9fc6803f830ba3b7cab0bb0b16a2711",
+  "prompts": {},
+  "sessions": {
+    "s_ee0176df288914": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eed1fcc2d755097759df0204595b9",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

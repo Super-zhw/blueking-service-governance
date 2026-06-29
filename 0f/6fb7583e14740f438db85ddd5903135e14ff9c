@@ -1,0 +1,30 @@
+apps/bkms-server/pkg/observability/bkmonitor/promql_builder.go
+  s_b7613983d19f8b::t_d3570e9a2c3ba0 1-116
+apps/bkms-server/pkg/observability/bkmonitor/instance_metrics.go
+  s_b7613983d19f8b::t_c04ac7d83d78a8 1-123
+apps/bkms-server/pkg/observability/bkmonitor/promql_builder_test.go
+  s_b7613983d19f8b::t_9d6756b29be7ca 1-130
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  s_b7613983d19f8b::t_d571ad1c3110ba 4,122-164
+apps/bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  s_b7613983d19f8b::t_941feb555de904 4-5
+  s_b7613983d19f8b::t_1c8830517a0f32 368-472
+apps/bkms-server/pkg/bkintegrations/serializer/bkmonitor_test.go
+  s_b7613983d19f8b::t_0d0defa94d6ece 1-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0f6fb7583e14740f438db85ddd5903135e14ff9c",
+  "prompts": {},
+  "sessions": {
+    "s_b7613983d19f8b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eca583fd3715da5000bed0156b111",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
