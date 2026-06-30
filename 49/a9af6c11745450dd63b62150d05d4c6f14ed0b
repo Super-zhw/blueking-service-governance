@@ -1,0 +1,19 @@
+bkms-cli/test/e2e/testdata/app/missing-code-repo-fields.yaml
+  s_433368cc4036dd::t_a94e3ee18c72ae 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "49a9af6c11745450dd63b62150d05d4c6f14ed0b",
+  "prompts": {},
+  "sessions": {
+    "s_433368cc4036dd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f1275de037de687dcd81139f64e69",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
