@@ -1,0 +1,117 @@
+apps/bkms-server/pkg/deploy/helm/postrenderer/bscp.go
+  s_ee0176df288914::t_4564b5129d8c0e 156
+  s_ee0176df288914::t_e18ffd19e5342b 10,18,20,22,24-26,47,104-106,107-109,112-113,121,125-126,128-133,135-137,139-141,143,146-147
+  s_ee0176df288914::t_537310790b69ea 2-5,6,7,8,9,12,14-15,16,19,21,23,27-31,33-36,38-46,49-50,52-54,58-61,63-67,73,77,85,100-101,110,118,127,134,138,142,144-145,153
+  s_ee0176df288914::t_95c797174f2545 1,11,13,17,32,37,48,51,69-72,76,103
+  s_798fa2e5a241a9::t_9da7c8821dd1a9 55-57,62,74-75,78-82,84,86-89,91
+  s_798fa2e5a241a9::t_2cbb0284cce5f3 90
+  s_798fa2e5a241a9::t_f8c2924c3644d2 92-94
+apps/bkms-server/pkg/deploy/helm/postrenderer/bscp_test.go
+  s_ee0176df288914::t_2bdf53432d28d0 225,226
+  s_ee0176df288914::t_afa7d2f8eb939a 2-10,12-14,17-22,25-29,31-34,37-40,42-43,45-52,55-65,109-114,118,122,125,128-131,133-154,155-169,172-177,178,180,182-184,187,193-195,196-216,219-224,227-229,232-240,243,245,248,249,251-257,260,262,265-267,268-280,283-304,307-321,324-334,343-347,354,362-364,385,490-495,498,502,506-508
+  s_ee0176df288914::t_c04ed729663529 1-14,17-22,25-34,36-40,42-52,55-65,108-114,118,122,125,128-131,133-154,155-169,171-177,178,180,182-184,187-188,190-191,193-216,218-224,225,226-229,232-240,242-243,245,248,249,251-257,259-260,262,265-267,268-280,282-304,306-321,323-334,343-347,354,362-364,385,489-495,498,502,506-508
+  s_798fa2e5a241a9::t_f219a1a69b6b60 440-493,503
+  s_798fa2e5a241a9::t_1e7e501c1bbd83 181,185-186,498,502
+  s_798fa2e5a241a9::t_00ef65a8ddde94 494-497
+  s_798fa2e5a241a9::t_7af5883f70deee 499-501
+  s_798fa2e5a241a9::t_d16d44974bb997 504-506
+  s_798fa2e5a241a9::t_1eab1e7d569937 41,53-54,66-107,115-117,119-121,123-124,126-127,132,179,189,192,230,336,348-351,377-379,412-415,425-428,433
+  s_798fa2e5a241a9::t_0ab75ef957dc6c 335,337-342,352-353,355-361,365-376,380-384,386-411,416-424,429-432,434-436
+  s_798fa2e5a241a9::t_4826f7d006ff6f 437-438
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder_test.go
+  s_ee0176df288914::t_665a4b68ea4585 160,163-164,169-171
+  s_ee0176df288914::t_895ef3c1d190ff 16
+  s_ee0176df288914::t_4faef45d571577 135-141,143-147,151-159,162,165-168,172-175
+  s_ee0176df288914::t_22131f4c4e2257 161
+  s_798fa2e5a241a9::t_6a386e74bf507d 142,148,150
+  s_798fa2e5a241a9::t_9aed8200b2e5c9 149
+apps/bkms-server/pkg/extension/bscpcfg/service/manager.go
+  s_798fa2e5a241a9::t_80fe560bceab20 85-86
+  s_798fa2e5a241a9::t_bb9542691e57bd 74
+apps/bkms-server/pkg/extension/bscpcfg/model/metadata_store.go
+  s_798fa2e5a241a9::t_709d3229ead9d1 131-132
+  s_798fa2e5a241a9::t_3eb36b993d93ce 129-130
+apps/bkms-server/pkg/extension/bscpcfg/model/metadata_store_test.go
+  s_798fa2e5a241a9::t_9a4832e3be27ec 185-189,191-195,197-204,206-218,220-228,230-235,237-241,243-244
+apps/bkms-server/pkg/extension/bscpcfg/handler/metadata.go
+  s_798fa2e5a241a9::t_ec188e5265a17b 133-134
+  s_798fa2e5a241a9::t_7553631b0056fc 105-106
+  s_798fa2e5a241a9::t_76fa9f489ce1e5 60,62-64
+  s_798fa2e5a241a9::t_b3fcabd01537dd 101
+  s_798fa2e5a241a9::t_bc2a19acd5f025 61
+  s_798fa2e5a241a9::t_e968b1f9cf2b23 102-104,138-139
+apps/bkms-server/pkg/extension/bscpcfg/service/manager_test.go
+  s_798fa2e5a241a9::t_a6bbc946b3e6ef 86,96-99,102,109-114,119-123,128,133-134,136,139-140,142
+  s_798fa2e5a241a9::t_563395bca1422a 116-118,124-127,130-132,137-138,143-146
+apps/bkms-server/pkg/extension/bscpcfg/model/snapshot.go
+  s_798fa2e5a241a9::t_2615956a20ce53 34
+  s_798fa2e5a241a9::t_7d149ad5b7564d 32-33
+apps/bkms-server/pkg/extension/bscpcfg/model/snapshot_test.go
+  s_798fa2e5a241a9::t_eb2207fb12b6ce 1-14,21-39,41-42,44-46,48-105
+apps/bkms-server/pkg/workload/bscpcfg/builder.go
+  s_798fa2e5a241a9::t_da73e3ed9d33eb 28-30,69
+apps/bkms-server/pkg/workload/bscpcfg/inject_test.go
+  s_798fa2e5a241a9::t_587246003481f3 203-205
+  s_798fa2e5a241a9::t_0e35a9d9efa5d3 200-202
+  s_798fa2e5a241a9::t_0567abc71ada4f 77-78,111-112,239
+apps/bkms-server/pkg/extension/bscpcfg/service/types.go
+  s_798fa2e5a241a9::t_48097a79b68816 24-25
+apps/bkms-server/pkg/workload/bscpcfg/inject_map.go
+  s_798fa2e5a241a9::t_4723767aa94eb5 1-7,9-31,33-38,40-44,46-59,61-66,68-78,82-87,89-94,96-107,109,111-113,115,124-125,129-130,132-133,136-139
+  s_798fa2e5a241a9::t_5e44129223a16d 8,32,39,45,60,67,79-81,88,116-123,127-128,131,134-135
+  s_798fa2e5a241a9::t_284b100d5787d3 95,108,110,114,126
+apps/bkms-server/pkg/workload/bscpcfg/inject_map_test.go
+  s_798fa2e5a241a9::t_baf224094c8d25 192-196,198-212,218-220,222-223,226-231,235,247-261,269,272-276,278-293
+  s_798fa2e5a241a9::t_d75553c2ee6009 1-71,84-94,96-106,108-160,168-177,179,180,184-191,197,213-217,221,224-225,232-234,236-246,262-268,270-271,277,294-298
+  s_798fa2e5a241a9::t_fdc8321b1ba880 299
+  s_798fa2e5a241a9::t_d7c0694dca627a 72-83,95,107,161-167,178,181-183
+apps/bkms-server/pkg/workload/bscpcfg/builder_test.go
+  s_798fa2e5a241a9::t_e075e84aa45fe3 12,16,33-44,54-59
+  s_798fa2e5a241a9::t_053e96c93241df 60
+apps/bkms-server/pkg/extension/bscpcfg/handler/env_binding.go
+  s_798fa2e5a241a9::t_cc289863ef9f8b 27-28,35
+  s_798fa2e5a241a9::t_70be9f3ef3551d 250-251,253,257,259
+  s_798fa2e5a241a9::t_783cd404f7956b 254
+  s_798fa2e5a241a9::t_85ede79f047524 256
+  s_798fa2e5a241a9::t_77cd00ff83c668 258
+  s_798fa2e5a241a9::t_757baf657b62b1 260-262
+apps/bkms-server/tests/apis/apps/bscpcfg/get-env-binding.bru
+  s_798fa2e5a241a9::t_2230271ad096ce 17,25
+apps/bkms-server/tests/apis/apps/bscpcfg/patch-metadata.bru
+  s_798fa2e5a241a9::t_30a6fb3b864dfd 15-16,24,28,32
+apps/bkms-server/tests/apis/apps/bscpcfg/list-env-bindings.bru
+  s_798fa2e5a241a9::t_a1b9e437cbf053 26
+apps/bkms-server/tests/apis/apps/bscpcfg/create-env-binding.bru
+  s_798fa2e5a241a9::t_8d0bcc0d0c4c80 9,17,26
+apps/bkms-server/pkg/extension/bscpcfg/serializer/serializer.go
+  s_798fa2e5a241a9::t_73f980f969fd0b 17,23,48,50-82
+  s_798fa2e5a241a9::t_a54c442c0db900 16
+  s_798fa2e5a241a9::t_a2d46980ef0115 18-22
+  s_798fa2e5a241a9::t_3d5db581dc9ddc 24-26
+apps/bkms-server/pkg/extension/bscpcfg/model/metadata.go
+  s_798fa2e5a241a9::t_54ede6d1213dfa 49-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "c124a861fc5b80f4f50bea5560c926c9a7b42e71",
+  "prompts": {},
+  "sessions": {
+    "s_798fa2e5a241a9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112ef3f072eca96b6be248d1162d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_ee0176df288914": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eed1fcc2d755097759df0204595b9",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
