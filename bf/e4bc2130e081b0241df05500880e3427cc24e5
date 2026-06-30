@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/extension/addon/gpa/handler/gpa.go
+  h_d56f85e7c6980c 138-141,144-147,245-328,333,337-339
+apps/bkms-server/pkg/extension/addon/gpa/model.go
+  h_d56f85e7c6980c 57-59
+apps/bkms-server/pkg/extension/addon/gpa/types.go
+  h_d56f85e7c6980c 27-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "bfe4bc2130e081b0241df05500880e3427cc24e5",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
