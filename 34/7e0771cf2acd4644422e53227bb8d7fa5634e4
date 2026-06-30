@@ -1,0 +1,50 @@
+bkms-cli/pkg/update/semver.go
+  s_8a2ad61a7177ed::t_6759475f6168b3 1-29
+bkms-cli/pkg/update/cache.go
+  s_8a2ad61a7177ed::t_32b48e6abf6544 1-82
+  s_8a2ad61a7177ed::t_25988894d42157 83-85
+bkms-cli/pkg/update/background.go
+  s_8a2ad61a7177ed::t_2674e284deab7a 1-105
+bkms-cli/pkg/update/replace.go
+  s_8a2ad61a7177ed::t_0fa2b51b871fde 1-97
+bkms-cli/Makefile
+  s_8a2ad61a7177ed::t_ea25b088c67ebe 122-149
+bkms-cli/pkg/update/replace_test.go
+  s_8a2ad61a7177ed::t_94435e2c1affd0 1-61
+bkms-cli/pkg/update/cache_test.go
+  s_8a2ad61a7177ed::t_d0d4a1f969654d 1-105
+bkms-cli/pkg/update/source.go
+  s_8a2ad61a7177ed::t_19bdb4ef997048 1-11
+bkms-cli/cmd/update/update.go
+  s_8a2ad61a7177ed::t_6958a93b8557b2 1-115
+bkms-cli/pkg/update/semver_test.go
+  s_8a2ad61a7177ed::t_53ed4ae8080f4d 1-45
+bkms-cli/pkg/update/extract.go
+  s_8a2ad61a7177ed::t_aabac64bb0a3f9 1-96
+bkms-cli/pkg/update/download.go
+  s_8a2ad61a7177ed::t_78cf688cd2765a 1-36
+bkms-cli/pkg/update/update_suite_test.go
+  s_8a2ad61a7177ed::t_e173c4b4dbd381 1-13
+bkms-cli/pkg/update/stub.go
+  s_8a2ad61a7177ed::t_8464931c808135 1-24
+bkms-cli/pkg/update/types.go
+  s_8a2ad61a7177ed::t_1e1cf266ec5240 1-14
+bkms-cli/pkg/update/extract_test.go
+  s_8a2ad61a7177ed::t_17440877cbf9a1 1-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "347e0771cf2acd4644422e53227bb8d7fa5634e4",
+  "prompts": {},
+  "sessions": {
+    "s_8a2ad61a7177ed": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f183672b67c1ea8ec7205ceeecb74",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
