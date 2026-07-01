@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/extension/addon/gpa/serialize_test.go
+  h_d56f85e7c6980c 164-300
+apps/bkms-server/pkg/extension/addon/gpa/serialize.go
+  h_d56f85e7c6980c 5,7,36-43,49,135,139-235
+apps/bkms-server/pkg/extension/addon/gpa/types.go
+  h_d56f85e7c6980c 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "7477da59c1a9b9a921f9c3b450da9d39b1893bf7",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
