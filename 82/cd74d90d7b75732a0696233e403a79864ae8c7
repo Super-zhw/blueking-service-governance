@@ -1,0 +1,21 @@
+bkms-cli/.agents/prompts/app-create.md
+  s_433368cc4036dd::t_1b16d30e98de3b 1-225
+bkms-cli/.agents/prompts/app-list.md
+  s_433368cc4036dd::t_aa46f073870327 1-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "82cd74d90d7b75732a0696233e403a79864ae8c7",
+  "prompts": {},
+  "sessions": {
+    "s_433368cc4036dd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f1275de037de687dcd81139f64e69",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
