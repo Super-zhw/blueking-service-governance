@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/deploy/appmodel/service/deploy_targets.go
+  h_d56f85e7c6980c 1-70
+apps/bkms-server/pkg/deploy/appmodel/polaris_sync.go
+  h_d56f85e7c6980c 14,64
+apps/bkms-server/pkg/deploy/appmodel/polaris_sync_test.go
+  h_d56f85e7c6980c 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "24e09834e8429c52ea63d8090af8ccfcf978eed4",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
