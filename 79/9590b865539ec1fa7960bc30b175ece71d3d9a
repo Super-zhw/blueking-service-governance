@@ -1,0 +1,22 @@
+bkms-cli/test/e2e/app_create_validate_test.go
+  s_433368cc4036dd::t_4083339b9253da 14,16-17
+  s_433368cc4036dd::t_c164bbb7cafe5f 1-13,15,18-185
+bkms-cli/test/e2e/testdata/app/missing-code-repo-fields.yaml
+  s_433368cc4036dd::t_a94e3ee18c72ae 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "799590b865539ec1fa7960bc30b175ece71d3d9a",
+  "prompts": {},
+  "sessions": {
+    "s_433368cc4036dd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f1275de037de687dcd81139f64e69",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
