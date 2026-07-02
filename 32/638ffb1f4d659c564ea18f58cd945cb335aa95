@@ -28,6 +28,8 @@ apps/bkms-server/tests/configs/config.yaml
   h_d56f85e7c6980c 27-28
 apps/bkms-server/pkg/extension/depservice/provider/redis/provider_test.go
   h_d56f85e7c6980c 1-231
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  h_d56f85e7c6980c 33-34
 ---
 {
   "schema_version": "authorship/3.0.0",
