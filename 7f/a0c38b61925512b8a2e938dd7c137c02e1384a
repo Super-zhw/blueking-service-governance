@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/extension/depservice/asynq_task.go
+  h_d56f85e7c6980c 1-112
+apps/bkms-server/configs/config.yaml
+  h_d56f85e7c6980c 126-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "7fa0c38b61925512b8a2e938dd7c137c02e1384a",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
