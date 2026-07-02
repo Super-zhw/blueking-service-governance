@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/extension/depservice/provider/redis/provider.go
+  h_d56f85e7c6980c 229,233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "c8b9412b9fb71efe6bc45f9e49ded3f88a29c76f",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
