@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/extension/addon/polaris/serializer/polaris.go
+  h_d56f85e7c6980c 117-118,121-130,155,160-172
+apps/bkms-server/pkg/extension/addon/polaris/store.go
+  h_d56f85e7c6980c 36-37,207-245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "97b3026788cadcb3a7bbb54af6d91c19c9f4157e",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
