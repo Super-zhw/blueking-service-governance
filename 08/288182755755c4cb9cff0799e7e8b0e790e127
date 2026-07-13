@@ -1,11 +1,11 @@
 apps/bkms-server/pkg/infras/taskq/retry.go
   h_d56f85e7c6980c 33-34
 apps/bkms-server/cmd/worker.go
-  h_d56f85e7c6980c 27,102
+  h_d56f85e7c6980c 23,27-28,70-71,102-106,115,127,134-137
 apps/bkms-server/pkg/server/taskqtask/task.go
   h_d56f85e7c6980c 3,5,8-9,13,18
 apps/bkms-server/cmd/webserver.go
-  h_d56f85e7c6980c 26
+  h_d56f85e7c6980c 22,26-27,61-62
 apps/bkms-server/tests/utdeps/config_ci_ut.yml
   h_d56f85e7c6980c 104-105
 apps/bkms-server/pkg/server/taskqtask/example/example.go
@@ -15,9 +15,11 @@ apps/bkms-server/tests/configs/config.yaml
 apps/bkms-server/pkg/infras/taskq/taskq.go
   h_d56f85e7c6980c 1,6
 apps/bkms-server/pkg/infras/taskq/enqueue.go
-  h_d56f85e7c6980c 21,72
+  h_d56f85e7c6980c 1-153
 apps/bkms-server/configs/config.yaml
   h_d56f85e7c6980c 158,160
+apps/bkms-server/cmd/taskq_example.go
+  h_d56f85e7c6980c 1-66
 ---
 {
   "schema_version": "authorship/3.0.0",
