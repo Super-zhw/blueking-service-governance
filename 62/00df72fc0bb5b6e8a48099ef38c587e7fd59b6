@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/observability/apm/middleware.go
+  s_6956b6484857e1::t_52e5c87bf6d7dd 66-67,70-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "6200df72fc0bb5b6e8a48099ef38c587e7fd59b6",
+  "prompts": {},
+  "sessions": {
+    "s_6956b6484857e1": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f59a17b307dfeb37e93806f0c6e16",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
