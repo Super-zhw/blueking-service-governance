@@ -6,6 +6,8 @@ apps/bkms-server/pkg/infras/taskq/enqueue.go
   h_d56f85e7c6980c 17,19,21,71,73-80,86-87,89,92-99,101
 apps/bkms-server/pkg/infras/taskq/server.go
   h_d56f85e7c6980c 17,22-25,35-39,42,46,49,51-52,60-61,63-64,70,74,82
+apps/bkms-server/cmd/taskq_example.go
+  h_d56f85e7c6980c 21-24,26,29-30,48-51,56-57,62-65
 ---
 {
   "schema_version": "authorship/3.0.0",
