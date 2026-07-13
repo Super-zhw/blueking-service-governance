@@ -1,0 +1,38 @@
+manifests/helm/bkms-server/templates/_helpers.tpl
+  s_6956b6484857e1::t_66387b736f8060 123-135
+  s_6956b6484857e1::t_8d3d8298b4d399 136-239
+apps/bkms-server/pkg/observability/apm/apm.go
+  s_6956b6484857e1::t_8be275e6beada3 41,117,176,178-181,182-186,188-189,191-195
+  s_6956b6484857e1::t_e0a10da99389e2 100-103,107
+  s_6956b6484857e1::t_18573250e5198b 99,175,177
+  s_6956b6484857e1::t_13893c1490b98b 115-116
+apps/bkms-server/pkg/observability/apm/apm_test.go
+  s_6956b6484857e1::t_df232389c790c3 170,174
+apps/bkms-server/pkg/observability/apm/middleware.go
+  s_6956b6484857e1::t_760335e2a70dda 59,62-63
+  s_6956b6484857e1::t_9a662a1d3e416c 87,89
+  s_6956b6484857e1::t_7cc7fa499ce308 9-10,69,82-88
+  s_6956b6484857e1::t_3a94d10b10cea0 89
+  s_6956b6484857e1::t_2e1f08f286badb 60
+  s_6956b6484857e1::t_f439c6aab422ed 64
+  s_6956b6484857e1::t_2dec8e1d142e7c 65,70-71,73-77,79-80
+  s_6956b6484857e1::t_895f7079d966cb 72
+  s_6956b6484857e1::t_2e69892b8b524f 78
+  s_6956b6484857e1::t_66cd2cb6bbd8aa 81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "9a16093b2e712d96e1c3b38df746981fea46b41c",
+  "prompts": {},
+  "sessions": {
+    "s_6956b6484857e1": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f59a17b307dfeb37e93806f0c6e16",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
