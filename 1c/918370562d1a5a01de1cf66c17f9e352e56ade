@@ -1,0 +1,21 @@
+bkms-cli/cmd/app/create.go
+  s_433368cc4036dd::t_9abd50e47fa2c0 101-102,106
+  s_433368cc4036dd::t_3862a38a62dda4 5-6,10
+  s_433368cc4036dd::t_18ed94fc6d01f0 107-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "1c918370562d1a5a01de1cf66c17f9e352e56ade",
+  "prompts": {},
+  "sessions": {
+    "s_433368cc4036dd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f1275de037de687dcd81139f64e69",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

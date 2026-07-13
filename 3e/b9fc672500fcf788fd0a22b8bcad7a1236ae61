@@ -1,0 +1,26 @@
+bkms-cli/pkg/handler/app/create.go
+  s_c4b876f63f4b72::t_b1da8ff34095fe 36-38,40-43
+bkms-cli/test/e2e/framework/cli.go
+  s_c4b876f63f4b72::t_707782fc166642 62
+bkms-cli/pkg/handler/appcfgfile/edit_test.go
+  s_c4b876f63f4b72::t_406920046a7921 62
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_c4b876f63f4b72::t_8da1bcef43178a 117-172
+  s_c4b876f63f4b72::t_7a5e65b3f74940 173-244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "3eb9fc672500fcf788fd0a22b8bcad7a1236ae61",
+  "prompts": {},
+  "sessions": {
+    "s_c4b876f63f4b72": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f21fd16567bb7a857ab30fb0fcd95",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

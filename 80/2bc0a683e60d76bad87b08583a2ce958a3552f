@@ -1,0 +1,59 @@
+bkms-cli/pkg/client/app.go
+  s_433368cc4036dd::t_0b19e4129bf141 23,25
+bkms-cli/pkg/handler/app/request.go
+  s_433368cc4036dd::t_85df3b279bcfa1 11-19
+  s_433368cc4036dd::t_4d9bed53b6645a 24-27,30-31,35,37,40,42,48,53,57-59,64-67,70-77,80-81,92,107,121,128,142,148,162,168
+  s_433368cc4036dd::t_4ba2c1e9556deb 23
+  s_433368cc4036dd::t_75ec49f1dc498a 82
+  s_433368cc4036dd::t_fa4d7b56e10fea 93-95
+  s_433368cc4036dd::t_1b64af3590bc4c 108-110
+  s_433368cc4036dd::t_fe33c0648b6e74 126-127
+  s_433368cc4036dd::t_a087d0d9da1f24 129-130
+  s_433368cc4036dd::t_853f9fa73ba5dc 141
+  s_433368cc4036dd::t_6d45b3e91c38e4 143-144
+  s_433368cc4036dd::t_5043664edb42b4 147
+  s_433368cc4036dd::t_38f3cb45afbcc1 149-151
+  s_433368cc4036dd::t_b72cdd453ee204 163-165
+  s_433368cc4036dd::t_9f0dd7b34bedbb 169-171
+bkms-cli/pkg/handler/app/id_test.go
+  s_433368cc4036dd::t_1d8c8fe9ee1a52 13-18,20-25
+bkms-cli/pkg/handler/app/validate.go
+  s_433368cc4036dd::t_b70bf03a917663 27
+  s_433368cc4036dd::t_8849b23a9f4e95 72-73
+bkms-cli/pkg/handler/app/create.go
+  s_433368cc4036dd::t_5ab671df23d446 32-37,39
+  s_433368cc4036dd::t_88b16d6ed80c8e 40-41,43
+bkms-cli/test/e2e/app_create_validate_test.go
+  s_433368cc4036dd::t_28ddb6f38efa50 14,27-30,32-37,40-63,66-76,79-87
+bkms-cli/pkg/handler/app/request_types.go
+  s_433368cc4036dd::t_041536b0eba569 1-113
+bkms-cli/pkg/handler/app/types.go
+  s_433368cc4036dd::t_ff317040434f04 4-7
+  s_433368cc4036dd::t_66b302d4e3f3d5 14-15,17-18
+  s_433368cc4036dd::t_2b3fc4d159ec66 149,151,154-172
+bkms-cli/cmd/app/create.go
+  s_433368cc4036dd::t_ae9b876ee5ea07 37,93-97
+  s_433368cc4036dd::t_9abd50e47fa2c0 101-102,106
+  s_433368cc4036dd::t_3862a38a62dda4 5-6,10
+  s_433368cc4036dd::t_18ed94fc6d01f0 107-109
+bkms-cli/pkg/client/client.go
+  s_433368cc4036dd::t_d5c5e178b09cdf 164
+bkms-cli/AGENTS.md
+  s_433368cc4036dd::t_1b83a18844d2b8 35-43,52-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "802bc0a683e60d76bad87b08583a2ce958a3552f",
+  "prompts": {},
+  "sessions": {
+    "s_433368cc4036dd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f1275de037de687dcd81139f64e69",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

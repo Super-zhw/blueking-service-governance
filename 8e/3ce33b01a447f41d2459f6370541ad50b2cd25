@@ -1,0 +1,20 @@
+apps/bkms-server/pkg/server/taskqtask/example/example.go
+  h_d56f85e7c6980c 1-78
+apps/bkms-server/pkg/infras/taskq/taskq.go
+  h_d56f85e7c6980c 1
+apps/bkms-server/pkg/infras/taskq/enqueue.go
+  h_d56f85e7c6980c 72
+apps/bkms-server/pkg/server/taskqtask/task.go
+  h_d56f85e7c6980c 3,5,8-9,13,18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "8e3ce33b01a447f41d2459f6370541ad50b2cd25",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

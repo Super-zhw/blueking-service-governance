@@ -1,0 +1,22 @@
+apps/bkms-server/pkg/build/image/build.go
+  s_9685dc9cc937aa::t_adc5743a3fa067 47-51
+apps/bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  s_9685dc9cc937aa::t_b12fe1fad2ea09 725-734
+  s_9685dc9cc937aa::t_00ff41cf5cde25 735-736
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "91e997238d46e7f4732d8a4b34fb1897416c0e89",
+  "prompts": {},
+  "sessions": {
+    "s_9685dc9cc937aa": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f1cc968a87ecea1342b9ba059bd87",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

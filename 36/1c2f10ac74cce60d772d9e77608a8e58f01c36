@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/infras/taskq/enqueue.go
+  h_d56f85e7c6980c 72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "361c2f10ac74cce60d772d9e77608a8e58f01c36",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
