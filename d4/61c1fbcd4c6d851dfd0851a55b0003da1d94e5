@@ -1,0 +1,28 @@
+apps/bkms-server/pkg/extension/addon/gpa/serialize_test.go
+  h_d56f85e7c6980c 10,180,220,239,258,275,296,320,337
+apps/bkms-server/pkg/extension/addon/gpa/service_test.go
+  h_d56f85e7c6980c 57,88-91,99,106,179
+apps/bkms-server/pkg/extension/addon/gpa/serializer/gpa.go
+  h_d56f85e7c6980c 58
+apps/bkms-server/pkg/extension/addon/gpa/model.go
+  h_d56f85e7c6980c 22
+apps/bkms-server/pkg/extension/addon/gpa/store_test.go
+  h_d56f85e7c6980c 78,167
+apps/bkms-server/pkg/extension/addon/gpa/handler/gpa.go
+  h_d56f85e7c6980c 138
+apps/bkms-server/pkg/extension/addon/gpa/serializer/gpa_test.go
+  h_d56f85e7c6980c 42,96,262
+apps/bkms-server/pkg/extension/addon/gpa/serialize.go
+  h_d56f85e7c6980c 23,224
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "d461c1fbcd4c6d851dfd0851a55b0003da1d94e5",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
