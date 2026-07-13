@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/extension/addon/gpa/service.go
+  h_d56f85e7c6980c 5,8,27-28,59-62,68-71,184-195
+apps/bkms-server/pkg/extension/addon/gpa/types.go
+  h_d56f85e7c6980c 4-5
+apps/bkms-server/pkg/extension/addon/gpa/handler/gpa.go
+  h_d56f85e7c6980c 143-149
+apps/bkms-server/pkg/extension/addon/gpa/service_test.go
+  h_d56f85e7c6980c 11,205-248
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/general-pod-autoscaler.yaml
+  h_d56f85e7c6980c 1-18
+apps/bkms-server/pkg/common/bkerrs/err_detail_code.go
+  h_d56f85e7c6980c 25-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "a57cd2f3d316946a194cf04b167e49f925bab45c",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
