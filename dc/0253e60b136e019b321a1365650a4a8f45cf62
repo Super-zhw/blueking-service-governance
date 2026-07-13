@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/extension/addon/polaris/model.go
+  h_d56f85e7c6980c 126,232
+apps/bkms-server/pkg/extension/addon/polaris/store.go
+  h_d56f85e7c6980c 36-37,209-247
+apps/bkms-server/pkg/extension/addon/polaris/serializer/polaris.go
+  h_d56f85e7c6980c 117-118,121-130,155,160-172
+apps/bkms-server/pkg/deploy/appmodel/service/service.go
+  h_d56f85e7c6980c 204-205
+apps/bkms-server/pkg/extension/addon/polaris/handler/polaris.go
+  h_d56f85e7c6980c 193-200,302-308,310-313
+apps/bkms-server/pkg/extension/addon/polaris/service.go
+  h_d56f85e7c6980c 5,13,17,241-242,244-248,251,255-256,279-280,376-523,525-585
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "dc0253e60b136e019b321a1365650a4a8f45cf62",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
