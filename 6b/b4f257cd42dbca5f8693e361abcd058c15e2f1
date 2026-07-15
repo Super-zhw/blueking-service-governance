@@ -5,7 +5,7 @@ apps/bkms-server/pkg/extension/addon/polaris/store.go
 apps/bkms-server/pkg/extension/addon/polaris/model.go
   h_d56f85e7c6980c 126,232
 apps/bkms-server/pkg/extension/addon/polaris/service.go
-  h_d56f85e7c6980c 5,17,241-242,244-248,251,255-256,279-280,386-545,547-612
+  h_d56f85e7c6980c 5,13,17,241-242,244-248,251,255-256,279-280,386-545,386-393,395,398-407,412-430,433-449,453-481,483-545,547-612,547-574,581-612
 apps/bkms-server/pkg/deploy/appmodel/service/service.go
   h_d56f85e7c6980c 204-205
 apps/bkms-server/pkg/extension/addon/polaris/handler/polaris.go
