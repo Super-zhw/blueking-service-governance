@@ -1,0 +1,44 @@
+apps/bkms-server/pkg/workload/appmodelcore/sendrequest/send_request.go
+  s_361e01a81ac706::t_73d05d72f0c208 1-6,7,8-10,12-64,66-71,74-170,173-174,177-178,184-186,188-191,192-193,196-200,207,209,211-229
+  s_361e01a81ac706::t_93779b6d2485d9 11,65,72-73,171-172,175-176,179-183,187,194-195,201-206,208,210
+bkms-cli/cmd/app/instance/instance.go
+  s_361e01a81ac706::t_3864a96dad35d9 23-24
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_361e01a81ac706::t_cf5e9e9ec7089a 2357-2436
+apps/bkms-server/pkg/workload/appmodelcore/sendrequest/send_request_test.go
+  s_361e01a81ac706::t_3989979f39d018 1-62
+bkms-cli/pkg/client/types.go
+  s_361e01a81ac706::t_e754c25fc7446a 122-129
+bkms-cli/pkg/client/instance.go
+  s_361e01a81ac706::t_1f719c5f3f1879 108-139
+bkms-cli/pkg/handler/instance/send_request_test.go
+  s_361e01a81ac706::t_dc2bf574360211 1-65,67-74,76-83,85-92,94-133
+apps/bkms-server/pkg/workload/instance/handler/send_request.go
+  s_361e01a81ac706::t_90113536fb15ed 1-16,18-19,21-99
+apps/bkms-server/pkg/workload/instance/serializer/instance.go
+  s_361e01a81ac706::t_ac023a1deee1a8 457-458,460,462-464,466-468,470,472,474,476-478,480-482,484,486,488,490,492-494,496-502,504-506
+  s_361e01a81ac706::t_115d1ffd918d0e 459,461,465,469,471,473,475,479,483,485,487,489,491,495,503
+bkms-cli/pkg/client/client.go
+  s_361e01a81ac706::t_5d9350cdafc97c 754-771
+bkms-cli/cmd/app/instance/send_request.go
+  s_361e01a81ac706::t_6d587fade85813 1-104
+bkms-cli/pkg/handler/instance/send_request.go
+  s_361e01a81ac706::t_e7740055f7b12d 1-9,11-21,23,25,27-36,39,42-128
+  s_361e01a81ac706::t_7e2cc2853ca574 10,22,24,26,37-38,40-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "73a2b248b3d3e1b7c6a03ab5bfbbf8cda90e0fc9",
+  "prompts": {},
+  "sessions": {
+    "s_361e01a81ac706": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112430fc7103b97f1559f74e8280",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
