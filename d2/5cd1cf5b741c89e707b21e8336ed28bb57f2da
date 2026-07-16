@@ -1,0 +1,32 @@
+apps/bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  s_9685dc9cc937aa::t_00ff41cf5cde25 776-777
+  s_9685dc9cc937aa::t_b12fe1fad2ea09 774
+apps/bkms-server/pkg/infras/cloudapi/bkci/utils.go
+  s_b0070c8e3b573c::t_338c9dbd863613 76-94,96
+apps/bkms-server/pkg/infras/cloudapi/bkci/bkci_test.go
+  s_b0070c8e3b573c::t_4001f2d505a527 1-3,4-7,8-51,53-55,57-70,72-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "d25cd1cf5b741c89e707b21e8336ed28bb57f2da",
+  "prompts": {},
+  "sessions": {
+    "s_9685dc9cc937aa": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f1cc968a87ecea1342b9ba059bd87",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_b0070c8e3b573c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f69c3f2657d10bafc0aa5e82735e5",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
