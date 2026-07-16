@@ -1,0 +1,69 @@
+apps/bkms-server/pkg/workload/appmodelcore/sendrequest/send_request.go
+  s_361e01a81ac706::t_73d05d72f0c208 1-6,7,9-11,13,15-66,68-73,76-130,132-137,143-144,148,152,155-156,160-176,179-180,183-184,190-192,194-197,198-199,202-206,213,215,217-235
+  s_361e01a81ac706::t_93779b6d2485d9 12,67,74-75,177-178,181-182,185-189,193,200-201,207-212,214,216
+bkms-cli/cmd/app/instance/instance.go
+  s_361e01a81ac706::t_3864a96dad35d9 23-24
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_361e01a81ac706::t_cf5e9e9ec7089a 2357-2436
+apps/bkms-server/pkg/workload/appmodelcore/sendrequest/send_request_test.go
+  s_361e01a81ac706::t_3989979f39d018 1-62
+bkms-cli/pkg/client/types.go
+  s_361e01a81ac706::t_e754c25fc7446a 122-129
+bkms-cli/pkg/client/instance.go
+  s_361e01a81ac706::t_1f719c5f3f1879 108-139
+bkms-cli/pkg/handler/instance/send_request_test.go
+  s_361e01a81ac706::t_dc2bf574360211 1-65,67-74,76-83,85-92,94-133
+apps/bkms-server/pkg/workload/instance/handler/send_request.go
+  s_361e01a81ac706::t_90113536fb15ed 1-16,18-19,21-99
+apps/bkms-server/pkg/workload/instance/serializer/instance.go
+  s_361e01a81ac706::t_ac023a1deee1a8 457-458,460,462-464,466-468,470,472,474,476-478,480-482,484,486,488,490,492-494,496-502,504-506
+  s_361e01a81ac706::t_115d1ffd918d0e 459,461,465,469,471,473,475,479,483,485,487,489,491,495,503
+bkms-cli/pkg/client/client.go
+  s_361e01a81ac706::t_5d9350cdafc97c 754-771
+bkms-cli/cmd/app/instance/send_request.go
+  s_361e01a81ac706::t_6d587fade85813 1-4,5-12,14-17,19-41,43-50,51-70,71-83
+bkms-cli/pkg/handler/instance/send_request.go
+  s_361e01a81ac706::t_e7740055f7b12d 1-9,11-21,23,25,27-36,39,42-128
+  s_361e01a81ac706::t_7e2cc2853ca574 10,22,24,26,37-38,40-41
+apps/bkms-server/pkg/workload/instance/serializer/instance_test.go
+  s_361e01a81ac706::t_ecc51e667ede34 106-111,113-174
+  s_361e01a81ac706::t_762bb0af0c1ec4 112
+bkms-cli/pkg/utils/params/params.go
+  s_361e01a81ac706::t_8dbe1ab320f93f 19-39
+bkms-cli/pkg/utils/params/params_test.go
+  s_361e01a81ac706::t_b8e22eba88b53c 1,6-7,28-29,32-33,36-37
+  s_361e01a81ac706::t_3ebce1b1ac0de0 10,12,20,27,30-31,34-35,38-39
+bkms-cli/pkg/utils/params/params_suite_test.go
+  s_361e01a81ac706::t_32f6383d1c36be 1-13
+bkms-cli/pkg/account/account.go
+  s_29d801c5da50ec::t_6fc4ea78d29fe7 6,24
+  s_29d801c5da50ec::t_fc64b7787abe4d 32,34,35-39
+bkms-cli/cmd/root/root.go
+  s_29d801c5da50ec::t_6d944819299a25 54-55
+bkms-cli/pkg/account/account_test.go
+  s_29d801c5da50ec::t_2b8509360dda5f 31-37,58-62,64-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "978408b585b6aa88cfa20312bd27811ada8e8781",
+  "prompts": {},
+  "sessions": {
+    "s_29d801c5da50ec": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f699758f97caca8c8e9d61588543d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_361e01a81ac706": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112430fc7103b97f1559f74e8280",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
