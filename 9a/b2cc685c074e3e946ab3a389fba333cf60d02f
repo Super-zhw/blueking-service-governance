@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/infras/taskq/tasktype.go
+  h_d56f85e7c6980c 48
+apps/bkms-server/pkg/infras/taskq/server.go
+  h_d56f85e7c6980c 36,42,48
+apps/bkms-server/pkg/infras/taskq/client.go
+  h_d56f85e7c6980c 20,36,38-41
+apps/bkms-server/pkg/common/config/types.go
+  h_d56f85e7c6980c 125
+apps/bkms-server/pkg/server/taskqtask/example/example.go
+  h_d56f85e7c6980c 26-29,44,46,50
+apps/bkms-server/cmd/taskq_example.go
+  h_d56f85e7c6980c 21-24,29-30,48-52,54,56-57,62,64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9ab2cc685c074e3e946ab3a389fba333cf60d02f",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
