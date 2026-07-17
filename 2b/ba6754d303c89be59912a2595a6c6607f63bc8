@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/core/env/clusteraddon/model.go
+  h_d56f85e7c6980c 72-73
+apps/bkms-server/pkg/core/env/clusteraddon/deploy.go
+  h_d56f85e7c6980c 16-19
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/bcs-polaris-operator.yaml
+  h_d56f85e7c6980c 6
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/general-pod-autoscaler.yaml
+  h_d56f85e7c6980c 6
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/bcs-ingress-controller.yaml
+  h_d56f85e7c6980c 6
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/agones.yaml
+  h_d56f85e7c6980c 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2bba6754d303c89be59912a2595a6c6607f63bc8",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
