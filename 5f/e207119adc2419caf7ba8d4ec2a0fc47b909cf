@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/server/taskqtask/example/example.go
+  h_d56f85e7c6980c 26-29,44,46,50
+apps/bkms-server/cmd/taskq_example.go
+  h_d56f85e7c6980c 21-24,29-30,48-52,54,56-57,62,64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "5fe207119adc2419caf7ba8d4ec2a0fc47b909cf",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
