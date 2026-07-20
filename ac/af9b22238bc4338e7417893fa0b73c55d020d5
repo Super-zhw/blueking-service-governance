@@ -1,0 +1,21 @@
+bkms-cli/pkg/client/port_forward_mux.go
+  s_8c2ecdc27a74b8::t_b993bc6b932b1e 39-40,100-101
+bkms-cli/pkg/portforward/mux/mux.go
+  s_8c2ecdc27a74b8::t_55daa4096a080e 44-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "acaf9b22238bc4338e7417893fa0b73c55d020d5",
+  "prompts": {},
+  "sessions": {
+    "s_8c2ecdc27a74b8": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f75b027b272d2a4f8bb4dcea548ca",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
