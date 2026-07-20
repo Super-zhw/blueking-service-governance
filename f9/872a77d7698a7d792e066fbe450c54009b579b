@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/workload/bscpcfg/inject_test.go
+  s_c1997b8edb83b3::t_87a3c58b9d2efa 272,277,280,283,293,298,305,315,322,329
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "f9872a77d7698a7d792e066fbe450c54009b579b",
+  "prompts": {},
+  "sessions": {
+    "s_c1997b8edb83b3": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7dab094f76b6ab7a7608a9e2571f",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
