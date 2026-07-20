@@ -1,0 +1,25 @@
+bkms-cli/pkg/handler/instance/port_forward_test.go
+  s_b79353beba9e14::t_9472e659a4e571 57
+  s_b79353beba9e14::t_65637ee7a407b2 48,66,75
+bkms-cli/pkg/handler/instance/port_forward.go
+  s_b79353beba9e14::t_4afe655d804089 10,14-15,20-39
+  s_b79353beba9e14::t_a28eca8ce126c4 53
+  s_b79353beba9e14::t_e3edfd8572fc0d 40
+  s_b79353beba9e14::t_d7531dcbc081ff 54-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "10b787210ff141dc5a3e8ecf6018f364662452a3",
+  "prompts": {},
+  "sessions": {
+    "s_b79353beba9e14": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f6f7d62157e64bb82d06a3e0ead50",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
