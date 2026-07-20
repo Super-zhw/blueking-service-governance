@@ -1,0 +1,59 @@
+apps/bkms-server/pkg/workload/instance/handler/port_forward.go
+  s_8c2ecdc27a74b8::t_3e899703ccecec 62-67
+bkms-cli/pkg/portforward/mux/mux.go
+  s_8c2ecdc27a74b8::t_d5da122c4b98b5 3-7,9-11,13-15,39-43,46-47,48-57,58,61-64,66-68,70-73,75-94,95,96-98,101-106,108-109,111-113,115-117,119-132,138-140,142-143,145-146,149,151-153,155-167,169-181,183-188,189-202,203-208,210-212,215-218
+  s_8c2ecdc27a74b8::t_b5d1d67d9d6d1b 1-43,46-217
+  s_8c2ecdc27a74b8::t_55daa4096a080e 44-45
+apps/bkms-server/pkg/observability/metrics/metrics.go
+  s_8c2ecdc27a74b8::t_d93a3fefcd89f0 145-190
+  s_8c2ecdc27a74b8::t_912d7e5839dbd0 232-271
+bkms-cli/pkg/client/port_forward_mux.go
+  s_8c2ecdc27a74b8::t_fd2f1bce289650 1-24,30-38,41-60,61-68,69,72-74,76-77,78,79-82,84-86,88-99,102,103,105-118
+  s_8c2ecdc27a74b8::t_26f35017c14178 25-29,70-71,75,83,87,104
+  s_8c2ecdc27a74b8::t_b993bc6b932b1e 39-40,100-101
+apps/bkms-server/pkg/workload/instance/handler/port_forward_mux.go
+  s_8c2ecdc27a74b8::t_5e20df7b019c32 20
+  s_8c2ecdc27a74b8::t_28bc63c3c78b73 1-12,14-19,21-22,26-27,30-51,53-59,61-69,80,104,111,114,115,126
+  s_8c2ecdc27a74b8::t_2e4064512332a4 23,70-71,91,93-94,96,102-103,105-106,116,118-125,178
+  s_8c2ecdc27a74b8::t_2990f141f0722f 127
+  s_8c2ecdc27a74b8::t_5c6c29040f8be4 179,180
+  s_8c2ecdc27a74b8::t_a00fcab3409366 13,24-25,28-29,52,60,72-79,81-90,92,95,97-101,107,109-110,112-113,117,128-132,134-177,185
+  s_8c2ecdc27a74b8::t_4094ca10ee132b 108
+  s_8c2ecdc27a74b8::t_2404c81c4bf565 133
+bkms-cli/pkg/portforward/mux/mux_test.go
+  s_8c2ecdc27a74b8::t_fe0ff697c262cd 1-20,49,51,54,59,61-63,65-66,68-75,76-84,85-87,90-91,93-96,98-99,101-119,122,124-126,128-129,131-143,146-148,151-152,155-162,165,167,169-170,172-178,181-223
+  s_8c2ecdc27a74b8::t_ba57f1691dc06f 21-48,50,52-53,55-58,60,64,67,88-89,92,97,100,120-121,123,127,163-164,166,168
+  s_8c2ecdc27a74b8::t_d312c5b04d8351 150
+  s_8c2ecdc27a74b8::t_7622dd1aee7f1a 149
+bkms-cli/pkg/client/types.go
+  s_8c2ecdc27a74b8::t_f8103c078d05fa 133-139
+bkms-cli/pkg/handler/instance/port_forward_listener.go
+  s_8c2ecdc27a74b8::t_22db8f5515f5f8 126
+bkms-cli/pkg/handler/instance/port_forward.go
+  s_b79353beba9e14::t_a9e129cdbba7f9 114
+  s_b79353beba9e14::t_e1596a1015f4d2 115-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "b7ee7798869a3105acb4308970e05be41a8e1197",
+  "prompts": {},
+  "sessions": {
+    "s_8c2ecdc27a74b8": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f75b027b272d2a4f8bb4dcea548ca",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_b79353beba9e14": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f6f7d62157e64bb82d06a3e0ead50",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
