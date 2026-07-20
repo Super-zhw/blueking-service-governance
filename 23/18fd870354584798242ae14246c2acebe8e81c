@@ -1,0 +1,20 @@
+bkms-cli/pkg/handler/instance/port_forward_bridge_test.go
+  s_b79353beba9e14::t_e4b605106c38ae 230,259,264-265,280
+  s_b79353beba9e14::t_060a5de5be8ef0 281-283
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2318fd870354584798242ae14246c2acebe8e81c",
+  "prompts": {},
+  "sessions": {
+    "s_b79353beba9e14": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f6f7d62157e64bb82d06a3e0ead50",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

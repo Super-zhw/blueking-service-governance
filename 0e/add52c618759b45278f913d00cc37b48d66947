@@ -1,0 +1,200 @@
+bkms-cli/pkg/client/instance.go
+  s_b79353beba9e14::t_5403348b9eebf1 109-117
+apps/bkms-server/pkg/workload/appmodelcore/portforward/service.go
+  s_b79353beba9e14::t_b4a99fe9314898 193,195-196
+  s_b79353beba9e14::t_4cdfb1d6214871 1-5,6,12-13,15-18,20-32,36-37,56-59,61-69,77-81,82-85,88-96,103-104,106-112,115-122,124-125,127,139-140,146-148,186-189,191-192,198-199,220,231-246,310
+  s_b79353beba9e14::t_1ca1da6bb1ca55 8,33-35,60,70-76,86,197,200,202,210-211,221-222,247-248,256-258,260-263,265-267,276-277,298,299-304,309
+  s_b79353beba9e14::t_079c5c4af8baff 190,201
+  s_b79353beba9e14::t_ccad64dff3b2ac 43-44
+  s_b79353beba9e14::t_b449ce209f13db 54,259,264,268,270-271,273-275,284-286,293-297
+  s_b79353beba9e14::t_167c4b66fd896f 132-133,136,138
+  s_b79353beba9e14::t_c43c294c2a92e3 249-253
+  s_b79353beba9e14::t_f17fb184288ab6 269,272,278-283,287-292
+  s_b79353beba9e14::t_702826a89c7b54 128-129,131,135
+  s_b79353beba9e14::t_0f709f11757266 55
+  s_b79353beba9e14::t_51c2829541333d 9,50-52,87
+  s_b79353beba9e14::t_7cd2109f061b7f 7,10,19,212-218,311-332
+  s_b79353beba9e14::t_5bdf6f7bf6293c 11,45-49,53,333
+  s_b79353beba9e14::t_21a904a05abc72 14,97-102,105,113-114,123,126,130,134,137,203-209
+  s_b79353beba9e14::t_6bcadf35581e8a 141-145
+  s_b79353beba9e14::t_0378e6b62713dc 39-42
+  s_b79353beba9e14::t_b76d31979f1f4a 38
+  s_b79353beba9e14::t_7a47432c2a8b09 149-155,157-180,182-185
+  s_b79353beba9e14::t_93371dd9c85293 156,181,194,219,305-306
+  s_b79353beba9e14::t_700706f8ebf0d9 307-308
+bkms-cli/pkg/client/types.go
+  s_b79353beba9e14::t_539f794225e5cd 4-7,127-132
+  s_b79353beba9e14::t_e453e1458e21c2 126
+bkms-cli/cmd/app/instance/port_forward.go
+  s_b79353beba9e14::t_1ecb28dd929416 1-54
+bkms-cli/cmd/app/instance/instance_suite_test.go
+  s_b79353beba9e14::t_3d03534a0bb543 1-13
+apps/bkms-server/pkg/workload/instance/handler/port_forward.go
+  s_b79353beba9e14::t_f3422e1878a862 1-3,8,10,11-12,17,19-21,22-23,43-50,83-86,87,135,173,178,179
+  s_b79353beba9e14::t_3ecdf090f0d879 7
+  s_b79353beba9e14::t_b1a78c3abc2979 4,15
+  s_b79353beba9e14::t_910f61299d21db 100-103,105-117,136,138-139,141,155-172
+  s_b79353beba9e14::t_01751a14afc3ef 14,18,51-61
+  s_b79353beba9e14::t_71f51ad41e2d9d 104
+  s_b79353beba9e14::t_6fbf433795e838 88-99
+  s_b79353beba9e14::t_994b406b680d85 6,13,16
+  s_b79353beba9e14::t_fddee47c31e36d 137,140,143-148
+  s_b79353beba9e14::t_0e419abf0009bd 142,149-154
+  s_b79353beba9e14::t_dfd4f45df1295b 9,24-42,62-73,75,77-78,130
+  s_b79353beba9e14::t_5c383285850d14 74
+  s_b79353beba9e14::t_fd344f81a7975b 76
+  s_b79353beba9e14::t_c548ae0d80b045 79-81
+  s_b79353beba9e14::t_9e37d92bab2079 118
+  s_b79353beba9e14::t_742bbd141d6b64 125
+  s_b79353beba9e14::t_8073f5bc933028 119,122-124
+  s_b79353beba9e14::t_bc7ebc0f0c45fa 180,190-217
+  s_b79353beba9e14::t_85928eeb1e165e 126-129
+  s_b79353beba9e14::t_261f548bc50054 5
+  s_b79353beba9e14::t_747e28b66cfb4e 181-189
+  s_b79353beba9e14::t_3be28f5c50d4a0 120-121,131-134
+apps/bkms-server/pkg/misc/audit/audit_test.go
+  s_b79353beba9e14::t_55a18617b16d62 16-21
+bkms-cli/pkg/client/port_forward_test.go
+  s_b79353beba9e14::t_e7fd07cf754b62 1-3,4-16,20-22,33-34,38-46
+  s_b79353beba9e14::t_57cbfb2aaa07bd 19
+  s_b79353beba9e14::t_941f9155a82a03 37
+apps/bkms-server/pkg/workload/instance/serializer/instance.go
+  s_b79353beba9e14::t_f4ce2dd5d33647 464,466
+  s_b79353beba9e14::t_d6a27fb69edbda 459-463,465,467
+  s_b79353beba9e14::t_80980c2704c3dc 458
+apps/bkms-server/pkg/misc/audit/model.go
+  s_b79353beba9e14::t_5c10fc54a2b439 170-171
+  s_b79353beba9e14::t_2ce65cdb97c5fe 209-210
+bkms-cli/pkg/handler/instance/port_forward_listener_test.go
+  s_b79353beba9e14::t_257fd57a407987 1-7,9-14,33-41,43-72,74-96,104-115
+  s_b79353beba9e14::t_8d2946cde9d666 8,15-31
+  s_b79353beba9e14::t_3600f17fad9230 32
+apps/bkms-server/pkg/workload/appmodelcore/portforward/stream_test.go
+  s_b79353beba9e14::t_7cae2263303ba2 90-111,113-117
+  s_b79353beba9e14::t_a72601a2be9ff6 1-4,6-7,13-20,89,215-237,240-265
+  s_b79353beba9e14::t_14b5309ef1c4e8 239
+  s_b79353beba9e14::t_710abc20591a43 112
+  s_b79353beba9e14::t_940e851d6adb84 10,12
+  s_b79353beba9e14::t_977fda14b66312 238
+  s_b79353beba9e14::t_44ed4ccd5be8c6 5
+  s_b79353beba9e14::t_ba4318c0751709 11
+  s_b79353beba9e14::t_13f1be706ef12c 24
+  s_b79353beba9e14::t_90d880d86731c5 266
+  s_b79353beba9e14::t_ca6d34db674a67 276-278,287
+  s_b79353beba9e14::t_11d57930ef35d9 304-305
+  s_b79353beba9e14::t_65dcd59401bab0 148
+  s_b79353beba9e14::t_b1237eeffee5de 28-30
+  s_b79353beba9e14::t_fd7c03d9c69ff1 118-147
+  s_b79353beba9e14::t_7ab67a29ac36a1 149-178,181-182
+  s_b79353beba9e14::t_5d4ba63fe58911 179-180
+  s_b79353beba9e14::t_35955d65c3e745 275,279-286,288-303
+  s_b79353beba9e14::t_b0f764b03c4afd 8,21,23,25,27
+  s_b79353beba9e14::t_7df79f7668ac85 9,22,26,31,37-69,267-273
+  s_b79353beba9e14::t_03019689cc2ed4 274
+  s_b79353beba9e14::t_002a62e0585ab0 32-36
+  s_b79353beba9e14::t_3667a84fd42795 70-83
+  s_b79353beba9e14::t_a03e88745e17ed 183-209
+  s_b79353beba9e14::t_a59357d0b21b91 84-86
+  s_b79353beba9e14::t_e1ad4bc31adc90 210-212
+apps/bkms-server/pkg/workload/instance/serializer/instance_test.go
+  s_b79353beba9e14::t_6fe8bb25cd7c97 107-121,123-132
+  s_b79353beba9e14::t_9d4557746837db 122
+bkms-cli/pkg/client/client_suite_test.go
+  s_b79353beba9e14::t_52aa0ca33f61e0 1-13
+apps/bkms-server/pkg/workload/instance/router.go
+  s_b79353beba9e14::t_1230c9e8293b56 18,45
+bkms-cli/pkg/client/port_forward.go
+  s_b79353beba9e14::t_fcd6a76c8a5f43 1-3,4-5,7-10,13,15-19,27-37,38-40,44-50,107-129,139-144
+  s_b79353beba9e14::t_c03060db807d25 130-131,133-138
+  s_b79353beba9e14::t_b1da5e5ff33f70 14,41-43
+  s_b79353beba9e14::t_f32f93ff245ad5 6
+  s_b79353beba9e14::t_6a974963f5eef9 52-53,64-65,67-68,98-100
+  s_b79353beba9e14::t_9884787dd977de 132
+  s_b79353beba9e14::t_690f9d2f3afaac 12,20-26,51,54-63,66,74-97,103
+  s_b79353beba9e14::t_1b7d02012c1a3c 11
+  s_b79353beba9e14::t_5f96b4f01ef415 69-73,101-102,104-106
+bkms-cli/cmd/app/instance/port_forward_cmd_test.go
+  s_b79353beba9e14::t_ed28b7d1019a7e 1-21,22
+bkms-cli/cmd/app/instance/instance.go
+  s_b79353beba9e14::t_0cb21dbcbd525d 23-24
+bkms-cli/pkg/handler/instance/port_forward.go
+  s_b79353beba9e14::t_40a9785af2759f 107-114
+  s_b79353beba9e14::t_28abae6477d0f0 1-3,5,8-9,11-12,15-30,31-34,35-37,50-58,64-79,80-90,96
+  s_b79353beba9e14::t_cc8e4cd29b7686 10,38-40,44-49
+  s_b79353beba9e14::t_57a59cf280193f 4,13-14,91-95,97-99,101-102
+  s_b79353beba9e14::t_36a21b598394f6 6-7,59-63,100,103-106
+  s_b79353beba9e14::t_85ecc5d56ae414 41-43
+bkms-cli/pkg/handler/instance/port_forward_bridge_test.go
+  s_b79353beba9e14::t_4df5451b0a0515 1-5,7-8,11,12-13,16-18,85-94,101-135,296-301,316-317,319-322,331-337,339,341-343,350-352
+  s_b79353beba9e14::t_1c8a30b1091cf1 19-22,29-31,33-46,55-56,58-63
+  s_b79353beba9e14::t_01cbb13793e875 345
+  s_b79353beba9e14::t_34371b173a6cc3 268-279,288-295
+  s_b79353beba9e14::t_e017e25e156823 318
+  s_b79353beba9e14::t_75590c4db98e88 23-28,32,47-54,57
+  s_b79353beba9e14::t_2ff1d60eb439f2 9-10
+  s_b79353beba9e14::t_93ff79f72e305b 324-330,344,346-349,353-375
+  s_b79353beba9e14::t_51672a78515a65 212-229,231-239
+  s_b79353beba9e14::t_f6273473632b1c 64-84
+  s_b79353beba9e14::t_ab45c3f46300a9 6
+  s_b79353beba9e14::t_8a5e22e02d1bd8 376
+  s_b79353beba9e14::t_f3cb46faf8d9b6 136-146,150-179,185-211
+  s_b79353beba9e14::t_48c9bb34a38bf8 147-149,180-184
+  s_b79353beba9e14::t_09ea3029a53d61 241-258,260-263,266-267
+  s_b79353beba9e14::t_a8c2e9d3920405 240
+  s_b79353beba9e14::t_e4b605106c38ae 230,259,264-265,280
+  s_b79353beba9e14::t_060a5de5be8ef0 281-283
+  s_b79353beba9e14::t_b225ed16c482b2 338,340
+  s_b79353beba9e14::t_2e1d6d9467a054 323
+apps/bkms-server/pkg/workload/appmodelcore/portforward/portforward_suite_test.go
+  s_b79353beba9e14::t_bcf69f36f757e3 1-13
+apps/bkms-server/pkg/workload/appmodelcore/portforward/service_test.go
+  s_b79353beba9e14::t_42ce47ff211221 5,13,200,208-269,271
+  s_b79353beba9e14::t_481341f5a1118d 1-4,6-12,14-38,40-43,117-174,180-182,196-197,199,270
+  s_b79353beba9e14::t_b55a3ed1be6ee5 39,44-73
+  s_b79353beba9e14::t_6af8cb58966b16 186,204-207
+  s_b79353beba9e14::t_04ff2baa441376 76-91
+  s_b79353beba9e14::t_86d5c196f8d857 195,198
+  s_b79353beba9e14::t_b07c41bac7dd53 74,92-116
+  s_b79353beba9e14::t_fcc9b31431a2d5 175-179,183-184,187-194,201-203
+  s_b79353beba9e14::t_1cb410a6fbec7f 75
+  s_b79353beba9e14::t_2c96de799eaa86 185
+bkms-cli/pkg/handler/instance/port_forward_test.go
+  s_b79353beba9e14::t_9fa5f6c6c9d571 1-50,60-104,105-122,124-125
+  s_b79353beba9e14::t_1242260e42b616 51-59
+bkms-cli/pkg/handler/publish/handler.go
+  s_b79353beba9e14::t_308ba7ac820bbb 229-230
+apps/bkms-server/pkg/workload/instance/handler/port_forward_test.go
+  s_b79353beba9e14::t_3ade8ae38b3d30 1-3,4,5-6,8
+  s_b79353beba9e14::t_017cca6a275e81 13
+  s_b79353beba9e14::t_8eca94b1518721 7,9-12
+apps/bkms-server/pkg/observability/metrics/metrics.go
+  s_b79353beba9e14::t_45d8fc9df3c799 181-195
+  s_b79353beba9e14::t_c5211567cf27f4 112-144
+bkms-cli/pkg/handler/instance/port_forward_listener.go
+  s_b79353beba9e14::t_b69b8e10c11066 1-31,34,40,48-49,51-58,60,63,65-69,73-75,77-82,89-91,93-95,108-112,121-135,139
+  s_b79353beba9e14::t_12db96f8e4a21a 32-33,36,42
+  s_b79353beba9e14::t_3f7208c7478007 50,59,61-62,64,83-86,88
+  s_b79353beba9e14::t_42d355d7b1a8d3 70,72,87,92,96-106
+  s_b79353beba9e14::t_c91b6c8fb0502a 76
+  s_b79353beba9e14::t_e50189d0d55d2d 107
+bkms-cli/pkg/handler/instance/port_forward_bridge.go
+  s_b79353beba9e14::t_0bfbc31b05e209 1-60,62-76,103-104
+  s_b79353beba9e14::t_54d2602f55eaba 61,77-101
+  s_b79353beba9e14::t_d95ac40550991f 102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "0eadd52c618759b45278f913d00cc37b48d66947",
+  "prompts": {},
+  "sessions": {
+    "s_b79353beba9e14": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f6f7d62157e64bb82d06a3e0ead50",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
