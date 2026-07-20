@@ -1,0 +1,25 @@
+apps/bkms-server/pkg/workload/appmodelcore/portforward/service.go
+  s_b79353beba9e14::t_2e3e3cab58525e 14,52,95-111
+  s_b79353beba9e14::t_b8b885611e6cbb 136-139
+  s_b79353beba9e14::t_34bb7e71b5ed6d 24-26,30-31,59,66-67,69,84,127,129,132-134,235-240,243,255-256,259-260,264-265,277-278
+  s_b79353beba9e14::t_018f6a00ddea16 112-113
+apps/bkms-server/pkg/infras/kubernetes/client/pod.go
+  s_b79353beba9e14::t_d593cfacd5a88f 19,52
+  s_b79353beba9e14::t_63f73618312841 53-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "b58db6b08e4640de1a308a2cb3b1b6b9cf3a5e57",
+  "prompts": {},
+  "sessions": {
+    "s_b79353beba9e14": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f6f7d62157e64bb82d06a3e0ead50",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
