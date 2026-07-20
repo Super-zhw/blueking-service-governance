@@ -1,0 +1,32 @@
+apps/bkms-server/pkg/workload/instance/handler/port_forward.go
+  s_069de239f60d58::t_44188dc916b048 165
+  s_069de239f60d58::t_6ebaf1e610e15d 166-167
+apps/bkms-server/pkg/common/bkerrs/port_forward.go
+  s_069de239f60d58::t_5227794e21de81 1-48
+bkms-cli/pkg/handler/instance/errors.go
+  s_069de239f60d58::t_c72c0ffa5c741b 3-4,6-9,11,13-21,25-29,31-33,40-41,46-62
+  s_069de239f60d58::t_9fb2c4c368efc2 10,12
+  s_069de239f60d58::t_84da66301c097c 1-2,5,22-24,30,34-39,42-45
+bkms-cli/pkg/handler/instance/port_forward_bridge.go
+  s_069de239f60d58::t_0241c6811886c9 10
+  s_069de239f60d58::t_b374915314fc9d 62-63,74-78,81,91-92,104,106-107
+  s_069de239f60d58::t_452aee8d8b4d78 5,65,68-70,84-90,94-101,103,108,110-112,114-115,117
+  s_069de239f60d58::t_4616f23009a93b 73
+  s_069de239f60d58::t_4ebab705a32e04 93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "4ed178ad6036bc77c92d5ed3fede105ae067a92b",
+  "prompts": {},
+  "sessions": {
+    "s_069de239f60d58": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7e74fca675639fdc19ed845ff386",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
