@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/infras/polaris/provider_default.go
+  h_d56f85e7c6980c 1-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "db3735a9bc6b08a167111e301f7d9d867735734a",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
