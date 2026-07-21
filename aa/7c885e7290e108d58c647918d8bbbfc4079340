@@ -1,0 +1,138 @@
+bkms-cli/pkg/client/appspec.go
+  s_0c667d212fee3d::t_44e1eb3ad5ebfb 1-2,3-33,35,43-44,49-50,56-57,68,74-75,85,95,99-100,104
+  s_0c667d212fee3d::t_1a53a5a61d14ac 33
+  s_cdfdade5d3f96d::t_b12ff4b8792a8c 34-104
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_0c667d212fee3d::t_c1e83b31954794 2357-2368,2372-2373,2377-2397
+  s_cdfdade5d3f96d::t_7d1db575925dab 2372-2373
+  s_cdfdade5d3f96d::t_9cad77f119661e 2369-2371,2374-2376
+bkms-cli/pkg/handler/appspec/output.go
+  s_0c667d212fee3d::t_83262528765b54 6-7
+  s_cdfdade5d3f96d::t_8c6177b15a9788 42,47,52,57,62,67,73,76-78,80-82,84-86,88-90,92-94,96-98,100,105-107,119-121,130-132,144,173-175,188,222-224,234-236
+bkms-cli/pkg/handler/appspec/types.go
+  s_0c667d212fee3d::t_48468ebf8aa009 101-112
+  s_cdfdade5d3f96d::t_9d8d84a6f901f2 3-4,113-122
+  s_cdfdade5d3f96d::t_156164785a7ca5 123
+  s_cdfdade5d3f96d::t_0ea51eab057448 124-140
+bkms-cli/pkg/client/types.go
+  s_0c667d212fee3d::t_3bdb93a145c0da 124-128,135-142
+  s_0c667d212fee3d::t_770757d8cda7e0 4-5,6
+  s_cdfdade5d3f96d::t_ce62af698d794e 129,134
+  s_cdfdade5d3f96d::t_21c559c09340d3 130-133
+bkms-cli/cmd/app/appspec/probe/probe.go
+  s_0c667d212fee3d::t_623ff9b6c999f1 1-3,5-7,20
+  s_0c667d212fee3d::t_452ee4ab4e7d59 4,8,12-19
+  s_cdfdade5d3f96d::t_53334b4318faa1 11
+  s_cdfdade5d3f96d::t_b2235e16adc67b 9-10
+bkms-cli/cmd/app/appspec/resources/resources.go
+  s_0c667d212fee3d::t_ee21f5fc0d6c29 1-3,5-7,20
+  s_0c667d212fee3d::t_751585a20e395f 4,8,12-19
+  s_cdfdade5d3f96d::t_2e1325af76b175 11
+  s_cdfdade5d3f96d::t_8afe980c2d8fec 9-10
+bkms-cli/cmd/app/appspec/appspec.go
+  s_0c667d212fee3d::t_d37129bd1bfcff 4-14,38-44
+  s_0c667d212fee3d::t_af98a4b6257b16 24-25,28-29,31-32
+bkms-cli/cmd/app/appspec/lifecycle/lifecycle.go
+  s_0c667d212fee3d::t_ca013d90a7842e 1-3,5-7,20
+  s_0c667d212fee3d::t_4d8010aac2d621 4,8,12-19
+  s_cdfdade5d3f96d::t_f6df02e4b2fc6c 11
+  s_cdfdade5d3f96d::t_d637f1f3412724 9-10
+bkms-cli/cmd/app/appspec/startcommand/start_command.go
+  s_0c667d212fee3d::t_502dba9daef11d 1-3,5-10,12-14,17-19
+  s_0c667d212fee3d::t_26571e9ddd4a04 4,12,15-16
+  s_cdfdade5d3f96d::t_4cc273b5f1f058 11
+  s_cdfdade5d3f96d::t_6b72f9896d7b25 9-10
+bkms-cli/cmd/app/appspec/labels/labels.go
+  s_0c667d212fee3d::t_4a58025476a1b5 1-3,5-7,20
+  s_0c667d212fee3d::t_2348902c8d25b7 4,8,12-19
+  s_cdfdade5d3f96d::t_b7d9c58ee1c03d 11
+  s_cdfdade5d3f96d::t_a5e508ef6c7ba5 9-10
+bkms-cli/cmd/app/appspec/annotations/annotations.go
+  s_0c667d212fee3d::t_6a25fa12c958af 1-3,5-7,20
+  s_0c667d212fee3d::t_d8820e4a54d1b9 4,8,12-19
+  s_cdfdade5d3f96d::t_4e6d8b9be08c82 11
+  s_cdfdade5d3f96d::t_8c8ad8927ae095 9-10
+bkms-cli/cmd/app/appspec/updatestrategy/update_strategy.go
+  s_0c667d212fee3d::t_9f01aca21ba420 1-3,5-7,20
+  s_0c667d212fee3d::t_3a671348eeec57 4,8,12-19
+  s_cdfdade5d3f96d::t_006fed6766e0bc 11
+  s_cdfdade5d3f96d::t_e8270fee6bcc2b 9-10
+bkms-cli/cmd/app/appspec/resources/reset.go
+  s_0c667d212fee3d::t_7bed898f2b293a 1-32,34-48
+bkms-cli/cmd/app/appspec/resources/edit.go
+  s_0c667d212fee3d::t_0c9609773e6e52 1-25,34-42,44-63
+bkms-cli/cmd/app/appspec/labels/view.go
+  s_0c667d212fee3d::t_0c9458d659f851 1-3,4-32,34-44
+bkms-cli/cmd/app/appspec/lifecycle/edit.go
+  s_0c667d212fee3d::t_5958615343ba6d 1-25,41-49,51-70
+bkms-cli/cmd/app/appspec/annotations/edit.go
+  s_0c667d212fee3d::t_07ab806e772952 1-25,32-40,42-61
+bkms-cli/cmd/app/appspec/updatestrategy/reset.go
+  s_0c667d212fee3d::t_a90b3942ed1f4f 1-32,34-48
+bkms-cli/cmd/app/appspec/labels/edit.go
+  s_0c667d212fee3d::t_d6b713c87e0b36 1-25,32-40,42-61
+bkms-cli/cmd/app/appspec/probe/reset.go
+  s_0c667d212fee3d::t_1a106cf3d26218 1-32,34-48
+bkms-cli/cmd/app/appspec/lifecycle/view.go
+  s_0c667d212fee3d::t_f0e669104e0cc2 1-3,4-32,34-44
+bkms-cli/cmd/app/appspec/probe/edit.go
+  s_0c667d212fee3d::t_a0d5e521380c00 1-25,53-61,63-82
+  s_cdfdade5d3f96d::t_aad37e6c14588a 26,46-50,52
+  s_cdfdade5d3f96d::t_4aab6bc9d2ea48 27-45,51
+bkms-cli/cmd/app/appspec/updatestrategy/view.go
+  s_0c667d212fee3d::t_08640c5269d6ab 1-3,4-32,34-44
+bkms-cli/cmd/app/appspec/lifecycle/reset.go
+  s_0c667d212fee3d::t_a7afbf972ae812 1-32,34-48
+bkms-cli/cmd/app/appspec/labels/reset.go
+  s_0c667d212fee3d::t_1dd8a8aeb398c5 1-32,34-48
+bkms-cli/cmd/app/appspec/annotations/view.go
+  s_0c667d212fee3d::t_9737f0b7b41e70 1-3,4-32,34-44
+bkms-cli/cmd/app/appspec/updatestrategy/edit.go
+  s_0c667d212fee3d::t_15213e9f48535a 1-25,31-39,41-60
+bkms-cli/cmd/app/appspec/annotations/reset.go
+  s_0c667d212fee3d::t_0172b857d55636 1-32,34-48
+bkms-cli/cmd/app/appspec/probe/view.go
+  s_0c667d212fee3d::t_c4a26db099bd40 1-3,4-32,34-44
+bkms-cli/cmd/app/appspec/resources/view.go
+  s_0c667d212fee3d::t_2e520846998b89 1-3,4-32,34-44
+bkms-cli/cmd/app/appspec/startcommand/edit.go
+  s_0c667d212fee3d::t_cb954e365ffd44 1-8,9-34,36-51
+bkms-cli/cmd/app/appspec/startcommand/view.go
+  s_0c667d212fee3d::t_891286ed5f16c4 1-8,9-30,32-57
+bkms-cli/pkg/client/client.go
+  s_cdfdade5d3f96d::t_590048069a92ec 780-781,786-787
+  s_cdfdade5d3f96d::t_97be97ff7a5344 776-779,782-785,788-790,792-793,795,798,800
+bkms-cli/pkg/handler/appspec/output_test.go
+  s_cdfdade5d3f96d::t_4c84f68e07770c 13-24,32,39,42
+bkms-cli/pkg/handler/appspec/edit.go
+  s_cdfdade5d3f96d::t_20503989175f0b 13-14,46-47,73-76,79,81-82,98,100
+  s_cdfdade5d3f96d::t_77948b9926085e 18-20,22-24,26-28,30-32,34-36,38-40,84-92,96
+bkms-cli/pkg/handler/appspec/view.go
+  s_cdfdade5d3f96d::t_f1e9a680ce83fc 15,35,69-72,98,102,107-109
+  s_cdfdade5d3f96d::t_4fa167a4d1402c 73-97,99-101,103-106
+  s_cdfdade5d3f96d::t_1bc5aec0193d74 128-134,137,139,141,146,148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "aa7c885e7290e108d58c647918d8bbbfc4079340",
+  "prompts": {},
+  "sessions": {
+    "s_0c667d212fee3d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f82a054bd78dcaa66f8af181dd333",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
