@@ -1,0 +1,20 @@
+apps/bkms-server/pkg/common/httpcli/transport_test.go
+  s_160c9ec266ea5b::t_5a50f24d4b5a69 11,19,22,27-31,34-37,41,66-67,70,78,84,93,98,104,107-111
+  s_160c9ec266ea5b::t_6ad0262fc0c112 112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "0eefe32b69a3628946c7875a9d5b18fbe873620d",
+  "prompts": {},
+  "sessions": {
+    "s_160c9ec266ea5b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f51a4c5789d86493f476ea5c687",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
