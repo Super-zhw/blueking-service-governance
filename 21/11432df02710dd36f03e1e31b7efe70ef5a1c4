@@ -1,0 +1,35 @@
+bkms-cli/cmd/app/appspec/probe/probe.go
+  s_0c667d212fee3d::t_623ff9b6c999f1 1-18
+bkms-cli/cmd/app/appspec/resources/resources.go
+  s_0c667d212fee3d::t_ee21f5fc0d6c29 1-18
+bkms-cli/cmd/app/appspec/appspec.go
+  s_0c667d212fee3d::t_d37129bd1bfcff 4-14,50-56
+bkms-cli/cmd/app/appspec/lifecycle/lifecycle.go
+  s_0c667d212fee3d::t_ca013d90a7842e 1-18
+bkms-cli/cmd/app/appspec/startcommand/start_command.go
+  s_0c667d212fee3d::t_502dba9daef11d 1-106
+bkms-cli/pkg/handler/appspec/section_cmd.go
+  s_0c667d212fee3d::t_18e891792bce0d 1-157
+bkms-cli/cmd/app/appspec/labels/labels.go
+  s_0c667d212fee3d::t_4a58025476a1b5 1-18
+bkms-cli/cmd/app/appspec/annotations/annotations.go
+  s_0c667d212fee3d::t_6a25fa12c958af 1-18
+bkms-cli/cmd/app/appspec/updatestrategy/update_strategy.go
+  s_0c667d212fee3d::t_9f01aca21ba420 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2111432df02710dd36f03e1e31b7efe70ef5a1c4",
+  "prompts": {},
+  "sessions": {
+    "s_0c667d212fee3d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f82a054bd78dcaa66f8af181dd333",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
