@@ -1,0 +1,19 @@
+bkms-cli/cmd/app/appspec/appspec.go
+  s_0c667d212fee3d::t_af98a4b6257b16 24-25,28-29,31-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "969c330fc94a3810b01991bfa04c8d47aa4f7a69",
+  "prompts": {},
+  "sessions": {
+    "s_0c667d212fee3d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f82a054bd78dcaa66f8af181dd333",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
