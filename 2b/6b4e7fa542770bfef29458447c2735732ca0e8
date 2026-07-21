@@ -1,0 +1,81 @@
+bkms-cli/cmd/app/appspec/startcommand/edit.go
+  s_0c667d212fee3d::t_cb954e365ffd44 1-53
+bkms-cli/cmd/app/appspec/startcommand/start_command.go
+  s_0c667d212fee3d::t_26571e9ddd4a04 4,12,15-16
+  s_cdfdade5d3f96d::t_4cc273b5f1f058 11
+  s_cdfdade5d3f96d::t_6b72f9896d7b25 9-10
+bkms-cli/cmd/app/appspec/startcommand/view.go
+  s_0c667d212fee3d::t_891286ed5f16c4 1-59
+bkms-cli/cmd/app/appspec/labels/labels.go
+  s_cdfdade5d3f96d::t_b7d9c58ee1c03d 11
+  s_cdfdade5d3f96d::t_a5e508ef6c7ba5 9-10
+bkms-cli/cmd/app/appspec/lifecycle/lifecycle.go
+  s_cdfdade5d3f96d::t_f6df02e4b2fc6c 11
+  s_cdfdade5d3f96d::t_d637f1f3412724 9-10
+bkms-cli/cmd/app/appspec/resources/resources.go
+  s_cdfdade5d3f96d::t_2e1325af76b175 11
+  s_cdfdade5d3f96d::t_8afe980c2d8fec 9-10
+bkms-cli/cmd/app/appspec/updatestrategy/update_strategy.go
+  s_cdfdade5d3f96d::t_006fed6766e0bc 11
+  s_cdfdade5d3f96d::t_e8270fee6bcc2b 9-10
+bkms-cli/cmd/app/appspec/probe/edit.go
+  s_cdfdade5d3f96d::t_aad37e6c14588a 26,46-50,52
+  s_cdfdade5d3f96d::t_4aab6bc9d2ea48 27-45,51
+bkms-cli/cmd/app/appspec/annotations/annotations.go
+  s_cdfdade5d3f96d::t_4e6d8b9be08c82 11
+  s_cdfdade5d3f96d::t_8c8ad8927ae095 9-10
+bkms-cli/cmd/app/appspec/probe/probe.go
+  s_cdfdade5d3f96d::t_53334b4318faa1 11
+  s_cdfdade5d3f96d::t_b2235e16adc67b 9-10
+bkms-cli/pkg/client/appspec.go
+  s_0c667d212fee3d::t_1a53a5a61d14ac 33,136
+  s_cdfdade5d3f96d::t_b12ff4b8792a8c 34-135
+bkms-cli/pkg/handler/appspec/view_all.go
+  s_cdfdade5d3f96d::t_a01ff1b3c57168 12-18,43,45-109
+bkms-cli/pkg/handler/appspec/handler.go
+  s_cdfdade5d3f96d::t_4d8eeda88e2927 13-14,16,18-58
+bkms-cli/cmd/app/appspec/annotations/view.go
+  s_cdfdade5d3f96d::t_c9e0995f192541 37,43,52
+bkms-cli/cmd/app/appspec/updatestrategy/view.go
+  s_cdfdade5d3f96d::t_9983fdc5504868 37,43,52
+bkms-cli/cmd/app/appspec/resources/view.go
+  s_cdfdade5d3f96d::t_492104b40968e9 37,43,52
+bkms-cli/pkg/handler/appspec/output.go
+  s_cdfdade5d3f96d::t_8c6177b15a9788 42,47,52,57,62,67,73,76-78,80-82,84-86,88-90,92-94,96-98,100,105-107,119-121,130-132,144,173-175,188,222-224,234-236
+bkms-cli/pkg/client/types.go
+  s_cdfdade5d3f96d::t_ce62af698d794e 129-161
+bkms-cli/cmd/app/appspec/lifecycle/view.go
+  s_cdfdade5d3f96d::t_d62ddc7b5bbd6d 37,43,52
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_cdfdade5d3f96d::t_7d1db575925dab 2369-2371,2373,2378-2470,2472
+bkms-cli/cmd/app/appspec/labels/view.go
+  s_cdfdade5d3f96d::t_a5b1442c26151c 37,43,52
+bkms-cli/cmd/app/appspec/probe/view.go
+  s_cdfdade5d3f96d::t_0824065e0d5b1b 37,43,52
+bkms-cli/pkg/client/client.go
+  s_cdfdade5d3f96d::t_590048069a92ec 776-940,942,945,948,954-956,958,961,964
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2b6b4e7fa542770bfef29458447c2735732ca0e8",
+  "prompts": {},
+  "sessions": {
+    "s_0c667d212fee3d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f82a054bd78dcaa66f8af181dd333",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

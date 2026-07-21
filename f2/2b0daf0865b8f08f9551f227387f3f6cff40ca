@@ -1,0 +1,23 @@
+bkms-cli/cmd/app/appspec/startcommand/edit.go
+  s_0c667d212fee3d::t_cb954e365ffd44 1-53
+bkms-cli/cmd/app/appspec/startcommand/start_command.go
+  s_0c667d212fee3d::t_26571e9ddd4a04 4,9-11,13-15,17-18,21-22
+bkms-cli/cmd/app/appspec/startcommand/view.go
+  s_0c667d212fee3d::t_891286ed5f16c4 1-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "f22b0daf0865b8f08f9551f227387f3f6cff40ca",
+  "prompts": {},
+  "sessions": {
+    "s_0c667d212fee3d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f82a054bd78dcaa66f8af181dd333",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

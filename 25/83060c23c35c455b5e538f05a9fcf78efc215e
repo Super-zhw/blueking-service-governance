@@ -1,0 +1,47 @@
+bkms-cli/pkg/handler/appspec/handler.go
+  s_cdfdade5d3f96d::t_56731d8ef688d4 13,15-20,22-27,63,179-180,182,190-191,193,201-202,204,212-213,215,223
+  s_cdfdade5d3f96d::t_38d2b77163bf94 14,21,29-30,35-36,56-57,184,195,206,217
+  s_cdfdade5d3f96d::t_6f6778f76bfcb1 28
+  s_cdfdade5d3f96d::t_9f59cbc7911d5f 62
+  s_cdfdade5d3f96d::t_9a6cbf7fd962bb 176-178
+  s_cdfdade5d3f96d::t_4525a1e5e109a6 181
+  s_cdfdade5d3f96d::t_17a70556a12f97 183
+  s_cdfdade5d3f96d::t_808872324ec88d 185-189
+  s_cdfdade5d3f96d::t_01e6fe6f681333 192
+  s_cdfdade5d3f96d::t_ccee6dbeffb6e0 194
+  s_cdfdade5d3f96d::t_b58ff1569cb139 196-200
+  s_cdfdade5d3f96d::t_c76b601d9e16b2 203
+  s_cdfdade5d3f96d::t_63da81d027e1ea 205
+  s_cdfdade5d3f96d::t_7fb5525467f64c 207-211
+  s_cdfdade5d3f96d::t_6e83ab4875154f 214
+  s_cdfdade5d3f96d::t_1eac4b7eb44507 216
+  s_cdfdade5d3f96d::t_799c76b7c004ba 218-222
+bkms-cli/cmd/app/appspec/resources/view.go
+  s_cdfdade5d3f96d::t_f684dcab33763a 36,51
+bkms-cli/cmd/app/appspec/updatestrategy/view.go
+  s_cdfdade5d3f96d::t_aa732e1ecfb595 36,51
+bkms-cli/cmd/app/appspec/annotations/view.go
+  s_cdfdade5d3f96d::t_2b6eabeaf5ac56 36,51
+bkms-cli/cmd/app/appspec/lifecycle/view.go
+  s_cdfdade5d3f96d::t_dc891201daf944 36,51
+bkms-cli/cmd/app/appspec/probe/view.go
+  s_cdfdade5d3f96d::t_03118ea62557bc 36,51
+bkms-cli/cmd/app/appspec/labels/view.go
+  s_cdfdade5d3f96d::t_bd702d451f20bd 36,51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2583060c23c35c455b5e538f05a9fcf78efc215e",
+  "prompts": {},
+  "sessions": {
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
