@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/extension/bscpcfg/service/manager.go
+  s_0b252bb58f939f::t_6ad13c540f8887 400-401
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "986c6b80c878a02ac4e221a18b7cdf4a90b102c0",
+  "prompts": {},
+  "sessions": {
+    "s_0b252bb58f939f": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f4b41707d3baebb083c566caf0e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

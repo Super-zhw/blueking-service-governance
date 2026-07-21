@@ -1,0 +1,50 @@
+apps/bkms-server/pkg/infras/cloudapi/dbm/dbm.go
+  s_160c9ec266ea5b::t_09092946658a98 117
+apps/bkms-server/pkg/infras/cloudapi/bcs/client.go
+  s_160c9ec266ea5b::t_c02e5daefd59da 254
+apps/bkms-server/pkg/infras/cloudapi/clusterresources/client.go
+  s_160c9ec266ea5b::t_772ef2166ba152 149
+apps/bkms-server/pkg/infras/cloudapi/bscp/client.go
+  s_160c9ec266ea5b::t_e3d72d82be3148 134
+apps/bkms-server/pkg/infras/cloudapi/iam/grade_manager.go
+  s_160c9ec266ea5b::t_2c1eb14d30fa7e 53,89,138,166,196
+  s_160c9ec266ea5b::t_ae16d9617a8059 224
+apps/bkms-server/pkg/observability/apm/outbound.go
+  s_160c9ec266ea5b::t_b819b96fba59a0 8,12-15,21-22,30-39,48-91
+  s_160c9ec266ea5b::t_95af25c59d28fc 92
+apps/bkms-server/pkg/infras/cloudapi/iam/user_group.go
+  s_160c9ec266ea5b::t_ffee31d9941d5c 44,86,127,175,209
+  s_160c9ec266ea5b::t_9d79bcf82d9901 244
+apps/bkms-server/pkg/infras/cloudapi/iam/client.go
+  s_160c9ec266ea5b::t_c7f2e6be05cbe4 201-208
+apps/bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  s_160c9ec266ea5b::t_452fe70b274430 753
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/client.go
+  s_160c9ec266ea5b::t_faa39b679c1d6e 112
+apps/bkms-server/pkg/infras/cloudapi/tof/tof.go
+  s_160c9ec266ea5b::t_c302c9029ff3cb 131
+apps/bkms-server/pkg/infras/cloudapi/kubeinsight/client.go
+  s_160c9ec266ea5b::t_4af887c81f57e3 86-88
+apps/bkms-server/pkg/infras/cloudapi/bkcc/bkcc.go
+  s_160c9ec266ea5b::t_cd179f308d74bd 91
+apps/bkms-server/pkg/infras/cloudapi/bkrepo/bkrepo.go
+  s_160c9ec266ea5b::t_e81e75fd2fffa4 148
+apps/bkms-server/pkg/infras/cloudapi/bkhcm/client.go
+  s_160c9ec266ea5b::t_83e00d30c3f164 92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "1b0c9dc168ef418b443a9bf3d35d675dd784d775",
+  "prompts": {},
+  "sessions": {
+    "s_160c9ec266ea5b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f51a4c5789d86493f476ea5c687",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
