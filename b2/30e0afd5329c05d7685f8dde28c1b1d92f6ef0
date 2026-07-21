@@ -1,0 +1,21 @@
+apps/bkms-server/pkg/observability/apm/outbound.go
+  s_160c9ec266ea5b::t_ed0adac9e5bbe4 15-16
+apps/bkms-server/pkg/observability/apm/outbound_test.go
+  s_160c9ec266ea5b::t_ad9c88fc69d4f7 7,10-13,15-17,21-25,27-28,32-36,38-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "b230e0afd5329c05d7685f8dde28c1b1d92f6ef0",
+  "prompts": {},
+  "sessions": {
+    "s_160c9ec266ea5b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f51a4c5789d86493f476ea5c687",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

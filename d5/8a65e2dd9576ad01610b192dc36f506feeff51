@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/observability/apm/outbound.go
+  s_160c9ec266ea5b::t_2f5f483987b25f 19,24,26,32-33,44,46,75
+  s_160c9ec266ea5b::t_391edb5a856daf 20-23,30-31,37,55,81,87
+  s_160c9ec266ea5b::t_5f6d11ccd54435 74
+  s_160c9ec266ea5b::t_a4d5b5539430fd 76-80
+  s_160c9ec266ea5b::t_131c44f1abe32d 82-86
+  s_160c9ec266ea5b::t_3c38544d63b100 88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "d58a65e2dd9576ad01610b192dc36f506feeff51",
+  "prompts": {},
+  "sessions": {
+    "s_160c9ec266ea5b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f51a4c5789d86493f476ea5c687",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
