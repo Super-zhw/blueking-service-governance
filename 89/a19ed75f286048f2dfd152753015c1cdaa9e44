@@ -1,0 +1,65 @@
+bkms-cli/cmd/app/appspec/view.go
+  s_0c667d212fee3d::t_8a8ab22a04f7ed 5-7,9,12,47-53,55-57,58-59,61,63-64,66-92,94-95,96,98-104,106-126,128-129,131-133,135,137,139,141,143,145-147
+  s_0c667d212fee3d::t_3561fabec8a6bf 1-3,10-11,13-15,17-26,28-29,31-46,127,148
+  s_0c667d212fee3d::t_82f329ff9807ce 4,8
+bkms-cli/pkg/handler/appspec/types.go
+  s_0c667d212fee3d::t_1aecd316141190 1-133
+bkms-cli/pkg/handler/appspec/printer.go
+  s_0c667d212fee3d::t_9b3f8129459aaf 1-10,12,14-17,19-26,28-32,34-39,41-50,52-57,59-67,69-77,79-82,84-87,89-96,98,100-101,103-105,107-111,113-119,121-127,129,131-132,134-138,140-142,148-149,151,153-154,156-160,162-164,167-168,170,172-173,175-179,181-183,185-186,188-190,192-194,196-197,199-201,203-205,207-208,210-211,213-216,218-219,221-224,226,228-229,231-235,237-240,242-244,246-248,250-252,254-255,257-260,262-265,267-269,271-273,275-276,278-281,287-288,290,292-293,295-299,301-304,306-313,315,317-318,320-324,326-329,331-338,340-349
+bkms-cli/cmd/app/appspec/resources.go
+  s_0c667d212fee3d::t_571ee6f7284b80 5,7,10,52-53,55-69,70-75,77-93,99-103,105-106
+  s_0c667d212fee3d::t_ff74990e6fdc6b 1-3,8-9,11-13,15-25,29-30,32-33,35-36,42-51,76,107
+  s_0c667d212fee3d::t_c03e7ddd891344 4,6
+  s_0c667d212fee3d::t_66187efb34b189 14,26-28,31,34,37-41,54,94-98,104
+bkms-cli/pkg/handler/appspec/yaml.go
+  s_0c667d212fee3d::t_319c728e31c30e 1-9,11-12,14-17,19-21,23-25,27-31,33-40,42-49,51-58,60-67,69-76,78-84
+bkms-cli/pkg/handler/appspec/yaml_test.go
+  s_0c667d212fee3d::t_4b2e3fd5056177 1-10,12-24,26-28,30-31,33-39,41-42,44-50,52-55,57-76,78-96,98-113,115-133,135-157,159-205,207-224,226-242
+bkms-cli/pkg/handler/appspec/appspec_suite_test.go
+  s_0c667d212fee3d::t_4439203d7b6ebd 1-13
+bkms-cli/cmd/app/appspec/probe.go
+  s_0c667d212fee3d::t_deb9febd852490 4,6
+  s_0c667d212fee3d::t_8fce0d13da2c07 1-3,7-8,10-12,14-22,26-27,29-30,33-42,67,83
+  s_0c667d212fee3d::t_5931978db5138f 5,9,43-44,46-66,68-82
+bkms-cli/cmd/app/appspec/update_strategy.go
+  s_0c667d212fee3d::t_13378756f67228 5,9,43-44,46-66,68-82
+  s_0c667d212fee3d::t_f0f3650f763cb1 1-3,7-8,10-12,14-22,26-27,29-30,33-42,67,83
+  s_0c667d212fee3d::t_c80c183c6e8a0c 4,6
+bkms-cli/cmd/app/appspec/annotations.go
+  s_0c667d212fee3d::t_7326f13b4a0e2b 4,6
+  s_0c667d212fee3d::t_cd3da1be59021a 5,9,43-44,46-66,68-82
+  s_0c667d212fee3d::t_1cc994ac4d6f59 1-3,7-8,10-12,14-22,26-27,29-30,33-42,67,83
+bkms-cli/pkg/handler/appspec/client.go
+  s_0c667d212fee3d::t_2db39bce8a6e34 2-74,76-80,82-83,85-89,91-95,97-98,100-104,106-110,112-113,115-119,121-125,127-128,145-148
+bkms-cli/pkg/handler/appspec/printer_test.go
+  s_0c667d212fee3d::t_c91308fe1f8ee9 1-104
+bkms-cli/cmd/app/appspec/lifecycle.go
+  s_0c667d212fee3d::t_77aeb1d3c56eb0 1-3,7-8,10-12,14-22,26-27,29-30,33-42,67,83
+  s_0c667d212fee3d::t_3615efa4c1cd9d 4,6
+  s_0c667d212fee3d::t_de81f4228ac2c5 5,9,43-44,46-66,68-82
+bkms-cli/cmd/app/appspec/common.go
+  s_0c667d212fee3d::t_a956a36583667d 1-6,8-13,15-19,21-22,24-27,34-38,40-43,45-48,51-56,58,69-70,81,82-85,87,89-92,94-95
+  s_0c667d212fee3d::t_ed5fd14e35e296 7,14,20,23,28-33,39,44,49-50,57,59-68,71-80,86,88,93
+bkms-cli/cmd/app/appspec/labels.go
+  s_0c667d212fee3d::t_11575b23eb97ca 1-3,7-8,10-12,14-22,26-27,29-30,33-42,67,83
+  s_0c667d212fee3d::t_1f489199e841cf 5,9,43-44,46-66,68-82
+  s_0c667d212fee3d::t_2c733290758ab8 4,6
+bkms-cli/cmd/app/appspec/appspec.go
+  s_0c667d212fee3d::t_1e1ffa529b49f2 2-5,7-20,22-23,25-26,28-29,31-32,38-40,42-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "89a19ed75f286048f2dfd152753015c1cdaa9e44",
+  "prompts": {},
+  "sessions": {
+    "s_0c667d212fee3d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f82a054bd78dcaa66f8af181dd333",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
