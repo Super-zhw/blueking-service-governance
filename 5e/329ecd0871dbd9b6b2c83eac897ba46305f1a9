@@ -1,0 +1,20 @@
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  h_d56f85e7c6980c 102,104
+apps/bkms-server/configs/config.yaml
+  h_d56f85e7c6980c 155,157-158
+apps/bkms-server/tests/configs/config.yaml
+  h_d56f85e7c6980c 112,114
+apps/bkms-server/pkg/common/config/types.go
+  h_d56f85e7c6980c 114,118-119,394
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "5e329ecd0871dbd9b6b2c83eac897ba46305f1a9",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
