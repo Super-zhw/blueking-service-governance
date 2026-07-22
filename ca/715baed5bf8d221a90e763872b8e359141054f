@@ -1,0 +1,20 @@
+apps/bkms-server/Dockerfile.ci_ut
+  h_d56f85e7c6980c 42-43
+apps/bkms-server/Dockerfile-Dev
+  h_d56f85e7c6980c 41
+apps/bkms-server/Dockerfile
+  h_d56f85e7c6980c 38
+apps/bkms-server/Dockerfile.ci_apis
+  h_d56f85e7c6980c 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "ca715baed5bf8d221a90e763872b8e359141054f",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}
