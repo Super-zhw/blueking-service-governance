@@ -1,7 +1,14 @@
+apps/bkms-server/go.mod
+  h_d56f85e7c6980c 8-9,11
 ---
 {
   "schema_version": "authorship/3.0.0",
   "git_ai_version": "1.6.15",
   "base_commit_sha": "d078058f10fe870babc3ed41e3d62a9732b47c1b",
-  "prompts": {}
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
 }
