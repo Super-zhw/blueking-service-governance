@@ -1,0 +1,36 @@
+bkms-cli/test/e2e/testdata/appspec/resources.yaml
+  s_cdfdade5d3f96d::t_3e2d9414846e77 1-5
+bkms-cli/test/e2e/testdata/appspec/labels.yaml
+  s_cdfdade5d3f96d::t_752f9e1249de70 1-3
+bkms-cli/test/e2e/app_appspec_test.go
+  s_cdfdade5d3f96d::t_82ea5ce0f7e84f 1-279,283,287-316
+  s_cdfdade5d3f96d::t_8d2bc7210f72d6 280-282,284-286
+bkms-cli/test/e2e/testdata/appspec/lifecycle.yaml
+  s_cdfdade5d3f96d::t_3861e535907fd1 1
+bkms-cli/test/e2e/testdata/appspec/update-strategy.yaml
+  s_cdfdade5d3f96d::t_211ccaba862ce9 1-2
+bkms-cli/test/e2e/testdata/appspec/start-command.yaml
+  s_cdfdade5d3f96d::t_7dc6c9483a6b72 1-5
+bkms-cli/test/e2e/testdata/appspec/probe.yaml
+  s_cdfdade5d3f96d::t_39efd5ea62a067 1-9
+bkms-cli/test/e2e/testdata/appspec/annotations.yaml
+  s_cdfdade5d3f96d::t_013c0e488c8d31 1-3
+bkms-cli/test/e2e/testdata/appspec/invalid.yaml
+  s_cdfdade5d3f96d::t_4153e1b528059a 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "30225b0668a2f3612b918a3c8efc964f5aed8e65",
+  "prompts": {},
+  "sessions": {
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
