@@ -1,0 +1,38 @@
+bkms-cli/cmd/app/polaris/polaris.go
+  s_ffbb249b2bca61::t_d94ae5b604d2e9 1-24
+bkms-cli/cmd/app/polaris/create.go
+  s_ffbb249b2bca61::t_f6c89debc90dca 1-105
+  s_ffbb249b2bca61::t_2a37bc95a93ec8 106
+bkms-cli/cmd/app/polaris/list.go
+  s_ffbb249b2bca61::t_29e1b26c70586c 1-66
+  s_ffbb249b2bca61::t_ee6273c468520c 67
+bkms-cli/pkg/client/client.go
+  s_ffbb249b2bca61::t_0036bea3e4c053 754-785
+bkms-cli/pkg/client/polaris.go
+  s_ffbb249b2bca61::t_fac86cea7f1bc1 1-53
+bkms-cli/cmd/app/app.go
+  s_ffbb249b2bca61::t_45068864d6106e 12
+  s_ffbb249b2bca61::t_3503d41f7d2768 43-44
+bkms-cli/pkg/client/types.go
+  s_ffbb249b2bca61::t_a6494b25836c7b 122-128
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_ffbb249b2bca61::t_3bdcda59ea49e5 2357-2496
+bkms-cli/.agents/prompts/app-polaris.md
+  s_ffbb249b2bca61::t_2c947c178a0502 1-157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "bc499ebfeab5cb0842f9db82500e413e80690941",
+  "prompts": {},
+  "sessions": {
+    "s_ffbb249b2bca61": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8267127d75a1a47fcfcc7aeffedb",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
