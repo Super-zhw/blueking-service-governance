@@ -1,0 +1,25 @@
+bkms-cli/cmd/app/polaris/create.go
+  s_ffbb249b2bca61::t_e65cda96134c8a 17,26-27
+bkms-cli/cmd/app/polaris/delete.go
+  s_ffbb249b2bca61::t_8bffefa5bce16e 15,26-27,29
+bkms-cli/.agents/prompts/app-polaris.md
+  s_ffbb249b2bca61::t_e8546fc9796283 66-67
+bkms-cli/cmd/app/polaris/update.go
+  s_ffbb249b2bca61::t_905783ad81d5a0 17,27-30,34,37-40,51,53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "9bb7e39c4bbb634113d774f972415ddfe69306dd",
+  "prompts": {},
+  "sessions": {
+    "s_ffbb249b2bca61": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8267127d75a1a47fcfcc7aeffedb",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
