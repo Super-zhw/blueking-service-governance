@@ -1,0 +1,19 @@
+bkms-cli/.agents/prompts/app-polaris.md
+  s_ffbb249b2bca61::t_e8546fc9796283 141-142,145-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "c06a206c87530782915c584bf7cab8fd9efcf71d",
+  "prompts": {},
+  "sessions": {
+    "s_ffbb249b2bca61": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8267127d75a1a47fcfcc7aeffedb",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
