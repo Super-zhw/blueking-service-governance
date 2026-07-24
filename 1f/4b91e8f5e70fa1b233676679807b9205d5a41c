@@ -1,0 +1,20 @@
+bkms-cli/test/e2e/framework/helpers.go
+  s_77584af7bd2116::t_1b6a13eaece664 4,6,10-12
+  s_77584af7bd2116::t_9c0514c25959e8 17,20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1f4b91e8f5e70fa1b233676679807b9205d5a41c",
+  "prompts": {},
+  "sessions": {
+    "s_77584af7bd2116": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8cfc908276d6b66062eb4251ac8b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
