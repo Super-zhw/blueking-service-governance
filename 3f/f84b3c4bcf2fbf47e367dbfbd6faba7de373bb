@@ -1,0 +1,48 @@
+bkms-cli/pkg/handler/instance/port_forward.go
+  s_03e3ad14fb8a33::t_85906a8c367e9c 100-101,112
+  s_03e3ad14fb8a33::t_abd462639b8f46 9-10,19-57,87-90
+apps/bkms-server/pkg/workload/misc/portforward/service_test.go
+  s_03e3ad14fb8a33::t_25fa315da511df 1-281
+apps/bkms-server/pkg/workload/misc/portforward/service.go
+  s_03e3ad14fb8a33::t_655dfddd4ee333 1-92,97-98,100-103,105-108,132-143,145-153,155-186,188-218,221-232
+  s_03e3ad14fb8a33::t_a3ac198f0f8088 93-96,99,104,109-131,144,154,187,219-220
+bkms-cli/pkg/handler/instance/port_forward_listener.go
+  s_03e3ad14fb8a33::t_afe9c69b5e1697 7,16-18,52-54,71-75,79-87,149-152
+  s_03e3ad14fb8a33::t_56c6f524044ee1 153
+apps/bkms-server/pkg/workload/misc/portforward/portforward_suite_test.go
+  s_03e3ad14fb8a33::t_cc94ec37faff0b 1-13
+apps/bkms-server/pkg/workload/misc/portforward/stream.go
+  s_03e3ad14fb8a33::t_321e6f6a1b9582 10-11,19-60,65,71,80-81,85-89,97-101,103-122,124
+  s_03e3ad14fb8a33::t_d6d0ccc2bf2d13 1-9,12-18,61-64,66-70,72-79,82-84,90-96,102,123,125-186
+bkms-cli/pkg/client/port_forward_test.go
+  s_03e3ad14fb8a33::t_ebf95f7796e899 1-94
+bkms-cli/pkg/client/port_forward.go
+  s_03e3ad14fb8a33::t_a280af5b5f7f54 92
+  s_03e3ad14fb8a33::t_e6aafae31747b9 99-100
+bkms-cli/.agents/prompts/app-instance-port-forward.md
+  s_03e3ad14fb8a33::t_2816d60ced1783 1-108
+apps/bkms-server/pkg/workload/instance/handler/port_forward.go
+  s_03e3ad14fb8a33::t_c3d5e0c846a28f 138
+apps/bkms-server/.mockery.yml
+  s_03e3ad14fb8a33::t_4e6e881ef40af2 38-40
+bkms-cli/cmd/app/instance/port_forward.go
+  s_03e3ad14fb8a33::t_8dc10a0fba5454 4,16,21-30,33-34,36-41
+apps/bkms-server/pkg/workload/misc/portforward/mocks_test.go
+  s_03e3ad14fb8a33::t_a7a01c7d1d31b4 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "3ff84b3c4bcf2fbf47e367dbfbd6faba7de373bb",
+  "prompts": {},
+  "sessions": {
+    "s_03e3ad14fb8a33": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f88cfdc7b7a62bbf19a280aceea22",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
