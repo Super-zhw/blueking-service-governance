@@ -1,0 +1,26 @@
+bkms-cli/pkg/client/auth_client_test.go
+  s_77584af7bd2116::t_6f5febd08e64c6 95
+  s_77584af7bd2116::t_b79bd103bc4ea0 60,80,88
+bkms-cli/cmd/root/root.go
+  s_77584af7bd2116::t_66e106f5c1f416 54
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_77584af7bd2116::t_c26d40e97a19a9 2670-2736
+bkms-cli/pkg/client/types.go
+  s_77584af7bd2116::t_21d245cf1627a1 8-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2800ad812c78a900dc2183470101a3f7e738ecc6",
+  "prompts": {},
+  "sessions": {
+    "s_77584af7bd2116": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8cfc908276d6b66062eb4251ac8b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

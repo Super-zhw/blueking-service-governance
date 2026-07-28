@@ -1,0 +1,19 @@
+bkms-cli/pkg/handler/instance/port_forward_listener_test.go
+  s_77584af7bd2116::t_3d7c1930795106 86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c40dea8ba1dac93c32535c5ae38df8b9d7e2883e",
+  "prompts": {},
+  "sessions": {
+    "s_77584af7bd2116": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8cfc908276d6b66062eb4251ac8b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

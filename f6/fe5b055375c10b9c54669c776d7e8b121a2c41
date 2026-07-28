@@ -1,0 +1,20 @@
+bkms-cli/pkg/client/client.go
+  s_77584af7bd2116::t_fe2581faa37371 67-71,78,995-999,1005-1006
+  s_77584af7bd2116::t_9faef75b2a81cd 1007-1008
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f6fe5b055375c10b9c54669c776d7e8b121a2c41",
+  "prompts": {},
+  "sessions": {
+    "s_77584af7bd2116": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8cfc908276d6b66062eb4251ac8b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

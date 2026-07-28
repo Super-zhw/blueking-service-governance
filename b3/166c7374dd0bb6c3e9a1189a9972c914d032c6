@@ -1,0 +1,27 @@
+manifests/helm/bkms-server/values.yaml
+  s_baefb0db72d811::t_4034b0b0a93b22 158-180
+manifests/helm/bkms-server/templates/web-deployment.yaml
+  s_baefb0db72d811::t_1922663e997963 18-21
+manifests/helm/bkms-ui/templates/deployment.yaml
+  s_baefb0db72d811::t_f781a2bc744e7e 17-20
+manifests/helm/bkms-server/templates/worker-deployment.yaml
+  s_baefb0db72d811::t_1389cbf80c1e29 18-21
+manifests/helm/bkms-ui/values.yaml
+  s_baefb0db72d811::t_ac8da287545b83 19-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "b3166c7374dd0bb6c3e9a1189a9972c914d032c6",
+  "prompts": {},
+  "sessions": {
+    "s_baefb0db72d811": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8e20b41d75ffb1318987c6af133f",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
