@@ -1,0 +1,23 @@
+apps/bkms-server/tests/apis/bkms_envs/envs/list-environments.bru
+  s_65e46f3386e2bb::t_7443b6039e1260 37
+apps/bkms-server/tests/apis/envvars/list-detailed-env-scoped-env-vars.bru
+  s_65e46f3386e2bb::t_0db6cbf0a41db2 43
+apps/bkms-server/tests/apis/envvars/list-detailed-app-env-vars.bru
+  s_65e46f3386e2bb::t_5b490fdc8d69a4 85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d16690df0074e8eaba430dbca74e9aad4a7f51be",
+  "prompts": {},
+  "sessions": {
+    "s_65e46f3386e2bb": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fab8083b4793887c497669493fa09",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
