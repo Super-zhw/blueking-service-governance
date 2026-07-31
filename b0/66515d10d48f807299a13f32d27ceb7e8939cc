@@ -1,0 +1,52 @@
+apps/bkms-server/pkg/platmgt/portforward/store_test.go
+  s_80216cbbc7d5c9::t_70bdb16332f8fc 42,52-53,57,68-71,75,77,80-82,86,90,97-98,105-130,132,138-141,148,156,162
+apps/bkms-server/pkg/platmgt/portforward/service.go
+  s_80216cbbc7d5c9::t_970c642747d9da 6,10,46-48,51,54,60,63,70-71,75,77-78,86-87,94-99,103-107,109-114,116-123
+apps/bkms-server/pkg/platmgt/portforward/handler/handler.go
+  s_80216cbbc7d5c9::t_4c4cf2e0d6adfd 140
+  s_80216cbbc7d5c9::t_f407e4e62d272a 202,208
+  s_80216cbbc7d5c9::t_37406a1f7b0624 85,104,148,153-156,174,222
+  s_80216cbbc7d5c9::t_d141912b1ab6da 237-240
+  s_80216cbbc7d5c9::t_4b4600f9958299 241-243
+apps/bkms-server/pkg/workload/instance/handler/port_forward.go
+  s_80216cbbc7d5c9::t_57ba009d280c3a 79
+apps/bkms-server/pkg/platmgt/portforward/service_test.go
+  s_80216cbbc7d5c9::t_bf3bf269fac69b 37,41,46,49-50,54-55,60,65,69-70
+apps/bkms-server/pkg/platmgt/portforward/serializer/serializer.go
+  s_80216cbbc7d5c9::t_1cf36d18fa49bf 17-18,31-33,38,52-53,58-59,64-65
+bkms-cli/pkg/constant/constant.go
+  s_80216cbbc7d5c9::t_72bef8f0ecde44 64-69
+bkms-cli/pkg/handler/instance/port_forward_env_check_test.go
+  s_80216cbbc7d5c9::t_be3b6f6f3c60d4 33-36,45-47,55-57,65-67,80,82-87,89
+  s_80216cbbc7d5c9::t_836e7ea856da0f 25,31-32,37,39-40,43-44,48,50,53-54,58,60-61,63-64,68,70-71,74-76,78-79
+  s_80216cbbc7d5c9::t_0a30df9e0913f3 13,20
+  s_80216cbbc7d5c9::t_26cfb01c3d4409 38,49,59,69,73,77,88
+bkms-cli/pkg/handler/instance/port_forward.go
+  s_80216cbbc7d5c9::t_6ecdee6defcf1d 10,50,52
+  s_80216cbbc7d5c9::t_c868480cf22c2f 24,42-43
+  s_80216cbbc7d5c9::t_3f407825ee9413 32-36
+bkms-cli/cmd/app/instance/port_forward.go
+  s_80216cbbc7d5c9::t_3fbe335e8980b2 9,14-16
+  s_80216cbbc7d5c9::t_aa3d82aece3da6 17-18
+bkms-cli/pkg/client/types.go
+  s_80216cbbc7d5c9::t_ad391cf01784b5 29-30
+bkms-cli/pkg/client/port_forward.go
+  s_80216cbbc7d5c9::t_02bd14b8b916ef 157
+  s_80216cbbc7d5c9::t_ddb3a6b0afbb9f 37-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "b066515d10d48f807299a13f32d27ceb7e8939cc",
+  "prompts": {},
+  "sessions": {
+    "s_80216cbbc7d5c9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb768bd7d77b48e81fecf186a5ad3",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
