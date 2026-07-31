@@ -1,0 +1,46 @@
+apps/bkms-server/pkg/platmgt/portforward/portforward_suite_test.go
+  s_80216cbbc7d5c9::t_20617f95716f03 1-27
+bkms-cli/pkg/handler/instance/port_forward.go
+  s_80216cbbc7d5c9::t_afbd5ce95755dc 9-10,17-19,25-30,38-64
+  s_80216cbbc7d5c9::t_2b2c94a8fdbc5a 65-66
+apps/bkms-server/pkg/platmgt/portforward/model.go
+  s_80216cbbc7d5c9::t_abb461ba147d96 1-29
+apps/bkms-server/pkg/platmgt/portforward/service_test.go
+  s_80216cbbc7d5c9::t_5bba8482058f75 1-74
+apps/bkms-server/pkg/platmgt/portforward/store.go
+  s_80216cbbc7d5c9::t_03e87578c9ffe0 1-135
+bkms-cli/pkg/handler/instance/port_forward_env_check_test.go
+  s_80216cbbc7d5c9::t_1f8a3d3ded60a2 1-117
+apps/bkms-server/db/migrations/20260731173800_port_forward_whitelist_idx.md
+  s_80216cbbc7d5c9::t_9f92952559ed75 1-4
+apps/bkms-server/pkg/platmgt/portforward/service.go
+  s_80216cbbc7d5c9::t_cc0beb73421942 1-115
+apps/bkms-server/pkg/platmgt/portforward/handler/handler.go
+  s_80216cbbc7d5c9::t_fa225b6f08a256 1-245
+apps/bkms-server/db/migrations/20260731173800_port_forward_whitelist_idx.up.json
+  s_80216cbbc7d5c9::t_8f46a280ea53af 1-14
+apps/bkms-server/pkg/platmgt/portforward/store_test.go
+  s_80216cbbc7d5c9::t_efa169545f4ff6 1-151
+apps/bkms-server/pkg/platmgt/portforward/serializer/serializer.go
+  s_80216cbbc7d5c9::t_5dce520c756a65 1-77
+apps/bkms-server/pkg/platmgt/portforward/router.go
+  s_80216cbbc7d5c9::t_9f153a160f5a99 1-23
+apps/bkms-server/db/migrations/20260731173800_port_forward_whitelist_idx.down.json
+  s_80216cbbc7d5c9::t_cf9ba6c32e66f3 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "062448222f3c61527336a294865ddabe7de7e937",
+  "prompts": {},
+  "sessions": {
+    "s_80216cbbc7d5c9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb768bd7d77b48e81fecf186a5ad3",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
