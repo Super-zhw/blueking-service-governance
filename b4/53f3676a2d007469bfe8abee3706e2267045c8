@@ -1,0 +1,23 @@
+bkms-internal/bkms-cli/skills/bkms-cli/SKILL.md
+  s_8bebe5489a1efd::t_1116e7f2321db7 150-152
+bkms-internal/bkms-cli/skills/bkms-cli/references/troubleshooting.md
+  s_8bebe5489a1efd::t_7cf23c0ab52899 69-71
+bkms-cli/cmd/app/appspec/startcommand/view.go
+  s_8bebe5489a1efd::t_e5c0ca661f33d2 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b453f3676a2d007469bfe8abee3706e2267045c8",
+  "prompts": {},
+  "sessions": {
+    "s_8bebe5489a1efd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb2074c7e76a292c8e83c873d5359",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
