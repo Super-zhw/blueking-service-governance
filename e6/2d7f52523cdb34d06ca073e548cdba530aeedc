@@ -1,0 +1,16 @@
+apps/bkms-server/pkg/workload/instance/handler/port_forward.go
+  h_35547c76ab0580 70
+bkms-cli/pkg/client/port_forward.go
+  h_35547c76ab0580 45,47,68,90-98,187-224
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "e62d7f52523cdb34d06ca073e548cdba530aeedc",
+  "prompts": {},
+  "humans": {
+    "h_35547c76ab0580": {
+      "author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
