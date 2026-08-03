@@ -1,0 +1,50 @@
+bkms-cli/cmd/app/appcfgfile/delete_version.go
+  h_35547c76ab0580 32
+bkms-cli/cmd/app/appcfgfile/rollback_version.go
+  h_35547c76ab0580 32
+bkms-cli/cmd/app/appcfgfile/view_version.go
+  h_35547c76ab0580 33
+bkms-cli/cmd/app/appspec/startcommand/edit.go
+  h_35547c76ab0580 41,45
+bkms-cli/cmd/app/deploy/update.go
+  h_35547c76ab0580 78
+bkms-internal/bkms-cli/skills/bkms-cli/SKILL.md
+  h_35547c76ab0580 166,169,172,178-179,182
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-appspec.md
+  h_35547c76ab0580 34,36-37,44,46-47,53-54,61,64,73,75-76,79,82,85,96,99,108,126,130,141,143-144,147,156,158-159,177-178,189,191-192,195,204,206-207,222-223,234,236-237,240,249,251-252,292-293,304,306-307,310,319,321-322,366-367,378,380-381,384,393,395-396,412-413,424,426-427,430,439,441-442,458-459
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-build.md
+  h_35547c76ab0580 12,15,18,35
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-cfg-file.md
+  h_35547c76ab0580 20,22-23,30,33,36,43,50,52-53,56,59,62,65,74,77,80,83,85-86,89,98,101,103-104,106-107,110,113,122,124-125,128,137,139-140,143,146,155,157-158,161,164,173,175-176,179
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-create.md
+  h_35547c76ab0580 16,46,67,74
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-deploy.md
+  h_35547c76ab0580 21-22,25,28,31,34,88,91,94,141,152,155,158
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-image.md
+  h_35547c76ab0580 9,12,15
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-instance.md
+  h_35547c76ab0580 14,17,62,65,68,74,81,130,154,157,161
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-list.md
+  h_35547c76ab0580 32
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-polaris.md
+  h_35547c76ab0580 49,52,55,58,60-61,64,84,175,204
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-publish.md
+  h_35547c76ab0580 22,25,32,35,42,51,54,57,60
+bkms-internal/bkms-cli/skills/bkms-cli/references/env.md
+  h_35547c76ab0580 12
+bkms-internal/bkms-cli/skills/bkms-cli/references/scenarios.md
+  h_35547c76ab0580 51,86-87,98,101
+bkms-internal/bkms-cli/skills/bkms-cli/references/troubleshooting.md
+  h_35547c76ab0580 3,17,21,31,35,80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "0bbef0457b9524659a3a8527c5ea6659a0fe68e6",
+  "prompts": {},
+  "humans": {
+    "h_35547c76ab0580": {
+      "author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
