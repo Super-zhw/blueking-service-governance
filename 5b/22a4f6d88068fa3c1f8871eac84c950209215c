@@ -1,0 +1,50 @@
+bkms-internal/bkms-cli/skills/bkms-cli/references/install.md
+  s_8bebe5489a1efd::t_450f8ef368c690 7,10,12,14-16,19-21,26,104
+bkms-internal/bkms-cli/skills/bkms-cli/scripts/install.sh
+  s_8bebe5489a1efd::t_e9f07488f5c509 176-190,193-196,199,201-225,227,229-232,234
+  s_8bebe5489a1efd::t_43b75a324c17ee 139,248,250-257,264-266
+  s_8bebe5489a1efd::t_097ca7baa47493 249,258-261
+  s_8bebe5489a1efd::t_ea2442249a6dee 93,95-112,125-138
+  s_8bebe5489a1efd::t_59074746664297 5-8,12-15,17,29-30
+  s_8bebe5489a1efd::t_ad29332538214f 94
+  s_8bebe5489a1efd::t_a1dda48edf2761 46-49,52-55,61-66,68
+  s_8bebe5489a1efd::t_9f2181c0207a34 140-141
+bkms-internal/bkms-cli/skills/bkms-cli/references/troubleshooting.md
+  s_8bebe5489a1efd::t_f0f27af8d4d9ce 52-53
+bkms-internal/bkms-cli/skills/bkms-cli/SKILL.md
+  s_8bebe5489a1efd::t_d70d964ecf82e2 3,13,20-21,32,44,99-100,122,160,178-179,182-183
+bkms-internal/bkms-cli/skills/bkms-cli/references/app-polaris.md
+  s_8bebe5489a1efd::t_da73bd20a9b50e 10-15
+bkms-internal/bkms-cli/skills/bkms-cli/references/scenarios.md
+  s_8bebe5489a1efd::t_875d392745d85d 3,5
+  s_6a6beff353102b::t_73313b355b3c15 74-76,92,106
+  s_6a6beff353102b::t_d7dae37091c652 118
+  s_8bebe5489a1efd::t_40d8f944916759 109,111,114
+  s_8bebe5489a1efd::t_50c7d206696a15 115
+bkms-cli/.agents/prompts/app-polaris.md
+  s_8bebe5489a1efd::t_aa50355c98ecaa 10-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "5b22a4f6d88068fa3c1f8871eac84c950209215c",
+  "prompts": {},
+  "sessions": {
+    "s_6a6beff353102b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fc6d129cf70ba99bace51d7a088f2",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_8bebe5489a1efd": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb2074c7e76a292c8e83c873d5359",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
