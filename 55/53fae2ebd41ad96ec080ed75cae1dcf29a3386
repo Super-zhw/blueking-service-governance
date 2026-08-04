@@ -1,0 +1,19 @@
+bkms-cli/Makefile
+  s_8a178421446668::t_ead895f9b394bd 235
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "5553fae2ebd41ad96ec080ed75cae1dcf29a3386",
+  "prompts": {},
+  "sessions": {
+    "s_8a178421446668": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcad42aae7b469bfba4e6374d840f",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
