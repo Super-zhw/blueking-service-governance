@@ -1,0 +1,54 @@
+bkms-cli/cmd/envvar/listcmd/app.go
+  s_2925c2e0e5358a::t_11eb73001a8b96 1-52
+bkms-cli/cmd/envvar/deletecmd/deletecmd.go
+  s_2925c2e0e5358a::t_4fd1e525ca9d5c 1-23
+bkms-cli/cmd/envvar/updatecmd/app.go
+  s_2925c2e0e5358a::t_838178d1ab7a5d 1-77
+bkms-cli/cmd/envvar/createcmd/createcmd.go
+  s_2925c2e0e5358a::t_e231bfd3c5f67b 1-23
+bkms-cli/cmd/envvar/deletecmd/app.go
+  s_2925c2e0e5358a::t_46930ac9d292ea 1-41
+bkms-cli/cmd/envvar/listcmd/public.go
+  s_2925c2e0e5358a::t_0b9f1bb378d9c6 1-55
+bkms-cli/cmd/envvar/updatecmd/updatecmd.go
+  s_2925c2e0e5358a::t_5fbcbdf8b94029 1-23
+bkms-cli/pkg/client/types.go
+  s_2925c2e0e5358a::t_e5c16bdab33e8a 196-216
+  s_2925c2e0e5358a::t_66480475523b99 217-219
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_2925c2e0e5358a::t_387b308848db67 3024-3241
+bkms-cli/pkg/client/env_var.go
+  s_2925c2e0e5358a::t_0fa0ffd27d6805 129-370
+bkms-cli/cmd/envvar/listcmd/app_env.go
+  s_2925c2e0e5358a::t_14a7b49c3bef38 1-55
+bkms-cli/cmd/envvar/updatecmd/public.go
+  s_2925c2e0e5358a::t_4742f02c915c39 1-78
+bkms-cli/cmd/envvar/deletecmd/public.go
+  s_2925c2e0e5358a::t_a30446d1c1bcae 1-45
+bkms-cli/cmd/envvar/envvar.go
+  s_2925c2e0e5358a::t_b11cfbe1e3151b 7-8,11-12,20,22-23,31-38
+bkms-cli/cmd/envvar/createcmd/public.go
+  s_2925c2e0e5358a::t_9eb85e332618da 1-77
+  s_2925c2e0e5358a::t_aa3d38cead34ab 78
+bkms-cli/cmd/envvar/listcmd/listcmd.go
+  s_2925c2e0e5358a::t_ae755c44880228 1-26
+bkms-cli/cmd/envvar/createcmd/app.go
+  s_2925c2e0e5358a::t_6fc7703eebfba9 1-59
+  s_2925c2e0e5358a::t_c40cd0e4e5ed51 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "eb283326421edc350c20494cb5282675768b8b68",
+  "prompts": {},
+  "sessions": {
+    "s_2925c2e0e5358a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcfe05740780994a05bef9d7a5d40",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
