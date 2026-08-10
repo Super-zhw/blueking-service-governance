@@ -20,10 +20,14 @@ package migration
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkiam"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkiam/role"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkiam/scope"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
@@ -32,27 +36,16 @@ import (
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
 )
 
-// NewRefreshWorkspaceBkmonitorPermsCmd 创建一个 Cobra 命令，用于批量刷新所有 workspace 的
-// bkmonitor 权限范围到 IAM 用户组。
-//
-// 该命令设计为一次性执行，在 bkmonitor 权限模板新增 MCP actions 后，将新权限刷新到
-// 所有已有 workspace 的 IAM 用户组中。
-//
-// 命令执行流程：
-//  1. 读取业务配置并初始化 MongoDB 连接
-//  2. 初始化存储层，获取 WorkspaceStore
-//  3. 分页拉取所有 workspace，逐个刷新 bkmonitor 权限
-//  4. 输出汇总信息（总数、成功数、跳过数、失败数）
-//
-// 必填参数：
-//
-//	--srvCfg：业务配置文件路径，包含 MongoDB 等连接信息
+// NewRefreshWorkspaceBkmonitorPermsCmd 批量刷新所有 Ready 状态 workspace 的 bkmonitor
+// 权限范围（含 MCP actions）到 IAM grade manager 及用户组。
+// 支持 --dry-run 预览待变更内容。
 func NewRefreshWorkspaceBkmonitorPermsCmd() *cobra.Command {
 	var srvCfg string
+	var dryRun bool
 
 	cmd := &cobra.Command{
 		Use:   "refresh_workspace_bkmonitor_perms",
-		Short: "批量刷新所有 workspace 的 bkmonitor 权限范围（含 MCP actions）到 IAM 用户组",
+		Short: "Refresh bkmonitor permission scopes (including MCP actions) for all workspaces to IAM user groups",
 		Run: func(cmd *cobra.Command, _ []string) {
 			ctx := cmd.Context()
 			cfg, err := config.Load(ctx, srvCfg)
@@ -66,17 +59,113 @@ func NewRefreshWorkspaceBkmonitorPermsCmd() *cobra.Command {
 			database.InitClient(ctx, cfg.Mongo)
 			storereg.Init(ctx)
 
-			permMgr := perm.NewManager()
 			wsStore := storereg.G().WorkspaceStore
 
-			refreshWorkspaceBkmonitorPerms(ctx, wsStore, permMgr)
+			if dryRun {
+				dryRunRefreshWorkspaceBkmonitorPerms(ctx, wsStore)
+			} else {
+				permMgr := perm.NewManager()
+				refreshWorkspaceBkmonitorPerms(ctx, wsStore, permMgr)
+			}
 		},
 	}
 
 	cmd.Flags().StringVar(&srvCfg, "srvCfg", "", "server config file")
+	cmd.Flags().
+		BoolVar(&dryRun, "dry-run", false, "list pending changes without actually executing IAM permission refresh")
 	_ = cmd.MarkFlagRequired("srvCfg")
 
 	return cmd
+}
+
+// dryRunRefreshWorkspaceBkmonitorPerms 以 dry-run 模式列出所有待变更的 workspace 及其详细信息。
+func dryRunRefreshWorkspaceBkmonitorPerms(
+	ctx context.Context,
+	wsStore workspace.WorkspaceStore,
+) {
+	readyState := workspace.StateReady
+	workspaces, err := wsStore.List(ctx, &workspace.ListOptions{State: &readyState})
+	if err != nil {
+		log.Fatalf("list workspaces: %v", err)
+	}
+
+	fmt.Println("========================================")
+	fmt.Println("[DRY-RUN] BKMonitor Permission Refresh Preview")
+	fmt.Printf("========================================\n\n")
+	fmt.Printf("Total workspaces to process: %d\n\n", len(workspaces))
+
+	var willProcess, willSkip int
+
+	for i, ws := range workspaces {
+		fmt.Printf("--- [%d/%d] Workspace: %s (%s) ---\n", i+1, len(workspaces), ws.ID, ws.DisplayName)
+
+		if ws.BkSystems.BkMonitorProjectID == "" {
+			fmt.Printf("  Status: SKIP (BkMonitorProjectID is empty)\n\n")
+			willSkip++
+			continue
+		}
+
+		willProcess++
+		data := buildWorkspaceData(ws)
+
+		fmt.Printf("  Status: WILL_REFRESH\n")
+		fmt.Printf("  BKMonitor: SpaceID=%s\n", data.BKMonitor.SpaceID)
+		if data.BKLog != nil {
+			fmt.Printf("  BKLog:     SpaceID=%s\n", data.BKLog.SpaceID)
+		}
+		if data.BKCI != nil {
+			fmt.Printf("  BKCI:     ProjectID=%s\n", data.BKCI.ProjectID)
+		}
+		if data.BCS != nil {
+			fmt.Printf("  BCS:      ProjectID=%s\n", data.BCS.ProjectID)
+		}
+		if data.BKRepo != nil {
+			fmt.Printf("  BKRepo:   ProjectID=%s\n", data.BKRepo.ProjectID)
+		}
+
+		fmt.Println("  BKMonitor actions to grant (by role):")
+		for _, roleCode := range append(
+			[]string{role.BuiltinRoleCode.Admin},
+			role.WorkspaceScopeBuiltinRoles...,
+		) {
+			g := scope.BKMonitorRoleScopesGenerator{
+				SpaceID:     data.BKMonitor.SpaceID,
+				SpaceName:   data.BKMonitor.SpaceName,
+				TplRoleCode: roleCode,
+			}
+			scopes := g.Generate()
+			fmt.Printf("    [%s] %d scope blocks, actions: ", roleCode, len(scopes))
+			for si, s := range scopes {
+				if si > 0 {
+					fmt.Print(" | ")
+				}
+				for ai, a := range s.Actions {
+					if ai > 0 {
+						fmt.Print(", ")
+					}
+					fmt.Print(a.ID)
+				}
+			}
+			fmt.Println()
+		}
+		fmt.Println()
+	}
+
+	fmt.Println("========================================")
+	fmt.Printf("[DRY-RUN] Summary: total=%d, will_process=%d, will_skip=%d\n", len(workspaces), willProcess, willSkip)
+	fmt.Println("========================================")
+
+	if willProcess > 0 {
+		for _, ws := range workspaces {
+			if ws.BkSystems.BkMonitorProjectID == "" {
+				continue
+			}
+			data := buildWorkspaceData(ws)
+			jsonBytes, _ := json.MarshalIndent(data, "", "  ")
+			fmt.Printf("\n[DRY-RUN] Sample WorkspaceData (workspace=%s):\n%s\n", ws.ID, string(jsonBytes))
+			break
+		}
+	}
 }
 
 // refreshWorkspaceBkmonitorPerms 遍历所有 Ready 状态的 workspace，逐个刷新 bkmonitor 权限。
