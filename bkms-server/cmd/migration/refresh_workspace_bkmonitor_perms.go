@@ -1,0 +1,174 @@
+/*
+ * TencentBlueKing is pleased to support the open source community by making
+ * 蓝鲸智云 - 服务治理 (BlueKing Service Governance) available.
+ * Copyright (C) Tencent. All rights reserved.
+ * Licensed under the MIT License (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ *  http://opensource.org/licenses/MIT
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * We undertake not to change the open source license (MIT license) applicable
+ * to the current version of the project delivered to anyone in the future.
+ */
+
+package migration
+
+import (
+	"context"
+
+	"github.com/spf13/cobra"
+
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkiam"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
+	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
+	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
+)
+
+// NewRefreshWorkspaceBkmonitorPermsCmd 创建一个 Cobra 命令，用于批量刷新所有 workspace 的
+// bkmonitor 权限范围到 IAM 用户组。
+//
+// 该命令设计为一次性执行，在 bkmonitor 权限模板新增 MCP actions 后，将新权限刷新到
+// 所有已有 workspace 的 IAM 用户组中。
+//
+// 命令执行流程：
+//  1. 读取业务配置并初始化 MongoDB 连接
+//  2. 初始化存储层，获取 WorkspaceStore
+//  3. 分页拉取所有 workspace，逐个刷新 bkmonitor 权限
+//  4. 输出汇总信息（总数、成功数、跳过数、失败数）
+//
+// 必填参数：
+//
+//	--srvCfg：业务配置文件路径，包含 MongoDB 等连接信息
+func NewRefreshWorkspaceBkmonitorPermsCmd() *cobra.Command {
+	var srvCfg string
+
+	cmd := &cobra.Command{
+		Use:   "refresh_workspace_bkmonitor_perms",
+		Short: "批量刷新所有 workspace 的 bkmonitor 权限范围（含 MCP actions）到 IAM 用户组",
+		Run: func(cmd *cobra.Command, _ []string) {
+			ctx := cmd.Context()
+			cfg, err := config.Load(ctx, srvCfg)
+			if err != nil {
+				log.Fatalf("load config: %v", err)
+			}
+			if err = log.InitDefaultLogger(cfg.Logging); err != nil {
+				log.Fatalf("init logger: %v", err)
+			}
+
+			database.InitClient(ctx, cfg.Mongo)
+			storereg.Init(ctx)
+
+			permMgr := perm.NewManager()
+			wsStore := storereg.G().WorkspaceStore
+
+			refreshWorkspaceBkmonitorPerms(ctx, wsStore, permMgr)
+		},
+	}
+
+	cmd.Flags().StringVar(&srvCfg, "srvCfg", "", "server config file")
+	_ = cmd.MarkFlagRequired("srvCfg")
+
+	return cmd
+}
+
+// refreshWorkspaceBkmonitorPerms 遍历所有 Ready 状态的 workspace，逐个刷新 bkmonitor 权限。
+func refreshWorkspaceBkmonitorPerms(
+	ctx context.Context,
+	wsStore workspace.WorkspaceStore,
+	permMgr perm.Manager,
+) {
+	readyState := workspace.StateReady
+	workspaces, err := wsStore.List(ctx, &workspace.ListOptions{State: &readyState})
+	if err != nil {
+		log.Fatalf("list workspaces: %v", err)
+	}
+
+	var total, success, skipped, failed int
+	total = len(workspaces)
+
+	for _, ws := range workspaces {
+		if ws.BkSystems.BkMonitorProjectID == "" {
+			log.Warnf(ctx, "workspace %s has no BkMonitorProjectID, skipping", ws.ID)
+			skipped++
+			continue
+		}
+
+		data := buildWorkspaceData(ws)
+
+		if err = permMgr.UpdateWorkspaceAdmin(ctx, data); err != nil {
+			log.Errorf(ctx, "update workspace admin for %s failed: %v", ws.ID, err)
+			failed++
+			continue
+		}
+
+		if err = permMgr.UpdateWorkspaceScopeBuiltinRoles(ctx, data); err != nil {
+			log.Errorf(ctx, "update workspace builtin roles for %s failed: %v", ws.ID, err)
+			failed++
+			continue
+		}
+
+		log.Infof(ctx, "workspace %s bkmonitor perms refreshed successfully", ws.ID)
+		success++
+	}
+
+	log.Infof(
+		ctx,
+		"refresh_workspace_bkmonitor_perms completed: total=%d, success=%d, skipped=%d, failed=%d",
+		total, success, skipped, failed,
+	)
+}
+
+// buildWorkspaceData 根据 workspace 信息构造 WorkspaceData，填充所有平台字段。
+func buildWorkspaceData(ws workspace.Workspace) bkiam.WorkspaceData {
+	data := bkiam.WorkspaceData{
+		WorkspaceID:   ws.ID,
+		WorkspaceName: ws.DisplayName,
+		BKMonitor: &bkiam.BKMonitorOptions{
+			SpaceID:   ws.BkSystems.BkMonitorProjectID,
+			SpaceName: ws.DisplayName,
+		},
+	}
+
+	// 填充 BKLog（与 BKMonitor 共用同一个 project ID）
+	if ws.BkSystems.BkLogProjectID != "" {
+		data.BKLog = &bkiam.BKLogOptions{
+			SpaceID:   ws.BkSystems.BkLogProjectID,
+			SpaceName: ws.DisplayName,
+		}
+	}
+
+	// 填充 BKCI
+	if ws.BkSystems.BkCIProjectID != "" {
+		data.BKCI = &bkiam.BKCIOptions{
+			ProjectID:   ws.BkSystems.BkCIProjectID,
+			ProjectName: ws.BkSystems.BkCIProjectID,
+		}
+	}
+
+	// 填充 BCS
+	if ws.BkSystems.BkBCSProjectID != "" {
+		data.BCS = &bkiam.BCSOptions{
+			ProjectID: ws.BkSystems.BkBCSProjectID,
+			// 历史兼容 quirk：BCS.ProjectName 取 bkCIProjectID 而非 bcsProjectID
+			ProjectName: ws.BkSystems.BkCIProjectID,
+		}
+	}
+
+	// 填充 BKRepo
+	if ws.BkSystems.BkRepoProjectID != "" {
+		data.BKRepo = &bkiam.BKRepoOptions{
+			ProjectID:   ws.BkSystems.BkRepoProjectID,
+			ProjectName: ws.BkSystems.BkRepoProjectID,
+		}
+	}
+
+	return data
+}

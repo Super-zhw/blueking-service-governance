@@ -60,4 +60,57 @@ var _ = Describe("BKMonitorRoleScopesGenerator", func() {
 		Expect(scopes).NotTo(BeEmpty())
 		Expect(scopes[0].Actions).NotTo(BeEmpty())
 	})
+
+	Context("MCP actions", func() {
+		// mcpViewActions 是所有 view 类型的 MCP actions
+		mcpViewActions := []types.Action{
+			{ID: "using_dashboard_mcp"},
+			{ID: "using_metrics_mcp"},
+			{ID: "using_log_mcp"},
+			{ID: "using_alarm_mcp"},
+			{ID: "using_metadata_mcp"},
+			{ID: "using_apm_mcp"},
+			{ID: "using_operation_mcp"},
+		}
+		// mcpManageAction 是 manage 类型的 MCP action
+		mcpManageAction := types.Action{ID: "using_alarm_handling_mcp"}
+
+		DescribeTable("admin/developer/sre should include all 8 MCP actions",
+			func(roleCode string) {
+				g := BKMonitorRoleScopesGenerator{
+					SpaceID:     spaceID,
+					SpaceName:   spaceName,
+					TplRoleCode: roleCode,
+				}
+				scopes := g.Generate()
+				Expect(scopes).NotTo(BeEmpty())
+
+				// 第一个 scope block（type: space）应包含所有 MCP actions
+				spaceActions := scopes[0].Actions
+				for _, action := range mcpViewActions {
+					Expect(spaceActions).To(ContainElement(action))
+				}
+				Expect(spaceActions).To(ContainElement(mcpManageAction))
+			},
+			Entry("admin", role.BuiltinRoleCode.Admin),
+			Entry("developer", role.BuiltinRoleCode.Developer),
+			Entry("sre", role.BuiltinRoleCode.SRE),
+		)
+
+		It("operator should include 7 view MCP actions but NOT using_alarm_handling_mcp", func() {
+			g := BKMonitorRoleScopesGenerator{
+				SpaceID:     spaceID,
+				SpaceName:   spaceName,
+				TplRoleCode: role.BuiltinRoleCode.Operator,
+			}
+			scopes := g.Generate()
+			Expect(scopes).NotTo(BeEmpty())
+
+			spaceActions := scopes[0].Actions
+			for _, action := range mcpViewActions {
+				Expect(spaceActions).To(ContainElement(action))
+			}
+			Expect(spaceActions).NotTo(ContainElement(mcpManageAction))
+		})
+	})
 })

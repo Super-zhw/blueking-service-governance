@@ -43,6 +43,7 @@ func init() {
 	rootCmd.AddCommand(migration.NewCleanupExpiredWorkspaceTempAdminsCmd())
 	rootCmd.AddCommand(migration.NewCleanupOrphanAppConfigFileVersionsCmd())
 	rootCmd.AddCommand(migration.NewUpsertRuntimeImageCmd())
+	rootCmd.AddCommand(migration.NewRefreshWorkspaceBkmonitorPermsCmd())
 }
 
 // Execute ...

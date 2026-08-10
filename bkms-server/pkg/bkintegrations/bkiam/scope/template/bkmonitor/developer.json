@@ -43,6 +43,30 @@
       },
       {
         "id": "import_config_v2"
+      },
+      {
+        "id": "using_dashboard_mcp"
+      },
+      {
+        "id": "using_metrics_mcp"
+      },
+      {
+        "id": "using_log_mcp"
+      },
+      {
+        "id": "using_alarm_mcp"
+      },
+      {
+        "id": "using_alarm_handling_mcp"
+      },
+      {
+        "id": "using_metadata_mcp"
+      },
+      {
+        "id": "using_apm_mcp"
+      },
+      {
+        "id": "using_operation_mcp"
       }
     ],
     "resources": [
