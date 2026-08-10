@@ -22,7 +22,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkiam"
@@ -42,18 +44,19 @@ import (
 func NewRefreshWorkspaceBkmonitorPermsCmd() *cobra.Command {
 	var srvCfg string
 	var dryRun bool
+	var workspaceIDs []string
 
 	cmd := &cobra.Command{
 		Use:   "refresh_workspace_bkmonitor_perms",
 		Short: "Refresh bkmonitor permission scopes (including MCP actions) for all workspaces to IAM user groups",
-		Run: func(cmd *cobra.Command, _ []string) {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := cmd.Context()
 			cfg, err := config.Load(ctx, srvCfg)
 			if err != nil {
-				log.Fatalf("load config: %v", err)
+				return errors.Wrap(err, "load config")
 			}
 			if err = log.InitDefaultLogger(cfg.Logging); err != nil {
-				log.Fatalf("init logger: %v", err)
+				return errors.Wrap(err, "init logger")
 			}
 
 			database.InitClient(ctx, cfg.Mongo)
@@ -62,17 +65,23 @@ func NewRefreshWorkspaceBkmonitorPermsCmd() *cobra.Command {
 			wsStore := storereg.G().WorkspaceStore
 
 			if dryRun {
-				dryRunRefreshWorkspaceBkmonitorPerms(ctx, wsStore)
-			} else {
-				permMgr := perm.NewManager()
-				refreshWorkspaceBkmonitorPerms(ctx, wsStore, permMgr)
+				dryRunRefreshWorkspaceBkmonitorPerms(ctx, wsStore, workspaceIDs)
+				return nil
 			}
+
+			log.Warn(ctx, "WARNING: This will grant bkmonitor MCP policies to IAM user groups "+
+				"for all Ready workspaces (append-only, will NOT overwrite grade manager scopes).")
+
+			permMgr := perm.NewManager()
+			return refreshWorkspaceBkmonitorPerms(ctx, wsStore, permMgr, workspaceIDs)
 		},
 	}
 
 	cmd.Flags().StringVar(&srvCfg, "srvCfg", "", "server config file")
 	cmd.Flags().
 		BoolVar(&dryRun, "dry-run", false, "list pending changes without actually executing IAM permission refresh")
+	cmd.Flags().StringSliceVar(&workspaceIDs, "workspace-id", nil,
+		"only refresh specified workspace IDs (comma-separated), useful for retrying failed ones")
 	_ = cmd.MarkFlagRequired("srvCfg")
 
 	return cmd
@@ -82,11 +91,26 @@ func NewRefreshWorkspaceBkmonitorPermsCmd() *cobra.Command {
 func dryRunRefreshWorkspaceBkmonitorPerms(
 	ctx context.Context,
 	wsStore workspace.WorkspaceStore,
+	filterIDs []string,
 ) {
 	readyState := workspace.StateReady
 	workspaces, err := wsStore.List(ctx, &workspace.ListOptions{State: &readyState})
 	if err != nil {
 		log.Fatalf("list workspaces: %v", err)
+	}
+
+	if len(filterIDs) > 0 {
+		filterSet := make(map[string]struct{}, len(filterIDs))
+		for _, id := range filterIDs {
+			filterSet[id] = struct{}{}
+		}
+		filtered := workspaces[:0]
+		for _, ws := range workspaces {
+			if _, ok := filterSet[ws.ID]; ok {
+				filtered = append(filtered, ws)
+			}
+		}
+		workspaces = filtered
 	}
 
 	fmt.Println("========================================")
@@ -173,14 +197,31 @@ func refreshWorkspaceBkmonitorPerms(
 	ctx context.Context,
 	wsStore workspace.WorkspaceStore,
 	permMgr perm.Manager,
-) {
+	filterIDs []string,
+) error {
 	readyState := workspace.StateReady
 	workspaces, err := wsStore.List(ctx, &workspace.ListOptions{State: &readyState})
 	if err != nil {
-		log.Fatalf("list workspaces: %v", err)
+		return errors.Wrap(err, "list workspaces")
+	}
+
+	// 如果指定了 --workspace-id，则只处理指定的 workspace
+	if len(filterIDs) > 0 {
+		filterSet := make(map[string]struct{}, len(filterIDs))
+		for _, id := range filterIDs {
+			filterSet[id] = struct{}{}
+		}
+		filtered := workspaces[:0]
+		for _, ws := range workspaces {
+			if _, ok := filterSet[ws.ID]; ok {
+				filtered = append(filtered, ws)
+			}
+		}
+		workspaces = filtered
 	}
 
 	var total, success, skipped, failed int
+	var failedIDs []string
 	total = len(workspaces)
 
 	for _, ws := range workspaces {
@@ -192,15 +233,12 @@ func refreshWorkspaceBkmonitorPerms(
 
 		data := buildWorkspaceData(ws)
 
-		if err = permMgr.UpdateWorkspaceAdmin(ctx, data); err != nil {
-			log.Errorf(ctx, "update workspace admin for %s failed: %v", ws.ID, err)
-			failed++
-			continue
-		}
-
+		// 仅刷新用户组 policies（追加语义），不更新 grade manager（覆盖语义），
+		// 避免因缺少数据导致 grade manager authScopes 被意外缩减。
 		if err = permMgr.UpdateWorkspaceScopeBuiltinRoles(ctx, data); err != nil {
 			log.Errorf(ctx, "update workspace builtin roles for %s failed: %v", ws.ID, err)
 			failed++
+			failedIDs = append(failedIDs, ws.ID)
 			continue
 		}
 
@@ -213,6 +251,20 @@ func refreshWorkspaceBkmonitorPerms(
 		"refresh_workspace_bkmonitor_perms completed: total=%d, success=%d, skipped=%d, failed=%d",
 		total, success, skipped, failed,
 	)
+
+	if failed > 0 {
+		log.Errorf(ctx, "failed workspace IDs: %s", strings.Join(failedIDs, ", "))
+		log.Infof(
+			ctx,
+			"to retry failed workspaces, run: refresh_workspace_bkmonitor_perms --srvCfg=<path> --workspace-id=%s",
+			strings.Join(failedIDs, ","),
+		)
+		return errors.Errorf(
+			"refresh_workspace_bkmonitor_perms partially failed: %d/%d workspaces failed",
+			failed, total,
+		)
+	}
+	return nil
 }
 
 // buildWorkspaceData 根据 workspace 信息构造 WorkspaceData，填充所有平台字段。
