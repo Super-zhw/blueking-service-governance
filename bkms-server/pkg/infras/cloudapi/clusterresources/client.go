@@ -162,7 +162,7 @@ func (c *ApiClient) handleOperation(
 ) (result map[string]any, err error) {
 	started := time.Now()
 	opName := apiOperation.FullName()
-	defer metrics.ReportClientRequestMetric("clusterresources", apiOperation.FullName(), started, &err)
+	defer metrics.ClientRequest("clusterresources", apiOperation.FullName(), started, &err)
 
 	ctx, span := apm.StartClientSpan(ctx, "clusterresources", opName)
 	resp, err := apiOperation.SetContext(ctx).SetResult(&result).Request()

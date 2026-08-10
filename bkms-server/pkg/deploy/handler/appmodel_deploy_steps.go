@@ -23,6 +23,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -40,6 +41,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/worker"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	alertstrategy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/strategy"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/task"
@@ -198,6 +200,8 @@ func (h *Handler) createAppModelDeploy(c *gin.Context) {
 
 // deleteAppModelDeploy 删除 AppModel 应用部署
 func (h *Handler) deleteAppModelDeploy(c *gin.Context) {
+	startedAt := time.Now()
+	metricStatus := metrics.StatusOK
 	var uriInput serializer.AppEnvURIInput
 	var input serializer.DeleteAppModelDeployInput
 	if err := ginutils.BindURIQuery(c, &uriInput, &input); err != nil {
@@ -212,10 +216,14 @@ func (h *Handler) deleteAppModelDeploy(c *gin.Context) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
+	defer func() {
+		metrics.DeployUninstallFinished(metrics.DeployKindAppModel, metricStatus, startedAt)
+	}()
 
 	// 执行部署操作
 	deployer := h.newDeployer(app)
 	if err = deployer.Uninstall(ctx, uriInput.EnvName, input.TrafficLaneName); err != nil {
+		metricStatus = metrics.StatusErr
 		deployInfo := genDeployInfo(app.WorkspaceID, app.ID, uriInput.EnvName, input.TrafficLaneName)
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
 			err, bkerrs.ErrCodeInternalServerError, "uninstall app model app: %s", deployInfo,

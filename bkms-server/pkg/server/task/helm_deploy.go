@@ -33,6 +33,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/helm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
 )
 
@@ -151,6 +152,7 @@ func pollingHelmDeployStatus(ctx context.Context, args PollingHelmDeployStatusAr
 
 		// 如果最新状态已经是最终态，退出轮询
 		if helm.IsStable(record.Status) {
+			metrics.DeployFinished(metrics.DeployKindHelm, string(record.Status), record.StartedAt, time.Now())
 			// 泳道标签已通过 PostRenderer 在部署时前置注入，无需异步 Patch
 			log.Infof(ctx, "helm deploy %s status is %s (Stable), stop polling and release lock", args, record.Status)
 

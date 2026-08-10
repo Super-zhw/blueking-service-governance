@@ -104,7 +104,7 @@ func (c *ApiClient) handleOperation(
 ) (result map[string]any, err error) {
 	started := time.Now()
 	opName := apiOperation.FullName()
-	defer metrics.ReportClientRequestMetric(apiName, apiOperation.FullName(), started, &err)
+	defer metrics.ClientRequest(apiName, apiOperation.FullName(), started, &err)
 
 	ctx, span := apm.StartClientSpan(ctx, apiName, opName)
 	resp, err := apiOperation.SetContext(ctx).SetResult(&result).Request()

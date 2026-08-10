@@ -31,6 +31,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/topology"
 )
@@ -177,6 +178,7 @@ func pollingTrpcDeployStatus(ctx context.Context, args PollingTrpcDeployStatusAr
 
 		// 如果最新状态已经是最终态，退出轮询
 		if record.Status.IsStable() {
+			metrics.DeployFinished(metrics.DeployKindAppModel, string(record.Status), record.StartedAt, time.Now())
 			log.Infof(ctx, "trpc deploy %s status is %s (Stable)，stop polling and release lock", args, record.Status)
 
 			// 部署成功时，记录应用到环境的关联

@@ -32,6 +32,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/httpcli"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/depservice/provider/types"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 )
 
 // Provider implements ServiceProvider for Polaris
@@ -95,6 +96,7 @@ func (p *Provider) CreateInstance(
 		createParams.Owners,
 	)
 	if err != nil {
+		metrics.DepservicePolarisFailed("create")
 		return nil, errors.Wrap(err, "create polaris service")
 	}
 
@@ -138,6 +140,7 @@ func (p *Provider) DeleteInstance(
 		return &types.DeleteInstanceResult{}, nil
 	}
 	if err = p.deleteService(ctx, instCfg.PolarisName, instCfg.PolarisNamespace, instCfg.Token); err != nil {
+		metrics.DepservicePolarisFailed("delete")
 		return nil, err
 	}
 	return &types.DeleteInstanceResult{}, nil

@@ -948,7 +948,7 @@ func (c *ApiClient) handleOperation(
 ) (result map[string]any, err error) {
 	started := time.Now()
 	opName := apiOperation.FullName()
-	defer metrics.ReportClientRequestMetric("bkci", apiOperation.FullName(), started, &err)
+	defer metrics.ClientRequest("bkci", apiOperation.FullName(), started, &err)
 
 	ctx, span := apm.StartClientSpan(ctx, "bkci", opName)
 	resp, err := apiOperation.SetContext(ctx).SetResult(&result).Request()
@@ -1009,7 +1009,7 @@ func (c *ApiClient) handleStreamOperation(
 ) (body io.ReadCloser, err error) {
 	started := time.Now()
 	opName := apiOperation.FullName()
-	defer metrics.ReportClientRequestMetric("bkci", apiOperation.FullName(), started, &err)
+	defer metrics.ClientRequest("bkci", apiOperation.FullName(), started, &err)
 
 	ctx, span := apm.StartClientSpan(ctx, "bkci", opName)
 	resp, err := apiOperation.SetContext(ctx).Request()

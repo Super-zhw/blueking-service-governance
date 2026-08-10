@@ -86,7 +86,7 @@ func (c *ApiClient) GetLatestClusterReport(
 ) (*ClusterReport, []byte, error) {
 	var err error
 	started := time.Now()
-	defer metrics.ReportClientRequestMetric("kubeinsight", "GetLatestClusterReport", started, &err)
+	defer metrics.ClientRequest("kubeinsight", "GetLatestClusterReport", started, &err)
 
 	apiOperation := c.NewOperation(
 		bkapi.OperationConfig{

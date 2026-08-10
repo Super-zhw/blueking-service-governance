@@ -41,6 +41,7 @@ import (
 	bkciapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkci"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/worker"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/snapshot"
 )
@@ -354,6 +355,7 @@ func pollingBuildStatus(ctx context.Context, args PollingBuildStatusArgs) (*Empt
 
 		// 如果最新状态已经是结束态，退出轮询
 		if record.Status.IsTerminated() {
+			metrics.BuildFinished(string(record.Status), record.StartedAt, time.Now())
 			if record.Status == build.StatusSuccess && autoDeployEnabled {
 				if err = triggerDeployAfterBuild(ctx, buildAutoDeployOperator, record, args); err != nil {
 					log.Errorf(ctx, "handle build auto deploy after build success failed: %v", err)

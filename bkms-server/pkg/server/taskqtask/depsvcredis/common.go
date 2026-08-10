@@ -38,6 +38,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/depservice/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/dbm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/taskq"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 )
 
 const (
@@ -91,6 +92,7 @@ func pollTicket(ctx context.Context, ticketID int, username string) (bool, error
 
 // failWithStopErr 标记实例状态为失败并返回 ErrStopRetry 终止 task 重试
 func failWithStopErr(ctx context.Context, instID string, status model.InstanceStatus, err error) error {
+	metrics.DepserviceRedisFailed(operationFromStatus(status))
 	objID, parseErr := bson.ObjectIDFromHex(instID)
 	if parseErr != nil {
 		log.Errorf(ctx, "depsvcredis: invalid instID %q: %v", instID, parseErr)
@@ -104,6 +106,7 @@ func failWithStopErr(ctx context.Context, instID string, status model.InstanceSt
 
 // failOnExhausted 在重试耗尽回调中标记实例为失败状态
 func failOnExhausted(ctx context.Context, instID string, status model.InstanceStatus, lastErr error) {
+	metrics.DepserviceRedisFailed(operationFromStatus(status))
 	objID, parseErr := bson.ObjectIDFromHex(instID)
 	if parseErr != nil {
 		log.Errorf(ctx, "depsvcredis exhausted: invalid instID %q: %v", instID, parseErr)
@@ -154,4 +157,14 @@ func parseTicketID(handle string) (int, error) {
 		return 0, errors.Wrapf(taskq.ErrStopRetry, "invalid ticket handle %q", handle)
 	}
 	return ticketID, nil
+}
+
+// operationFromStatus 根据实例终态状态推断操作类型，用于指标上报。
+func operationFromStatus(status model.InstanceStatus) string {
+	switch status {
+	case model.CreateFailedStatus:
+		return "create"
+	default:
+		return "delete"
+	}
 }

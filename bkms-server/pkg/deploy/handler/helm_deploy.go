@@ -22,6 +22,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -35,6 +36,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/helm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/worker"
 	alertstrategy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/strategy"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/task"
@@ -392,6 +394,8 @@ func (h *Handler) RollbackHelmDeploy(c *gin.Context) {
 //	@Failure	400					{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/envs/{envName}/helm-deploys/{deployID} [delete]
 func (h *Handler) DeleteHelmDeploy(c *gin.Context) {
+	startedAt := time.Now()
+	metricStatus := metrics.StatusOK
 	var uriInput serializer.HelmDeployRecordURIInput
 	var queryInput serializer.HelmDeployTrafficLaneQueryInput
 	if err := ginutils.BindURIQuery(c, &uriInput, &queryInput); err != nil {
@@ -405,17 +409,22 @@ func (h *Handler) DeleteHelmDeploy(c *gin.Context) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
+	defer func() {
+		metrics.DeployUninstallFinished(metrics.DeployKindHelm, metricStatus, startedAt)
+	}()
 
 	// 找到最新部署记录
 	record, err := h.registry.HelmDeployRecordStore.GetLatest(
 		ctx, app.ID, uriInput.EnvName, queryInput.TrafficLaneName,
 	)
 	if err != nil {
+		metricStatus = metrics.StatusErr
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeNotFound, "get latest deploy record"))
 		return
 	}
 	// 检查提供的部署记录 ID 是否与最新一次的一致
 	if record.ID.Hex() != uriInput.DeployID {
+		metricStatus = metrics.StatusErr
 		bkerrs.AbortWithErr(c, bkerrs.New(bkerrs.ErrCodeInvalidArgument, "must provide latest deploy record id"))
 		return
 	}
@@ -423,6 +432,7 @@ func (h *Handler) DeleteHelmDeploy(c *gin.Context) {
 	// 对部署进行删除操作
 	deployInfo := genDeployInfo(app.WorkspaceID, app.ID, uriInput.EnvName, queryInput.TrafficLaneName)
 	if err = helmdeploy.UninstallHelmRelease(ctx, record); err != nil {
+		metricStatus = metrics.StatusErr
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
 			err, bkerrs.ErrCodeInternalServerError, "uninstall helm release for %s", deployInfo,
 		))
@@ -431,6 +441,7 @@ func (h *Handler) DeleteHelmDeploy(c *gin.Context) {
 	// 修改状态为已卸载
 	record.Status = helm.StatusUninstalled
 	if err = h.registry.HelmDeployRecordStore.Update(ctx, record); err != nil {
+		metricStatus = metrics.StatusErr
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
 			err, bkerrs.ErrCodeInternalServerError, "update deploy record for %s", deployInfo,
 		))

@@ -36,6 +36,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
@@ -295,6 +296,7 @@ func (h *Handler) ScaleAppInstances(c *gin.Context) {
 		audit.WithDataBefore(oldReplicas),
 		audit.WithDataAfter(input.TargetReplicas),
 	)
+	metrics.InstanceScaled(oldReplicas, input.TargetReplicas)
 	ginutils.OK(c, serializer.EmptyOutput{})
 }
 

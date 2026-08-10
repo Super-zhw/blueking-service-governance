@@ -168,7 +168,7 @@ func (c *ApiClient) handleOperation(
 	ctx context.Context, op define.Operation,
 ) (result map[string]any, err error) {
 	started := time.Now()
-	defer metrics.ReportClientRequestMetric("bkmonitorv3", op.FullName(), started, &err)
+	defer metrics.ClientRequest("bkmonitorv3", op.FullName(), started, &err)
 
 	ctx, span := apm.StartClientSpan(ctx, "bkmonitorv3", op.FullName())
 	resp, err := op.SetContext(ctx).SetResult(&result).Request()

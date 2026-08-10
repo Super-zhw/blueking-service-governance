@@ -21,12 +21,14 @@ package clusteraddon
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/action"
 
 	helmdeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/helm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/helm"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 )
 
 // GenerateReleaseName 生成 Helm Release 名称
@@ -44,7 +46,10 @@ func InstallOrUpgradeClusterAddon(
 	addonDef *ClusterAddonDef,
 	clusterID, namespace, chartVersion string,
 	valuesMap map[string]any,
-) error {
+) (retErr error) {
+	startedAt := time.Now()
+	defer metrics.ClusterAddonOperationFinished(metrics.ClusterAddonOperationDeploy, startedAt, &retErr)
+
 	releaseName := GenerateReleaseName(addonDef)
 
 	// 获取全局 Helm 仓库配置
@@ -87,7 +92,10 @@ func UninstallClusterAddon(
 	ctx context.Context,
 	addonDef *ClusterAddonDef,
 	clusterID, namespace string,
-) error {
+) (retErr error) {
+	startedAt := time.Now()
+	defer metrics.ClusterAddonOperationFinished(metrics.ClusterAddonOperationUninstall, startedAt, &retErr)
+
 	releaseName := GenerateReleaseName(addonDef)
 
 	// 初始化 Helm SDK

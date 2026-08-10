@@ -34,6 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
 	bkmmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/envvars"
 )
 
@@ -53,7 +54,19 @@ type PollingWorkspaceInitStatusArgs struct {
 // 2. 如果就绪，给空间角色加上对应监控/日志项目的权限
 // 3. 将蓝鲸监控项目 ID 写入 workspace, 并将空间状态调整为就绪
 // 4. 给空间下的所有环境添加 APM 相关环境变量
-func pollingWorkspaceInitStatus(ctx context.Context, args PollingWorkspaceInitStatusArgs) (*EmptyResult, error) {
+func pollingWorkspaceInitStatus(
+	ctx context.Context,
+	args PollingWorkspaceInitStatusArgs,
+) (result *EmptyResult, retErr error) {
+	startedAt := time.Now()
+	metricStatus := metrics.StatusOK
+	defer func() {
+		if retErr != nil && metricStatus == metrics.StatusOK {
+			metricStatus = metrics.StatusErr
+		}
+		metrics.WorkspaceInitFinished(metricStatus, startedAt)
+	}()
+
 	log.Infof(ctx, "polling workspace status for workspace %s", args.WorkspaceID)
 
 	mongoCli, dbName := database.Client(), database.Name()
@@ -83,6 +96,7 @@ func pollingWorkspaceInitStatus(ctx context.Context, args PollingWorkspaceInitSt
 		//  1、 通过加 metrics 告警处理
 		//  2、 新增一个接口用于手动调用重试
 		if time.Since(ws.CreatedAt) > pollingWorkspaceInitStatusMaxWaitDuration {
+			metricStatus = metrics.StatusTimeout
 			return nil, errors.Wrapf(
 				err, "get BKM project %s timeout after %v", ws.ID, pollingWorkspaceInitStatusMaxWaitDuration,
 			)
@@ -95,6 +109,7 @@ func pollingWorkspaceInitStatus(ctx context.Context, args PollingWorkspaceInitSt
 		// 等待一分钟后重试
 		select {
 		case <-ctx.Done():
+			metricStatus = metrics.StatusCancelled
 			return nil, ctx.Err()
 		case <-time.After(pollingWorkspaceInitStatusRetryInterval):
 		}

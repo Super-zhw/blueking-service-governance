@@ -25,22 +25,6 @@
 | `metrics.go` | 使用 `promauto` 定义全局 Counter 指标（自动注册）、`recordFailure` 通用记录函数及各场景便捷函数 |
 | `server.go` | Metrics HTTP Server 启停逻辑（`StartServer(ctx)` / `StopServer(ctx)`） |
 
-## 预置指标
-
-| 指标名 | 类型 | 标签 | 说明 |
-|--------|------|------|------|
-| `bkms_server_create_env_failure` | Counter | `workspace_id`, `env_name` | 创建环境失败计数（每次失败 +1） |
-| `bkms_server_create_apm_failure` | Counter | `workspace_id`, `env_name` | APM 应用创建/获取失败计数（每次失败 +1） |
-| `bkms_server_bind_apm_failure` | Counter | `workspace_id`, `env_name` | APM 与环境绑定失败计数（每次失败 +1） |
-
-### 便捷记录函数
-
-| 函数 | 对应指标 | 说明 |
-|------|----------|------|
-| `CreateEnvFailed` | `create_env_failure` | 记录创建环境失败 |
-| `CreateEnvApmFailed` | `create_apm_failure` | 记录 APM 应用创建/获取失败 |
-| `BindEnvApmFailed` | `bind_apm_failure` | 记录 APM 与环境绑定失败 |
-
 ## 配置
 
 `config.yaml` 中新增：

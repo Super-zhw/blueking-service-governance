@@ -32,6 +32,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	bscpapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bscp"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	bscpworkload "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/bscpcfg"
 )
 
@@ -80,12 +81,14 @@ func (m *Manager) InitMetadata(
 	// 获取或创建 Credential
 	cred, err := m.GetOrCreateCredential(ctx, params.BscpBizID)
 	if err != nil {
+		metrics.BscpcfgStepFailed("credential")
 		return nil, errors.Wrap(err, "get or create bscpcfg credential")
 	}
 
 	// 获取或创建后置脚本
 	hookID, err := m.GetOrCreatePostHook(ctx, params.BscpBizID, params.AppID)
 	if err != nil {
+		metrics.BscpcfgStepFailed("post_hook")
 		return nil, errors.Wrap(err, "get or create post hook")
 	}
 
@@ -133,6 +136,7 @@ func (m *Manager) CreateEnvBinding(
 	// 2. 获取或创建 file 服务并刷新 IAM 权限
 	fileSvc, err := m.getOrCreateFileService(ctx, params)
 	if err != nil {
+		metrics.BscpcfgStepFailed("file_service")
 		return nil, errors.Wrap(err, "get or create file service")
 	}
 
@@ -144,6 +148,7 @@ func (m *Manager) CreateEnvBinding(
 			AppID:      fileSvcID,
 			PostHookID: postHookID,
 		}); err != nil {
+			metrics.BscpcfgStepFailed("bind_hook")
 			return nil, errors.Wrap(err, "bind post hook to file service")
 		}
 		log.Infof(ctx, "bound post hook %d to file service %d (biz %s)", postHookID, fileSvcID, params.BscpBizID)
@@ -152,6 +157,7 @@ func (m *Manager) CreateEnvBinding(
 	// 4. 刷新 Credential 权限
 	credID := cast.ToInt64(meta.CredentialID)
 	if err = m.RefreshCredentialScopes(ctx, params.BscpBizID, credID); err != nil {
+		metrics.BscpcfgStepFailed("refresh_scopes")
 		return nil, errors.Wrap(err, "refresh credential scopes")
 	}
 

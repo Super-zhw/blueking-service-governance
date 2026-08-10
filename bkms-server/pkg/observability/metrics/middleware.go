@@ -39,6 +39,6 @@ func GinMiddleware() gin.HandlerFunc {
 		if handler == "" {
 			handler = unknownRoute
 		}
-		ReportServerRequestMetric(handler, c.Request.Method, c.Writer.Status(), started)
+		ServerRequest(handler, c.Request.Method, c.Writer.Status(), started)
 	}
 }

@@ -367,7 +367,7 @@ func (c *ApiClient) getFileContent(ctx context.Context, bizID, svcID, signature 
 	)
 
 	started := time.Now()
-	defer metrics.ReportClientRequestMetric("bscp", apiOperation.FullName(), started, &err)
+	defer metrics.ClientRequest("bscp", apiOperation.FullName(), started, &err)
 
 	resultProvider := bkapi.NewUnmarshalResultProvider(
 		func(body io.Reader, v any) error {

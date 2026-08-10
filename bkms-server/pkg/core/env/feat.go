@@ -36,6 +36,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/gvr"
 	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 )
 
 const featureEnvNamePrefix = "feat"
@@ -220,6 +221,7 @@ func (s *FeatureEnvService) Create(ctx context.Context, input CreateFeatureEnvIn
 		env.Cluster.Namespace,
 		featureEnvOwnerLabels(env),
 	); err != nil {
+		metrics.FeatureEnvNamespaceInitFailed()
 		// TODO: 后续应更好处理此种状况（例如标记 createFailed、支持重试补建 namespace）。
 		log.ErrorAttrs(ctx, "TODO: initialize feature env namespace failed",
 			slog.String("env_id", env.ID.Hex()),

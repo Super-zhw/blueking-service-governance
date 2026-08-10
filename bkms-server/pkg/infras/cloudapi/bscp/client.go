@@ -160,7 +160,7 @@ func (c *ApiClient) handleOperation(
 	ctx context.Context, op define.Operation,
 ) (result map[string]any, err error) {
 	started := time.Now()
-	defer metrics.ReportClientRequestMetric("bscp", op.FullName(), started, &err)
+	defer metrics.ClientRequest("bscp", op.FullName(), started, &err)
 
 	ctx, span := apm.StartClientSpan(ctx, "bscp", op.FullName())
 	chain := op.SetContext(ctx)

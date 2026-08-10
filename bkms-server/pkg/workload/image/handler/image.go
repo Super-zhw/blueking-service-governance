@@ -21,6 +21,7 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -32,6 +33,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	reginfra "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/registry"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
@@ -168,6 +170,8 @@ func (h *Handler) ListAppImages(c *gin.Context) {
 //	@Failure		500		{object}	bkerrs.GinErrorOutput
 //	@Router			/apps/{appID}/images/refresh [post]
 func (h *Handler) RefreshAppImages(c *gin.Context) {
+	startedAt := time.Now()
+	metricStatus := metrics.StatusOK
 	var uriInput serializer.AppURIInput
 	if err := ginutils.BindURI(c, &uriInput); err != nil {
 		bkerrs.AbortWithErr(c, err)
@@ -179,10 +183,14 @@ func (h *Handler) RefreshAppImages(c *gin.Context) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
+	defer func() {
+		metrics.ImageSnapshotRefreshFinished(metricStatus, startedAt)
+	}()
 
 	snapshotService := snapshot.NewService(h.registry.SnapshotStore, h.registry.BuildConfigStore, h.registry.AppStore)
 	result, err := snapshotService.RefreshAppSnapshots(ctx, uriInput.AppID)
 	if err != nil {
+		metricStatus = metrics.StatusErr
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
@@ -321,6 +329,8 @@ func (h *Handler) ListAppImageUsages(c *gin.Context) {
 //	@Failure		500		{object}	bkerrs.GinErrorOutput
 //	@Router			/apps/{appID}/images/{tag} [delete]
 func (h *Handler) DeleteAppImage(c *gin.Context) {
+	startedAt := time.Now()
+	metricStatus := metrics.StatusOK
 	var uriInput serializer.AppImageTagURIInput
 	if err := ginutils.BindURI(c, &uriInput); err != nil {
 		bkerrs.AbortWithErr(c, err)
@@ -333,6 +343,9 @@ func (h *Handler) DeleteAppImage(c *gin.Context) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
+	defer func() {
+		metrics.ImageTagDeleteFinished(metricStatus, startedAt)
+	}()
 
 	svc := tagdeletion.NewService(
 		h.registry.SnapshotStore,
@@ -344,6 +357,7 @@ func (h *Handler) DeleteAppImage(c *gin.Context) {
 		h.registry.HelmDeployRecordStore,
 	)
 	if err := svc.DeleteImageTag(ctx, uriInput.AppID, uriInput.Tag); err != nil {
+		metricStatus = metrics.StatusErr
 		code := bkerrs.ErrCodeInternalServerError
 		if reginfra.IsTagNotFound(err) {
 			code = bkerrs.ErrCodeNotFound
