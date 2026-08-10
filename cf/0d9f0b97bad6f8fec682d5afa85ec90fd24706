@@ -1,0 +1,26 @@
+bkms-cli/cmd/envvar/create/public.go
+  s_8a178421446668::t_a7907092c322a3 15,22,27,40-47
+  s_8a178421446668::t_352de7824edaa8 48
+bkms-cli/cmd/envvar/importvar/app.go
+  s_8a178421446668::t_4967b846fd602d 10,32-44,60
+bkms-cli/cmd/envvar/importvar/env.go
+  s_8a178421446668::t_7bad82f17e0452 11,34-47,70
+bkms-cli/cmd/envvar/importvar/public.go
+  s_8a178421446668::t_b02c59feffaf11 10,35-53,71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "cf0d9f0b97bad6f8fec682d5afa85ec90fd24706",
+  "prompts": {},
+  "sessions": {
+    "s_8a178421446668": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcad42aae7b469bfba4e6374d840f",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
