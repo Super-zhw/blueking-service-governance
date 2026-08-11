@@ -1,0 +1,70 @@
+bkms-server/pkg/workload/instance/handler/instance.go
+  s_2e9abd3e72fc6b::t_d184b14ecd9836 39
+bkms-server/pkg/observability/metrics/metrics.go
+  s_2e9abd3e72fc6b::t_5e366e288528a0 21,59,62,64,75,87,98,175,177-187,189-199,200-209,292,295-296,297-299,302,303-305,308-310,326-342,344-349,350-368
+  s_2e9abd3e72fc6b::t_aa190d9c01785e 343
+  s_66f5627389c49a::t_ec9ab6a790a463 369
+  s_2e9abd3e72fc6b::t_1e2d3041135689 27,39-50,51-56,60-61
+  h_2321bec5d80d15 110-111,114-115,121-122,125-126,132-133,136-137,176,188,263,265,268,270,273,275
+  s_0533769496d1f6::t_ddd0f80280f6ff 22,210-242,245-246,256-257,293-294,300-301,306-307,311-324
+  s_0533769496d1f6::t_f3bb0df6228cb9 325
+bkms-server/pkg/server/task/build.go
+  s_2e9abd3e72fc6b::t_c7cdb19f3ba774 44
+  h_2321bec5d80d15 358
+bkms-server/pkg/server/task/helm_deploy.go
+  s_2e9abd3e72fc6b::t_c81974ff1762d7 36
+  h_2321bec5d80d15 155
+bkms-server/pkg/server/task/appmodel_deploy.go
+  s_2e9abd3e72fc6b::t_1053497732dda8 34
+  h_2321bec5d80d15 181
+bkms-server/pkg/extension/depservice/provider/polaris/provider.go
+  s_0533769496d1f6::t_4d15a18c8312ea 35
+  s_0533769496d1f6::t_7d6a65e87005f8 143
+  s_0533769496d1f6::t_a45f96ea6f9b34 99
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  s_0533769496d1f6::t_90a4104735397e 35,84,91,139,151,160
+bkms-server/pkg/server/taskqtask/depsvcredis/common.go
+  s_0533769496d1f6::t_4cf265b81f6e8d 95,161-169
+  s_0533769496d1f6::t_b04e322eb2d17b 109
+  s_0533769496d1f6::t_b8aa64f1e86b6a 41
+  s_0533769496d1f6::t_3541e217804f13 170
+bkms-server/pkg/observability/metrics/README.md
+  s_0533769496d1f6::t_a81e35807dcfba 35-37,43-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "4252ee9d4a1b7fbdbf161d633a8f73024a8896ec",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_0533769496d1f6": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feec9dff87b92a27e07cec9eeb1eb",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_2e9abd3e72fc6b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb1c3121736aa3ad246b47021fcf",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_66f5627389c49a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb0c318b7bb2bacf2155f26c8c7a",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
