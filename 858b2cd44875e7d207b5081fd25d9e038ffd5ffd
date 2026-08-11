@@ -1,0 +1,42 @@
+bkms-cli/cmd/envvar/del/del.go
+  s_2925c2e0e5358a::t_7d684670250c6c 1-25
+bkms-cli/cmd/envvar/envvar.go
+  s_2925c2e0e5358a::t_96af56a6177941 7-12,28,30,32,34,36,38
+bkms-cli/cmd/envvar/update/update.go
+  s_2925c2e0e5358a::t_02588b7e12f3da 1-25
+bkms-cli/pkg/client/env_var.go
+  s_2925c2e0e5358a::t_cde89cae19a539 13-18,37,87
+bkms-cli/cmd/envvar/create/create.go
+  s_2925c2e0e5358a::t_0e7550989fec15 1-25
+bkms-cli/cmd/envvar/update/env.go
+  s_2925c2e0e5358a::t_9bbe9dc3e5c739 1-75
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_2925c2e0e5358a::t_c7f86179ce6b48 3322-3347
+bkms-cli/cmd/envvar/del/env.go
+  s_2925c2e0e5358a::t_ea4834ccf2eaf1 1-45
+bkms-cli/pkg/client/types.go
+  s_2925c2e0e5358a::t_fcb8cbf482eaba 210-211
+bkms-cli/cmd/envvar/list/list.go
+  s_2925c2e0e5358a::t_f65d310b4c47d5 1-28
+bkms-cli/cmd/envvar/create/env.go
+  s_2925c2e0e5358a::t_2c5dcb7202b089 1-63
+  s_2925c2e0e5358a::t_d2a1079a325f33 64
+bkms-cli/cmd/envvar/list/env.go
+  s_2925c2e0e5358a::t_827d92d7c14d79 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "858b2cd44875e7d207b5081fd25d9e038ffd5ffd",
+  "prompts": {},
+  "sessions": {
+    "s_2925c2e0e5358a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcfe05740780994a05bef9d7a5d40",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

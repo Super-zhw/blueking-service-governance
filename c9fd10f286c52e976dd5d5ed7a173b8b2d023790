@@ -1,0 +1,16 @@
+bkms-cli/cmd/envvar/create/env.go
+  h_2321bec5d80d15 29
+bkms-cli/cmd/envvar/create/public.go
+  h_2321bec5d80d15 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c9fd10f286c52e976dd5d5ed7a173b8b2d023790",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+bkms-cli/pkg/handler/env/resolve.go
+  s_2925c2e0e5358a::t_f1c87d7be79de1 28-85
+bkms-cli/cmd/envvar/delete/env.go
+  s_2925c2e0e5358a::t_88ee27930ae994 10,16,21-24,26,29,33-43,45,49,55-56,58-59
+bkms-cli/cmd/envvar/update/env.go
+  s_2925c2e0e5358a::t_76765313d2af89 10,16,24-26,30-33,36,44-62,65,79,90-92,98
+bkms-cli/cmd/envvar/delete/public.go
+  s_2925c2e0e5358a::t_9ad142a093340d 10,16,20-21,23-30,33-40,42-47,49,53,59-61,63-64
+bkms-cli/cmd/envvar/update/public.go
+  s_2925c2e0e5358a::t_404211c4cafcc2 10,16,21,24-27,30-31,33-37,40,46-52,55-66,69,83,94-97,104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "de150340ccb932baac49bbe45f6aeb940a68e81a",
+  "prompts": {},
+  "sessions": {
+    "s_2925c2e0e5358a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcfe05740780994a05bef9d7a5d40",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

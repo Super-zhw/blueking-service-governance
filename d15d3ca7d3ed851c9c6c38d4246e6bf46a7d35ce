@@ -1,0 +1,31 @@
+bkms-server/cmd/root.go
+  s_f97ee55aac9378::t_a870f39cf78557 46
+bkms-server/pkg/bkintegrations/bkiam/scope/bkmonitor_test.go
+  s_f97ee55aac9378::t_66305728714bd8 63-115
+bkms-server/pkg/bkintegrations/bkiam/scope/template/bkmonitor/admin.json
+  s_f97ee55aac9378::t_b57030df518c59 46-69
+bkms-server/pkg/bkintegrations/bkiam/scope/template/bkmonitor/developer.json
+  s_f97ee55aac9378::t_9b59616a715ae0 46-69
+bkms-server/pkg/bkintegrations/bkiam/scope/template/bkmonitor/operator.json
+  s_f97ee55aac9378::t_0878fdf1c1cf71 19-39
+bkms-server/pkg/bkintegrations/bkiam/scope/template/bkmonitor/sre.json
+  s_f97ee55aac9378::t_6f3fb1d8011fbe 46-69
+bkms-server/cmd/migration/refresh_workspace_bkmonitor_perms.go
+  s_f97ee55aac9378::t_b941f426d82661 1-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d15d3ca7d3ed851c9c6c38d4246e6bf46a7d35ce",
+  "prompts": {},
+  "sessions": {
+    "s_f97ee55aac9378": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feaae58627d15b0fa4e4d15ae74e9",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

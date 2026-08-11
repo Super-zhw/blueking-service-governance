@@ -1,0 +1,26 @@
+bkms-cli/.agents/prompts/app-polaris.md
+  h_2321bec5d80d15 10-15
+bkms-cli/cmd/app/appcfgfile/delete_version.go
+  h_2321bec5d80d15 32
+bkms-cli/cmd/app/appcfgfile/rollback_version.go
+  h_2321bec5d80d15 32
+bkms-cli/cmd/app/appcfgfile/view_version.go
+  h_2321bec5d80d15 33
+bkms-cli/cmd/app/appspec/startcommand/edit.go
+  h_2321bec5d80d15 41,45
+bkms-cli/cmd/app/appspec/startcommand/view.go
+  h_2321bec5d80d15 36
+bkms-cli/cmd/app/deploy/update.go
+  h_2321bec5d80d15 78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "01510d75e5b24a36d101c870296ec4afc499c245",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

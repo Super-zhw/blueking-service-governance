@@ -1,0 +1,26 @@
+bkms-cli/pkg/handler/instance/port_forward_listener_test.go
+  s_8a178421446668::t_dc90097afa4425 15-16,43-44,73-74
+bkms-cli/pkg/handler/instance/port_forward_listener.go
+  s_8a178421446668::t_9fe1efea84c525 69,84
+bkms-cli/pkg/handler/instance/port_forward_bridge_test.go
+  s_8a178421446668::t_ee873f8d994273 29,95-96,156-157,220-221,249-250,272-273,298-299
+  s_8a178421446668::t_70b6ec63ce1567 30-31,373
+bkms-cli/Makefile
+  s_8a178421446668::t_f921a4daf941a3 234-236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "469db0911f17d4f3d03ac6af40981de816780908",
+  "prompts": {},
+  "sessions": {
+    "s_8a178421446668": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcad42aae7b469bfba4e6374d840f",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

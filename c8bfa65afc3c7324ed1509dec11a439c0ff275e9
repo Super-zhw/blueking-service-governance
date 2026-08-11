@@ -1,0 +1,22 @@
+bkms-cli/cmd/envvar/delete/app.go
+  s_2925c2e0e5358a::t_4af0fcffe79775 1-41
+bkms-cli/cmd/envvar/list/app.go
+  s_2925c2e0e5358a::t_e648150b627c58 16,20-26,29,32,39-48,50,53,63
+  s_2925c2e0e5358a::t_20f208fea07786 33-34,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c8bfa65afc3c7324ed1509dec11a439c0ff275e9",
+  "prompts": {},
+  "sessions": {
+    "s_2925c2e0e5358a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcfe05740780994a05bef9d7a5d40",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

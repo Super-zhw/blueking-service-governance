@@ -1,0 +1,23 @@
+bkms-cli/cmd/envvar/create/workspace.go
+  s_8a178421446668::t_fdd086bc4b615c 11,16,18,22-24,26-32,35,37-38,43-45,60,72
+bkms-cli/cmd/envvar/update/workspace.go
+  s_8a178421446668::t_1d48c71d8f7924 16,18,22-30,36-37,40,42-43,46,55-58,94,105
+bkms-cli/cmd/envvar/delete/workspace.go
+  s_8a178421446668::t_cf781eb7afdfd7 14,16,19-21,23-25,27-34,37-39,51,54,61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "889e987f92bd151f07b0dfb98b34c4e9656c7b71",
+  "prompts": {},
+  "sessions": {
+    "s_8a178421446668": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcad42aae7b469bfba4e6374d840f",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

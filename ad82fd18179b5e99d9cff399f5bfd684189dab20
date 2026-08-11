@@ -1,0 +1,74 @@
+bkms-cli/cmd/envvar/create/app.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/create/create.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/create/env.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/create/workspace.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/delete/app.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/delete/delete.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/delete/env.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/delete/workspace.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/envvar.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/export/app.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/export/env.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/export/export.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/export/workspace.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/importvar/app.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/importvar/env.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/importvar/importvar.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/importvar/preview_output.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/importvar/workspace.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/list/app.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/list/env.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/list/list.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/list/workspace.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/update/app.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/update/env.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/update/update.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/envvar/update/workspace.go
+  h_2321bec5d80d15 1-18
+bkms-cli/cmd/root/root.go
+  h_2321bec5d80d15 34
+bkms-cli/pkg/client/env_var.go
+  h_2321bec5d80d15 1-18
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 1-18
+bkms-cli/pkg/handler/env/output.go
+  h_2321bec5d80d15 1-18
+bkms-cli/pkg/handler/env/resolve.go
+  h_2321bec5d80d15 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ad82fd18179b5e99d9cff399f5bfd684189dab20",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+bkms-server/cmd/portforward_whitelist.go
+  h_2321bec5d80d15 1-137
+bkms-server/pkg/infras/cloudapi/txcmdb/types.go
+  h_2321bec5d80d15 6,9,12,17,42,57
+bkms-server/pkg/observability/bkmonitor/alert/handler/event.go
+  h_2321bec5d80d15 68-70,90
+bkms-server/pkg/platmgt/portforward/model.go
+  h_2321bec5d80d15 1-9
+bkms-server/pkg/platmgt/portforward/portforward_suite_test.go
+  h_2321bec5d80d15 1-27
+bkms-server/pkg/platmgt/portforward/service.go
+  h_2321bec5d80d15 1-97
+bkms-server/pkg/platmgt/portforward/service_test.go
+  h_2321bec5d80d15 1-92
+bkms-server/pkg/platmgt/portforward/store.go
+  h_2321bec5d80d15 1-103
+bkms-server/pkg/platmgt/portforward/store_test.go
+  h_2321bec5d80d15 1-134
+bkms-server/pkg/server/registry/registry.go
+  h_2321bec5d80d15 39,123-124,227-228
+bkms-server/pkg/workload/instance/handler/port_forward.go
+  h_2321bec5d80d15 14,18,61-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "81d787217b1648db0ad9faf9156a21dbfae6d8a3",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
