@@ -1,0 +1,33 @@
+bkms-server/pkg/observability/metrics/metrics.go
+  s_0533769496d1f6::t_ddd0f80280f6ff 22,210-242,245-246,256-257,293-294,300-301,306-307,311-324
+  s_0533769496d1f6::t_f3bb0df6228cb9 325
+bkms-server/pkg/extension/depservice/provider/polaris/provider.go
+  s_0533769496d1f6::t_4d15a18c8312ea 35
+  s_0533769496d1f6::t_7d6a65e87005f8 143
+  s_0533769496d1f6::t_a45f96ea6f9b34 99
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  s_0533769496d1f6::t_90a4104735397e 35,84,91,139,151,160
+bkms-server/pkg/server/taskqtask/depsvcredis/common.go
+  s_0533769496d1f6::t_4cf265b81f6e8d 95,161-169
+  s_0533769496d1f6::t_b04e322eb2d17b 109
+  s_0533769496d1f6::t_b8aa64f1e86b6a 41
+  s_0533769496d1f6::t_3541e217804f13 170
+bkms-server/pkg/observability/metrics/README.md
+  s_0533769496d1f6::t_a81e35807dcfba 35-37,43-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "33431b55a1356b197d66d9b3ec0a9d72109b0aa0",
+  "prompts": {},
+  "sessions": {
+    "s_0533769496d1f6": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feec9dff87b92a27e07cec9eeb1eb",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
