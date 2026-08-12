@@ -1,0 +1,63 @@
+bkms-server/pkg/observability/apm/log_test.go
+  s_f77341672ea62d::t_bd777bf370f7c0 30-36,44,46-47,49
+  s_f77341672ea62d::t_cd81cff6376463 45,48,50
+  s_f77341672ea62d::t_020964297aee9d 29
+  s_f77341672ea62d::t_e66a141dbc1448 37-39,51-53
+  s_f77341672ea62d::t_6b9b7b2e76a7b0 1-28,42-43,56-58
+bkms-server/pkg/common/logging/init.go
+  s_f77341672ea62d::t_bc8f0295d79b0a 134-136
+  s_f77341672ea62d::t_f1ed223387cc28 82
+  s_f77341672ea62d::t_d3a8d9a4652451 26,28,45,47-53,57-60,63-75
+  s_f77341672ea62d::t_cd3cf8b3673d12 29
+  s_f77341672ea62d::t_562ee6503c599e 46,54
+  s_f77341672ea62d::t_a83186d7488714 55
+bkms-server/pkg/observability/apm/log.go
+  s_f77341672ea62d::t_221ee8883fe320 39,48,52,56-57,73,75-80,90,98,101-106
+  s_f77341672ea62d::t_a6bde603d6efb6 51
+  s_f77341672ea62d::t_f502e7fcb2d35c 1-31,32-33,35,38,40,42-47,54-55,58-72,74,81-89,91-97,99-100,107-108
+  s_f77341672ea62d::t_52b577ec574683 34
+  s_f77341672ea62d::t_082b29971b7d14 36,37,41,53
+  s_f77341672ea62d::t_52f1bc550e82a5 49
+bkms-server/pkg/common/logging/otel.go
+  s_f77341672ea62d::t_b1e67a360e2487 1-20,21-24
+bkms-server/pkg/observability/apm/apm.go
+  s_f77341672ea62d::t_04167f54d9fb6f 21,67,123,138,146,155-159,162
+  s_f77341672ea62d::t_fecadc367b37cb 117
+  s_f77341672ea62d::t_767403fab1cfbd 128-132,134-137
+  s_f77341672ea62d::t_88d0a39c067899 75,97,109,112,114-116
+  s_f77341672ea62d::t_d44d02e133e8c2 91-92,98,100-101,104,107-108,110-111,113,124,139,148,151
+  s_f77341672ea62d::t_3e63f175c0a5f8 118
+  s_f77341672ea62d::t_a6b8758efc7cc5 122
+  s_f77341672ea62d::t_63a9c7b9d6c602 125-126
+  s_f77341672ea62d::t_a09026387a0e13 140
+  s_f77341672ea62d::t_28aab3d26268eb 145
+  s_f77341672ea62d::t_173c552f90ba0c 147
+  s_f77341672ea62d::t_4064cd9a81becb 149-150
+  s_f77341672ea62d::t_9de6603ca9998f 152-154
+bkms-server/pkg/observability/apm/apm_test.go
+  s_f77341672ea62d::t_a536798af1ce79 70-75
+  s_f77341672ea62d::t_fbf58bd0834292 121-126
+  s_f77341672ea62d::t_0060a61b80196f 130-131
+  s_f77341672ea62d::t_dd5f39081ec476 23,26
+bkms-server/pkg/observability/apm/trace.go
+  s_f77341672ea62d::t_caf53a0998e9e5 1-118
+bkms-server/pkg/common/logging/logging_test.go
+  s_f77341672ea62d::t_eeebf28d0bd6b0 28,31,207-208,210,223,233
+  s_f77341672ea62d::t_c20914940c745d 38-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c9769826231399f2d19ff4088d87362c342bcfc5",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
