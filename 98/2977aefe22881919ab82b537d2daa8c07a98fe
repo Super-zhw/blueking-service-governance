@@ -1,0 +1,23 @@
+bkms-server/pkg/server/server.go
+  s_f77341672ea62d::t_6084eabd44a262 114
+  s_f77341672ea62d::t_297de2e1e7e789 115-117
+bkms-server/pkg/observability/apm/middleware.go
+  s_f77341672ea62d::t_ff3d271a3ecd8e 45
+  s_f77341672ea62d::t_59b2396f67c2b0 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "982977aefe22881919ab82b537d2daa8c07a98fe",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
