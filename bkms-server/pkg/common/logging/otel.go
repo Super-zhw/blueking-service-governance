@@ -21,29 +21,19 @@ package logging
 import (
 	"log/slog"
 
-	"github.com/go-slog/otelslog"
 	slogmulti "github.com/samber/slog-multi"
 	otelslogbridge "go.opentelemetry.io/contrib/bridges/otelslog"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
 )
 
-// InitOTelHandler 注入 OTel Handler 到全局 slog，构建 Pipe(traceMiddleware) → Fanout(local, otelBridge) pipeline。
-// provider 为 nil 时仅注入 trace_id/span_id 中间件，不上报远程。
+// InitOTelHandler 追加 OTel bridge handler 到全局 slog，实现日志远程上报。
+// 调用前 InitDefaultLogger 已挂载 otelslog.Middleware()（trace_id/span_id 注入），
+// 此处仅通过 Fanout 追加 otelBridge handler，不重复包装 Middleware。
 func InitOTelHandler(provider *sdklog.LoggerProvider) {
 	localHandler := slog.Default().Handler()
-
-	if provider == nil {
-		slog.SetDefault(slog.New(
-			slogmulti.Pipe(otelslog.Middleware()).Handler(localHandler),
-		))
-		return
-	}
-
 	otelHandler := otelslogbridge.NewHandler("bkms", otelslogbridge.WithLoggerProvider(provider))
 
 	slog.SetDefault(slog.New(
-		slogmulti.Pipe(otelslog.Middleware()).Handler(
-			slogmulti.Fanout(localHandler, otelHandler),
-		),
+		slogmulti.Fanout(localHandler, otelHandler),
 	))
 }

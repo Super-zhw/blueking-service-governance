@@ -23,18 +23,25 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/go-slog/otelslog"
 	"github.com/pkg/errors"
+	slogmulti "github.com/samber/slog-multi"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 )
 
 // InitDefaultLogger 初始化并注册全局默认 logger（通过 slog.SetDefault）。
+// 无条件挂载 otelslog.Middleware()，确保本地日志始终携带 trace_id/span_id。
 func InitDefaultLogger(cfg config.LoggingConfig) error {
 	logger, err := newLogger(cfg)
 	if err != nil {
 		return err
 	}
-	slog.SetDefault(logger)
+	// 通过 Pipe 挂载 otelslog.Middleware()，从 ctx 中提取 trace_id/span_id 注入日志 record，
+	// 无论 APM 是否启用，本地日志都能关联链路信息
+	slog.SetDefault(slog.New(
+		slogmulti.Pipe(otelslog.Middleware()).Handler(logger.Handler()),
+	))
 	return nil
 }
 

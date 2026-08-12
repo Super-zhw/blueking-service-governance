@@ -52,11 +52,12 @@ func HTTPLogMiddleware() gin.HandlerFunc {
 		DefaultLevel:     slog.LevelInfo,
 		ClientErrorLevel: slog.LevelWarn,
 		ServerErrorLevel: slog.LevelError,
-		WithTraceID:      true,
-		WithSpanID:       true,
 		WithUserAgent:    true,
-		WithRequestID:    true,
 		WithClientIP:     true,
+		// 以下内容重复了，需要显示关闭
+		WithTraceID:   false,
+		WithSpanID:    false,
+		WithRequestID: false,
 		Filters: []sloggin.Filter{
 			sloggin.IgnorePath("/healthz", "/readyz", "/metrics"),
 		},
