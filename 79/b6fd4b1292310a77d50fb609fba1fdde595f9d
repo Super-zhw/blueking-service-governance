@@ -1,0 +1,22 @@
+bkms-server/pkg/observability/apm/middleware.go
+  s_f77341672ea62d::t_ff3d271a3ecd8e 29,34,41-44,49-58
+  s_f77341672ea62d::t_7f19d265198ba7 59-61
+bkms-server/pkg/common/logging/otel.go
+  s_f77341672ea62d::t_53f846a35df8a3 21-27,29-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "79b6fd4b1292310a77d50fb609fba1fdde595f9d",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
