@@ -20,8 +20,10 @@ package apm
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 
 	"github.com/bytedance/mockey"
 	"github.com/gin-gonic/gin"
@@ -65,6 +67,12 @@ func (e *fakeSpanExporter) Shutdown(context.Context) error {
 }
 
 var _ = Describe("APM", func() {
+	// 确保所有测试使用 JSONHandler 而非标准库的 defaultHandler，
+	// 避免 FanoutHandler 包装 defaultHandler 后因 log.Logger ↔ slog 双向桥接导致死锁
+	BeforeEach(func() {
+		slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
+	})
+
 	Describe("ServiceName", func() {
 		It("uses explicit service name first", func() {
 			cfg := config.BkMonitorConfig{APMServiceName: testAPMServiceName}
@@ -110,9 +118,17 @@ var _ = Describe("APM", func() {
 	})
 
 	Describe("Setup", func() {
+		BeforeEach(func() {
+			// 确保 slog 使用 JSONHandler 而非标准库的 defaultHandler，
+			// 避免 InitOTelHandler 包装 defaultHandler 后因 log.Logger ↔ slog 双向桥接导致死锁
+			slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
+		})
+
 		AfterEach(func() {
 			otel.SetTracerProvider(oteltracenoop.NewTracerProvider())
 			otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator())
+			// 重置 slog default handler，避免 Setup 中 InitOTelHandler 替换的 FanoutHandler 影响后续测试
+			slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
 		})
 
 		It("returns noop shutdown when endpoint is empty", func() {
@@ -204,7 +220,7 @@ var _ = Describe("APM", func() {
 		})
 	})
 
-	Describe("Middleware", func() {
+	Describe("OTelMiddleware", func() {
 		var recorder *tracetest.SpanRecorder
 
 		BeforeEach(func() {
@@ -225,7 +241,7 @@ var _ = Describe("APM", func() {
 
 		It("continues incoming trace context", func() {
 			r := gin.New()
-			r.Use(Middleware(config.BkMonitorConfig{APMServiceName: testAPMServiceName}, testServerRole))
+			r.Use(OTelMiddleware(config.BkMonitorConfig{APMServiceName: testAPMServiceName}, testServerRole))
 			r.GET("/healthz", func(c *gin.Context) {
 				c.Status(http.StatusNoContent)
 			})
@@ -245,8 +261,7 @@ var _ = Describe("APM", func() {
 		It("marks server error status on span", func() {
 			r := gin.New()
 			r.Use(
-				Middleware(config.BkMonitorConfig{APMServiceName: testAPMServiceName}, testServerRole),
-				ErrorStatusMiddleware(),
+				OTelMiddleware(config.BkMonitorConfig{APMServiceName: testAPMServiceName}, testServerRole),
 			)
 			r.GET("/failed", func(c *gin.Context) {
 				c.Status(http.StatusInternalServerError)

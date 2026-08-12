@@ -94,6 +94,8 @@ func normalizeConfig(cfg config.LoggingConfig) config.LoggingConfig {
 	return cfg
 }
 
+// toSlogLevel 将字符串级别转换为 slog.Level，支持 DEBUG、INFO、WARN、WARNING、ERROR。
+// 为空时默认返回 slog.LevelInfo。
 func toSlogLevel(level string) (slog.Level, error) {
 	switch strings.ToUpper(level) {
 	case "", "INFO":

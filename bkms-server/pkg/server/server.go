@@ -110,12 +110,11 @@ func RegisterRouter(ctx context.Context, cfg config.Config, serverRole string) *
 	gin.SetMode(cfg.HTTPServer.Mode)
 	r := gin.New()
 	r.Use(
-		gin.Logger(),
 		gin.Recovery(),
-		apm.Middleware(cfg.BkMonitor, serverRole),
-		apm.ErrorStatusMiddleware(),
-		apm.TraceIDResponseMiddleware(),
-		metrics.GinMiddleware(),
+		apm.OTelMiddleware(cfg.BkMonitor, serverRole),
+		apm.HTTPLogMiddleware(),
+		apm.ResponseTraceMiddleware(),
+		metrics.Middleware(),
 	)
 
 	// Enable the Swagger UI if configured to do so.

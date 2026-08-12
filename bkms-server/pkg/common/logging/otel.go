@@ -16,29 +16,34 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package metrics
+package logging
 
 import (
-	"time"
+	"log/slog"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-slog/otelslog"
+	slogmulti "github.com/samber/slog-multi"
+	otelslogbridge "go.opentelemetry.io/contrib/bridges/otelslog"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
 )
 
-const unknownRoute = "unknown"
+// InitOTelHandler 注入 OTel Handler 到全局 slog，构建 Pipe(traceMiddleware) → Fanout(local, otelBridge) pipeline。
+// provider 为 nil 时仅注入 trace_id/span_id 中间件，不上报远程。
+func InitOTelHandler(provider *sdklog.LoggerProvider) {
+	localHandler := slog.Default().Handler()
 
-// Middleware 记录 Gin 入站请求的 Prometheus 指标
-//
-// 指标在 c.Next 之后上报，确保能拿到最终响应状态码；未匹配到 Gin 路由模板时统一归类为 unknown，
-// 避免 404 等场景直接使用原始 URL 造成高基数标签
-func Middleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		started := time.Now()
-		c.Next()
-
-		handler := c.FullPath()
-		if handler == "" {
-			handler = unknownRoute
-		}
-		ServerRequest(handler, c.Request.Method, c.Writer.Status(), started)
+	if provider == nil {
+		slog.SetDefault(slog.New(
+			slogmulti.Pipe(otelslog.Middleware()).Handler(localHandler),
+		))
+		return
 	}
+
+	otelHandler := otelslogbridge.NewHandler("bkms", otelslogbridge.WithLoggerProvider(provider))
+
+	slog.SetDefault(slog.New(
+		slogmulti.Pipe(otelslog.Middleware()).Handler(
+			slogmulti.Fanout(localHandler, otelHandler),
+		),
+	))
 }
