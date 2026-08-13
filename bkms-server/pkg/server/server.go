@@ -110,9 +110,9 @@ func RegisterRouter(ctx context.Context, cfg config.Config, serverRole string) *
 	gin.SetMode(cfg.HTTPServer.Mode)
 	r := gin.New()
 	r.Use(
-		gin.Recovery(),
 		apm.OTelMiddleware(cfg.BkMonitor, serverRole),
 		apm.HTTPLogMiddleware(),
+		gin.Recovery(),
 		apm.ResponseTraceMiddleware(),
 		metrics.Middleware(),
 	)
