@@ -26,6 +26,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"log/slog"
 	"sync/atomic"
 	"time"
@@ -58,6 +59,9 @@ func HTTPLogMiddleware() gin.HandlerFunc {
 		WithTraceID:   false,
 		WithSpanID:    false,
 		WithRequestID: false,
+		WithCustomMessage: func(c *gin.Context) string {
+			return fmt.Sprintf("%s %s %d", c.Request.Method, c.FullPath(), c.Writer.Status())
+		},
 		Filters: []sloggin.Filter{
 			sloggin.IgnorePath("/healthz", "/readyz", "/metrics"),
 		},
