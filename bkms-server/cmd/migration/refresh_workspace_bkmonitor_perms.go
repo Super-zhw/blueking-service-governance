@@ -69,8 +69,8 @@ func NewRefreshWorkspaceBkmonitorPermsCmd() *cobra.Command {
 				return nil
 			}
 
-			log.Warn(ctx, "WARNING: This will grant bkmonitor MCP policies to IAM user groups "+
-				"for all Ready workspaces (append-only, will NOT overwrite grade manager scopes).")
+			log.Warn(ctx, "WARNING: This will update grade manager scopes AND grant policies to IAM user groups "+
+				"for all Ready workspaces. Only workspaces with complete platform data will be processed.")
 
 			permMgr := perm.NewManager()
 			return refreshWorkspaceBkmonitorPerms(ctx, wsStore, permMgr, workspaceIDs)
@@ -118,7 +118,7 @@ func dryRunRefreshWorkspaceBkmonitorPerms(
 	fmt.Printf("========================================\n\n")
 	fmt.Printf("Total workspaces to process: %d\n\n", len(workspaces))
 
-	var willProcess, willSkip int
+	var willProcess, willSkip, willError int
 
 	for i, ws := range workspaces {
 		fmt.Printf("--- [%d/%d] Workspace: %s (%s) ---\n", i+1, len(workspaces), ws.ID, ws.DisplayName)
@@ -129,8 +129,15 @@ func dryRunRefreshWorkspaceBkmonitorPerms(
 			continue
 		}
 
-		willProcess++
 		data := buildWorkspaceData(ws)
+
+		if checkErr := hasAllPlatformData(data); checkErr != nil {
+			fmt.Printf("  Status: ERROR (platform data incomplete: %v)\n\n", checkErr)
+			willError++
+			continue
+		}
+
+		willProcess++
 
 		fmt.Printf("  Status: WILL_REFRESH\n")
 		fmt.Printf("  BKMonitor: SpaceID=%s\n", data.BKMonitor.SpaceID)
@@ -176,7 +183,8 @@ func dryRunRefreshWorkspaceBkmonitorPerms(
 	}
 
 	fmt.Println("========================================")
-	fmt.Printf("[DRY-RUN] Summary: total=%d, will_process=%d, will_skip=%d\n", len(workspaces), willProcess, willSkip)
+	fmt.Printf("[DRY-RUN] Summary: total=%d, will_process=%d, will_skip=%d, will_error=%d\n",
+		len(workspaces), willProcess, willSkip, willError)
 	fmt.Println("========================================")
 
 	if willProcess > 0 {
@@ -233,8 +241,23 @@ func refreshWorkspaceBkmonitorPerms(
 
 		data := buildWorkspaceData(ws)
 
-		// 仅刷新用户组 policies（追加语义），不更新 grade manager（覆盖语义），
-		// 避免因缺少数据导致 grade manager authScopes 被意外缩减。
+		// 校验所有平台信息是否齐全。UpdateWorkspaceAdmin 调用的 UpdateGradeManager
+		// 是 PUT 覆盖语义，如果平台信息不全会导致分级管理员授权范围被意外缩减。
+		if err = hasAllPlatformData(data); err != nil {
+			log.Errorf(ctx, "workspace %s platform data incomplete: %v, skipping", ws.ID, err)
+			skipped++
+			continue
+		}
+
+		// 1. 先更新分级管理员的授权范围（PUT 覆盖语义），确保所有系统都在授权范围内
+		if err = permMgr.UpdateWorkspaceAdmin(ctx, data); err != nil {
+			log.Errorf(ctx, "update workspace admin for %s failed: %v", ws.ID, err)
+			failed++
+			failedIDs = append(failedIDs, ws.ID)
+			continue
+		}
+
+		// 2. 再刷新用户组 policies（POST 追加语义）
 		if err = permMgr.UpdateWorkspaceScopeBuiltinRoles(ctx, data); err != nil {
 			log.Errorf(ctx, "update workspace builtin roles for %s failed: %v", ws.ID, err)
 			failed++
@@ -263,6 +286,30 @@ func refreshWorkspaceBkmonitorPerms(
 			"refresh_workspace_bkmonitor_perms partially failed: %d/%d workspaces failed",
 			failed, total,
 		)
+	}
+	return nil
+}
+
+// hasAllPlatformData 校验 WorkspaceData 中所有平台信息是否齐全。
+func hasAllPlatformData(data bkiam.WorkspaceData) error {
+	var missing []string
+	if data.BKMonitor == nil || data.BKMonitor.SpaceID == "" {
+		missing = append(missing, "BKMonitor")
+	}
+	if data.BKLog == nil || data.BKLog.SpaceID == "" {
+		missing = append(missing, "BKLog")
+	}
+	if data.BKCI == nil || data.BKCI.ProjectID == "" {
+		missing = append(missing, "BKCI")
+	}
+	if data.BCS == nil || data.BCS.ProjectID == "" {
+		missing = append(missing, "BCS")
+	}
+	if data.BKRepo == nil || data.BKRepo.ProjectID == "" {
+		missing = append(missing, "BKRepo")
+	}
+	if len(missing) > 0 {
+		return errors.Errorf("missing: %s", strings.Join(missing, ", "))
 	}
 	return nil
 }
