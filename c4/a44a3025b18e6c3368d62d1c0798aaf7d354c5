@@ -1,0 +1,20 @@
+bkms-server/pkg/core/workspace/handler/workspace.go
+  h_2321bec5d80d15 563
+bkms-server/pkg/server/taskqtask/task.go
+  h_2321bec5d80d15 50
+bkms-server/pkg/server/taskqtask/workspace/handler.go
+  h_2321bec5d80d15 42,52-53,73,85,94,100
+bkms-server/pkg/server/taskqtask/workspace/register.go
+  h_2321bec5d80d15 30-31,36,40-41,46,52-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c4a44a3025b18e6c3368d62d1c0798aaf7d354c5",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
