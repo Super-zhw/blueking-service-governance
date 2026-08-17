@@ -1,0 +1,60 @@
+bkms-server/pkg/observability/apm/log_test.go
+  s_f77341672ea62d::t_bd777bf370f7c0 30-36,43,45-46,48
+  s_f77341672ea62d::t_cd81cff6376463 44,47,49
+  s_f77341672ea62d::t_020964297aee9d 29
+  s_f77341672ea62d::t_e66a141dbc1448 37-40,50-53
+  s_f77341672ea62d::t_6b9b7b2e76a7b0 1-28,41-42,54-56
+bkms-server/pkg/common/logging/fanout.go
+  s_f77341672ea62d::t_04e7ace77e3a10 1-76
+bkms-server/pkg/common/logging/init.go
+  s_f77341672ea62d::t_bc8f0295d79b0a 106-108
+  s_f77341672ea62d::t_f1ed223387cc28 54
+bkms-server/pkg/observability/apm/log.go
+  s_f77341672ea62d::t_221ee8883fe320 40,44,53,57,61-62,78,80-85,95,103,106-111
+  s_f77341672ea62d::t_a6bde603d6efb6 56
+  s_f77341672ea62d::t_f502e7fcb2d35c 1-34,36,41,43,45,47-52,59-60,63-77,79,86-94,96-102,104-105,112-113
+  s_f77341672ea62d::t_52b577ec574683 35
+  s_f77341672ea62d::t_082b29971b7d14 37,39,42,46,58
+  s_f77341672ea62d::t_52f1bc550e82a5 38,54-55
+bkms-server/pkg/common/logging/otel.go
+  s_f77341672ea62d::t_b1e67a360e2487 1-77
+bkms-server/pkg/observability/apm/apm.go
+  s_f77341672ea62d::t_04167f54d9fb6f 21,69,125,140,148,157-161,164
+  s_f77341672ea62d::t_fecadc367b37cb 119
+  s_f77341672ea62d::t_767403fab1cfbd 130-134,136-139
+  s_f77341672ea62d::t_88d0a39c067899 77,99,111,114,116-118
+  s_f77341672ea62d::t_d44d02e133e8c2 93-94,100,102-103,106,109-110,112-113,115,126,141,150,153
+  s_f77341672ea62d::t_3e63f175c0a5f8 120
+  s_f77341672ea62d::t_a6b8758efc7cc5 124
+  s_f77341672ea62d::t_63a9c7b9d6c602 127-128
+  s_f77341672ea62d::t_a09026387a0e13 142
+  s_f77341672ea62d::t_28aab3d26268eb 147
+  s_f77341672ea62d::t_173c552f90ba0c 149
+  s_f77341672ea62d::t_4064cd9a81becb 151-152
+  s_f77341672ea62d::t_9de6603ca9998f 154-156
+bkms-server/pkg/common/logging/fanout_test.go
+  s_f77341672ea62d::t_179c25ee309d26 1-169
+bkms-server/pkg/observability/apm/apm_test.go
+  s_f77341672ea62d::t_a536798af1ce79 70-75
+  s_f77341672ea62d::t_fbf58bd0834292 121-126
+  s_f77341672ea62d::t_0060a61b80196f 130-131
+  s_f77341672ea62d::t_dd5f39081ec476 23,26
+bkms-server/pkg/observability/apm/trace.go
+  s_f77341672ea62d::t_caf53a0998e9e5 1-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3c4a27dd1e0455251074087a2b62e60067006e39",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

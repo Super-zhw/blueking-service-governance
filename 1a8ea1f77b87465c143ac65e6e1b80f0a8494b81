@@ -1,0 +1,124 @@
+bkms-server/pkg/workload/instance/handler/instance.go
+  s_2e9abd3e72fc6b::t_d184b14ecd9836 39
+bkms-server/pkg/observability/metrics/metrics.go
+  s_2e9abd3e72fc6b::t_5e366e288528a0 21,70,72,83,95,106,183,185-190,192-195,197-202,274-277,278-287,370,373-374,375-377,380,381-383,426-428,444-454,466-471,473-478,479-497
+  s_2e9abd3e72fc6b::t_aa190d9c01785e 472
+  s_66f5627389c49a::t_ec9ab6a790a463 498
+  s_2e9abd3e72fc6b::t_1e2d3041135689 27,40-51,59-64,69
+  h_2321bec5d80d15 118-119,122-123,129-130,133-134,140-141,144-145,184,196,341,343,346,348,351,353
+  s_0533769496d1f6::t_ddd0f80280f6ff 22,288-320,323,334-335,371-372,378-379,424-425,429-442
+  s_0533769496d1f6::t_f3bb0df6228cb9 443
+  s_3d6678911891f1::t_5ef0fc4f21d477 384,386,388-390,392-393,395-396,407-408,410-412,414,416-418,420,422-423
+  s_0533769496d1f6::t_8179ddd8d25290 324,397-398,400,403-404
+  s_3d6678911891f1::t_e418500b413078 204-206,208-211,216-223,226,228-231,234-236,238,240-243,246-248,251-257,260,262-269,272
+  s_0533769496d1f6::t_d829b73a8dad11 191,203,215,227,239,258-259,261,270-271,273,385,387,391,394,399,401-402,405-406,413,415,419,421
+  s_0533769496d1f6::t_a34ecce90244f2 67-68,212-214,224-225,232-233,237,244-245,249-250,409
+  s_0533769496d1f6::t_2f5b9f33adb5cf 32,326
+  s_3d6678911891f1::t_cd159fa609a6be 52-58
+  s_3d6678911891f1::t_bda69bd181983e 455-465
+  s_3d6678911891f1::t_8fa1fbdd2cc52c 207
+bkms-server/pkg/server/task/build.go
+  s_2e9abd3e72fc6b::t_c7cdb19f3ba774 44
+  h_2321bec5d80d15 358
+bkms-server/pkg/server/task/helm_deploy.go
+  s_2e9abd3e72fc6b::t_c81974ff1762d7 36
+  h_2321bec5d80d15 155
+bkms-server/pkg/server/task/appmodel_deploy.go
+  s_2e9abd3e72fc6b::t_1053497732dda8 34
+  h_2321bec5d80d15 181
+bkms-server/pkg/extension/depservice/provider/polaris/provider.go
+  s_0533769496d1f6::t_4d15a18c8312ea 35
+  s_0533769496d1f6::t_7d6a65e87005f8 143
+  s_0533769496d1f6::t_a45f96ea6f9b34 99
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  s_0533769496d1f6::t_90a4104735397e 35,84,91,139,151,160
+bkms-server/pkg/server/taskqtask/depsvcredis/common.go
+  s_0533769496d1f6::t_4cf265b81f6e8d 95,161-169
+  s_0533769496d1f6::t_b04e322eb2d17b 109
+  s_0533769496d1f6::t_b8aa64f1e86b6a 41
+  s_0533769496d1f6::t_3541e217804f13 170
+bkms-server/pkg/core/env/feat.go
+  s_3d6678911891f1::t_4f2d30be86c11e 39
+  s_3d6678911891f1::t_4f9cb595ffd885 224
+bkms-server/pkg/deploy/handler/helm_deploy.go
+  s_0533769496d1f6::t_e6a5ecdecb34d5 397-398
+  s_3d6678911891f1::t_d490abb6091c95 427
+  s_3d6678911891f1::t_14eab1e21af886 435
+  s_3d6678911891f1::t_a1b0a13703aebf 444
+  s_3d6678911891f1::t_0fc76b8f647c6b 25
+  s_3d6678911891f1::t_2abb45b002f86a 412,414
+  s_3d6678911891f1::t_82c09010aa4287 421
+  s_3d6678911891f1::t_3819c4e90ef56b 39
+  s_0533769496d1f6::t_d0fcd9651c2d9a 413
+bkms-server/pkg/deploy/handler/appmodel_deploy_steps.go
+  s_0533769496d1f6::t_74cf66d1f46ce2 203-204
+  s_3d6678911891f1::t_4839c778e6c50c 44
+  s_3d6678911891f1::t_2d2d65631176e0 219,221
+  s_0533769496d1f6::t_fa85269eb16d25 220
+  s_3d6678911891f1::t_183291786a87a1 26
+  s_3d6678911891f1::t_f5860019348474 226
+bkms-server/pkg/server/task/workspace.go
+  s_3d6678911891f1::t_f0f8fafb602c2f 61-63,65-66,68-69
+  s_3d6678911891f1::t_b3ca6c1a5d033e 64
+  s_0533769496d1f6::t_7922b667beed56 57-60
+  s_0533769496d1f6::t_6433b66a980997 67
+  s_3d6678911891f1::t_b9525c07605a56 99,112
+  s_3d6678911891f1::t_de8129df710772 37
+bkms-server/pkg/core/env/clusteraddon/deploy.go
+  s_3d6678911891f1::t_e88e30f6255fc8 31
+  s_3d6678911891f1::t_944ce1c4cfb82b 24
+  s_3d6678911891f1::t_767729334694b3 49-52
+  s_3d6678911891f1::t_76467e79d86d14 96-98
+  s_3d6678911891f1::t_77027bf971ff4f 95
+bkms-server/pkg/workload/image/handler/image.go
+  s_3d6678911891f1::t_3d752b53ae8cea 186-187,346-348
+  s_3d6678911891f1::t_52c86fd29db444 24
+  s_3d6678911891f1::t_4cab622d63b883 36
+  s_3d6678911891f1::t_b0057fd4b4f2b1 193
+  s_3d6678911891f1::t_bb93fa4d885967 188
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "1a8ea1f77b87465c143ac65e6e1b80f0a8494b81",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_0533769496d1f6": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feec9dff87b92a27e07cec9eeb1eb",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_2e9abd3e72fc6b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb1c3121736aa3ad246b47021fcf",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_3d6678911891f1": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feffedfbb7271bf5b590b9cb4cd74",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_66f5627389c49a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb0c318b7bb2bacf2155f26c8c7a",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

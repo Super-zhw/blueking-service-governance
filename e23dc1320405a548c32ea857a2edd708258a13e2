@@ -1,0 +1,18 @@
+bkms-server/pkg/server/task/appmodel_deploy.go
+  h_2321bec5d80d15 187
+bkms-server/pkg/server/task/build.go
+  h_2321bec5d80d15 359
+bkms-server/pkg/server/task/helm_deploy.go
+  h_2321bec5d80d15 161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "e23dc1320405a548c32ea857a2edd708258a13e2",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

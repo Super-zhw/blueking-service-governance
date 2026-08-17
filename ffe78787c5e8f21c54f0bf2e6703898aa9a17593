@@ -1,0 +1,20 @@
+bkms-server/pkg/common/logging/init.go
+  s_f77341672ea62d::t_34ce7800b716a0 26,28,34,40-43
+  s_f77341672ea62d::t_dac77b67daee9f 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ffe78787c5e8f21c54f0bf2e6703898aa9a17593",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
