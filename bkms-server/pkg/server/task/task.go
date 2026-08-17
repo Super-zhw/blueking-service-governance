@@ -32,8 +32,6 @@ const (
 	PollingTrpcDeployStatus = "PollingTrpcDeployStatus"
 	// PollingHelmDeployStatus 轮询 Helm 应用部署状态
 	PollingHelmDeployStatus = "PollingHelmDeployStatus"
-	// PollingWorkspaceInitStatus 轮询工作空间状态
-	PollingWorkspaceInitStatus = "PollingWorkspaceInitStatus"
 	// PollingHelmChartBuildStatus 轮询 Helm Chart 构建状态
 	PollingHelmChartBuildStatus = "PollingHelmChartBuildStatus"
 )
@@ -53,9 +51,6 @@ func init() {
 	)
 	worker.RegisterTask[PollingTrpcDeployStatusArgs, *EmptyResult](
 		PollingTrpcDeployStatus, pollingTrpcDeployStatus,
-	)
-	worker.RegisterTask[PollingWorkspaceInitStatusArgs, *EmptyResult](
-		PollingWorkspaceInitStatus, pollingWorkspaceInitStatus,
 	)
 	worker.RegisterTask[snapshot.ImageDetailSyncArgs, *EmptyResult](
 		snapshot.TaskImageDetailSync, imageDetailSync,

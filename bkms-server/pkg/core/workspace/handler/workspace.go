@@ -27,7 +27,6 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
@@ -35,13 +34,13 @@ import (
 	deploystatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/status"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/worker"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/taskq"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/task"
+	workspacetask "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/taskqtask/workspace"
 	bkmsreg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/registry"
 )
 
@@ -561,18 +560,12 @@ func (h *Handler) CreateWorkspace(c *gin.Context) {
 	}
 
 	// 异步轮询对应的监控项目状态
-	if _, err = worker.ApplyTask(
-		ctx,
-		config.G.RabbitMQ.GetURI(),
-		config.G.RabbitMQ.Queue,
-		task.PollingWorkspaceInitStatus,
-		task.PollingWorkspaceInitStatusArgs{
-			WorkspaceID: ws.ID,
-		},
-	); err != nil {
+	if err = taskq.Enqueue(ctx, workspacetask.Initialization.NewTask(workspacetask.InitializationArgs{
+		WorkspaceID: ws.ID,
+	})); err != nil {
 		bkerrs.AbortWithErr(
 			c,
-			bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "apply polling workspace status task"),
+			bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "enqueue workspace init task"),
 		)
 		return
 	}
