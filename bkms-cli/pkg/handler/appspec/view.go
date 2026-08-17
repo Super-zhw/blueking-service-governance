@@ -135,6 +135,14 @@ func viewSectionWith(
 			return nil, nil //nolint:nilnil // 空配置时返回 nil 表示无数据
 		}
 		return v, nil
+	case client.AppSpecSectionTkeRouteEni:
+		return viewSectionTyped[client.TkeRouteEniConfig](ctx, cli, appID, envName, section)
+	case client.AppSpecSectionDevMode:
+		// devMode 没有应用默认级接口，只能查询环境级配置
+		if envName == "" {
+			return nil, errors.Errorf("%s only supports env-level configuration, --env is required", section)
+		}
+		return viewSectionTyped[client.DevModeConfig](ctx, cli, appID, envName, section)
 	default:
 		return nil, nil //nolint:nilnil // 未知 section 返回 nil 表示无数据
 	}
@@ -183,8 +191,13 @@ func viewAll(ctx context.Context, appID, envName string) (*ViewAllResult, error)
 		client.AppSpecSectionProbe,
 		client.AppSpecSectionResources,
 		client.AppSpecSectionUpdateStrategy,
+		client.AppSpecSectionTkeRouteEni,
 		client.AppSpecSectionLabels,
 		client.AppSpecSectionAnnotations,
+	}
+	// devMode 只有环境级配置，聚合查看默认配置时不展示
+	if envName != "" {
+		sections = append(sections, client.AppSpecSectionDevMode)
 	}
 
 	for _, section := range sections {

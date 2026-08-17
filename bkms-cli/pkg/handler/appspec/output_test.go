@@ -50,6 +50,48 @@ var _ = Describe("Output Formatting", func() {
 			result := FormatSectionTable(client.AppSpecSectionResources, (*client.ResourcesConfig)(nil))
 			Expect(result).To(ContainSubstring("Not configured"))
 		})
+
+		It("should format underlay-ip table correctly", func() {
+			enabled := true
+			result := FormatSectionTable(
+				client.AppSpecSectionTkeRouteEni,
+				&client.TkeRouteEniConfig{Enabled: &enabled},
+			)
+			Expect(result).To(ContainSubstring("Enabled:"))
+			Expect(result).To(ContainSubstring("true"))
+		})
+
+		It("should show a dash for unconfigured underlay-ip", func() {
+			result := FormatSectionTable(
+				client.AppSpecSectionTkeRouteEni,
+				&client.TkeRouteEniConfig{Enabled: nil},
+			)
+			Expect(result).To(ContainSubstring("Enabled:"))
+			Expect(result).To(ContainSubstring("-"))
+		})
+
+		It("should show Not configured for nil underlay-ip", func() {
+			result := FormatSectionTable(client.AppSpecSectionTkeRouteEni, (*client.TkeRouteEniConfig)(nil))
+			Expect(result).To(ContainSubstring("Not configured"))
+		})
+
+		It("should format dev-mode table correctly", func() {
+			result := FormatSectionTable(client.AppSpecSectionDevMode, &client.DevModeConfig{
+				Enabled:   true,
+				WorkPath:  "/usr/local/trpc",
+				MountPath: "/usr/local/trpc/dev-mode",
+			})
+			Expect(result).To(ContainSubstring("Enabled:"))
+			Expect(result).To(ContainSubstring("true"))
+			Expect(result).To(ContainSubstring("Work Path:"))
+			Expect(result).To(ContainSubstring("/usr/local/trpc"))
+			Expect(result).To(ContainSubstring("Mount Path:"))
+		})
+
+		It("should show Not configured for nil dev-mode", func() {
+			result := FormatSectionTable(client.AppSpecSectionDevMode, (*client.DevModeConfig)(nil))
+			Expect(result).To(ContainSubstring("Not configured"))
+		})
 	})
 
 	Describe("FormatViewAllTable", func() {
@@ -80,6 +122,38 @@ var _ = Describe("Output Formatting", func() {
 			result := &ViewAllResult{}
 			output := FormatViewAllTable(result)
 			Expect(output).To(ContainSubstring("Not configured"))
+		})
+
+		It("should omit the Dev Mode section when it has no data", func() {
+			enabled := true
+			result := &ViewAllResult{
+				UnderlayIP: &client.TkeRouteEniConfig{Enabled: &enabled},
+			}
+			output := FormatViewAllTable(result)
+
+			Expect(output).To(ContainSubstring("=== Underlay IP ==="))
+			Expect(output).NotTo(ContainSubstring("=== Dev Mode ==="))
+
+			// Underlay IP 位于 Update Strategy 之后、Labels 之前
+			Expect(indexOf(output, "=== Update Strategy ===")).To(
+				BeNumerically("<", indexOf(output, "=== Underlay IP ===")))
+			Expect(indexOf(output, "=== Underlay IP ===")).To(
+				BeNumerically("<", indexOf(output, "=== Labels ===")))
+		})
+
+		It("should include the Dev Mode section when it has data", func() {
+			enabled := true
+			result := &ViewAllResult{
+				UnderlayIP: &client.TkeRouteEniConfig{Enabled: &enabled},
+				DevMode:    &client.DevModeConfig{Enabled: true, WorkPath: "/usr/local/trpc"},
+			}
+			output := FormatViewAllTable(result)
+
+			Expect(output).To(ContainSubstring("=== Dev Mode ==="))
+			Expect(indexOf(output, "=== Underlay IP ===")).To(
+				BeNumerically("<", indexOf(output, "=== Dev Mode ===")))
+			Expect(indexOf(output, "=== Dev Mode ===")).To(
+				BeNumerically("<", indexOf(output, "=== Labels ===")))
 		})
 	})
 

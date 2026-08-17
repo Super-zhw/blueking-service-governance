@@ -29,88 +29,138 @@ import (
 
 // EditHandler 从 YAML 文件更新指定 section 配置。
 func EditHandler(ctx context.Context, appID, envName, specFile string, section client.AppSpecSectionName) error {
+	// 开关型 section 只有一个 enabled 布尔值，不接受 YAML 文件输入
+	if section == client.AppSpecSectionTkeRouteEni || section == client.AppSpecSectionDevMode {
+		return errors.Errorf("section %s does not support edit, use enable/disable instead", section)
+	}
+
 	cli := client.New()
 	switch section {
 	case client.AppSpecSectionResources:
-		return editSectionHandler(
+		return setSectionHandler(
 			ctx,
 			cli,
 			appID,
 			envName,
-			specFile,
 			section,
-			ParseResourcesFile,
+			func() (*ResourcesInput, error) { return ParseResourcesFile(specFile) },
 			func(v *ResourcesInput) any {
 				return &SetDefaultResourcesRequest{AppSpecResources: v}
 			},
 		)
 	case client.AppSpecSectionUpdateStrategy:
-		return editSectionHandler(
+		return setSectionHandler(
 			ctx,
 			cli,
 			appID,
 			envName,
-			specFile,
 			section,
-			ParseUpdateStrategyFile,
+			func() (*UpdateStrategyInput, error) { return ParseUpdateStrategyFile(specFile) },
 			func(v *UpdateStrategyInput) any {
 				return &SetDefaultUpdateStrategyRequest{AppSpecUpdateStrategy: v}
 			},
 		)
 	case client.AppSpecSectionLifecycle:
-		return editSectionHandler(
+		return setSectionHandler(
 			ctx,
 			cli,
 			appID,
 			envName,
-			specFile,
 			section,
-			ParseLifecycleFile,
+			func() (*LifecycleInput, error) { return ParseLifecycleFile(specFile) },
 			func(v *LifecycleInput) any {
 				return &SetDefaultLifecycleRequest{AppSpecLifecycle: v}
 			},
 		)
 	case client.AppSpecSectionProbe:
-		return editSectionHandler(
+		return setSectionHandler(
 			ctx,
 			cli,
 			appID,
 			envName,
-			specFile,
 			section,
-			ParseProbeFile,
+			func() (*ProbeInput, error) { return ParseProbeFile(specFile) },
 			func(v *ProbeInput) any {
 				return &SetDefaultProbeRequest{AppSpecProbe: v}
 			},
 		)
 	case client.AppSpecSectionLabels:
-		return editSectionHandler(
+		return setSectionHandler(
 			ctx,
 			cli,
 			appID,
 			envName,
-			specFile,
 			section,
-			ParseLabelsFile,
+			func() (*LabelsInput, error) { return ParseLabelsFile(specFile) },
 			func(v *LabelsInput) any {
 				return &SetDefaultLabelsRequest{AppSpecLabels: v}
 			},
 		)
 	case client.AppSpecSectionAnnotations:
-		return editSectionHandler(
+		return setSectionHandler(
 			ctx,
 			cli,
 			appID,
 			envName,
-			specFile,
 			section,
-			ParseAnnotationsFile,
+			func() (*AnnotationsInput, error) { return ParseAnnotationsFile(specFile) },
 			func(v *AnnotationsInput) any {
 				return &SetDefaultAnnotationsRequest{AppSpecAnnotations: v}
 			},
 		)
 	default:
 		return errors.Errorf("unsupported section: %s", section)
+	}
+}
+
+// SetEnabledHandler 设置开关型 section（underlay-ip / dev-mode）的启用状态。
+func SetEnabledHandler(
+	ctx context.Context,
+	appID, envName string,
+	section client.AppSpecSectionName,
+	enabled bool,
+) error {
+	return setEnabledHandler(ctx, client.New(), appID, envName, section, enabled)
+}
+
+func setEnabledHandler(
+	ctx context.Context,
+	cli client.Client,
+	appID, envName string,
+	section client.AppSpecSectionName,
+	enabled bool,
+) error {
+	load := func() (*EnabledInput, error) { return &EnabledInput{Enabled: enabled}, nil }
+
+	switch section {
+	case client.AppSpecSectionTkeRouteEni:
+		return setSectionHandler(
+			ctx,
+			cli,
+			appID,
+			envName,
+			section,
+			load,
+			// 非标准行为：tkeRouteEni 的默认级与环境级请求体都是扁平结构，不带 appSpecXxx 包装
+			func(v *EnabledInput) any { return v },
+		)
+	case client.AppSpecSectionDevMode:
+		if envName == "" {
+			return errors.Errorf("%s only supports env-level configuration, --env is required", section)
+		}
+		return setSectionHandler(
+			ctx,
+			cli,
+			appID,
+			envName,
+			section,
+			load,
+			func(v *EnabledInput) any {
+				return &SetEnvDevModeRequest{AppSpecDevMode: v}
+			},
+		)
+	default:
+		return errors.Errorf("section %s does not support enable/disable", section)
 	}
 }
 
@@ -157,15 +207,18 @@ func isAppModelType(appType string) bool {
 	return appType == "trpc" || appType == "taf"
 }
 
-func editSectionHandler[T any](
+// setSectionHandler 获取 section 输入，包装为请求体后写入默认级或环境级配置。
+// load 负责产出输入（从 YAML 文件解析，或直接由命令行参数构造），
+// buildReq 负责包装为服务端要求的请求体结构。
+func setSectionHandler[T any](
 	ctx context.Context,
 	cli client.Client,
-	appID, envName, specFile string,
+	appID, envName string,
 	section client.AppSpecSectionName,
-	parse func(string) (*T, error),
+	load func() (*T, error),
 	buildReq func(*T) any,
 ) error {
-	input, err := parse(specFile)
+	input, err := load()
 	if err != nil {
 		return err
 	}

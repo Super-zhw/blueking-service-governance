@@ -24,12 +24,22 @@ package client
 type AppSpecSectionName string
 
 const (
-	AppSpecSectionResources      AppSpecSectionName = "resources"
+	// AppSpecSectionResources 资源规格配置（副本数、CPU/内存 requests/limits）
+	AppSpecSectionResources AppSpecSectionName = "resources"
+	// AppSpecSectionUpdateStrategy 滚动更新策略（maxSurge / maxUnavailable）
 	AppSpecSectionUpdateStrategy AppSpecSectionName = "update-strategy"
-	AppSpecSectionLifecycle      AppSpecSectionName = "lifecycle"
-	AppSpecSectionProbe          AppSpecSectionName = "probe"
-	AppSpecSectionLabels         AppSpecSectionName = "labels"
-	AppSpecSectionAnnotations    AppSpecSectionName = "annotations"
+	// AppSpecSectionLifecycle 容器生命周期钩子（postStart / preStop）
+	AppSpecSectionLifecycle AppSpecSectionName = "lifecycle"
+	// AppSpecSectionProbe 健康探针配置（liveness / readiness / startup）
+	AppSpecSectionProbe AppSpecSectionName = "probe"
+	// AppSpecSectionLabels 工作负载自定义标签
+	AppSpecSectionLabels AppSpecSectionName = "labels"
+	// AppSpecSectionAnnotations 工作负载自定义注解
+	AppSpecSectionAnnotations AppSpecSectionName = "annotations"
+	// AppSpecSectionTkeRouteEni VPC 网络模式（underlay IP），启用后 Pod 获得 VPC IP，可以跨 VPC 互相访问。
+	AppSpecSectionTkeRouteEni AppSpecSectionName = "tke-route-eni"
+	// AppSpecSectionDevMode 开发模式，允许运行时热更新二进制；仅支持环境级配置，无 default 接口
+	AppSpecSectionDevMode AppSpecSectionName = "dev-mode"
 )
 
 // AppDetail represents the app detail response from GET /apps/:appID.
@@ -156,4 +166,10 @@ type AnnotationsConfig struct {
 // IsEmpty 判断是否为空配置。
 func (c *AnnotationsConfig) IsEmpty() bool {
 	return len(c.Annotations) == 0
+}
+
+// TkeRouteEniConfig underlay IP（TKE Route ENI / VPC-CNI）网络模式配置
+type TkeRouteEniConfig struct {
+	// Enabled 为 nil 表示未配置
+	Enabled *bool `json:"enabled" yaml:"enabled"`
 }

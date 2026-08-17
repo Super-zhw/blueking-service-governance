@@ -1,6 +1,6 @@
 # bkms-cli app-appspec Reference
 
-`bkms-cli app appspec` 用于管理应用部署规格（AppSpec）的各个配置段（section），包括启动命令、资源限制、更新策略、生命周期钩子、健康探针、标签和注解。
+`bkms-cli app appspec` 用于管理应用部署规格（AppSpec）的各个配置段（section），包括启动命令、资源限制、更新策略、生命周期钩子、健康探针、underlay IP 网络、开发模式、标签和注解。
 
 当前包含以下子命令组：
 
@@ -10,14 +10,21 @@
 - `update-strategy`：管理滚动更新策略（view / edit / reset）。
 - `lifecycle`：管理容器生命周期钩子（view / edit / reset）。
 - `probe`：管理健康探针配置（view / edit / reset）。
+- `underlay-ip`：管理 underlay IP（VPC-CNI）网络模式开关（view / enable / disable / reset）。
+- `dev-mode`：管理开发模式开关，**仅支持环境级配置**（view / enable / disable / reset），所有子命令必须指定 `--env`。
 - `labels`：管理 Kubernetes 标签（view / edit / reset）。
 - `annotations`：管理 Kubernetes 注解（view / edit / reset）。
 
 **默认配置 vs 环境配置：**
 
 - 不带 `--env`：操作的是应用级默认配置，所有环境共享。
-- 带 `--env`：操作的是环境级覆盖配置。view 时展示合并后的生效配置；edit 时修改环境覆盖层；reset 时删除环境覆盖（恢复为使用默认配置）。
+- 带 `--env`：操作的是环境级覆盖配置。view 时展示合并后的生效配置；edit / enable / disable 时修改环境覆盖层；reset 时删除环境覆盖（恢复为使用默认配置）。
 - `start-command` 是全局配置，不区分环境，没有 `--env` 参数和 reset 操作。
+- `dev-mode` 只有环境级配置，服务端没有应用默认级接口，因此所有 `dev-mode` 子命令都必须指定 `--env`。聚合 `view` 也只在带 `--env` 时才展示 dev mode。
+
+**开关型 section：**
+
+`underlay-ip` 与 `dev-mode` 只有一个 `enabled` 布尔开关，用 `enable` / `disable` 子命令切换，**不提供 `edit -f`**。其余 section 仍通过 `edit -f <yaml>` 修改。
 
 **输出格式：**
 
@@ -52,6 +59,19 @@ bkms-cli app appspec update-strategy edit --app my-app --env prod -f update-stra
 bkms-cli app appspec resources reset --app my-app --env prod
 ```
 
+开关型 section 用 enable / disable 切换，无需 YAML 文件。
+
+```bash
+# 在默认配置上开启 underlay IP（所有环境共享）
+bkms-cli app appspec underlay-ip enable --app my-app
+
+# 只在 prod 环境开启 underlay IP
+bkms-cli app appspec underlay-ip enable --app my-app --env prod
+
+# 开启 stag 环境的开发模式（dev-mode 必须带 --env）
+bkms-cli app appspec dev-mode enable --app my-app --env stag
+```
+
 使用 jq 表达式提取特定字段。
 
 ```bash
@@ -60,6 +80,9 @@ bkms-cli app appspec resources view --app my-app -o 'jq=.replicas'
 
 # 提取启动命令
 bkms-cli app appspec start-command view --app my-app -o 'jq=.command'
+
+# 判断 underlay IP 是否已开启
+bkms-cli app appspec underlay-ip view --app my-app -o 'jq=.enabled'
 ```
 
 ## view（聚合查看）
@@ -455,4 +478,103 @@ annotations:
 ```bash
 # 重置 prod 环境注解配置
 bkms-cli app appspec annotations reset --app my-app --env prod
+```
+
+## underlay-ip
+
+管理 underlay IP（VPC-CNI）网络模式开关。开启后 Pod 直接从 VPC 获取 IP，而不使用 overlay 网络。
+
+该 section 只有一个 `enabled` 布尔开关，支持默认级与环境级配置。
+
+### underlay-ip view
+
+查看 underlay IP 配置。不带 `--env` 查看默认配置，带 `--env` 查看该环境生效配置。
+
+```bash
+# 查看默认 underlay IP 配置
+bkms-cli app appspec underlay-ip view --app my-app
+
+# 查看 prod 环境生效配置
+bkms-cli app appspec underlay-ip view --app my-app --env prod
+
+# JSON 格式输出
+bkms-cli app appspec underlay-ip view --app my-app -o json
+```
+
+未配置时 `enabled` 为 `null`，表格中展示为 `-`。
+
+### underlay-ip enable / disable
+
+开启或关闭 underlay IP。不带 `--env` 修改默认配置，带 `--env` 修改该环境的覆盖配置。
+
+```bash
+# 在默认配置上开启（所有未单独覆盖的环境都会生效）
+bkms-cli app appspec underlay-ip enable --app my-app
+
+# 在默认配置上关闭
+bkms-cli app appspec underlay-ip disable --app my-app
+
+# 只在 prod 环境开启
+bkms-cli app appspec underlay-ip enable --app my-app --env prod
+
+# 只在 prod 环境关闭（默认配置为开启时，用它单独屏蔽某个环境）
+bkms-cli app appspec underlay-ip disable --app my-app --env prod
+```
+
+### underlay-ip reset
+
+删除环境级覆盖配置，使该环境恢复使用默认配置。必须指定 `--env`。
+
+```bash
+# 重置 prod 环境，恢复继承默认配置
+bkms-cli app appspec underlay-ip reset --app my-app --env prod
+```
+
+## dev-mode
+
+管理开发模式开关。**开发模式只支持环境级配置**，服务端没有应用默认级接口，因此所有子命令都必须指定 `--env`；缺少 `--env` 时命令会直接报错退出。
+
+`bkms-cli app publish` 要求目标环境已开启开发模式，否则会拒绝执行。
+
+### dev-mode view
+
+查看某环境生效的开发模式配置。
+
+```bash
+# 查看 stag 环境的开发模式配置
+bkms-cli app appspec dev-mode view --app my-app --env stag
+
+# JSON 格式输出
+bkms-cli app appspec dev-mode view --app my-app --env stag -o json
+```
+
+输出包含三个字段：
+
+- `enabled`：是否已开启开发模式。
+- `workPath`：开发模式工作根目录。
+- `mountPath`：脚本挂载路径。
+
+其中 `workPath` 与 `mountPath` 由服务端按应用类型（trpc / taf）推导，**只读**，CLI 不提供修改入口。
+
+### dev-mode enable / disable
+
+开启或关闭某环境的开发模式。`--env` 必填。
+
+```bash
+# 开启 stag 环境的开发模式
+bkms-cli app appspec dev-mode enable --app my-app --env stag
+
+# 关闭 stag 环境的开发模式
+bkms-cli app appspec dev-mode disable --app my-app --env stag
+```
+
+### dev-mode reset
+
+清除某环境的开发模式配置。必须指定 `--env`。
+
+由于开发模式没有应用默认级配置，reset 是直接清除该环境的设置，而不是回退到某个默认值。
+
+```bash
+# 清除 stag 环境的开发模式配置
+bkms-cli app appspec dev-mode reset --app my-app --env stag
 ```

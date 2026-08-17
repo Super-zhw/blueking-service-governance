@@ -75,12 +75,24 @@ func FormatViewAllTable(result *ViewAllResult) string {
 	sb.WriteString(FormatUpdateStrategyTable(result.UpdateStrategy))
 	sb.WriteString("\n\n")
 
-	// 6. Metadata - Labels
+	// 6. Underlay IP
+	sb.WriteString("=== Underlay IP ===\n")
+	sb.WriteString(FormatUnderlayIPTable(result.UnderlayIP))
+	sb.WriteString("\n\n")
+
+	// 7. Dev Mode（仅环境级配置，查看默认配置时不展示）
+	if result.DevMode != nil {
+		sb.WriteString("=== Dev Mode ===\n")
+		sb.WriteString(FormatDevModeTable(result.DevMode))
+		sb.WriteString("\n\n")
+	}
+
+	// 8. Metadata - Labels
 	sb.WriteString("=== Labels ===\n")
 	sb.WriteString(FormatLabelsTable(result.Labels))
 	sb.WriteString("\n\n")
 
-	// 7. Metadata - Annotations
+	// 9. Metadata - Annotations
 	sb.WriteString("=== Annotations ===\n")
 	sb.WriteString(FormatAnnotationsTable(result.Annotations))
 
@@ -113,6 +125,14 @@ func FormatSectionTable(section client.AppSpecSectionName, data any) string {
 	case client.AppSpecSectionAnnotations:
 		if v, ok := data.(*client.AnnotationsConfig); ok {
 			return FormatAnnotationsTable(v)
+		}
+	case client.AppSpecSectionTkeRouteEni:
+		if v, ok := data.(*client.TkeRouteEniConfig); ok {
+			return FormatUnderlayIPTable(v)
+		}
+	case client.AppSpecSectionDevMode:
+		if v, ok := data.(*client.DevModeConfig); ok {
+			return FormatDevModeTable(v)
 		}
 	}
 	return "  Not configured"
@@ -261,6 +281,27 @@ func FormatAnnotationsTable(a *client.AnnotationsConfig) string {
 	return strings.TrimRight(sb.String(), "\n")
 }
 
+// FormatUnderlayIPTable formats underlay-ip (tkeRouteEni) config as a table.
+func FormatUnderlayIPTable(t *client.TkeRouteEniConfig) string {
+	if t == nil {
+		return "  Not configured"
+	}
+	return fmt.Sprintf("  %-20s %s", "Enabled:", ptrBoolStr(t.Enabled))
+}
+
+// FormatDevModeTable formats dev-mode config as a table.
+// WorkPath/MountPath 由服务端按应用类型推导，此处仅作只读展示。
+func FormatDevModeTable(d *client.DevModeConfig) string {
+	if d == nil {
+		return "  Not configured"
+	}
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("  %-20s %t\n", "Enabled:", d.Enabled))
+	sb.WriteString(fmt.Sprintf("  %-20s %s\n", "Work Path:", orDash(d.WorkPath)))
+	sb.WriteString(fmt.Sprintf("  %-20s %s", "Mount Path:", orDash(d.MountPath)))
+	return sb.String()
+}
+
 // --- Helper functions ---
 
 func ptrStr(p *string) string {
@@ -275,6 +316,20 @@ func ptrInt32Str(p *int32) string {
 		return "-"
 	}
 	return fmt.Sprintf("%d", *p)
+}
+
+func ptrBoolStr(p *bool) string {
+	if p == nil {
+		return "-"
+	}
+	return fmt.Sprintf("%t", *p)
+}
+
+func orDash(s string) string {
+	if s == "" {
+		return "-"
+	}
+	return s
 }
 
 func formatStringSlice(s []string) string {

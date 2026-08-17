@@ -60,6 +60,19 @@ var _ = Describe("App AppSpec", Ordered, func() {
 			Expect(json.Unmarshal([]byte(result.Stdout), &data)).To(Succeed())
 			Expect(data).To(HaveKey("resources"))
 			Expect(data).To(HaveKey("updateStrategy"))
+			// underlayIP 恒在；devMode 仅环境级，默认配置视图不应出现
+			Expect(data).To(HaveKey("underlayIP"))
+			Expect(data).NotTo(HaveKey("devMode"))
+		})
+
+		It("view all with --env includes devMode", func() {
+			result := cli.Run("app", "appspec", "view",
+				"--app", envCfg.AppID, "--env", envCfg.EnvName, "-o", "json")
+			Expect(result.ExitCode).To(Equal(0))
+			var data map[string]any
+			Expect(json.Unmarshal([]byte(result.Stdout), &data)).To(Succeed())
+			Expect(data).To(HaveKey("underlayIP"))
+			Expect(data).To(HaveKey("devMode"))
 		})
 
 		It("view all with --env exits with code 0", func() {
@@ -290,6 +303,93 @@ var _ = Describe("App AppSpec", Ordered, func() {
 			result := cli.Run("app", "appspec", "start-command", "edit", "--app", envCfg.AppID)
 			Expect(result.ExitCode).NotTo(Equal(0))
 			Expect(result.CombinedOutput()).To(ContainSubstring("required"))
+		})
+	})
+
+	// ==================== appspec underlay-ip ====================
+	Context("Underlay IP", func() {
+		It("view exits with code 0", func() {
+			result := cli.Run("app", "appspec", "underlay-ip", "view", "--app", envCfg.AppID)
+			Expect(result.ExitCode).To(Equal(0))
+			Expect(result.Stdout).To(ContainSubstring("Enabled:"))
+		})
+
+		It("view with -o json outputs valid JSON", func() {
+			result := cli.Run("app", "appspec", "underlay-ip", "view", "--app", envCfg.AppID, "-o", "json")
+			Expect(result.ExitCode).To(Equal(0))
+			var data map[string]any
+			Expect(json.Unmarshal([]byte(result.Stdout), &data)).To(Succeed())
+			Expect(data).To(HaveKey("enabled"))
+		})
+
+		// 共用应用，enable 后必须立即 disable 复原
+		It("enable then disable at default level", func() {
+			enabled := cli.Run("app", "appspec", "underlay-ip", "enable", "--app", envCfg.AppID)
+			Expect(enabled.ExitCode).To(Equal(0))
+
+			disabled := cli.Run("app", "appspec", "underlay-ip", "disable", "--app", envCfg.AppID)
+			Expect(disabled.ExitCode).To(Equal(0))
+		})
+
+		It("enable with --env then reset removes the override", func() {
+			enabled := cli.Run("app", "appspec", "underlay-ip", "enable",
+				"--app", envCfg.AppID, "--env", envCfg.EnvName)
+			Expect(enabled.ExitCode).To(Equal(0))
+
+			reset := cli.Run("app", "appspec", "underlay-ip", "reset",
+				"--app", envCfg.AppID, "--env", envCfg.EnvName)
+			Expect(reset.ExitCode).To(Equal(0))
+		})
+
+		It("reset without --env exits with non-zero code", func() {
+			result := cli.Run("app", "appspec", "underlay-ip", "reset", "--app", envCfg.AppID)
+			Expect(result.ExitCode).NotTo(Equal(0))
+		})
+	})
+
+	// ==================== appspec dev-mode（仅环境级） ====================
+	Context("Dev Mode", func() {
+		It("view with --env exits with code 0", func() {
+			result := cli.Run("app", "appspec", "dev-mode", "view",
+				"--app", envCfg.AppID, "--env", envCfg.EnvName)
+			Expect(result.ExitCode).To(Equal(0))
+			Expect(result.Stdout).To(ContainSubstring("Enabled:"))
+			Expect(result.Stdout).To(ContainSubstring("Work Path:"))
+		})
+
+		It("view without --env exits with non-zero code", func() {
+			result := cli.Run("app", "appspec", "dev-mode", "view", "--app", envCfg.AppID)
+			Expect(result.ExitCode).NotTo(Equal(0))
+			Expect(result.CombinedOutput()).To(ContainSubstring("required"))
+		})
+
+		It("enable without --env exits with non-zero code", func() {
+			result := cli.Run("app", "appspec", "dev-mode", "enable", "--app", envCfg.AppID)
+			Expect(result.ExitCode).NotTo(Equal(0))
+			Expect(result.CombinedOutput()).To(ContainSubstring("required"))
+		})
+
+		It("disable without --env exits with non-zero code", func() {
+			result := cli.Run("app", "appspec", "dev-mode", "disable", "--app", envCfg.AppID)
+			Expect(result.ExitCode).NotTo(Equal(0))
+			Expect(result.CombinedOutput()).To(ContainSubstring("required"))
+		})
+
+		// app publish 依赖开发模式状态，enable 后必须立即 disable 复原
+		It("enable then disable with --env", func() {
+			enabled := cli.Run("app", "appspec", "dev-mode", "enable",
+				"--app", envCfg.AppID, "--env", envCfg.EnvName)
+			Expect(enabled.ExitCode).To(Equal(0))
+
+			disabled := cli.Run("app", "appspec", "dev-mode", "disable",
+				"--app", envCfg.AppID, "--env", envCfg.EnvName)
+			Expect(disabled.ExitCode).To(Equal(0))
+		})
+
+		It("reset with --env exits with code 0", func() {
+			result := cli.Run("app", "appspec", "dev-mode", "reset",
+				"--app", envCfg.AppID, "--env", envCfg.EnvName)
+			Expect(result.ExitCode).To(Equal(0))
 		})
 	})
 

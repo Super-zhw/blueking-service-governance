@@ -99,6 +99,11 @@ type AnnotationsInput struct {
 	Annotations map[string]string `yaml:"annotations" json:"annotations"`
 }
 
+// EnabledInput 开关型 section 的输入结构
+type EnabledInput struct {
+	Enabled bool `yaml:"enabled" json:"enabled"`
+}
+
 // --- API 请求体封装 ---
 
 // SetDefaultResourcesRequest 设置默认资源规格的请求体
@@ -131,6 +136,11 @@ type SetDefaultAnnotationsRequest struct {
 	AppSpecAnnotations *AnnotationsInput `json:"appSpecAnnotations"`
 }
 
+// SetEnvDevModeRequest 设置环境级开发模式的请求体。
+type SetEnvDevModeRequest struct {
+	AppSpecDevMode *EnabledInput `json:"appSpecDevMode"`
+}
+
 // --- Start command request types ---
 
 // UpdateStartCommandRequest is the request body for updating start command.
@@ -153,8 +163,11 @@ type ViewAllResult struct {
 	Probe          *client.ProbeConfig          `json:"probe"`
 	Resources      *client.ResourcesConfig      `json:"resources"`
 	UpdateStrategy *client.UpdateStrategyConfig `json:"updateStrategy"`
-	Labels         *client.LabelsConfig         `json:"labels"`
-	Annotations    *client.AnnotationsConfig    `json:"annotations"`
+	UnderlayIP     *client.TkeRouteEniConfig    `json:"underlayIP"`
+	// DevMode 仅支持环境级配置，只有指定 --env 时才有值
+	DevMode     *client.DevModeConfig     `json:"devMode,omitempty"`
+	Labels      *client.LabelsConfig      `json:"labels"`
+	Annotations *client.AnnotationsConfig `json:"annotations"`
 }
 
 func (r *ViewAllResult) setSection(section client.AppSpecSectionName, data any) {
@@ -167,6 +180,10 @@ func (r *ViewAllResult) setSection(section client.AppSpecSectionName, data any) 
 		r.Resources = data.(*client.ResourcesConfig)
 	case client.AppSpecSectionUpdateStrategy:
 		r.UpdateStrategy = data.(*client.UpdateStrategyConfig)
+	case client.AppSpecSectionTkeRouteEni:
+		r.UnderlayIP = data.(*client.TkeRouteEniConfig)
+	case client.AppSpecSectionDevMode:
+		r.DevMode = data.(*client.DevModeConfig)
 	case client.AppSpecSectionLabels:
 		r.Labels = data.(*client.LabelsConfig)
 	case client.AppSpecSectionAnnotations:

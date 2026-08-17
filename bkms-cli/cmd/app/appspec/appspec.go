@@ -23,11 +23,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/annotations"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/labels"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/lifecycle"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/probe"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/resources"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/startcommand"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/underlayip"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec/updatestrategy"
 )
 
@@ -39,7 +41,8 @@ func NewCmd() *cobra.Command {
 		Long: `Manage application deployment spec (AppSpec) sections.
 
 AppSpec defines how an application is deployed, including start command, resource limits,
-update strategy, lifecycle hooks, health probes, labels and annotations.`,
+update strategy, lifecycle hooks, health probes, underlay IP networking, development mode,
+labels and annotations.`,
 		Example: `  # View all sections (default config)
   bkms-cli app appspec view --app my-app
 
@@ -58,6 +61,8 @@ update strategy, lifecycle hooks, health probes, labels and annotations.`,
 	cmd.AddCommand(probe.NewCmd())
 	cmd.AddCommand(resources.NewCmd())
 	cmd.AddCommand(updatestrategy.NewCmd())
+	cmd.AddCommand(underlayip.NewCmd())
+	cmd.AddCommand(devmode.NewCmd())
 	cmd.AddCommand(labels.NewCmd())
 	cmd.AddCommand(annotations.NewCmd())
 
