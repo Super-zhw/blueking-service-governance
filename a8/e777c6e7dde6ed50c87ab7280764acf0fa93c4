@@ -1,0 +1,20 @@
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 46,143,244,258,262,265,271-274,278-279,282,286,289,293,295-297,337
+bkms-server/pkg/bkintegrations/handler/bcs.go
+  h_2321bec5d80d15 261,274
+bkms-server/pkg/infras/cloudapi/bcs/client.go
+  h_2321bec5d80d15 67-72,75-76,78-80,86-93,95-97,105-133
+bkms-server/pkg/infras/cloudapi/bcs/types.go
+  h_2321bec5d80d15 21-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a8e777c6e7dde6ed50c87ab7280764acf0fa93c4",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
