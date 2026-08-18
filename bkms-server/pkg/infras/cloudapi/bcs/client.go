@@ -54,6 +54,8 @@ type Client interface {
 		ctx context.Context,
 		projectID, clusterID, namespace, podName, containerName, command string,
 	) (string, error)
+	// ListUserTokens 获取用户的 BCS Token 列表
+	ListUserTokens(ctx context.Context) ([]UserToken, error)
 }
 
 // ApiClient api client
@@ -287,4 +289,63 @@ func (c *ApiClient) handleOperation(
 		return nil, errors.New(mapx.GetStr(result, "message"))
 	}
 	return result, nil
+}
+
+// NewUserMode 创建用户态 BCS API 客户端实例
+func NewUserMode(user auth.User) (Client, error) {
+	if config.G.Development.UseStubBCS {
+		log.InfoNoContext("use stub bcs client according to config")
+		return NewStub(user), nil
+	}
+
+	authorization, _ := json.Marshal(map[string]string{
+		"bk_app_code":       config.G.BkApp.Code,
+		"bk_app_secret":     config.G.BkApp.Secret,
+		user.Cred.CredKey(): user.Cred.CredValue(),
+	})
+	client, err := bkapi.NewBkApiClient("bcs-api-gateway", bkapi.ClientConfig{
+		BkApiUrlTmpl: config.G.BkPlatUrls.BkApiUrlTmpl,
+		Stage:        config.G.BkApiStages.BCS,
+		ClientOptions: []define.BkApiClientOption{
+			bkapi.OptSetRequestHeader("x-bkapi-authorization", string(authorization)),
+			bkapi.OptJsonResultProvider(),
+			bkapi.OptTimeout(60 * time.Second),
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ApiClient{client, user}, nil
+}
+
+// ListUserTokens 获取 BCS Auth Info
+func (c *ApiClient) ListUserTokens(ctx context.Context) ([]UserToken, error) {
+	op := c.NewOperation(
+		bkapi.OperationConfig{
+			Name:   "list_user_tokens",
+			Method: "GET",
+			Path:   fmt.Sprintf("/v4/usermanager/v1/users/%s/tokens", c.user.ID),
+		},
+	)
+
+	result, err := c.handleOperation(ctx, op)
+	if err != nil {
+		return nil, err
+	}
+
+	tokens := make([]UserToken, 0)
+	for _, item := range mapx.GetList(result, "data") {
+		if v, ok := item.(map[string]any); ok {
+			token := UserToken{
+				Token:  mapx.GetStr(v, "token"),
+				Status: cast.ToInt(v["status"]),
+			}
+			if ea, exists := v["expired_at"]; exists && ea != nil {
+				s := cast.ToString(ea)
+				token.ExpiredAt = &s
+			}
+			tokens = append(tokens, token)
+		}
+	}
+	return tokens, nil
 }

@@ -4345,6 +4345,11 @@ definitions:
       data:
         $ref: '#/definitions/serializer.BCSProjectOutput'
     type: object
+  serializer.GetBCSUserTokenOutput:
+    properties:
+      data:
+        type: string
+    type: object
   serializer.GetBSCPConfigOutput:
     properties:
       data:
@@ -15835,6 +15840,26 @@ paths:
       - BkUserInfo: []
       - BkUserCredential: []
       summary: 获取有权限的 BCS 项目列表
+      tags:
+      - bkintegrations-bcs
+  /bcs/token:
+    get:
+      operationId: GetBCSUserToken
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.GetBCSUserTokenOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取 BCS Auth Info
       tags:
       - bkintegrations-bcs
   /bkcc/businesses/authorized:

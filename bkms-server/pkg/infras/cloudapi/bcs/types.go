@@ -67,3 +67,13 @@ type Namespace struct {
 	// Status 命名空间状态, 如: Active
 	Status string
 }
+
+// UserToken BCS Auth 信息
+type UserToken struct {
+	// Token 令牌值
+	Token string
+	// Status 状态, 1 表示有效
+	Status int
+	// ExpiredAt 过期时间, nil 表示永不过期
+	ExpiredAt *string
+}

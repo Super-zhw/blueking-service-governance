@@ -135,3 +135,11 @@ func (s *StubApiClient) CreateWebConsole(
 		projectID, clusterID, namespace, podName,
 	), nil
 }
+
+// ListUserTokens 模拟获取 BCS Auth Info
+func (s *StubApiClient) ListUserTokens(ctx context.Context) ([]UserToken, error) {
+	log.Infof(ctx, "Stub: ListUserTokens request: user=%s", s.user.ID)
+	return []UserToken{
+		{Token: "stub-bcs-token-for-local-dev", Status: 1, ExpiredAt: nil},
+	}, nil
+}

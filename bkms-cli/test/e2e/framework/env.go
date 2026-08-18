@@ -41,9 +41,6 @@ type EnvConfig struct {
 	AppID string `env:"BKMS_APP_ID,required"`
 	// EnvName 环境名称
 	EnvName string `env:"BKMS_ENV_NAME,required"`
-
-	// BCSToken BCS 令牌
-	BCSToken string `env:"BCS_TOKEN,required"`
 }
 
 // LoadEnvConfig 从环境变量读取配置并返回 EnvConfig。

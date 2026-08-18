@@ -45,15 +45,6 @@ type Defaults struct {
 	WorkspaceID string `yaml:"workspaceID"`
 }
 
-// BCSConfig 蓝鲸 BCS 容器平台配置
-type BCSConfig struct {
-	// Token BCS 个人 token，用于通过 BCS API 网关连接 K8s 集群，该 token 可在 BCS 平台个人设置中获取；
-	// 请求经过 BCS 网关时，该 token 会被用来做用户身份鉴权；
-	// 仅用于 publish 命令的文件发布场景，首次通过 --bcs-token 参数传入后会持久化到配置文件，后续自动读取；
-	// 注意：该 token 具有个人权限，请勿泄露；如 token 过期或权限变更，需重新通过 --bcs-token 传入覆盖
-	Token string `yaml:"token"`
-}
-
 // String 返回 Defaults 的字符串表示
 func (d *Defaults) String() string {
 	// 如果所有字段都没有设置默认值，则不返回
@@ -75,16 +66,12 @@ type Config struct {
 	AccessToken string `yaml:"accessToken"`
 	// Defaults 默认参数
 	Defaults Defaults `yaml:"defaults"`
-	// BCS 蓝鲸容器平台配置，仅用于 publish 命令通过 BCS API 网关连接 K8s 集群，替代本地 kubeconfig 文件；
-	// 目前仅存储个人 Token，首次使用时通过 --bcs-token 参数传入并持久化，后续自动读取；
-	// 注意：该配置仅适用于 CLI publish 的文件发布场景，不适用于服务端 BCS 集群管理
-	BCS BCSConfig `yaml:"bcs"`
 }
 
 // String 返回配置的字符串表示
 func (c *Config) String() string {
 	return fmt.Sprintf(
-		"configFilePath: %s\n\nbkmsBaseUrl: %s\nusername: %s\naccessToken: [REDACTED]\n%sbcs:\n  token: [REDACTED]",
+		"configFilePath: %s\n\nbkmsBaseUrl: %s\nusername: %s\naccessToken: [REDACTED]\n%s",
 		cfgFilePath, G.BkmsBaseURL, G.Username, c.Defaults.String(),
 	)
 }

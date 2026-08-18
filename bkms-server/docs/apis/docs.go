@@ -11154,6 +11154,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/bcs/token": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkintegrations-bcs"
+                ],
+                "summary": "获取 BCS Auth Info",
+                "operationId": "GetBCSUserToken",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.GetBCSUserTokenOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/bkcc/businesses/authorized": {
             "get": {
                 "security": [
@@ -23845,6 +23879,14 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/serializer.BCSProjectOutput"
+                }
+            }
+        },
+        "serializer.GetBCSUserTokenOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
                 }
             }
         },

@@ -32,6 +32,8 @@ type Client interface {
 	ValidateAccessToken(accessToken string) (string, error)
 	// ExchangeBkTicketForToken 使用 bk_ticket 兑换 access_token
 	ExchangeBkTicketForToken(username, bkTicket string) (string, error)
+	// GetBCSToken 从服务端获取 BCS Auth Info
+	GetBCSToken(ctx context.Context) (string, error)
 
 	// ---------- 工作空间 ----------
 

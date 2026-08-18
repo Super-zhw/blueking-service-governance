@@ -21,6 +21,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/serializer"
@@ -240,4 +241,46 @@ func (h *Handler) ListNamespacesByCluster(c *gin.Context) {
 			}),
 		},
 	)
+}
+
+// GetBCSUserToken 获取 BCS Auth Info
+//
+//	@ID			GetBCSUserToken
+//	@Summary	获取 BCS Auth Info
+//	@Tags		bkintegrations-bcs
+//	@Produce	json
+//	@Security	BkUserInfo
+//	@Security	BkUserCredential
+//	@Success	200	{object}	serializer.GetBCSUserTokenOutput
+//	@Failure	400	{object}	bkerrs.GinErrorOutput
+//	@Router		/bcs/token [get]
+func (h *Handler) GetBCSUserToken(c *gin.Context) {
+	ctx := c.Request.Context()
+	user := auth.MustGetUser(ctx)
+
+	client, err := bcs.NewUserMode(user)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "initial bcs user-mode client"))
+		return
+	}
+
+	tokens, err := client.ListUserTokens(ctx)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "get bcs auth info"))
+		return
+	}
+
+	activeToken, found := lo.Find(tokens, func(item bcs.UserToken) bool {
+		return item.Status == 1
+	})
+	if !found {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(
+			errors.New("no active bcs auth info found, please create one in BCS platform"),
+			bkerrs.ErrCodeNotFound,
+			"no active bcs auth info",
+		))
+		return
+	}
+
+	ginutils.OK(c, &slz.GetBCSUserTokenOutput{Data: activeToken.Token})
 }

@@ -62,7 +62,6 @@ var _ = Describe("Config", func() {
 				Username:    "testuser",
 				AccessToken: "test-token",
 				Defaults:    Defaults{WorkspaceID: "ws-123"},
-				BCS:         BCSConfig{Token: "bcs-token-abc"},
 			}
 			data, err := yaml.Marshal(cfg)
 			Expect(err).ToNot(HaveOccurred())
@@ -74,7 +73,6 @@ var _ = Describe("Config", func() {
 			Expect(conf.Username).To(Equal("testuser"))
 			Expect(conf.AccessToken).To(Equal("test-token"))
 			Expect(conf.Defaults.WorkspaceID).To(Equal("ws-123"))
-			Expect(conf.BCS.Token).To(Equal("bcs-token-abc"))
 			Expect(G).To(Equal(conf))
 		})
 
@@ -111,7 +109,6 @@ var _ = Describe("Config", func() {
 				Username:    "dumpuser",
 				AccessToken: "dump-token",
 				Defaults:    Defaults{WorkspaceID: "ws-dump"},
-				BCS:         BCSConfig{Token: "bcs-dump"},
 			}
 			Expect(G.Dump()).To(Succeed())
 
@@ -121,7 +118,6 @@ var _ = Describe("Config", func() {
 			Expect(conf.Username).To(Equal("dumpuser"))
 			Expect(conf.AccessToken).To(Equal("dump-token"))
 			Expect(conf.Defaults.WorkspaceID).To(Equal("ws-dump"))
-			Expect(conf.BCS.Token).To(Equal("bcs-dump"))
 		})
 	})
 
@@ -131,14 +127,12 @@ var _ = Describe("Config", func() {
 				BkmsBaseURL: "http://string-test.example.com",
 				Username:    "stringuser",
 				AccessToken: "secret-token",
-				BCS:         BCSConfig{Token: "secret-bcs-token"},
 			}
 
 			s := G.String()
 			Expect(s).To(ContainSubstring("http://string-test.example.com"))
 			Expect(s).To(ContainSubstring("stringuser"))
 			Expect(s).ToNot(ContainSubstring("secret-token"))
-			Expect(s).ToNot(ContainSubstring("secret-bcs-token"))
 			Expect(s).To(ContainSubstring("[REDACTED]"))
 		})
 	})

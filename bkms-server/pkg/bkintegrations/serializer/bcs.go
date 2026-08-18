@@ -85,3 +85,8 @@ type NamespaceOutput struct {
 type ListNamespacesByClusterOutput struct {
 	Data []*NamespaceOutput `json:"data"`
 }
+
+// GetBCSUserTokenOutput 获取 BCS Auth Info 响应
+type GetBCSUserTokenOutput struct {
+	Data string `json:"data"`
+}

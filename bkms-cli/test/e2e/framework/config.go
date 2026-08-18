@@ -60,7 +60,6 @@ func buildCLIConfig(cfg *EnvConfig, authenticated bool) *config.Config {
 		c.Username = cfg.Username
 		c.AccessToken = cfg.Token
 		c.Defaults = config.Defaults{WorkspaceID: cfg.WorkspaceID}
-		c.BCS = config.BCSConfig{Token: cfg.BCSToken}
 	}
 	return c
 }

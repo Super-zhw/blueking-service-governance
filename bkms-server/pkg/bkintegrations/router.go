@@ -67,6 +67,8 @@ type Handler interface {
 	ListClustersByProject(c *gin.Context)
 	// ListNamespacesByCluster 获取集群下的命名空间列表
 	ListNamespacesByCluster(c *gin.Context)
+	// GetBCSUserToken 获取 BCS Auth Info
+	GetBCSUserToken(c *gin.Context)
 
 	// --- KubeInsight 相关 API ---
 
@@ -127,6 +129,7 @@ func Register(rg *gin.RouterGroup, h Handler) {
 	rg.GET("/bcs/projects/:projectID", h.GetBCSProject)
 	rg.GET("/bcs/projects/:projectID/clusters", h.ListClustersByProject)
 	rg.GET("/bcs/projects/:projectID/clusters/:clusterID/namespaces", h.ListNamespacesByCluster)
+	rg.GET("/bcs/token", h.GetBCSUserToken)
 
 	// --- KubeInsight 相关路由 ---
 	rg.GET("/kube-insight/reports", h.GetLatestEnvReport)

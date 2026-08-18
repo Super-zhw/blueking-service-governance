@@ -183,4 +183,24 @@ var _ = Describe("BCS Serializer", func() {
 			Expect(resp.Data).To(BeEmpty())
 		})
 	})
+
+	Describe("GetBCSUserTokenOutput", func() {
+		It("should parse raw JSON into struct correctly", func() {
+			rawJSON := `{"data": "IFOmCG8UQqQDDONHpTlJhWeHKFOTTOVN"}`
+
+			var resp serializer.GetBCSUserTokenOutput
+			err := json.Unmarshal([]byte(rawJSON), &resp)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.Data).To(Equal("IFOmCG8UQqQDDONHpTlJhWeHKFOTTOVN"))
+		})
+
+		It("should parse JSON with empty data", func() {
+			rawJSON := `{"data": ""}`
+
+			var resp serializer.GetBCSUserTokenOutput
+			err := json.Unmarshal([]byte(rawJSON), &resp)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.Data).To(BeEmpty())
+		})
+	})
 })

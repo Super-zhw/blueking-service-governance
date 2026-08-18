@@ -153,7 +153,7 @@ var _ = Describe("Publisher instance resolution", func() {
 	It("returns an error when publish is called before preCheck", func() {
 		publisher := NewPublisher(ctx, cli, "", appID, envName)
 
-		err := publisher.Publish("/tmp/demo", []string{"pod-1"}, "")
+		err := publisher.Publish("/tmp/demo", []string{"pod-1"})
 
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("preCheck must be called before publish"))

@@ -146,6 +146,27 @@ func (c *SvcBasedClient) ExchangeBkTicketForToken(username, bkTicket string) (st
 	return token, nil
 }
 
+// GetBCSToken 从服务端获取 BCS Auth Info
+func (c *SvcBasedClient) GetBCSToken(ctx context.Context) (string, error) {
+	url := "/bkms/v1/bkms-server/bcs/token"
+
+	var respData struct {
+		Data string `json:"data"`
+	}
+	resp, err := c.cli.R().SetContext(ctx).SetResult(&respData).Get(url)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get BCS Auth Info")
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return "", errors.Errorf("get BCS Auth Info failed: [%d] -> %s", resp.StatusCode(), truncateBody(resp.Body()))
+	}
+	if respData.Data == "" {
+		return "", errors.New("no active BCS Auth Info found, please create one in BCS platform")
+	}
+
+	return respData.Data, nil
+}
+
 // ListWorkspaces 获取工作空间列表
 func (c *SvcBasedClient) ListWorkspaces(ctx context.Context, keyword string) ([]Workspace, error) {
 	url := "/bkms/v1/bkms-server/workspaces"

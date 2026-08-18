@@ -31,7 +31,7 @@ import (
 
 // NewCmd 创建 publish 命令
 func NewCmd() *cobra.Command {
-	var appID, envName, file, instances, bcsToken, workspaceID string
+	var appID, envName, file, instances, workspaceID string
 	var publishAll bool
 
 	cmd := &cobra.Command{
@@ -41,19 +41,12 @@ func NewCmd() *cobra.Command {
 
 This command uploads a binary file to the dev mode container for the specified app and environment.
 Dev mode must be enabled for the target environment.
-Use --bcs-token to provide BCS API token on first use, it will be saved to config for subsequent calls.
+The BCS Auth Info is automatically retrieved from the server using your current login credentials.
 
 If you have set a default workspace using 'workspace set', the --workspace flag
 is optional. Otherwise, you must specify it explicitly.`,
 		Example: `
-# First use, provide BCS token (will be saved to config)
-bkms-cli app publish --app myapp --env stage -f /path/to/binary --instance-ids pod1,pod2 --bcs-token <token>
-
-# Or write token directly in ~/.bkms/config.yaml, same effect:
-#   bcs:
-#     token: <token>
-
-# Subsequent use, token is read from config
+# Publish to specific instances
 bkms-cli app publish --app myapp --env stage -f /path/to/binary --instance-ids pod1,pod2
 
 # Publish to all Running instances
@@ -93,7 +86,7 @@ bkms-cli app publish --workspace ws-demo --app myapp --env stage -f /path/to/bin
 			if err != nil {
 				return err
 			}
-			if err := publisher.Publish(file, targetInstanceIDs, bcsToken); err != nil {
+			if err := publisher.Publish(file, targetInstanceIDs); err != nil {
 				return err
 			}
 			return nil
@@ -107,9 +100,6 @@ bkms-cli app publish --workspace ws-demo --app myapp --env stage -f /path/to/bin
 	cmd.Flags().
 		StringVar(&instances, "instance-ids", "", "Instance IDs (pod names) to publish to, comma-separated")
 	cmd.Flags().BoolVar(&publishAll, "all", false, "Publish to all Running instances")
-
-	cmd.Flags().
-		StringVar(&bcsToken, "bcs-token", "", "BCS API access token (only required on first use, will be saved to config)")
 
 	_ = cmd.MarkFlagRequired("app")
 	_ = cmd.MarkFlagRequired("env")

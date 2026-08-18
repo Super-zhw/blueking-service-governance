@@ -235,4 +235,46 @@ var _ = Describe("BCS API Client", func() {
 		Expect(namespaces[0].Name).To(Equal(namespace1))
 		Expect(namespaces[1].Name).To(Equal(namespace2))
 	})
+
+	It("list user tokens", func() {
+		PatchConvey("test", GinkgoT(), func() {
+			token1 := stringx.Random(32)
+			token2 := stringx.Random(32)
+
+			resultJson := fmt.Sprintf(`
+{"data": [
+{"token": "%s", "status": 1, "expired_at": null},
+{"token": "%s", "status": 0, "expired_at": "2025-01-01"}
+]}`, token1, token2)
+			result := make(map[string]any)
+			Expect(json.Unmarshal([]byte(resultJson), &result)).To(BeNil())
+			Mock((*ApiClient).handleOperation).Return(result, nil).Build()
+
+			tokens, err := cli.ListUserTokens(ctx)
+			Expect(err).To(BeNil())
+			Expect(tokens).To(HaveLen(2))
+
+			Expect(tokens[0].Token).To(Equal(token1))
+			Expect(tokens[0].Status).To(Equal(1))
+			Expect(tokens[0].ExpiredAt).To(BeNil())
+
+			Expect(tokens[1].Token).To(Equal(token2))
+			Expect(tokens[1].Status).To(Equal(0))
+			Expect(tokens[1].ExpiredAt).NotTo(BeNil())
+			Expect(*tokens[1].ExpiredAt).To(Equal("2025-01-01"))
+		})
+	})
+
+	It("list user tokens returns empty when no tokens", func() {
+		PatchConvey("test", GinkgoT(), func() {
+			resultJson := `{"data": []}`
+			result := make(map[string]any)
+			Expect(json.Unmarshal([]byte(resultJson), &result)).To(BeNil())
+			Mock((*ApiClient).handleOperation).Return(result, nil).Build()
+
+			tokens, err := cli.ListUserTokens(ctx)
+			Expect(err).To(BeNil())
+			Expect(tokens).To(BeEmpty())
+		})
+	})
 })
