@@ -32,9 +32,9 @@ var Initialization *taskq.TaskType[InitializationArgs]
 
 const (
 	// initPollInterval BKM 项目就绪状态的轮询固定间隔
-	initPollInterval = 1 * time.Minute
-	// initPollMaxRetry 轮询窗口 12min, 需略大于 maxWaitDuration, 以保证超时判断先于重试耗尽生效
-	initPollMaxRetry = 12
+	initPollInterval = 15 * time.Second
+	// initPollMaxRetry 轮询窗口 ~11min, 需略大于 maxWaitDuration, 以保证超时判断先于重试耗尽生效
+	initPollMaxRetry = 44
 )
 
 // InitializationArgs 工作空间初始化任务参数
