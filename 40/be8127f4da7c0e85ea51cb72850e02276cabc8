@@ -1,0 +1,19 @@
+bkms-server/pkg/server/taskqtask/workspace/register.go
+  s_f97ee55aac9378::t_f4d92b5bc77731 35-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "40be8127f4da7c0e85ea51cb72850e02276cabc8",
+  "prompts": {},
+  "sessions": {
+    "s_f97ee55aac9378": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feaae58627d15b0fa4e4d15ae74e9",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
