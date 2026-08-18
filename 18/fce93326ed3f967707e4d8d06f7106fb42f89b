@@ -1,0 +1,20 @@
+bkms-server/pkg/bkintegrations/handler/bcs.go
+  h_2321bec5d80d15 278-279
+bkms-server/pkg/bkintegrations/serializer/bcs_test.go
+  h_2321bec5d80d15 186-205
+bkms-server/pkg/infras/cloudapi/bcs/client_test.go
+  h_2321bec5d80d15 238-279
+bkms-server/pkg/workload/appmodelcore/appdefaults/resolve_test.go
+  h_2321bec5d80d15 158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "18fce93326ed3f967707e4d8d06f7106fb42f89b",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
