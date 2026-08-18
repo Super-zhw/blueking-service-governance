@@ -18,6 +18,9 @@
 
 package bcs
 
+// UserTokenStatusActive 有效的 Token 状态
+const UserTokenStatusActive = 1
+
 // Project BCS 项目信息
 type Project struct {
 	// ID 项目 id, 如: 01234560123456e3acc1024d6bcs44b5

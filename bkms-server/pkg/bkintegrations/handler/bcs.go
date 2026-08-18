@@ -258,7 +258,7 @@ func (h *Handler) GetBCSUserToken(c *gin.Context) {
 	ctx := c.Request.Context()
 	user := auth.MustGetUser(ctx)
 
-	client, err := bcs.NewUserMode(user)
+	client, err := bcs.New(user, bcs.ClientOption{UserMode: true})
 	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "initial bcs user-mode client"))
 		return
@@ -271,7 +271,7 @@ func (h *Handler) GetBCSUserToken(c *gin.Context) {
 	}
 
 	activeToken, found := lo.Find(tokens, func(item bcs.UserToken) bool {
-		return item.Status == 1
+		return item.Status == bcs.UserTokenStatusActive
 	})
 	if !found {
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(

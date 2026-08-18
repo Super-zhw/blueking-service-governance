@@ -43,6 +43,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	instancehandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // bcsAPIHost BCS API 网关地址，通过 go build -ldflags 注入
@@ -139,7 +140,7 @@ func (h *Publisher) PreCheck() error {
 	h.devModeBinPath = osfilepath.Join(devMode.WorkPath, "/bin")
 	h.restartScriptPath = osfilepath.Join(devMode.MountPath, "/restart.sh")
 
-	fmt.Printf("App type: %s, WorkPath: %s, MountPath: %s\n", app.Type, devMode.WorkPath, devMode.MountPath)
+	console.Info("App type: %s, WorkPath: %s, MountPath: %s", app.Type, devMode.WorkPath, devMode.MountPath)
 
 	return nil
 }
@@ -240,7 +241,7 @@ func (h *Publisher) Publish(filePath string, instanceIDs []string) error {
 	}
 
 	// 2. 从服务端获取 BCS Auth Info 并初始化 k8s client
-	fmt.Println("Fetching BCS Auth Info from server...")
+	console.Info("Fetching BCS Auth Info from server...")
 	bcsToken, err := h.cli.GetBCSToken(h.ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get BCS Auth Info from server")
@@ -254,46 +255,46 @@ func (h *Publisher) Publish(filePath string, instanceIDs []string) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to calculate file MD5")
 	}
-	fmt.Printf("File MD5: %s\n", fileMD5)
+	console.Info("File MD5: %s", fileMD5)
 
 	// 4. 生成随机文件名（只需生成一次）
 	randomName := generateRandomName()
-	fmt.Printf("Random filename: %s\n", randomName)
+	console.Info("Random filename: %s", randomName)
 
 	// 5. 预先压缩文件为 tar.gz 格式（只需压缩一次）
-	fmt.Println("Compressing file to tar.gz format...")
+	console.Info("Compressing file to tar.gz format...")
 	tarGzData, err := compressFileToTarGz(filePath, randomName)
 	if err != nil {
 		return errors.Wrap(err, "failed to compress file to tar.gz")
 	}
 	namespace := h.env.Cluster.Namespace
-	fmt.Printf("Compressed size: %.2f MB\n", float64(len(tarGzData))/(1024*1024))
-	fmt.Println("==================================================")
-	fmt.Println("Publish workflow: 1. Upload file ==> 2. Execute restart script ==> 3. Done")
-	fmt.Println("==================================================")
+	console.Info("Compressed size: %.2f MB", float64(len(tarGzData))/(1024*1024))
+	console.Info("==================================================")
+	console.Info("Publish workflow: 1. Upload file ==> 2. Execute restart script ==> 3. Done")
+	console.Info("==================================================")
 
 	// 6. 逐个 pod 上传文件并执行 restart.sh
 	for i, instanceID := range instanceIDs {
-		fmt.Printf("\n[%d/%d] Processing instance: %s\n", i+1, len(instanceIDs), instanceID)
-		fmt.Printf("  Random filename: %s\n", randomName)
+		console.Info("\n[%d/%d] Processing instance: %s", i+1, len(instanceIDs), instanceID)
+		console.Info("  Random filename: %s", randomName)
 
 		// 上传已压缩的 tar.gz 数据到 pod
-		fmt.Printf("  Uploading file to %s...\n", h.devModeBinPath)
+		console.Info("  Uploading file to %s...", h.devModeBinPath)
 		if err = uploadTarGzToPod(h.ctx, tarGzData, instanceID, namespace, h.devModeBinPath); err != nil {
 			return errors.Wrapf(err, "failed to upload file to pod %s", instanceID)
 		}
-		fmt.Printf("  File upload completed!\n")
+		console.Info("  File upload completed!")
 
 		// 执行 restart.sh 脚本
-		fmt.Printf("  Executing restart.sh script...\n")
+		console.Info("  Executing restart.sh script...")
 		if err = executeRestartScript(h.ctx, instanceID, namespace, h.restartScriptPath, randomName, fileMD5); err != nil {
 			return errors.Wrapf(err, "failed to execute restart script on pod %s", instanceID)
 		}
-		fmt.Printf("  Instance %s restart completed!\n", instanceID)
+		console.Info("  Instance %s restart completed!", instanceID)
 	}
-	fmt.Println("\n==================================================")
-	fmt.Println("All instances published successfully!")
-	fmt.Println("==================================================")
+	console.Info("\n==================================================")
+	console.Info("All instances published successfully!")
+	console.Info("==================================================")
 
 	return nil
 }
@@ -333,7 +334,7 @@ func buildKubeClient(clusterID, token string) error {
 		return errors.New("BCS Auth Info is empty")
 	}
 
-	fmt.Printf("Using BCS API to connect cluster %s...\n", clusterID)
+	console.Info("Using BCS API to connect cluster %s...", clusterID)
 	restConfig = &rest.Config{
 		BearerToken:     token,
 		TLSClientConfig: rest.TLSClientConfig{Insecure: true},
