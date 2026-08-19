@@ -40,29 +40,30 @@ import (
 
 // NewLoginCmd create login command
 func NewLoginCmd() *cobra.Command {
-	var useAccessToken, useBkTicket bool
+	var accessToken string
+	var useBkTicket bool
 
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Login as user",
+		Annotations: map[string]string{
+			cmdutil.SkipAuthAnnotationKey: "true",
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if useAccessToken && useBkTicket {
+			if accessToken != "" && useBkTicket {
 				return errors.New("cannot use both access-token and bk-ticket at the same time")
 			}
-			if useAccessToken {
-				return loginByAccessToken()
+			if accessToken != "" {
+				return login(accessToken)
 			}
 			if useBkTicket {
 				return loginByBkTicket()
 			}
 			return loginByBrowser()
 		},
-		Annotations: map[string]string{
-			cmdutil.SkipAuthAnnotationKey: "true",
-		},
 	}
 
-	cmd.Flags().BoolVar(&useAccessToken, "access-token", false, "BlueKing AccessToken")
+	cmd.Flags().StringVar(&accessToken, "access-token", "", "BlueKing AccessToken")
 	cmd.Flags().BoolVar(&useBkTicket, "bk-ticket", false, "BlueKing User Ticket")
 	return cmd
 }
@@ -86,9 +87,8 @@ func loginByBrowser() error {
 	return loginByAccessToken()
 }
 
-// loginByAccessToken 通过 AccessToken 登录
+// loginByAccessToken 通过交互式输入 AccessToken 登录
 func loginByAccessToken() error {
-	// read access_token implicitly
 	fmt.Printf(">>> AccessToken: ")
 	accessToken, err := gopass.GetPasswdMasked()
 	if err != nil {
