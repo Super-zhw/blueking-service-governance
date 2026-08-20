@@ -1,0 +1,14 @@
+blueking-service-governance
+  h_35547c76ab0580 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "22508373b0e30499b5b271487a17a6d87519821c",
+  "prompts": {},
+  "humans": {
+    "h_35547c76ab0580": {
+      "author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
