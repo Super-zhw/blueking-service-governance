@@ -30,7 +30,7 @@ import (
 var _ = Describe("Config", Ordered, func() {
 	BeforeAll(func() {
 		framework.GenerateConfigFile(envCfg, true)
-		cli.RunWithStdin(envCfg.Token+"\n", "login", "--access-token")
+		cli.Run("login", "--access-token", envCfg.Token)
 	})
 
 	Context("View", func() {
@@ -53,7 +53,7 @@ var _ = Describe("Config", Ordered, func() {
 			Expect(result.CombinedOutput()).NotTo(MatchRegexp(`accessToken: [A-Za-z0-9]+`))
 
 			// 恢复登录状态
-			cli.RunWithStdin(envCfg.Token+"\n", "login", "--access-token")
+			cli.Run("login", "--access-token", envCfg.Token)
 		})
 	})
 })

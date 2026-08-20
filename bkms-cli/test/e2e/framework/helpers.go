@@ -24,7 +24,7 @@ package framework
 // 如果 cfg.WorkspaceID 不为空，会自动执行 workspace set。
 func EnsureLoggedIn(cli *CLI, cfg *EnvConfig) {
 	GenerateConfigFile(cfg, true)
-	cli.RunWithStdin(cfg.Token+"\n", "login", "--access-token")
+	cli.Run("login", "--access-token", cfg.Token)
 	cli.Run("workspace", "set", cfg.WorkspaceID)
 }
 

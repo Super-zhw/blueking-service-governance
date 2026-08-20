@@ -35,20 +35,20 @@ var _ = Describe("Auth", Ordered, func() {
 	Context("Login", func() {
 		// 使用有效 AccessToken 登录
 		It("login with valid AccessToken", func() {
-			result := cli.RunWithStdin(envCfg.Token+"\n", "login", "--access-token")
+			result := cli.Run("login", "--access-token", envCfg.Token)
 			Expect(result.ExitCode).To(Equal(0))
 			Expect(result.CombinedOutput()).To(ContainSubstring("Success"))
 		})
 
 		// 使用无效 Token 登录退出码为非零
 		It("login with invalid token exits with non-zero code", func() {
-			result := cli.RunWithStdin("invalid-token-12345\n", "login", "--access-token")
+			result := cli.Run("login", "--access-token", "invalid-token-12345")
 			Expect(result.ExitCode).NotTo(Equal(0))
 		})
 
 		// login 同时使用 --access-token 和 --bk-ticket 退出码为非零
 		It("login with both --access-token and --bk-ticket exits with non-zero code", func() {
-			result := cli.Run("login", "--access-token", "--bk-ticket")
+			result := cli.Run("login", "--access-token", "some-token", "--bk-ticket")
 			Expect(result.ExitCode).NotTo(Equal(0))
 			Expect(result.CombinedOutput()).To(ContainSubstring("cannot use both"))
 		})
@@ -58,7 +58,7 @@ var _ = Describe("Auth", Ordered, func() {
 		// logout 退出码为 0 且输出包含 success
 		It("logout exits with code 0 and output contains success", func() {
 			// 先确保已登录
-			cli.RunWithStdin(envCfg.Token+"\n", "login", "--access-token")
+			cli.Run("login", "--access-token", envCfg.Token)
 
 			result := cli.Run("logout")
 			Expect(result.ExitCode).To(Equal(0))
