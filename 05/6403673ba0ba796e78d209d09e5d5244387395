@@ -1,0 +1,18 @@
+bkms-cli/test/e2e/auth_test.go
+  h_2321bec5d80d15 38,45,51,61
+bkms-cli/test/e2e/config_test.go
+  h_2321bec5d80d15 33,56
+bkms-cli/test/e2e/framework/helpers.go
+  h_2321bec5d80d15 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "056403673ba0ba796e78d209d09e5d5244387395",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
