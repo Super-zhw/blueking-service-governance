@@ -3104,58 +3104,85 @@ func (_mock *MockClient) ExchangeBkTicketForToken(username, bkTicket string) (st
 	return r0, r1
 }
 
-// GetBCSToken provides a mock function for the type MockClient
-func (_mock *MockClient) GetBCSToken(ctx context.Context) (string, error) {
-	ret := _mock.Called(ctx)
+// DevModePublishPreflight provides a mock function for the type MockClient
+func (_mock *MockClient) DevModePublishPreflight(ctx context.Context, appID string, envName string, instanceIDs []string, publishAll bool) (*client.DevModePreflightData, error) {
+	ret := _mock.Called(ctx, appID, envName, instanceIDs, publishAll)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetBCSToken")
+		panic("no return value specified for DevModePublishPreflight")
 	}
 
-	var r0 string
-	if returnFunc, ok := ret.Get(0).(func(context.Context) string); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
+	var r0 *client.DevModePreflightData
 	var r1 error
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, []string, bool) (*client.DevModePreflightData, error)); ok {
+		return returnFunc(ctx, appID, envName, instanceIDs, publishAll)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, []string, bool) *client.DevModePreflightData); ok {
+		r0 = returnFunc(ctx, appID, envName, instanceIDs, publishAll)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.DevModePreflightData)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, []string, bool) error); ok {
+		r1 = returnFunc(ctx, appID, envName, instanceIDs, publishAll)
 	} else {
 		r1 = ret.Error(1)
 	}
 	return r0, r1
 }
 
-// MockClient_GetBCSToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBCSToken'
-type MockClient_GetBCSToken_Call struct {
+// MockClient_DevModePublishPreflight_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DevModePublishPreflight'
+type MockClient_DevModePublishPreflight_Call struct {
 	*mock.Call
 }
 
-// GetBCSToken is a helper method to define mock.On call
+// DevModePublishPreflight is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockClient_Expecter) GetBCSToken(ctx any) *MockClient_GetBCSToken_Call {
-	return &MockClient_GetBCSToken_Call{Call: _e.mock.On("GetBCSToken", ctx)}
+//   - appID string
+//   - envName string
+//   - instanceIDs []string
+//   - publishAll bool
+func (_e *MockClient_Expecter) DevModePublishPreflight(ctx any, appID any, envName any, instanceIDs any, publishAll any) *MockClient_DevModePublishPreflight_Call {
+	return &MockClient_DevModePublishPreflight_Call{Call: _e.mock.On("DevModePublishPreflight", ctx, appID, envName, instanceIDs, publishAll)}
 }
 
-func (_c *MockClient_GetBCSToken_Call) Run(run func(ctx context.Context)) *MockClient_GetBCSToken_Call {
+func (_c *MockClient_DevModePublishPreflight_Call) Run(run func(ctx context.Context, appID string, envName string, instanceIDs []string, publishAll bool)) *MockClient_DevModePublishPreflight_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		run(arg0)
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 []string
+		if args[3] != nil {
+			arg3 = args[3].([]string)
+		}
+		arg4 := args[4].(bool)
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
 
-func (_c *MockClient_GetBCSToken_Call) Return(token string, err error) *MockClient_GetBCSToken_Call {
-	_c.Call.Return(token, err)
+func (_c *MockClient_DevModePublishPreflight_Call) Return(data *client.DevModePreflightData, err error) *MockClient_DevModePublishPreflight_Call {
+	_c.Call.Return(data, err)
 	return _c
 }
 
-func (_c *MockClient_GetBCSToken_Call) RunAndReturn(run func(ctx context.Context) (string, error)) *MockClient_GetBCSToken_Call {
+func (_c *MockClient_DevModePublishPreflight_Call) RunAndReturn(run func(ctx context.Context, appID string, envName string, instanceIDs []string, publishAll bool) (*client.DevModePreflightData, error)) *MockClient_DevModePublishPreflight_Call {
 	_c.Call.Return(run)
 	return _c
 }

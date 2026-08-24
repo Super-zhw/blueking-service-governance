@@ -12081,6 +12081,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/devmode/{appID}/envs/{envName}/preflight": {
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "devmode"
+                ],
+                "summary": "开发模式 Publish 预检",
+                "operationId": "DevModePublishPreflight",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "预检请求体",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.PreflightBodyInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.PreflightOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/env-var-templates/app": {
             "get": {
                 "security": [
@@ -27566,6 +27634,75 @@ const docTemplate = `{
                 "startPort": {
                     "description": "起始端口",
                     "type": "integer"
+                }
+            }
+        },
+        "serializer.PreflightBodyInput": {
+            "type": "object",
+            "properties": {
+                "instanceIDs": {
+                    "description": "InstanceIDs 指定的实例 ID 列表（与 PublishAll 二选一）",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "publishAll": {
+                    "description": "PublishAll 是否发布到所有 Running 状态的实例（与 InstanceIDs 二选一）",
+                    "type": "boolean"
+                }
+            }
+        },
+        "serializer.PreflightData": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Address 已组装好的集群完整地址；如 {baseUrl}/clusters/{clusterID}/",
+                    "type": "string"
+                },
+                "devMode": {
+                    "description": "DevMode 开发模式相关路径配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.PreflightDevMode"
+                        }
+                    ]
+                },
+                "instanceIDs": {
+                    "description": "InstanceIDs 校验通过的实例 ID 列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "namespace": {
+                    "description": "Namespace 目标命名空间",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "Token 用户 Token，用于访问集群 API",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.PreflightDevMode": {
+            "type": "object",
+            "properties": {
+                "mountPath": {
+                    "description": "MountPath 脚本挂载路径",
+                    "type": "string"
+                },
+                "workPath": {
+                    "description": "WorkPath 开发模式根目录",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.PreflightOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.PreflightData"
                 }
             }
         },

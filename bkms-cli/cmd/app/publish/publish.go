@@ -31,7 +31,7 @@ import (
 
 // NewCmd 创建 publish 命令
 func NewCmd() *cobra.Command {
-	var appID, envName, file, instances, workspaceID string
+	var appID, envName, file, instances string
 	var publishAll bool
 
 	cmd := &cobra.Command{
@@ -50,13 +50,9 @@ is optional. Otherwise, you must specify it explicitly.`,
 bkms-cli app publish --app myapp --env stage -f /path/to/binary --instance-ids pod1,pod2
 
 # Publish to all Running instances
-bkms-cli app publish --app myapp --env stage -f /path/to/binary --all
-
-# Specify workspace explicitly
-bkms-cli app publish --workspace ws-demo --app myapp --env stage -f /path/to/binary --instance-ids pod1,pod2`,
+bkms-cli app publish --app myapp --env stage -f /path/to/binary --all`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
 			specifiedInstanceIDs := params.NormalizeInstIDs(instances, ",")
 
 			if publishAll && len(specifiedInstanceIDs) > 0 {
@@ -67,33 +63,20 @@ bkms-cli app publish --workspace ws-demo --app myapp --env stage -f /path/to/bin
 			}
 
 			// 发布二进制到线上实例
-			publisher := publish.NewPublisher(cmd.Context(), client.New(), workspaceID, appID, envName)
-			if err := publisher.PreCheck(); err != nil {
+			publisher := publish.NewPublisher(cmd.Context(), client.New(), appID, envName)
+
+			// 执行 preflight 预检（由 server 端负责解析和校验实例列表）
+			if err := publisher.PreCheck(specifiedInstanceIDs, publishAll); err != nil {
 				return err
 			}
 
-			var (
-				targetInstanceIDs []string
-				err               error
-			)
-
-			switch {
-			case publishAll:
-				targetInstanceIDs, err = publisher.GetAllRunningInstanceIDs()
-			default:
-				targetInstanceIDs, err = publisher.GetSpecifiedInstanceIDs(specifiedInstanceIDs)
-			}
-			if err != nil {
-				return err
-			}
-			if err := publisher.Publish(file, targetInstanceIDs); err != nil {
+			if err := publisher.Publish(file, publisher.GetInstanceIDs()); err != nil {
 				return err
 			}
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
 	cmd.Flags().StringVar(&appID, "app", "", "Application ID (required)")
 	cmd.Flags().StringVar(&envName, "env", "", "Environment name (required)")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to the binary file to publish (required)")

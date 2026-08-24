@@ -146,22 +146,34 @@ func (c *SvcBasedClient) ExchangeBkTicketForToken(username, bkTicket string) (st
 	return token, nil
 }
 
-// GetBCSToken 从服务端获取 BCS Auth Info
-func (c *SvcBasedClient) GetBCSToken(ctx context.Context) (string, error) {
-	url := "/bkms/v1/bkms-server/bcs/token"
+// DevModePublishPreflight 开发模式 Publish 预检，获取 publish 所需的全部上下文信息
+func (c *SvcBasedClient) DevModePublishPreflight(
+	ctx context.Context,
+	appID, envName string,
+	instanceIDs []string,
+	publishAll bool,
+) (*DevModePreflightData, error) {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/devmode/%s/envs/%s/preflight", appID, envName)
 
-	var respData struct {
-		Data string `json:"data"`
+	body := map[string]any{
+		"instanceIDs": instanceIDs,
+		"publishAll":  publishAll,
 	}
-	resp, err := c.cli.R().SetContext(ctx).SetResult(&respData).Get(url)
+
+	var respData DevModePreflightRespData
+	resp, err := c.cli.R().SetContext(ctx).SetBody(body).SetResult(&respData).Post(url)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get BCS Auth Info")
+		return nil, errors.Wrap(err, "publish preflight request failed")
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return "", errors.Errorf("get BCS Auth Info failed: [%d] -> %s", resp.StatusCode(), truncateBody(resp.Body()))
+		return nil, errors.Errorf(
+			"publish preflight failed: [%d] -> %s",
+			resp.StatusCode(),
+			truncateBody(resp.Body()),
+		)
 	}
-	if respData.Data == "" {
-		return "", errors.New("no active BCS Auth Info found, please create one in BCS platform")
+	if respData.Data == nil {
+		return nil, errors.New("devmode publish preflight returned empty data")
 	}
 
 	return respData.Data, nil

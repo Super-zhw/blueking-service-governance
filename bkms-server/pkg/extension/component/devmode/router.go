@@ -16,16 +16,17 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package publish
+package devmode
 
-import (
-	"testing"
+import "github.com/gin-gonic/gin"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-)
+// DevModeHandler contains views required by devmode Gin routes.
+type DevModeHandler interface {
+	DevModePublishPreflight(c *gin.Context)
+}
 
-func TestPublish(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "cmd/app/publish Suite")
+// RegisterRoutes registers Gin devmode routes.
+func RegisterRoutes(rg *gin.RouterGroup, h DevModeHandler) {
+	// 开发模式 Publish 预检
+	rg.POST("/devmode/:appID/envs/:envName/preflight", h.DevModePublishPreflight)
 }

@@ -6639,6 +6639,52 @@ definitions:
         description: 起始端口
         type: integer
     type: object
+  serializer.PreflightBodyInput:
+    properties:
+      instanceIDs:
+        description: InstanceIDs 指定的实例 ID 列表（与 PublishAll 二选一）
+        items:
+          type: string
+        type: array
+      publishAll:
+        description: PublishAll 是否发布到所有 Running 状态的实例（与 InstanceIDs 二选一）
+        type: boolean
+    type: object
+  serializer.PreflightData:
+    properties:
+      address:
+        description: Address 已组装好的集群完整地址；如 {baseUrl}/clusters/{clusterID}/
+        type: string
+      devMode:
+        allOf:
+        - $ref: '#/definitions/serializer.PreflightDevMode'
+        description: DevMode 开发模式相关路径配置
+      instanceIDs:
+        description: InstanceIDs 校验通过的实例 ID 列表
+        items:
+          type: string
+        type: array
+      namespace:
+        description: Namespace 目标命名空间
+        type: string
+      token:
+        description: Token 用户 Token，用于访问集群 API
+        type: string
+    type: object
+  serializer.PreflightDevMode:
+    properties:
+      mountPath:
+        description: MountPath 脚本挂载路径
+        type: string
+      workPath:
+        description: WorkPath 开发模式根目录
+        type: string
+    type: object
+  serializer.PreflightOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.PreflightData'
+    type: object
   serializer.PreviewComponentDefInput:
     properties:
       compDefName:
@@ -16589,6 +16635,49 @@ paths:
       summary: 预览组件实例（试运行）
       tags:
       - component-insts
+  /devmode/{appID}/envs/{envName}/preflight:
+    post:
+      consumes:
+      - application/json
+      operationId: DevModePublishPreflight
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 预检请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.PreflightBodyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.PreflightOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 开发模式 Publish 预检
+      tags:
+      - devmode
   /env-var-templates/app:
     get:
       description: 返回不带 scope 元数据的 `.env` 模板，供应用环境变量导入使用。

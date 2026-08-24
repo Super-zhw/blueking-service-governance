@@ -59,3 +59,22 @@ type DevModeConfig struct {
 type GetEnvEffectiveDevModeRespData struct {
 	Data *DevModeConfig `json:"data"`
 }
+
+// DevModePreflightData 开发模式 Publish 预检响应数据
+type DevModePreflightData struct {
+	// Token 用户 Token
+	Token string `json:"token"`
+	// Address 已组装好的集群完整地址
+	Address string `json:"address"`
+	// Namespace 目标命名空间
+	Namespace string `json:"namespace"`
+	// InstanceIDs 校验通过的实例 ID 列表
+	InstanceIDs []string `json:"instanceIDs"`
+	// DevMode 开发模式路径配置
+	DevMode *DevModeConfig `json:"devMode"`
+}
+
+// DevModePreflightRespData 开发模式 Publish 预检响应包装
+type DevModePreflightRespData struct {
+	Data *DevModePreflightData `json:"data"`
+}

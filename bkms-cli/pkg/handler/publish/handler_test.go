@@ -23,13 +23,14 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client/mocks"
 )
 
-var _ = Describe("Publisher instance resolution", func() {
+var _ = Describe("Publisher", func() {
 	const (
 		appID   = "demo-app"
 		envName = "test"
@@ -45,117 +46,92 @@ var _ = Describe("Publisher instance resolution", func() {
 		cli = mocks.NewMockClient(GinkgoT())
 	})
 
-	It("lists all running instances", func() {
-		cli.EXPECT().
-			ListAppInstances(
-				mock.Anything,
-				appID,
-				envName,
-				mock.MatchedBy(func(opts client.ListAppInstancesOptions) bool {
-					return opts.Page == 1 && opts.PageSize == client.DefaultListAppInstancesPageSize
-				}),
-			).
-			Return(&client.PaginatedInstances{
-				Count: "3",
-				Results: []client.Instance{
-					{ID: "pod-1", Status: instanceStatusRunning},
-					{ID: "pod-x", Status: "Pending"},
-					{ID: "pod-2", Status: instanceStatusRunning},
-				},
-			}, nil)
-
-		publisher := NewPublisher(ctx, cli, "", appID, envName)
-		instanceIDs, err := publisher.GetAllRunningInstanceIDs()
-
-		Expect(err).NotTo(HaveOccurred())
-		Expect(instanceIDs).To(Equal([]string{"pod-1", "pod-2"}))
-	})
-
-	It("returns an error when no running instances are found", func() {
-		cli.EXPECT().
-			ListAppInstances(
-				mock.Anything,
-				appID,
-				envName,
-				mock.MatchedBy(func(opts client.ListAppInstancesOptions) bool {
-					return opts.Page == 1 && opts.PageSize == client.DefaultListAppInstancesPageSize
-				}),
-			).
-			Return(&client.PaginatedInstances{
-				Count: "2",
-				Results: []client.Instance{
-					{ID: "pod-1", Status: "Pending"},
-					{ID: "pod-2", Status: "Failed"},
-				},
-			}, nil)
-
-		publisher := NewPublisher(ctx, cli, "", appID, envName)
-		instanceIDs, err := publisher.GetAllRunningInstanceIDs()
-
-		Expect(instanceIDs).To(BeNil())
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring("no running instances found"))
-	})
-
-	It("returns specified instances when they all exist", func() {
-		cli.EXPECT().
-			ListAppInstances(
-				mock.Anything,
-				appID,
-				envName,
-				mock.MatchedBy(func(opts client.ListAppInstancesOptions) bool {
-					return opts.Page == 1 && opts.PageSize == client.DefaultListAppInstancesPageSize
-				}),
-			).
-			Return(&client.PaginatedInstances{
-				Count: "3",
-				Results: []client.Instance{
-					{ID: "pod-1", Status: instanceStatusRunning},
-					{ID: "pod-2", Status: "Pending"},
-					{ID: "pod-3", Status: instanceStatusRunning},
-				},
-			}, nil)
-
-		publisher := NewPublisher(ctx, cli, "", appID, envName)
-		instanceIDs, err := publisher.GetSpecifiedInstanceIDs([]string{"pod-1", "pod-3"})
-
-		Expect(err).NotTo(HaveOccurred())
-		Expect(instanceIDs).To(Equal([]string{"pod-1", "pod-3"}))
-	})
-
-	It("returns an error when specified instances are not found", func() {
-		cli.EXPECT().
-			ListAppInstances(
-				mock.Anything,
-				appID,
-				envName,
-				mock.MatchedBy(func(opts client.ListAppInstancesOptions) bool {
-					return opts.Page == 1 && opts.PageSize == client.DefaultListAppInstancesPageSize
-				}),
-			).
-			Return(&client.PaginatedInstances{
-				Count: "2",
-				Results: []client.Instance{
-					{ID: "pod-1", Status: instanceStatusRunning},
-					{ID: "pod-2", Status: "Pending"},
-				},
-			}, nil)
-
-		publisher := NewPublisher(ctx, cli, "", appID, envName)
-		instanceIDs, err := publisher.GetSpecifiedInstanceIDs([]string{"pod-1", "pod-3"})
-
-		Expect(instanceIDs).To(BeNil())
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring("instances not found"))
-		Expect(err.Error()).To(ContainSubstring("pod-3"))
-	})
-
 	It("returns an error when publish is called before preCheck", func() {
-		publisher := NewPublisher(ctx, cli, "", appID, envName)
+		publisher := NewPublisher(ctx, cli, appID, envName)
 
 		err := publisher.Publish("/tmp/demo", []string{"pod-1"})
 
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("preCheck must be called before publish"))
+	})
+
+	Describe("PreCheck", func() {
+		It("succeeds when preflight returns valid data with specified instances", func() {
+			cli.EXPECT().
+				DevModePublishPreflight(mock.Anything, appID, envName, mock.Anything, mock.Anything).
+				Return(&client.DevModePreflightData{
+					Token:       "test-token",
+					Address:     "https://bcs-api.example.com/clusters/BCS-K8S-12345/",
+					Namespace:   "bkms-test",
+					InstanceIDs: []string{"pod-1"},
+					DevMode: &client.DevModeConfig{
+						WorkPath:  "/data/bkms/dev-mode/trpc",
+						MountPath: "/data/bkms/dev-mode/trpc/configmap-scripts",
+					},
+				}, nil)
+
+			publisher := NewPublisher(ctx, cli, appID, envName)
+			err := publisher.PreCheck([]string{"pod-1"}, false)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(publisher.GetInstanceIDs()).To(Equal([]string{"pod-1"}))
+		})
+
+		It("succeeds when preflight returns valid data with publishAll", func() {
+			cli.EXPECT().
+				DevModePublishPreflight(mock.Anything, appID, envName, mock.Anything, mock.Anything).
+				Return(&client.DevModePreflightData{
+					Token:       "test-token",
+					Address:     "https://bcs-api.example.com/clusters/BCS-K8S-12345/",
+					Namespace:   "bkms-test",
+					InstanceIDs: []string{"pod-1", "pod-2"},
+					DevMode: &client.DevModeConfig{
+						WorkPath:  "/data/bkms/dev-mode/trpc",
+						MountPath: "/data/bkms/dev-mode/trpc/configmap-scripts",
+					},
+				}, nil)
+
+			publisher := NewPublisher(ctx, cli, appID, envName)
+			err := publisher.PreCheck(nil, true)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(publisher.GetInstanceIDs()).To(Equal([]string{"pod-1", "pod-2"}))
+		})
+
+		It("returns an error when preflight fails", func() {
+			cli.EXPECT().
+				DevModePublishPreflight(mock.Anything, appID, envName, mock.Anything, mock.Anything).
+				Return(nil, errors.New("devmode publish preflight failed: [400] -> dev mode is not enabled"))
+
+			publisher := NewPublisher(ctx, cli, appID, envName)
+			err := publisher.PreCheck([]string{"pod-1"}, false)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("publish preflight failed"))
+		})
+
+		It("returns an error when publish is not supported", func() {
+			cli.EXPECT().
+				DevModePublishPreflight(mock.Anything, appID, envName, mock.Anything, mock.Anything).
+				Return(nil, errors.New("devmode publish preflight failed: [400] -> publish is not supported"))
+
+			publisher := NewPublisher(ctx, cli, appID, envName)
+			err := publisher.PreCheck([]string{"pod-1"}, false)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("publish is not supported"))
+		})
+
+		It("returns an error when no running instances found", func() {
+			cli.EXPECT().
+				DevModePublishPreflight(mock.Anything, appID, envName, mock.Anything, mock.Anything).
+				Return(nil, errors.New("devmode publish preflight failed: [404] -> no running instances found"))
+
+			publisher := NewPublisher(ctx, cli, appID, envName)
+			err := publisher.PreCheck(nil, true)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("no running instances found"))
+		})
 	})
 })

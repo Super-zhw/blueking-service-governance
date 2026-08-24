@@ -30,9 +30,6 @@ UPX ?= $(shell command -v upx 2>/dev/null)
 # -s: 去除符号表
 # -w: 去除 DWARF 调试信息
 
-# BCS API 网关地址，构建时可以通过 BCS_API_HOST=xxx 传入
-BCS_API_HOST ?= https://api.example.com
-
 # bkms_server 服务地址，作为配置文件中 bkmsBaseUrl 的值，构建时可以通过 BKMS_BASE_URL=xxx 传入
 BKMS_BASE_URL ?= https://example.com
 
@@ -42,12 +39,8 @@ UPDATE_SOURCE ?= TencentBlueKing/blueking-service-governance
 
 .PHONY: check-build-vars
 check-build-vars: ## 校验构建所需变量
-	@if [ -z "$(BCS_API_HOST)" ]; then \
-		echo "错误: 必须传入 BCS_API_HOST，例如: make build BCS_API_HOST=<bcs-api-host> BKMS_BASE_URL=<bkms-base-url>"; \
-		exit 1; \
-	fi
 	@if [ -z "$(BKMS_BASE_URL)" ]; then \
-		echo "错误: 必须传入 BKMS_BASE_URL，例如: make build BCS_API_HOST=<bcs-api-host> BKMS_BASE_URL=<bkms-base-url>"; \
+		echo "错误: 必须传入 BKMS_BASE_URL，例如: make build BKMS_BASE_URL=<bkms-base-url>"; \
 		exit 1; \
 	fi
 
@@ -56,7 +49,6 @@ LDFLAGS="-s -w \
 	-X github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/version.GitHash=${GIT_HASH} \
 	-X github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/version.BuildTime=${BUILD_TIME} \
 	-X github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/updater.updateSource=${UPDATE_SOURCE} \
-	-X github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/publish.bcsAPIHost=${BCS_API_HOST} \
 	-X github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/config.bkmsBaseURL=${BKMS_BASE_URL}"
 
 ## 支持的平台列表
