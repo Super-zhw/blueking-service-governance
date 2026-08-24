@@ -107,6 +107,14 @@ find_binary_in_dir() {
 # 只有进程拉起后，才能通过 SERVER_NAME_ENV 在进程列表中确定实际路径
 # 返回: 设置全局变量 TAF_BIN_PATH 和 SERVER_NAME
 get_taf_server_info() {
+    # 最高优先级：如果设置了 BKMS_DEVMODE_BINARY_PATH 环境变量，直接使用
+    if [ -n "${BKMS_DEVMODE_BINARY_PATH}" ]; then
+        TAF_BIN_PATH=$(dirname "${BKMS_DEVMODE_BINARY_PATH}")
+        SERVER_NAME=$(basename "${BKMS_DEVMODE_BINARY_PATH}")
+        log_info "Using BKMS_DEVMODE_BINARY_PATH override: TAF_BIN_PATH=${TAF_BIN_PATH}, SERVER_NAME=${SERVER_NAME}"
+        return 0
+    fi
+
     if [ -z "${SERVER_NAME_ENV}" ]; then
         log_error "SERVER_NAME_ENV is empty, cannot get taf server info"
         return 1
