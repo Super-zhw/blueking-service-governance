@@ -122,10 +122,10 @@ bkms-cli app appspec start-command view --app my-app -o json
 
 ### start-command edit
 
-从 YAML 文件更新启动命令。对于 trpc/taf 类型应用，当前的 trpcSpec/tafSpec 会自动保留，除非在 YAML 中显式覆盖。
+从 YAML 文件更新启动命令。`--app` 和 `-f/--file` 均为必填。对于 trpc/taf 类型应用，当前的 trpcSpec/tafSpec 会自动保留，除非在 YAML 中显式覆盖。
 
 ```bash
-# 从 YAML 文件更新启动命令
+# 从 YAML 文件更新启动命令（-f 必填）
 bkms-cli app appspec start-command edit --app my-app -f start-command.yaml
 ```
 
@@ -277,7 +277,8 @@ YAML 文件格式：
 
 ```yaml
 postStart:
-  type: EXEC              # EXEC | HTTP
+  # EXEC | HTTP
+  type: EXEC
   exec:
     command: ["/bin/sh", "-c", "echo hello"]
 preStop:
@@ -348,7 +349,8 @@ YAML 文件格式：
 ```yaml
 liveness:
   handler:
-    type: HTTP             # EXEC | HTTP | TCP
+    # EXEC | HTTP | TCP
+    type: HTTP
     url: /healthz
     port: 8080
   initialDelaySeconds: 10

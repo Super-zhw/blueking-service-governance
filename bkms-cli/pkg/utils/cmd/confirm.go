@@ -16,33 +16,37 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package polaris provides polaris config command group
-package polaris
+package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+)
 
-// NewCmd returns a Command instance for 'app polaris' command group
-func NewCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "polaris",
-		Short: "Manage polaris configs",
-		Long: `Manage polaris configs for applications.
-
-Use this command to list, create, update and delete polaris service registration
-configs for your applications.`,
-		DisableFlagsInUseLine: true,
+// PromptConfirm 打印 prompt 后读取一行，若用户输入 "yes" 返回 true，其他输入取消并返回 false。
+// 若 autoYes 为 true，则跳过交互直接返回 true。
+func PromptConfirm(prompt string, autoYes bool) (bool, error) {
+	if autoYes {
+		return true, nil
 	}
+	fmt.Print(prompt)
+	reader := bufio.NewReader(os.Stdin)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		return false, err
+	}
+	return strings.TrimSpace(line) == "yes", nil
+}
 
-	// 查询北极星配置列表
-	cmd.AddCommand(NewListCmd())
-	// 创建北极星配置
-	cmd.AddCommand(NewCreateCmd())
-	// 删除北极星配置
-	cmd.AddCommand(NewDeleteCmd())
-	// 更新北极星配置
-	cmd.AddCommand(NewUpdateCmd())
-	// 更新北极星配置在指定环境下的全局权重
-	cmd.AddCommand(NewWeightCmd())
-
-	return cmd
+// PromptInput 打印 prompt 后读取一行并返回用户输入的内容（去除首尾空格）。
+func PromptInput(prompt string) (string, error) {
+	fmt.Print(prompt)
+	reader := bufio.NewReader(os.Stdin)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(line), nil
 }

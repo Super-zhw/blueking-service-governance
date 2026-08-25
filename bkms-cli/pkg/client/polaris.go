@@ -92,3 +92,8 @@ type CreatePolarisConfigRespData struct {
 		Name string `json:"name"`
 	} `json:"data"`
 }
+
+// UpdatePolarisConfigEnvWeightBody 更新北极星配置环境全局权重请求体
+type UpdatePolarisConfigEnvWeightBody struct {
+	Weight int32 `json:"weight"`
+}

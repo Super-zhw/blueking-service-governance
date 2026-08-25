@@ -16,33 +16,25 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package polaris provides polaris config command group
-package polaris
+// Package update provides app update command group
+package update
 
 import "github.com/spf13/cobra"
 
-// NewCmd returns a Command instance for 'app polaris' command group
+// NewCmd returns a Command instance for 'app update' command group
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "polaris",
-		Short: "Manage polaris configs",
-		Long: `Manage polaris configs for applications.
+		Use:   "update",
+		Short: "Update application configuration",
+		Long: `Update application configuration.
 
-Use this command to list, create, update and delete polaris service registration
-configs for your applications.`,
+Subcommands:
+  build-config  Update the build config (source type, repo, image, pipeline)`,
 		DisableFlagsInUseLine: true,
 	}
 
-	// 查询北极星配置列表
-	cmd.AddCommand(NewListCmd())
-	// 创建北极星配置
-	cmd.AddCommand(NewCreateCmd())
-	// 删除北极星配置
-	cmd.AddCommand(NewDeleteCmd())
-	// 更新北极星配置
-	cmd.AddCommand(NewUpdateCmd())
-	// 更新北极星配置在指定环境下的全局权重
-	cmd.AddCommand(NewWeightCmd())
+	// update build config
+	cmd.AddCommand(NewBuildConfigCmd())
 
 	return cmd
 }

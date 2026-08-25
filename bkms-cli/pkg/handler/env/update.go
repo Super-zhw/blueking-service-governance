@@ -16,33 +16,30 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package polaris provides polaris config command group
-package polaris
+package env
 
-import "github.com/spf13/cobra"
+import (
+	"context"
 
-// NewCmd returns a Command instance for 'app polaris' command group
-func NewCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "polaris",
-		Short: "Manage polaris configs",
-		Long: `Manage polaris configs for applications.
+	"github.com/pkg/errors"
 
-Use this command to list, create, update and delete polaris service registration
-configs for your applications.`,
-		DisableFlagsInUseLine: true,
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
+)
+
+// UpdateEnv 通过环境名称解析 ID，更新环境基本信息（displayName / type）。
+func UpdateEnv(ctx context.Context, workspaceID, envName string, body client.UpdateEnvBasicInfoBody) error {
+	cli := client.New()
+
+	envID, err := ResolveEnvIDByName(ctx, cli, workspaceID, envName)
+	if err != nil {
+		return err
 	}
 
-	// 查询北极星配置列表
-	cmd.AddCommand(NewListCmd())
-	// 创建北极星配置
-	cmd.AddCommand(NewCreateCmd())
-	// 删除北极星配置
-	cmd.AddCommand(NewDeleteCmd())
-	// 更新北极星配置
-	cmd.AddCommand(NewUpdateCmd())
-	// 更新北极星配置在指定环境下的全局权重
-	cmd.AddCommand(NewWeightCmd())
+	if err = cli.UpdateEnvBasicInfo(ctx, envID, body); err != nil {
+		return errors.Wrap(err, "update env basic info")
+	}
 
-	return cmd
+	console.Info("✓ Environment %s updated successfully", envName)
+	return nil
 }

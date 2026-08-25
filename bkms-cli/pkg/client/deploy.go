@@ -141,3 +141,29 @@ type AppModelDeployRecordsResp struct {
 	// Data 返回数据
 	Data AppModelDeployRecordsRespData `json:"data"`
 }
+
+// --- Precheck types ---
+
+// DeployPrecheckResult 部署前检查结果
+type DeployPrecheckResult struct {
+	// Passed 是否通过，由 UndefinedVars 是否为空推导
+	Passed bool `json:"-" yaml:"passed"`
+	// UndefinedVars 未定义的环境变量列表
+	UndefinedVars []UndefinedEnvVar `json:"undefinedVars" yaml:"undefinedVars"`
+}
+
+// UndefinedEnvVar 未定义的环境变量
+type UndefinedEnvVar struct {
+	// Key 变量名
+	Key string `json:"key" yaml:"key"`
+	// Sources 引用来源列表
+	Sources []EnvVarSource `json:"sources" yaml:"sources"`
+}
+
+// EnvVarSource 环境变量引用来源
+type EnvVarSource struct {
+	// Type 来源类型（configFile / startCommand 等）
+	Type string `json:"type" yaml:"type"`
+	// Name 来源名称（配置文件名等）
+	Name string `json:"name" yaml:"name"`
+}

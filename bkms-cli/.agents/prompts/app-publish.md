@@ -4,12 +4,12 @@
 
 该命令仅适用于已开启 dev mode 的非正式环境。发布前会先校验应用、环境、dev mode 配置和目标实例；发布时会把本地文件上传到容器工作目录下的 `bin` 路径，并执行 `restart.sh` 完成切换。
 
+BCS Auth Info 由服务端自动通过当前登录凭据获取，无需手动传入 token。
+
 实例选择有两种方式：
 
 - 使用 `--instance-ids` 显式指定要发布的实例，多个实例用逗号分隔。
 - 使用 `--all` 自动获取当前环境下所有 `Running` 状态实例。
-
-首次使用文件发布时，通常需要通过 `--bcs-token` 提供 BCS API token。命令会自动将该 token 保存到本地配置文件，后续可直接复用。
 
 ## 常用场景
 
@@ -21,16 +21,6 @@ bkms-cli app publish --app myapp --env stage -f ./bin/server --instance-ids pod-
 
 # 发布到多个实例
 bkms-cli app publish --app myapp --env stage -f ./bin/server --instance-ids pod-1,pod-2
-```
-
-首次发布时携带 BCS token，后续无需重复传入。
-
-```bash
-# 首次使用时传入 BCS token
-bkms-cli app publish --app myapp --env stage -f ./bin/server --instance-ids pod-1 --bcs-token <token>
-
-# 后续 token 会从 ~/.bkms/config.yaml 读取
-bkms-cli app publish --app myapp --env stage -f ./bin/server --instance-ids pod-1
 ```
 
 自动发布到当前环境全部 Running 实例，适合开发模式下做整体验证。
@@ -53,14 +43,20 @@ bkms-cli app publish --app myapp --env test -f ./bin/server --instance-ids pod-1
 
 # 自动发布到所有 Running 实例
 bkms-cli app publish --app myapp --env test -f ./bin/server --all
-
-# 首次发布时传入 BCS token
-bkms-cli app publish --app myapp --env test -f ./bin/server --all --bcs-token <token>
 ```
 
-使用时有几个关键约束：
+### 参数说明
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `--app` | 是 | 应用 ID |
+| `--env` | 是 | 环境名称 |
+| `-f, --file` | 是 | 本地二进制文件路径 |
+| `--instance-ids` | 否 | 实例 ID（pod 名），逗号分隔；与 `--all` 二选一 |
+| `--all` | 否 | 发布到所有 Running 实例；与 `--instance-ids` 二选一 |
+
+### 使用约束
 
 - `--instance-ids` 和 `--all` 互斥，二选一。
 - 未使用 `--all` 时，必须显式提供 `--instance-ids`。
-- `--file` 必填，且文件大小不能超过 5GB。
 - 目标环境必须是已开启 dev mode 的非正式环境。

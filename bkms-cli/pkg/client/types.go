@@ -51,6 +51,14 @@ type Client interface {
 
 	// ListEnvs 获取环境列表
 	ListEnvs(ctx context.Context, workspaceID string) ([]Env, error)
+	// GetEnv 获取环境详情
+	GetEnv(ctx context.Context, envID string) (*Env, error)
+	// CreateEnv 创建环境
+	CreateEnv(ctx context.Context, workspaceID string, body CreateEnvBody) (string, error)
+	// UpdateEnvBasicInfo 更新环境基本信息（displayName / description）
+	UpdateEnvBasicInfo(ctx context.Context, envID string, body UpdateEnvBasicInfoBody) error
+	// DeleteEnv 删除环境
+	DeleteEnv(ctx context.Context, envID string) error
 
 	// ---------- 应用 ----------
 
@@ -60,8 +68,16 @@ type Client interface {
 	ListApps(ctx context.Context, workspaceID string) ([]AppMinimal, error)
 	// GetAppMinimal 获取应用，过滤 ListApps 结果
 	GetAppMinimal(ctx context.Context, workspaceID, appID string) (*AppMinimal, error)
+	// GetApp 获取应用完整定义（含 BuildConfig / AppModelSpec）
+	GetApp(ctx context.Context, appID string) (*AppFull, error)
 	// CreateApp 创建应用
 	CreateApp(ctx context.Context, workspaceID string, body any) (*AppMinimal, error)
+	// DeleteApp 删除应用
+	DeleteApp(ctx context.Context, appID string) error
+	// UpdateAppDisplayName 更新应用显示名
+	UpdateAppDisplayName(ctx context.Context, appID, displayName string) error
+	// UpdateAppBuildConfig 更新应用构建配置
+	UpdateAppBuildConfig(ctx context.Context, appID string, body AppBuildConfigUpdateBody) error
 	// CreateAppBuild 执行应用构建
 	CreateAppBuild(ctx context.Context, appID string, opts BuildOptions) error
 	// ListBuildRecords 获取最近的应用构建记录（10 条）
@@ -106,6 +122,8 @@ type Client interface {
 	ListHelmDeployRecords(
 		ctx context.Context, appID, envName, trafficLaneName, keyword string,
 	) ([]HelmDeployRecord, error)
+	// DeleteHelmDeploy 删除 Helm 部署
+	DeleteHelmDeploy(ctx context.Context, appID, envName, deployID string) error
 
 	// --- Trpc ---
 	// CreateAppTrpcDeploy 执行 Trpc 应用部署
@@ -117,6 +135,10 @@ type Client interface {
 	ListTrpcDeployRecords(
 		ctx context.Context, appID, envName, keyword, trafficLaneName string,
 	) ([]AppModelDeployRecord, error)
+	// DeleteTrpcDeploy 删除 Trpc 部署
+	DeleteTrpcDeploy(ctx context.Context, appID, envName string) error
+	// PreCheckTrpcDeployEnvVars 部署前检查 Trpc 应用环境变量
+	PreCheckTrpcDeployEnvVars(ctx context.Context, appID, envName string) (*DeployPrecheckResult, error)
 
 	// --- TAF ---
 	// CreateAppTafDeploy 执行 TAF 应用部署
@@ -125,6 +147,10 @@ type Client interface {
 	ListTafDeployRecords(
 		ctx context.Context, appID, envName, keyword, trafficLaneName string,
 	) ([]AppModelDeployRecord, error)
+	// DeleteTafDeploy 删除 TAF 部署
+	DeleteTafDeploy(ctx context.Context, appID, envName string) error
+	// PreCheckTafDeployEnvVars 部署前检查 TAF 应用环境变量
+	PreCheckTafDeployEnvVars(ctx context.Context, appID, envName string) (*DeployPrecheckResult, error)
 
 	// --- 通用 ---
 	// GrayscaleUpdateInstance 灰度更新 AppModel 实例
@@ -138,6 +164,10 @@ type Client interface {
 		appID, envName string,
 		opts ListAppInstancesOptions,
 	) (*PaginatedInstances, error)
+	// UpdateInstancePolaris 更新实例北极星权重/隔离状态
+	UpdateInstancePolaris(ctx context.Context, appID, envName string, opts UpdateInstancePolarisOptions) error
+	// BatchDeleteInstances 批量删除实例
+	BatchDeleteInstances(ctx context.Context, appID, envName string, opts BatchDeleteInstancesOptions) error
 
 	// --- 管理命令 ---
 	// ListTrpcAdminCmds 查询 Trpc 管理命令列表
@@ -165,6 +195,8 @@ type Client interface {
 	DeleteAppPolarisConfig(ctx context.Context, appID, configName string) error
 	// PatchAppPolarisConfig 更新应用的北极星配置（部分更新）
 	PatchAppPolarisConfig(ctx context.Context, appID, configName string, body any) error
+	// UpdatePolarisConfigEnvWeight 更新北极星配置在指定环境下的全局默认权重（对该环境所有实例生效）
+	UpdatePolarisConfigEnvWeight(ctx context.Context, appID, configName, envName string, weight int32) error
 
 	// ---------- 应用 / 空间组件 ----------
 

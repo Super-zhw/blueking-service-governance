@@ -227,6 +227,68 @@ func (c *SvcBasedClient) ListEnvs(ctx context.Context, workspaceID string) ([]En
 	return respData.Data, nil
 }
 
+// GetEnv 获取环境详情
+func (c *SvcBasedClient) GetEnv(ctx context.Context, envID string) (*Env, error) {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/envs/%s", envID)
+
+	var respData GetEnvRespData
+	resp, err := c.cli.R().SetContext(ctx).SetResult(&respData).Get(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return nil, errors.Errorf("get env failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return &respData.Data, nil
+}
+
+// CreateEnv 创建环境
+func (c *SvcBasedClient) CreateEnv(ctx context.Context, workspaceID string, body CreateEnvBody) (string, error) {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/workspaces/%s/envs", workspaceID)
+
+	var respData CreateEnvRespData
+	resp, err := c.cli.R().SetContext(ctx).SetBody(body).SetResult(&respData).Post(url)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
+		return "", errors.Errorf("create env failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return respData.Data.ID, nil
+}
+
+// UpdateEnvBasicInfo 更新环境基本信息
+func (c *SvcBasedClient) UpdateEnvBasicInfo(ctx context.Context, envID string, body UpdateEnvBasicInfoBody) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/envs/%s/basic-info", envID)
+
+	resp, err := c.cli.R().SetContext(ctx).SetBody(body).Put(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("update env basic info failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
+// DeleteEnv 删除环境
+func (c *SvcBasedClient) DeleteEnv(ctx context.Context, envID string) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/envs/%s", envID)
+
+	resp, err := c.cli.R().SetContext(ctx).Delete(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("delete env failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
 // ListApps 获取应用列表
 func (c *SvcBasedClient) ListApps(ctx context.Context, workspaceID string) ([]AppMinimal, error) {
 	url := fmt.Sprintf("/bkms/v1/bkms-server/workspaces/%s/apps", workspaceID)
@@ -258,6 +320,68 @@ func (c *SvcBasedClient) GetAppMinimal(ctx context.Context, workspaceID, appID s
 	}
 
 	return nil, errors.Errorf("app %s not found", appID)
+}
+
+// GetApp 获取应用完整定义（含 BuildConfig / AppModelSpec）
+func (c *SvcBasedClient) GetApp(ctx context.Context, appID string) (*AppFull, error) {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s", appID)
+
+	var respData GetAppFullRespData
+	resp, err := c.cli.R().SetContext(ctx).SetResult(&respData).Get(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return nil, errors.Errorf("get app failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return &respData.Data, nil
+}
+
+// DeleteApp 删除应用
+func (c *SvcBasedClient) DeleteApp(ctx context.Context, appID string) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s", appID)
+
+	resp, err := c.cli.R().SetContext(ctx).Delete(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("delete app failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
+// UpdateAppDisplayName 更新应用显示名
+func (c *SvcBasedClient) UpdateAppDisplayName(ctx context.Context, appID, displayName string) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/display-name", appID)
+	body := UpdateAppDisplayNameBody{DisplayName: displayName}
+
+	resp, err := c.cli.R().SetContext(ctx).SetBody(body).Put(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("update app display name failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
+// UpdateAppBuildConfig 更新应用构建配置
+func (c *SvcBasedClient) UpdateAppBuildConfig(ctx context.Context, appID string, body AppBuildConfigUpdateBody) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/build-configs", appID)
+
+	resp, err := c.cli.R().SetContext(ctx).SetBody(body).Put(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("update app build config failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
 }
 
 // GetAppIDAutoSuffix 获取应用 ID 自动后缀（后端生成）
@@ -670,6 +794,21 @@ func (c *SvcBasedClient) ListTrpcDeployRecords(
 	return respData.Data.Results, nil
 }
 
+// DeleteHelmDeploy 删除 Helm 部署
+func (c *SvcBasedClient) DeleteHelmDeploy(ctx context.Context, appID, envName, deployID string) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/helm-deploys/%s", appID, envName, deployID)
+
+	resp, err := c.cli.R().SetContext(ctx).Delete(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("delete helm deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
 // GrayscaleUpdateInstance 灰度更新 Trpc 实例
 func (c *SvcBasedClient) GrayscaleUpdateInstance(
 	ctx context.Context, appID, envName, imageTag string, instanceIDs []string, updateStrategy string,
@@ -760,6 +899,40 @@ func (c *SvcBasedClient) ListAppInstances(
 	}
 
 	return &respData.Data, nil
+}
+
+// UpdateInstancePolaris 更新实例北极星权重/隔离状态
+func (c *SvcBasedClient) UpdateInstancePolaris(
+	ctx context.Context, appID, envName string, opts UpdateInstancePolarisOptions,
+) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/instances/operations/polaris", appID, envName)
+
+	resp, err := c.cli.R().SetContext(ctx).SetBody(opts).Put(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("update instance polaris failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
+// BatchDeleteInstances 批量删除实例
+func (c *SvcBasedClient) BatchDeleteInstances(
+	ctx context.Context, appID, envName string, opts BatchDeleteInstancesOptions,
+) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/instances/operations/batch_delete", appID, envName)
+
+	resp, err := c.cli.R().SetContext(ctx).SetBody(opts).Post(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("batch delete instances failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
 }
 
 // ListTrpcAdminCmds 查询 Trpc 管理命令列表
@@ -864,6 +1037,76 @@ func (c *SvcBasedClient) ListTafDeployRecords(
 	}
 
 	return respData.Data.Results, nil
+}
+
+// DeleteTrpcDeploy 删除 Trpc 部署
+func (c *SvcBasedClient) DeleteTrpcDeploy(ctx context.Context, appID, envName string) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/trpc-deploys", appID, envName)
+
+	resp, err := c.cli.R().SetContext(ctx).Delete(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("delete trpc deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
+// PreCheckTrpcDeployEnvVars 部署前检查 Trpc 应用环境变量
+func (c *SvcBasedClient) PreCheckTrpcDeployEnvVars(
+	ctx context.Context,
+	appID, envName string,
+) (*DeployPrecheckResult, error) {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/trpc-deploys/env-var-precheck", appID, envName)
+
+	var respData DeployPrecheckResult
+	resp, err := c.cli.R().SetContext(ctx).SetResult(&respData).Get(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return nil, errors.Errorf("precheck trpc deploy env vars failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	respData.Passed = len(respData.UndefinedVars) == 0
+	return &respData, nil
+}
+
+// DeleteTafDeploy 删除 TAF 部署
+func (c *SvcBasedClient) DeleteTafDeploy(ctx context.Context, appID, envName string) error {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/taf-deploys", appID, envName)
+
+	resp, err := c.cli.R().SetContext(ctx).Delete(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("delete taf deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
+// PreCheckTafDeployEnvVars 部署前检查 TAF 应用环境变量
+func (c *SvcBasedClient) PreCheckTafDeployEnvVars(
+	ctx context.Context,
+	appID, envName string,
+) (*DeployPrecheckResult, error) {
+	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/taf-deploys/env-var-precheck", appID, envName)
+
+	var respData DeployPrecheckResult
+	resp, err := c.cli.R().SetContext(ctx).SetResult(&respData).Get(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return nil, errors.Errorf("precheck taf deploy env vars failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	respData.Passed = len(respData.UndefinedVars) == 0
+	return &respData, nil
 }
 
 // --- AppSpec method implementations ---
@@ -1129,6 +1372,29 @@ func (c *SvcBasedClient) PatchAppPolarisConfig(ctx context.Context, appID, confi
 	}
 	if resp.StatusCode() != http.StatusOK {
 		return errors.Errorf("patch app polaris config failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+	}
+
+	return nil
+}
+
+// UpdatePolarisConfigEnvWeight 更新北极星配置在指定环境下的全局默认权重（对该环境所有实例生效）
+func (c *SvcBasedClient) UpdatePolarisConfigEnvWeight(
+	ctx context.Context,
+	appID, configName, envName string,
+	weight int32,
+) error {
+	url := fmt.Sprintf(
+		"/bkms/v1/bkms-server/apps/%s/deps/polaris-configs/%s/envs/%s/weight",
+		appID, configName, envName,
+	)
+	body := UpdatePolarisConfigEnvWeightBody{Weight: weight}
+
+	resp, err := c.cli.R().SetContext(ctx).SetBody(body).Put(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
+		return errors.Errorf("update polaris config env weight failed: [%d] -> %s", resp.StatusCode(), resp.Body())
 	}
 
 	return nil

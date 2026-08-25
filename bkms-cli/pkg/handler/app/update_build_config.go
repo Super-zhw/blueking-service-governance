@@ -16,33 +16,29 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package polaris provides polaris config command group
-package polaris
+package app
 
-import "github.com/spf13/cobra"
+import (
+	"context"
+	"os"
 
-// NewCmd returns a Command instance for 'app polaris' command group
-func NewCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "polaris",
-		Short: "Manage polaris configs",
-		Long: `Manage polaris configs for applications.
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 
-Use this command to list, create, update and delete polaris service registration
-configs for your applications.`,
-		DisableFlagsInUseLine: true,
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+)
+
+// UpdateBuildConfig 读取 YAML spec 文件并更新应用构建配置。
+func UpdateBuildConfig(ctx context.Context, appID, specFile string) error {
+	data, err := os.ReadFile(specFile)
+	if err != nil {
+		return errors.Wrap(err, "read spec file")
 	}
 
-	// 查询北极星配置列表
-	cmd.AddCommand(NewListCmd())
-	// 创建北极星配置
-	cmd.AddCommand(NewCreateCmd())
-	// 删除北极星配置
-	cmd.AddCommand(NewDeleteCmd())
-	// 更新北极星配置
-	cmd.AddCommand(NewUpdateCmd())
-	// 更新北极星配置在指定环境下的全局权重
-	cmd.AddCommand(NewWeightCmd())
+	var body client.AppBuildConfigUpdateBody
+	if err = yaml.Unmarshal(data, &body); err != nil {
+		return errors.Wrap(err, "parse spec file")
+	}
 
-	return cmd
+	return errors.Wrap(client.New().UpdateAppBuildConfig(ctx, appID, body), "update build config")
 }

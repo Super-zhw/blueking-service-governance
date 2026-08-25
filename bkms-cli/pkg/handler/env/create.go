@@ -16,33 +16,40 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package polaris provides polaris config command group
-package polaris
+package env
 
-import "github.com/spf13/cobra"
+import (
+	"context"
+	"os"
 
-// NewCmd returns a Command instance for 'app polaris' command group
-func NewCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "polaris",
-		Short: "Manage polaris configs",
-		Long: `Manage polaris configs for applications.
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 
-Use this command to list, create, update and delete polaris service registration
-configs for your applications.`,
-		DisableFlagsInUseLine: true,
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+)
+
+// CreateEnv 读取 YAML spec 文件，创建环境并返回创建结果。
+func CreateEnv(ctx context.Context, workspaceID, specFile string) (*client.Env, error) {
+	data, err := os.ReadFile(specFile)
+	if err != nil {
+		return nil, errors.Wrap(err, "read spec file")
 	}
 
-	// 查询北极星配置列表
-	cmd.AddCommand(NewListCmd())
-	// 创建北极星配置
-	cmd.AddCommand(NewCreateCmd())
-	// 删除北极星配置
-	cmd.AddCommand(NewDeleteCmd())
-	// 更新北极星配置
-	cmd.AddCommand(NewUpdateCmd())
-	// 更新北极星配置在指定环境下的全局权重
-	cmd.AddCommand(NewWeightCmd())
+	var body client.CreateEnvBody
+	if err = yaml.Unmarshal(data, &body); err != nil {
+		return nil, errors.Wrap(err, "parse spec file")
+	}
 
-	return cmd
+	cli := client.New()
+	envID, err := cli.CreateEnv(ctx, workspaceID, body)
+	if err != nil {
+		return nil, errors.Wrap(err, "create env")
+	}
+
+	env, err := cli.GetEnv(ctx, envID)
+	if err != nil {
+		return nil, errors.Wrap(err, "get created env")
+	}
+
+	return env, nil
 }

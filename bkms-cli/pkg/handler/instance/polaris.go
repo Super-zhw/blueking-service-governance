@@ -16,33 +16,22 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package polaris provides polaris config command group
-package polaris
+package instance
 
-import "github.com/spf13/cobra"
+import (
+	"context"
 
-// NewCmd returns a Command instance for 'app polaris' command group
-func NewCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "polaris",
-		Short: "Manage polaris configs",
-		Long: `Manage polaris configs for applications.
+	"github.com/pkg/errors"
 
-Use this command to list, create, update and delete polaris service registration
-configs for your applications.`,
-		DisableFlagsInUseLine: true,
-	}
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+)
 
-	// 查询北极星配置列表
-	cmd.AddCommand(NewListCmd())
-	// 创建北极星配置
-	cmd.AddCommand(NewCreateCmd())
-	// 删除北极星配置
-	cmd.AddCommand(NewDeleteCmd())
-	// 更新北极星配置
-	cmd.AddCommand(NewUpdateCmd())
-	// 更新北极星配置在指定环境下的全局权重
-	cmd.AddCommand(NewWeightCmd())
-
-	return cmd
+// UpdatePolaris 更新指定实例的北极星权重或隔离状态。
+func UpdatePolaris(
+	ctx context.Context,
+	cli client.Client,
+	appID, envName string,
+	opts client.UpdateInstancePolarisOptions,
+) error {
+	return errors.Wrap(cli.UpdateInstancePolaris(ctx, appID, envName, opts), "update instance polaris")
 }

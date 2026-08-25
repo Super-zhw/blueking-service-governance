@@ -133,3 +133,23 @@ type PortForwardTunnelOptions struct {
 	// LocalPort CLI 本地监听端口，用于服务端审计。
 	LocalPort int
 }
+
+// UpdateInstancePolarisOptions 更新实例北极星配置参数
+type UpdateInstancePolarisOptions struct {
+	// TrafficLaneName 泳道名称
+	TrafficLaneName string `json:"trafficLaneName"`
+	// InstanceIDs 实例 ID 列表
+	InstanceIDs []string `json:"instanceIDs"`
+	// Weight 目标权重（nil 表示不修改）
+	Weight *int `json:"weight,omitempty"`
+	// Isolate 隔离状态（nil 表示不修改）
+	Isolate *bool `json:"isolate,omitempty"`
+}
+
+// BatchDeleteInstancesOptions 批量删除实例参数
+type BatchDeleteInstancesOptions struct {
+	// TrafficLaneName 泳道名称
+	TrafficLaneName string `json:"trafficLaneName"`
+	// InstanceIDs 实例 ID 列表
+	InstanceIDs []string `json:"instanceIDs"`
+}
