@@ -1,0 +1,39 @@
+apps/bkms-server/pkg/app/component/bscp/service/suite_test.go
+  s_ee1475003a8a27::t_ac82f64ec77dd4 1-27
+apps/bkms-server/pkg/infras/cloudapi/bscp/stub.go
+  s_ee1475003a8a27::t_a40afee9b4cd90 56
+apps/bkms-server/pkg/app/component/bscp/service/service_test.go
+  s_ee1475003a8a27::t_05bc6f7092fe9b 2-5,11-12,15-16,42-43,49-50,90-91,111,301
+  s_ee1475003a8a27::t_640d9a9f9122ed 1,6-10,13-14,17-41,44-48,51-89,92-110,112-300,302
+apps/bkms-server/pkg/app/component/bscp/service/diff_test.go
+  s_ee1475003a8a27::t_702abd886c722f 2-3,6,9-10
+  s_ee1475003a8a27::t_3fecf5abe410d8 1,4-5,7,11-169
+apps/bkms-server/pkg/app/component/bscp/service/service.go
+  s_ee1475003a8a27::t_1fd2429f78340e 1-43
+apps/bkms-server/pkg/app/component/bscp/service/permission.go
+  s_ee1475003a8a27::t_a7e39fcad12716 1-60
+apps/bkms-server/pkg/app/component/bscp/service/diff.go
+  s_ee1475003a8a27::t_5726a07088666c 1-63
+apps/bkms-server/pkg/app/component/bscp/service/app_config.go
+  s_ee1475003a8a27::t_83ba56a058cf5f 1-57
+apps/bkms-server/pkg/app/component/bscp/service/credential.go
+  s_ee1475003a8a27::t_6b74ebb0a59357 1-131
+apps/bkms-server/pkg/app/component/bscp/service/env_config.go
+  s_ee1475003a8a27::t_4442d0ee73bd5e 1,10-11,14-15,17-18,21-22,26,34,42,54,57,68,74-77,79,87-88,101,110-111,113,124,131,134-135,145,147,168,174-175,179-180,182,185-186,189-190,198,205-207,211-213,217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "ba54a6ba40d3aa081a313ef4903a3c6ec165361a",
+  "prompts": {},
+  "sessions": {
+    "s_ee1475003a8a27": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e82283fd07e8f84c31e8ccba99216",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

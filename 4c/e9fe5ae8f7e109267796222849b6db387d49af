@@ -1,0 +1,32 @@
+apps/bkms-server/pkg/infras/taskq/retry.go
+  h_d56f85e7c6980c 33-34
+apps/bkms-server/cmd/worker.go
+  h_d56f85e7c6980c 27,98
+apps/bkms-server/pkg/server/taskqtask/task.go
+  h_d56f85e7c6980c 3,5,8-9,13,18
+apps/bkms-server/cmd/webserver.go
+  h_d56f85e7c6980c 26
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  h_d56f85e7c6980c 104-105
+apps/bkms-server/pkg/server/taskqtask/example/example.go
+  h_d56f85e7c6980c 1-78
+apps/bkms-server/tests/configs/config.yaml
+  h_d56f85e7c6980c 107-108
+apps/bkms-server/pkg/infras/taskq/taskq.go
+  h_d56f85e7c6980c 1,6
+apps/bkms-server/pkg/infras/taskq/enqueue.go
+  h_d56f85e7c6980c 21,72
+apps/bkms-server/configs/config.yaml
+  h_d56f85e7c6980c 131,133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "4ce9fe5ae8f7e109267796222849b6db387d49af",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

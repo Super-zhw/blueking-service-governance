@@ -1,0 +1,43 @@
+bkms-cli/pkg/handler/appspec/view_all.go
+  s_cdfdade5d3f96d::t_a01ff1b3c57168 12-18,43,45-109
+bkms-cli/pkg/handler/appspec/handler.go
+  s_cdfdade5d3f96d::t_4d8eeda88e2927 13-14,16,18-58
+bkms-cli/cmd/app/appspec/annotations/view.go
+  s_cdfdade5d3f96d::t_c9e0995f192541 37,43,52
+bkms-cli/cmd/app/appspec/updatestrategy/view.go
+  s_cdfdade5d3f96d::t_9983fdc5504868 37,43,52
+bkms-cli/cmd/app/appspec/resources/view.go
+  s_cdfdade5d3f96d::t_492104b40968e9 37,43,52
+bkms-cli/pkg/client/appspec.go
+  s_cdfdade5d3f96d::t_b12ff4b8792a8c 34-135
+bkms-cli/pkg/handler/appspec/output.go
+  s_cdfdade5d3f96d::t_8c6177b15a9788 42,47,52,57,62,67,73,76-78,80-82,84-86,88-90,92-94,96-98,100,105-107,119-121,130-132,144,173-175,188,222-224,234-236
+bkms-cli/pkg/client/types.go
+  s_cdfdade5d3f96d::t_ce62af698d794e 129-161
+bkms-cli/cmd/app/appspec/lifecycle/view.go
+  s_cdfdade5d3f96d::t_d62ddc7b5bbd6d 37,43,52
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_cdfdade5d3f96d::t_7d1db575925dab 2369-2371,2373,2378-2470,2472
+bkms-cli/cmd/app/appspec/labels/view.go
+  s_cdfdade5d3f96d::t_a5b1442c26151c 37,43,52
+bkms-cli/cmd/app/appspec/probe/view.go
+  s_cdfdade5d3f96d::t_0824065e0d5b1b 37,43,52
+bkms-cli/pkg/client/client.go
+  s_cdfdade5d3f96d::t_590048069a92ec 776-940,942,945,948,954-956,958,961,964
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "969823fe24ec5b7d1ecf0a4f3aad8b99aa05a435",
+  "prompts": {},
+  "sessions": {
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

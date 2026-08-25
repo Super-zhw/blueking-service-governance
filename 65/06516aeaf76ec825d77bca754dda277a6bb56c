@@ -1,0 +1,22 @@
+apps/bkms-server/pkg/extension/depservice/provider/redis/provider_test.go
+  h_d56f85e7c6980c 91-92
+apps/bkms-server/design_notes/depservice_provision.md
+  h_d56f85e7c6980c 27-46
+apps/bkms-server/tests/configs/config.yaml
+  h_d56f85e7c6980c 127
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  h_d56f85e7c6980c 117
+apps/bkms-server/pkg/extension/depservice/provider/redis/provider.go
+  h_d56f85e7c6980c 57,90,113,134,164-170,192,196-201
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "6506516aeaf76ec825d77bca754dda277a6bb56c",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

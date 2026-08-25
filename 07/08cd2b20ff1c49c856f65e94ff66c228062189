@@ -1,0 +1,26 @@
+apps/bkms-server/pkg/deploy/handler/appmodel_deploy_steps.go
+  h_83f239dc907c66 204,220,237
+apps/bkms-server/pkg/deploy/appmodel/resource_snapshot_store.go
+  h_83f239dc907c66 15,18-24,26,28-31,33,66,68,73-75,77,79,97-98,100,102,104,113,118,126-127,129,131,133,138,153,158,165,170-173,175,177,180-181,186-187
+apps/bkms-server/pkg/deploy/handler/trpc_deploy.go
+  h_83f239dc907c66 87,89,105,107
+apps/bkms-server/pkg/deploy/handler/taf_deploy.go
+  h_83f239dc907c66 69,71,106,108
+apps/bkms-server/pkg/deploy/appmodel/resource_snapshot_store_test.go
+  h_83f239dc907c66 92,130,134-138,140-144
+apps/bkms-server/pkg/deploy/router.go
+  h_83f239dc907c66 80
+apps/bkms-server/pkg/handler/deploy_appmodel.go
+  h_83f239dc907c66 284
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "0708cd2b20ff1c49c856f65e94ff66c228062189",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

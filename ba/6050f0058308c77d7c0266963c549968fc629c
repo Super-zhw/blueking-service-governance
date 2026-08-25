@@ -1,0 +1,49 @@
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/developer.json
+  s_3728f4a1764d01::t_826ae1bb97b154 23,25-26,28
+apps/authmanager/pkg/auth_server.go
+  s_3728f4a1764d01::t_2579367afb99e8 426-429,431-433
+apps/authmanager/pkg/iam/role/scopes/bkci.go
+  s_3728f4a1764d01::t_c4de81866fc8ef 20
+apps/authmanager/pkg/iam/role/scopes/bkms.go
+  s_3728f4a1764d01::t_bc9d8d353b4659 20
+apps/authmanager/pkg/iam/service.go
+  s_3728f4a1764d01::t_9056c572614f6b 62-67,70-72,797,805-811
+  s_3728f4a1764d01::t_dc8622721fd444 794-796
+apps/authmanager/pkg/iam/role/scopes/bscp.go
+  s_3728f4a1764d01::t_70761f4141a287 12-17,20-23
+  s_3728f4a1764d01::t_4fb3d607dd3807 30-35
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/sre.json
+  s_3728f4a1764d01::t_2849a7ff443ba0 23,25-26,28
+apps/authmanager/pkg/iam/role/scopes/bkmonitor.go
+  s_3728f4a1764d01::t_ead8b236a76a3b 20
+apps/authmanager/pkg/iam/role/scopes/bcs.go
+  s_3728f4a1764d01::t_a4863d80c5ef23 20
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/operator.json
+  s_3728f4a1764d01::t_c0b46166b3a28b 23,25-26,28
+apps/authmanager/pkg/iam/role/scopes/generator.go
+  s_3728f4a1764d01::t_6f8f38161c1507 28
+apps/authmanager/pkg/iam/role/scopes/templates/bscp/admin.json
+  s_3728f4a1764d01::t_8b26440b7417b2 23,25-26,28
+apps/authmanager/proto/authmanager.proto
+  s_3728f4a1764d01::t_626ab5b873c96c 46-53,60-61
+apps/authmanager/pkg/iam/role/scopes/bklog.go
+  s_3728f4a1764d01::t_8ec915630978d2 20
+apps/authmanager/pkg/iam/role/scopes/bkrepo.go
+  s_3728f4a1764d01::t_2f62fa1e892bd3 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "ba6050f0058308c77d7c0266963c549968fc629c",
+  "prompts": {},
+  "sessions": {
+    "s_3728f4a1764d01": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e3ad276a77caf9810fd493b44d0ce",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

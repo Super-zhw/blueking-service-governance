@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/extension/addon/gpa/validate_test.go
+  h_d56f85e7c6980c 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "86e35179672c3ce43081a9a66a8b3df2b4bfa19a",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+apps/bkms-server/configs/config.yaml
+  h_83f239dc907c66 26,34,38,40
+manifests/helm/bkms-server/values.yaml
+  h_83f239dc907c66 215,223-229,235-237,239
+DEV_GUIDE.md
+  h_83f239dc907c66 155-157
+apps/bkms-server/tests/configs/config.yaml
+  h_83f239dc907c66 22,26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "75b055557e8b11b0831ff0db8ed2a84ef38fecbd",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

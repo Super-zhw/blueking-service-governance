@@ -1,0 +1,20 @@
+bkms-cli/pkg/handler/appspec/view.go
+  s_cdfdade5d3f96d::t_9f502653983b48 97,106
+  s_cdfdade5d3f96d::t_992eb1f5d2b39f 83-88,92-96,98-99,101-105,107-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "4d4eff63941e2bef1abd5408622d084ead9d04cf",
+  "prompts": {},
+  "sessions": {
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

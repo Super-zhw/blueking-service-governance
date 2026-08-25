@@ -1,0 +1,21 @@
+bkms-cli/cmd/auth/login.go
+  s_77584af7bd2116::t_159725a3e01d87 116-119
+bkms-cli/pkg/account/account.go
+  s_77584af7bd2116::t_d94cfe912c21a9 30-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "b92be9a3b10073003eb39ddb64c37d1cf4c347b5",
+  "prompts": {},
+  "sessions": {
+    "s_77584af7bd2116": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8cfc908276d6b66062eb4251ac8b",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

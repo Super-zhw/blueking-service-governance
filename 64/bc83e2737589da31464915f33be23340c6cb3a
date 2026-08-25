@@ -1,0 +1,37 @@
+bkms-cli/pkg/handler/publish/handler.go
+  s_8a2ad61a7177ed::t_d12c7a51251d93 29-30
+  s_8a2ad61a7177ed::t_500d0ed6deca0a 277
+bkms-cli/pkg/update/extract_unix.go
+  s_8a2ad61a7177ed::t_c64011386d879e 1-52
+bkms-cli/Makefile
+  s_8a2ad61a7177ed::t_d3ff0cba22f086 146
+  s_8a2ad61a7177ed::t_7babdd797d1995 167
+  s_8a2ad61a7177ed::t_014811cf63f688 147
+  s_8a2ad61a7177ed::t_5928a53e266c4f 3-5,7-24,30,35-38,42-50,53,62,64,66,68-69,77,84-86,88-89,91-97,99-101,107,110,112-113,115-117,120-143,145,149,156,166,194,201,203,220,229,235,238
+  s_8a2ad61a7177ed::t_1a221b6273138b 39-41,51-52,54-60
+  s_8a2ad61a7177ed::t_e7c77fdc946bfc 63,65,67,70-76,78-82
+bkms-cli/pkg/update/extract_test.go
+  s_8a2ad61a7177ed::t_9988846c5c7bbc 1-2,49-52,54,61
+bkms-cli/pkg/update/extract_windows_test.go
+  s_8a2ad61a7177ed::t_96cae873671171 1-70
+bkms-cli/pkg/update/extract_windows.go
+  s_8a2ad61a7177ed::t_4f25a4a143f869 1-46
+bkms-cli/pkg/update/extract.go
+  s_8a2ad61a7177ed::t_31cc9114b0b07f 12-13,23-27,29,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "64bc83e2737589da31464915f33be23340c6cb3a",
+  "prompts": {},
+  "sessions": {
+    "s_8a2ad61a7177ed": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f183672b67c1ea8ec7205ceeecb74",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

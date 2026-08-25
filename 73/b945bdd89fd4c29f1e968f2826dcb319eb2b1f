@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/infras/cloudapi/dbm/dbm.go
+  h_d56f85e7c6980c 67,102
+apps/bkms-server/pkg/infras/cloudapi/dbm/redis.go
+  h_d56f85e7c6980c 160-180
+apps/bkms-server/pkg/infras/cloudapi/dbm/client.go
+  h_d56f85e7c6980c 17-18
+apps/bkms-server/pkg/infras/cloudapi/dbm/types.go
+  h_d56f85e7c6980c 8,10,14,16,20,22,30,32,34,36,38
+apps/bkms-server/pkg/infras/cloudapi/dbm/redis_types.go
+  h_d56f85e7c6980c 77-80,93-94,109-110,112-114,145-243,282-293,298-299
+apps/bkms-server/pkg/infras/cloudapi/dbm/stub.go
+  h_d56f85e7c6980c 13-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "73b945bdd89fd4c29f1e968f2826dcb319eb2b1f",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+manifests/helm/bkms-server/templates/_helpers.tpl
+  s_6956b6484857e1::t_66387b736f8060 123-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "4deca6e004fc540a5a6bb6601126addd25fd7392",
+  "prompts": {},
+  "sessions": {
+    "s_6956b6484857e1": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f59a17b307dfeb37e93806f0c6e16",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

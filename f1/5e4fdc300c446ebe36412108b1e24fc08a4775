@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/deploy/handler/appmodel_deploy_steps.go
+  h_83f239dc907c66 337
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f15e4fdc300c446ebe36412108b1e24fc08a4775",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

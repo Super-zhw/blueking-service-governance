@@ -1,0 +1,23 @@
+apps/bkms-server/pkg/infras/cloudapi/bcs/stub.go
+  s_20546e71220d32::t_616f6e40fa971c 1-37,39-40,42-50,52-66,68-94,96-100,103-117
+apps/bkms-server/pkg/config/types.go
+  s_20546e71220d32::t_9a332e5ad39e0e 218
+apps/bkms-server/tests/configs/config.yaml
+  s_20546e71220d32::t_9a1c23f06ed040 106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "1cfd1080af5e2876bf79a33731b3b6d4bae32951",
+  "prompts": {},
+  "sessions": {
+    "s_20546e71220d32": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e01be84277c09a13760f1cc4f60af",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/observability/apm/apm.go
+  s_6956b6484857e1::t_8be275e6beada3 40,115,175,177-180,182-188,190-194
+  s_6956b6484857e1::t_e0a10da99389e2 99-102,106
+  s_6956b6484857e1::t_18573250e5198b 98,174,176,181
+  s_6956b6484857e1::t_13893c1490b98b 113-114
+apps/bkms-server/pkg/observability/apm/apm_test.go
+  s_6956b6484857e1::t_df232389c790c3 170,174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "f23791d879fc4fe0176d9ac490d89f66c116c124",
+  "prompts": {},
+  "sessions": {
+    "s_6956b6484857e1": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f59a17b307dfeb37e93806f0c6e16",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

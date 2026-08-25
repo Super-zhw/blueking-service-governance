@@ -1,0 +1,27 @@
+apps/bkms-server/pkg/extension/depservice/provider/polaris/provider.go
+  s_160c9ec266ea5b::t_3be8716309e1cc 50-54
+  s_160c9ec266ea5b::t_23d9739db6febb 14
+apps/bkms-server/pkg/infras/database/database.go
+  s_160c9ec266ea5b::t_3754f23a3624ac 11,50-51
+apps/bkms-server/pkg/observability/httpclient/httpclient.go
+  s_160c9ec266ea5b::t_bc8ae898cffefd 1-35
+apps/bkms-server/pkg/infras/redis/redis.go
+  s_160c9ec266ea5b::t_1e33ab92a54f2f 60-63
+  s_160c9ec266ea5b::t_47187a66484f06 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "fa141e3fca2cf9e29526c00c52de05b0e7e93786",
+  "prompts": {},
+  "sessions": {
+    "s_160c9ec266ea5b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f51a4c5789d86493f476ea5c687",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+apps/bkms-server/pkg/observability/apm/middleware.go
+  s_6956b6484857e1::t_7cc7fa499ce308 9-10,31,53,67,69,82-88
+  s_6956b6484857e1::t_3a94d10b10cea0 25,34,54,58,68,89
+  s_6956b6484857e1::t_760335e2a70dda 41,59,62-63
+  s_6956b6484857e1::t_2e1f08f286badb 60
+  s_6956b6484857e1::t_2dec8e1d142e7c 65,70-71,73-77,79-80
+  s_6956b6484857e1::t_895f7079d966cb 72
+  s_6956b6484857e1::t_2e69892b8b524f 78
+  s_6956b6484857e1::t_f439c6aab422ed 64
+  s_6956b6484857e1::t_66cd2cb6bbd8aa 81
+  s_6956b6484857e1::t_64eefede7cdad2 6-8
+  s_6956b6484857e1::t_00f3f3cbbbd3ee 11-13,22-24
+  s_6956b6484857e1::t_7edb28f49946e9 26-30
+  s_6956b6484857e1::t_7e4161ae87e122 32-33
+  s_6956b6484857e1::t_2f73e50fa70a42 35-40
+  s_6956b6484857e1::t_c0ed0711d6e5b4 42-44,50-52
+  s_6956b6484857e1::t_bfa2bb8d9d90ef 55-57
+  s_6956b6484857e1::t_8d2c0e214cd86b 61
+  s_6956b6484857e1::t_b0c20ef549243f 66
+apps/bkms-server/pkg/observability/apm/apm_test.go
+  s_6956b6484857e1::t_df232389c790c3 170,174
+manifests/helm/bkms-server/templates/_helpers.tpl
+  s_6956b6484857e1::t_66387b736f8060 123-135
+  s_6956b6484857e1::t_8d3d8298b4d399 136-239
+apps/bkms-server/pkg/observability/apm/apm.go
+  s_6956b6484857e1::t_13893c1490b98b 115-116
+  s_6956b6484857e1::t_e0a10da99389e2 100-103,107,212
+  s_6956b6484857e1::t_8be275e6beada3 41,117,176,178-189,191-192,195
+  s_6956b6484857e1::t_18573250e5198b 99,175,177
+  s_6956b6484857e1::t_99cb0b138468bd 209-211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "fe61ec86d3e3fc862d4f89f1038565d776c70028",
+  "prompts": {},
+  "sessions": {
+    "s_6956b6484857e1": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f59a17b307dfeb37e93806f0c6e16",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+apps/bkms-server/pkg/topology/router.go
+  s_6f79f146b35126::t_af6a760ad1bdef 1-19
+apps/bkms-server/pkg/topology/serializer/topology.go
+  s_6f79f146b35126::t_0edf10e3e73e17 354
+  s_6f79f146b35126::t_20e27fd58afa8e 97,162,215,259
+  s_6f79f146b35126::t_af6a760ad1bdef 1-96,98-161,163-214,216-258,260-305,309-353,355-386
+  s_6f79f146b35126::t_644b933e3bcfa5 306-308
+apps/bkms-server/pkg/topology/handler/topology_test.go
+  s_6f79f146b35126::t_bc1cdb83ecfd90 270,280
+  s_6f79f146b35126::t_d5a72134ab4255 1-269,271-279,281-312
+apps/bkms-server/pkg/topology/serializer/topology_test.go
+  s_6f79f146b35126::t_0edf10e3e73e17 255
+  s_6f79f146b35126::t_648d7dc66b4629 1-197,199-254,256-316
+  s_6f79f146b35126::t_7720dc8604ab8e 198
+apps/bkms-server/pkg/topology/handler/topology.go
+  s_6f79f146b35126::t_ac85d163bd8384 15
+  s_6f79f146b35126::t_af6a760ad1bdef 1-14,16-53,55-98,100-153,157-206,208-222
+  h_83f239dc907c66 54,99,207
+  s_6f79f146b35126::t_644b933e3bcfa5 154-156
+apps/bkms-server/pkg/topology/serializer/serializer_suite_test.go
+  s_6f79f146b35126::t_648d7dc66b4629 1-13
+apps/bkms-server/pkg/bkmssrv/server.go
+  s_6f79f146b35126::t_b0e1d78efb86e5 21-22,53
+apps/bkms-server/pkg/topology/handler/handler_suite_test.go
+  s_6f79f146b35126::t_d5a72134ab4255 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4baebd16a7914f2342ae3425c2f62b9c86bf5374",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  },
+  "sessions": {
+    "s_6f79f146b35126": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e632f-9022-7bb3-8d24-d6550ede46c4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

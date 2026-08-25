@@ -1,0 +1,40 @@
+apps/bkms-server/pkg/extension/component/devmode/devmode.go
+  s_954f7b20eec04f::t_d2a41b253d3a81 4
+apps/bkms-server/pkg/deploy/pre_checker_unit_test.go
+  s_954f7b20eec04f::t_fb00bf28db1bb6 16
+apps/bkms-server/pkg/build/autodeploy/handler/env_type_policy_test.go
+  s_954f7b20eec04f::t_6d643c68171f08 16
+apps/bkms-server/pkg/workload/image/handler/image.go
+  s_954f7b20eec04f::t_048ed80ec0d7ea 597
+  s_954f7b20eec04f::t_ee30a18f367da8 27
+apps/bkms-server/pkg/extension/component/devmode/production_like_test.go
+  s_954f7b20eec04f::t_2a46465e194f99 10,20-21
+apps/bkms-server/pkg/workload/appmodelcore/workload/devmode_policy_test.go
+  s_954f7b20eec04f::t_315ea08fa5edfa 21
+apps/bkms-server/pkg/core/env/constants.go
+  s_954f7b20eec04f::t_a4228347d6c5da 60-64
+apps/bkms-server/pkg/extension/component/devmode/builder.go
+  s_954f7b20eec04f::t_e56586784c5159 42
+apps/bkms-server/pkg/build/autodeploy/handler/build_auto_deploy.go
+  s_954f7b20eec04f::t_bbb23594bab3de 21
+apps/bkms-server/pkg/workload/appmodelcore/workload/builder.go
+  s_954f7b20eec04f::t_cbf460c1992cf3 331
+apps/bkms-server/pkg/deploy/pre_checker.go
+  s_954f7b20eec04f::t_85c0f04a2dedc5 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "969ad69864b573611a20827a1dd2390a57a4c76e",
+  "prompts": {},
+  "sessions": {
+    "s_954f7b20eec04f": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fa2c7f8a371b4a4d00cb9526c19d5",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

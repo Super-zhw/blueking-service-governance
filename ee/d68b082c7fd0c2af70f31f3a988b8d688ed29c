@@ -1,0 +1,14 @@
+apps/ui/Dockerfile.prod
+  h_d56f85e7c6980c 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "eed68b082c7fd0c2af70f31f3a988b8d688ed29c",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

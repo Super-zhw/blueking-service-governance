@@ -1,0 +1,33 @@
+apps/bkms-server/pkg/platmgt/portforward/store_test.go
+  s_80216cbbc7d5c9::t_70bdb16332f8fc 42,52-53,57,68-71,75,77,80-82,86,90,97-98,105-130,132,138-141,148,156,162
+apps/bkms-server/pkg/platmgt/portforward/service.go
+  s_80216cbbc7d5c9::t_970c642747d9da 6,10,32-34,37,39,45,47,54-55,59,61-62,70-71,84-95,99-103,105-110,112-119
+apps/bkms-server/pkg/platmgt/portforward/handler/handler.go
+  s_80216cbbc7d5c9::t_4c4cf2e0d6adfd 140
+  s_80216cbbc7d5c9::t_f407e4e62d272a 202,208
+  s_80216cbbc7d5c9::t_37406a1f7b0624 85,104,148,153-156,174,222
+  s_80216cbbc7d5c9::t_d141912b1ab6da 237-240
+  s_80216cbbc7d5c9::t_4b4600f9958299 241-243
+apps/bkms-server/pkg/workload/instance/handler/port_forward.go
+  s_80216cbbc7d5c9::t_57ba009d280c3a 79
+apps/bkms-server/pkg/platmgt/portforward/service_test.go
+  s_80216cbbc7d5c9::t_bf3bf269fac69b 37,41,46,49-50,54-55,60,65,69-70
+apps/bkms-server/pkg/platmgt/portforward/serializer/serializer.go
+  s_80216cbbc7d5c9::t_1cf36d18fa49bf 17-18,31-33,38,52-53,58-59,64-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "158aa67c75309daa12933c6d5c0b3696f42ee298",
+  "prompts": {},
+  "sessions": {
+    "s_80216cbbc7d5c9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb768bd7d77b48e81fecf186a5ad3",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

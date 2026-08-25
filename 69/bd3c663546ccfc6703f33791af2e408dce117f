@@ -1,0 +1,42 @@
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/folder.bru
+  h_83f239dc907c66 32-51,54-59,80-96
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/05-preview-rollback.bru
+  h_83f239dc907c66 22-23
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/05-list-snapshots.bru
+  h_83f239dc907c66 34-35
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/01-list-empty.bru
+  h_83f239dc907c66 21-22
+apps/bkms-server/tests/justfile
+  h_83f239dc907c66 27,30-38,50-54
+apps/bkms-server/tests/docker-compose.yaml
+  h_83f239dc907c66 18-26
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/03-list-and-get.bru
+  h_83f239dc907c66 21-23
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/folder.bru
+  h_83f239dc907c66 29-48,51-56,75-90
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/folder.bru
+  h_83f239dc907c66 27,31,50-70,96,108,116
+apps/bkms-server/tests/apis/fixtures/charts/sample-app/templates/deployment.yaml
+  h_83f239dc907c66 21-22
+apps/bkms-server/tests/apis/appmodel-deploys/trpc-lifecycle/01-list-empty.bru
+  h_83f239dc907c66 21-22
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/04-create-v2.bru
+  h_83f239dc907c66 22-24,27,32
+apps/bkms-server/tests/apis/appmodel-deploys/taf-lifecycle/05-list-snapshots.bru
+  h_83f239dc907c66 32-33
+apps/bkms-server/tests/README.md
+  h_83f239dc907c66 43-57,88-90
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/01-preview.bru
+  h_83f239dc907c66 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "69bd3c663546ccfc6703f33791af2e408dce117f",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

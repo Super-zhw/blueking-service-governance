@@ -1,0 +1,23 @@
+apps/bkms-server/pkg/common/httpcli/transport_test.go
+  s_160c9ec266ea5b::t_cc6c4414e0fb19 6-7,11-14,18-22,24,26,28,30,37,39,46-125
+  s_160c9ec266ea5b::t_554f8977fb857f 126
+apps/bkms-server/pkg/common/httpcli/transport.go
+  s_160c9ec266ea5b::t_b9502e2318664f 19
+  s_160c9ec266ea5b::t_3d67474ddb59c2 50,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "428c09f99d1703fabd087dd328a2be397cdd06af",
+  "prompts": {},
+  "sessions": {
+    "s_160c9ec266ea5b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f51a4c5789d86493f476ea5c687",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

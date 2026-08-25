@@ -1,0 +1,40 @@
+apps/bkms-server/tests/apis/helpers/helm.js
+  h_83f239dc907c66 23,25
+apps/bkms-server/tests/apis/helm-deploys/failure-case/06-delete-nonexistent-app.bru
+  h_83f239dc907c66 1-30
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/07-delete.bru
+  h_83f239dc907c66 1-42
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/02-create-v1.bru
+  h_83f239dc907c66 1-50
+apps/bkms-server/tests/apis/helm-deploys/failure-case/03-create-missing-image-tag.bru
+  h_83f239dc907c66 1-37
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/03-list-and-get.bru
+  h_83f239dc907c66 1-36
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/06-rollback.bru
+  h_83f239dc907c66 1-48
+apps/bkms-server/tests/apis/helm-deploys/failure-case/01-list-invalid-page-size.bru
+  h_83f239dc907c66 1-30
+apps/bkms-server/tests/apis/helm-deploys/failure-case/02-preview-missing-values-file-id.bru
+  h_83f239dc907c66 1-30
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/05-preview-rollback.bru
+  h_83f239dc907c66 1-30
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/01-preview.bru
+  h_83f239dc907c66 1-31
+apps/bkms-server/tests/apis/helm-deploys/failure-case/04-preview-rollback-nonexistent-app.bru
+  h_83f239dc907c66 1-30
+apps/bkms-server/tests/apis/helm-deploys/lifecycle/04-create-v2.bru
+  h_83f239dc907c66 1-75
+apps/bkms-server/tests/apis/helm-deploys/failure-case/05-rollback-nonexistent-app.bru
+  h_83f239dc907c66 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "213fde97434ccce503f3fd99197f9eee674f47ab",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

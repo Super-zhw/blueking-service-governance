@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/deploy/handler/helpers.go
+  h_83f239dc907c66 1-56
+apps/bkms-server/pkg/deploy/handler/helm_deploy_steps.go
+  h_83f239dc907c66 1-217
+apps/bkms-server/pkg/deploy/handler/helm_deploy.go
+  h_83f239dc907c66 88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b0b2eea1a1f890be3eadb66d7bc8e3a4d0c9f023",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

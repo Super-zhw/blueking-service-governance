@@ -1,0 +1,19 @@
+apps/bkms-server/tests/docker-compose.yaml
+  s_74a3a796660000::t_c7d1cb72015b9b 144-147,150,157,168-171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "f2d8e1e53ea0a6ce90246a9a23dde87f05bbd23d",
+  "prompts": {},
+  "sessions": {
+    "s_74a3a796660000": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e90691bd8754db3216f2be3cdca9a",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

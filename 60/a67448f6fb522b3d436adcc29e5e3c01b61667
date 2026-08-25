@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/infras/trafficmanager/trafficmanager_stub_test.go
+  s_07aba98c4b4754::t_acd3c437f51c60 23,26,31,34,39,42-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "60a67448f6fb522b3d436adcc29e5e3c01b61667",
+  "prompts": {},
+  "sessions": {
+    "s_07aba98c4b4754": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ea6a1217077158532a1a203cade1e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

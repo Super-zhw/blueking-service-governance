@@ -1,0 +1,77 @@
+apps/bkms-server/pkg/extension/component/devmode/builder.go
+  s_e0c5a476828abf::t_d07969d8816a54 16
+  s_e0c5a476828abf::t_7883046f889043 39,42
+apps/bkms-server/pkg/core/env/serializer/env.go
+  s_e0c5a476828abf::t_fc70a0ba65de38 12,27-29,37-40,91-92,247,445-446
+apps/bkms-server/pkg/deploy/pre_checker_unit_test.go
+  s_e0c5a476828abf::t_123b776dc2b60a 1-25
+apps/bkms-server/pkg/workload/appmodelcore/workload/builder.go
+  s_e0c5a476828abf::t_7340d30e39dc53 24
+  s_e0c5a476828abf::t_6efa8d7737cb32 324-333,591
+apps/bkms-server/pkg/core/workspace/env.go
+  s_e0c5a476828abf::t_6ab2c59fd15863 4,10-14,20-21,29-31,41
+apps/bkms-server/pkg/core/env/constants_test.go
+  s_e0c5a476828abf::t_26ac54dbe33677 4-5,10-65
+  s_e0c5a476828abf::t_a7015c31883548 1-3,6-9
+apps/bkms-server/pkg/workload/envvars/types/scope.go
+  s_e0c5a476828abf::t_25bfc881906c56 69
+apps/bkms-server/pkg/core/env/model/env.go
+  s_e0c5a476828abf::t_c66e45a241d3a8 39
+apps/bkms-server/pkg/workload/envvars/store.go
+  s_e0c5a476828abf::t_cd578360b1734e 16,227-232,234-240
+apps/bkms-server/pkg/workload/image/handler/env_type_policy_test.go
+  s_e0c5a476828abf::t_63df9e5e0ccc57 1-41
+apps/bkms-server/pkg/extension/component/devmode/production_like_test.go
+  s_e0c5a476828abf::t_5490bd4b3f4732 1-23
+apps/bkms-server/pkg/build/autodeploy/handler/build_auto_deploy.go
+  s_e0c5a476828abf::t_0248b1b7c54d13 116
+  s_e0c5a476828abf::t_cbe2021a32205b 15,20-22
+  s_e0c5a476828abf::t_2c175d43843c9e 23
+apps/bkms-server/pkg/extension/component/devmode/constants.go
+  s_e0c5a476828abf::t_3621ef1869301a 14-17
+apps/bkms-server/pkg/workload/envvars/types/scope_validation_test.go
+  s_e0c5a476828abf::t_65a87ef266c5e6 1-28
+apps/bkms-server/pkg/workload/envvars/public_order_test.go
+  s_e0c5a476828abf::t_b9d446352f2cbe 1-40
+apps/bkms-server/pkg/extension/component/devmode/devmode.go
+  s_e0c5a476828abf::t_6047f989931909 4
+apps/bkms-server/pkg/workload/image/handler/image.go
+  s_e0c5a476828abf::t_f70521b6b070d6 595,600
+  s_e0c5a476828abf::t_dc11802becb68e 498
+  s_e0c5a476828abf::t_c621439be2d785 26-29
+apps/bkms-server/pkg/extension/depservice/model/instance.go
+  s_e0c5a476828abf::t_b133d61cdc4d4d 56
+apps/bkms-server/pkg/core/env/constants.go
+  s_e0c5a476828abf::t_fa3bac4fcd6337 18,29-31,36-64,67-70,72
+apps/bkms-server/pkg/core/env/serializer/env_validation_test.go
+  s_e0c5a476828abf::t_b311732d5e1cdf 1-53
+apps/bkms-server/pkg/extension/depservice/model/instance_scope_test.go
+  s_e0c5a476828abf::t_08c5b5ba58f00a 1-13
+apps/bkms-server/pkg/build/autodeploy/handler/env_type_policy_test.go
+  s_e0c5a476828abf::t_c19b22254b856c 1-25
+apps/bkms-server/pkg/deploy/pre_checker.go
+  s_e0c5a476828abf::t_b220b502881bb5 18-21,85
+apps/bkms-server/pkg/core/workspace/env_test.go
+  s_e0c5a476828abf::t_daf71580c8da2d 1-48
+  s_e0c5a476828abf::t_75244f02f8ad9a 49-51
+apps/bkms-server/pkg/core/workspace/serializer/workspace.go
+  s_e0c5a476828abf::t_af1a05a8af0604 283
+apps/bkms-server/pkg/workload/appmodelcore/workload/devmode_policy_test.go
+  s_e0c5a476828abf::t_1a68df4e198c35 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "7a205cec8d7bd769a7938e07e0907a33a81cdd03",
+  "prompts": {},
+  "sessions": {
+    "s_e0c5a476828abf": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fa6dab3c17065943187c1f63b8cd8",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

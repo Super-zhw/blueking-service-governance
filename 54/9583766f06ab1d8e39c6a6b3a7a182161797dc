@@ -1,0 +1,14 @@
+blueking-service-governance
+  h_d56f85e7c6980c 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "549583766f06ab1d8e39c6a6b3a7a182161797dc",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

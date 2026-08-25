@@ -1,0 +1,19 @@
+bkms-cli/.agents/prompts/app-appspec.md
+  s_cdfdade5d3f96d::t_6bef5d39c95290 1-458
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "1e102810f914829bbd3d45f061bcb3d236e2c951",
+  "prompts": {},
+  "sessions": {
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

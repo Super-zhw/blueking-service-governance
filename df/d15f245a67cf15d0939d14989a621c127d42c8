@@ -1,0 +1,21 @@
+apps/bkms-server/tests/apis/v2/helm-chart-builds/09-get-helm-chart-files.bru
+  s_74a3a796660000::t_4a0100cec73a35 20
+apps/bkms-server/tests/apis/v2/helm-chart-builds/10-get-values-file.bru
+  s_74a3a796660000::t_6ed7dad62bba3f 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "dfd15f245a67cf15d0939d14989a621c127d42c8",
+  "prompts": {},
+  "sessions": {
+    "s_74a3a796660000": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e90691bd8754db3216f2be3cdca9a",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

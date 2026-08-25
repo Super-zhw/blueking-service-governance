@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/deploy/helm/repo_config.go
+  h_83f239dc907c66 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "8e56004fa58c33bdca52fedcc47ee8bb439cb3b3",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

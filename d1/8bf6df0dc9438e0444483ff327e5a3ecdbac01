@@ -1,0 +1,42 @@
+apps/bkms-server/pkg/common/config/types.go
+  h_83f239dc907c66 25-27,37,39-59,313-314
+apps/bkms-server/design_notes/permission.md
+  h_83f239dc907c66 1-155
+apps/bkms-server/pkg/infras/cloudapi/bkcc/bkcc.go
+  h_83f239dc907c66 72
+apps/bkms-server/configs/config.yaml
+  h_83f239dc907c66 23-24,41-52
+apps/bkms-server/pkg/infras/cloudapi/iam/client_test.go
+  h_83f239dc907c66 1-289
+apps/bkms-server/pkg/infras/cloudapi/iam/client.go
+  h_83f239dc907c66 1-164
+apps/bkms-server/pkg/infras/cloudapi/iam/iam_suite_test.go
+  h_83f239dc907c66 1-14
+apps/bkms-server/pkg/infras/cloudapi/iam/stub.go
+  h_83f239dc907c66 1-189
+apps/bkms-server/pkg/infras/cloudapi/iam/user_group.go
+  h_83f239dc907c66 1-246
+apps/bkms-server/pkg/infras/cloudapi/iam/types/req.go
+  h_83f239dc907c66 1-40
+apps/bkms-server/pkg/infras/cloudapi/iam/types/resp.go
+  h_83f239dc907c66 1-50
+apps/bkms-server/pkg/infras/cloudapi/iam/operation_mock.go
+  h_83f239dc907c66 1-422
+apps/bkms-server/tests/configs/config.yaml
+  h_83f239dc907c66 20-21,27-38
+apps/bkms-server/pkg/infras/cloudapi/iam/grade_manager.go
+  h_83f239dc907c66 1-230
+apps/bkms-server/pkg/infras/cloudapi/iam/types/base.go
+  h_83f239dc907c66 1-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "d18bf6df0dc9438e0444483ff327e5a3ecdbac01",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+apps/bkms-server/pkg/extension/depservice/provider/polaris/provider.go
+  s_160c9ec266ea5b::t_3be8716309e1cc 50-54
+  s_160c9ec266ea5b::t_23d9739db6febb 14
+apps/bkms-server/pkg/infras/database/database.go
+  s_160c9ec266ea5b::t_3754f23a3624ac 11,50-51
+apps/bkms-server/pkg/observability/httpclient/httpclient.go
+  s_160c9ec266ea5b::t_bc8ae898cffefd 1-35
+apps/bkms-server/pkg/infras/redis/redis.go
+  s_160c9ec266ea5b::t_1e33ab92a54f2f 60-63
+  s_160c9ec266ea5b::t_47187a66484f06 12
+apps/bkms-server/pkg/infras/cloudapi/iam/grade_manager.go
+  s_160c9ec266ea5b::t_ae16d9617a8059 224
+  s_160c9ec266ea5b::t_2c1eb14d30fa7e 53,89,138,166,196
+apps/bkms-server/pkg/observability/apm/outbound.go
+  s_160c9ec266ea5b::t_9e30820a4dd9c1 1-53
+apps/bkms-server/pkg/observability/apm/outbound_test.go
+  s_160c9ec266ea5b::t_3b4514f74bb94f 9,15-17,20-26,28-33,41,43-50,54-55,57,75-76,78,98-99,101
+  s_160c9ec266ea5b::t_ef26e7cf7147f7 1-8,10-14,18-19,27,34-40,42,51-53,56,58-74,77,79-97,100,102-124
+apps/bkms-server/pkg/infras/cloudapi/iam/user_group.go
+  s_160c9ec266ea5b::t_ffee31d9941d5c 44,86,127,175,209
+  s_160c9ec266ea5b::t_9d79bcf82d9901 244
+apps/bkms-server/pkg/infras/cloudapi/iam/client.go
+  s_160c9ec266ea5b::t_1c85d3dd4a9534 22
+  s_160c9ec266ea5b::t_2d3f2f6afa6577 200-207
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9c75c787c2bdb0fa1a99e3893534df0c0fb1c48b",
+  "prompts": {},
+  "sessions": {
+    "s_160c9ec266ea5b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f7f51a4c5789d86493f476ea5c687",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

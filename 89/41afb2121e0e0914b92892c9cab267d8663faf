@@ -1,0 +1,23 @@
+apps/bkms-server/pkg/extension/appcfgmgt/router.go
+  s_98575d4c4bf88c::t_df70a4aecc179a 1,12,17,19,21
+apps/bkms-server/design_notes/appcfgmgt.md
+  s_98575d4c4bf88c::t_d8f5ba0f201486 1,7,37,66-91,99-100,124,158-159,162-222,230,233,239-240,243-245,247,249-251,253,257,263-264,268-273,275-281
+apps/bkms-server/pkg/extension/appcfgmgt/service/types.go
+  s_98575d4c4bf88c::t_776275219fafa7 16-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8941afb2121e0e0914b92892c9cab267d8663faf",
+  "prompts": {},
+  "sessions": {
+    "s_98575d4c4bf88c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb072385b7ecfa2a4622fe2118480",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

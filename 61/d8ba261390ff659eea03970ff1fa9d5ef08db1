@@ -1,0 +1,20 @@
+bkms-cli/pkg/handler/instance/port_forward.go
+  s_b79353beba9e14::t_8dc2a7932cc6e4 95-96
+  s_b79353beba9e14::t_fd4892e1dc31f1 97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "61d8ba261390ff659eea03970ff1fa9d5ef08db1",
+  "prompts": {},
+  "sessions": {
+    "s_b79353beba9e14": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f6f7d62157e64bb82d06a3e0ead50",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

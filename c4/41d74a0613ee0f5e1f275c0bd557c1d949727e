@@ -1,0 +1,28 @@
+apps/bkms-server/pkg/extension/depservice/manager.go
+  h_d56f85e7c6980c 116
+apps/bkms-server/design_notes/depservice_provision.md
+  h_d56f85e7c6980c 27-46
+apps/bkms-server/pkg/extension/depservice/provider/provider.go
+  h_d56f85e7c6980c 31-32
+apps/bkms-server/pkg/extension/depservice/provider/redis/provider_test.go
+  h_d56f85e7c6980c 95,99-100,105,116,124,132,140,151,159
+apps/bkms-server/pkg/extension/depservice/reconcile.go
+  h_d56f85e7c6980c 118,178,218,247
+apps/bkms-server/tests/configs/config.yaml
+  h_d56f85e7c6980c 130
+apps/bkms-server/pkg/extension/depservice/provider/redis/provider.go
+  h_d56f85e7c6980c 90,98,102,108-114,120,125,135,143,145,159-165,187,191-196
+apps/bkms-server/tests/utdeps/config_ci_ut.yml
+  h_d56f85e7c6980c 120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "c441d74a0613ee0f5e1f275c0bd557c1d949727e",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,71 @@
+apps/bkms-server/pkg/extension/appcfgmgt/model/suite_test.go
+  s_98575d4c4bf88c::t_b9ea129feb3343 1-27
+apps/bkms-server/design_notes/appcfgmgt.md
+  s_98575d4c4bf88c::t_d8f5ba0f201486 1,7,37,66-91,99-100,124,158-159,162-222,230,233,239-240,243-245,247,249-251,253,257,263-264,268-273,275-281
+apps/bkms-server/pkg/extension/appcfgmgt/model/module.go
+  s_98575d4c4bf88c::t_ce8f66b9c96a09 1,13,15
+  s_98575d4c4bf88c::t_85026d5286672b 2-12,16-17
+  s_98575d4c4bf88c::t_444c13cb4b8492 14
+apps/bkms-server/pkg/extension/appcfgmgt/model/metadata_store_test.go
+  s_98575d4c4bf88c::t_99ee9fbd123b71 15-16,39,41,69-71,79,85,91,101,114,135,137,144,158,170,172,175,189,204,209,211
+apps/bkms-server/pkg/extension/appcfgmgt/service/manager_test.go
+  s_98575d4c4bf88c::t_7525408c83e8a3 265
+apps/bkms-server/pkg/extension/appcfgmgt/router.go
+  s_98575d4c4bf88c::t_df70a4aecc179a 1
+  s_98575d4c4bf88c::t_157d705e7beaa8 2,7,18,23-28,32-33
+  s_98575d4c4bf88c::t_3c562060ccba05 10-15,17,19,21,29-31,34-38
+apps/bkms-server/pkg/extension/appcfgmgt/model/store_test.go
+  s_98575d4c4bf88c::t_c87df8a76be4c1 1-182
+apps/bkms-server/pkg/extension/appcfgmgt/model/metadata.go
+  s_98575d4c4bf88c::t_4c48e1dcc621fe 1-44
+apps/bkms-server/pkg/extension/appcfgmgt/service/manager.go
+  s_98575d4c4bf88c::t_74bf3ff3ed0a45 1-43
+  s_98575d4c4bf88c::t_d051a718c7c0db 45,47-48,50-51,53,57-58,67,77-78,86-87,92,96-98,100-101,103,108-110,142-143,183-184,187-188,198-199,204-205,208-209,211,214,222,224-225,244-247
+apps/bkms-server/pkg/workload/bscpcfg/bscpcfg_test.go
+  s_98575d4c4bf88c::t_e42929f5f8ee23 1,6-9,12-14,17,74-75,94-95
+  s_98575d4c4bf88c::t_ff02d0884609dc 2-5,10-11,15-16
+  s_98575d4c4bf88c::t_8761c1501fb910 18-73,76-93,96-122
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_binding_store_test.go
+  s_98575d4c4bf88c::t_b51fce57597123 1-264
+apps/bkms-server/pkg/extension/appcfgmgt/serializer/serializer.go
+  s_98575d4c4bf88c::t_a26b7200356712 1-156
+apps/bkms-server/pkg/workload/appmodelcore/workload/builder.go
+  s_98575d4c4bf88c::t_af6c20ef8e5417 129,139-143
+  s_98575d4c4bf88c::t_30d9c61664edd1 130-133,135
+  s_98575d4c4bf88c::t_71c76a8ae6de51 138
+apps/bkms-server/pkg/extension/appcfgmgt/handler/metadata.go
+  s_98575d4c4bf88c::t_f18358606ff5ef 1-166,168-179,181-194
+apps/bkms-server/pkg/workload/bscpcfg/bscpcfg.go
+  s_98575d4c4bf88c::t_4d8005ddc53175 1-103
+apps/bkms-server/pkg/extension/appcfgmgt/service/types.go
+  s_98575d4c4bf88c::t_776275219fafa7 1-20,23-27
+  s_98575d4c4bf88c::t_3b152693c6f79b 21-22
+apps/bkms-server/pkg/workload/bscpcfg/inject.go
+  s_98575d4c4bf88c::t_20ce8d5ca28b4e 1-10,12,15-18,20-21,23-28,30-31,33-41
+  s_98575d4c4bf88c::t_991b61871ae56c 11,14,19,32
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_binding.go
+  s_98575d4c4bf88c::t_be2be4cf944ad7 1-18,20-43
+  s_98575d4c4bf88c::t_548cf7c256624c 19
+apps/bkms-server/pkg/extension/appcfgmgt/model/env_binding_store.go
+  s_98575d4c4bf88c::t_d9e702c30f8e5a 1-179
+apps/bkms-server/pkg/extension/appcfgmgt/model/store.go
+  s_98575d4c4bf88c::t_5aea43658bffd6 1-156
+apps/bkms-server/pkg/extension/appcfgmgt/model/metadata_store.go
+  s_98575d4c4bf88c::t_dec8a5b483b810 1-157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b2ec0b0a538ca9aef8f61023a0efbc3ff9652c00",
+  "prompts": {},
+  "sessions": {
+    "s_98575d4c4bf88c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eb072385b7ecfa2a4622fe2118480",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

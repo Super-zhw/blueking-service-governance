@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "b5384004948b05e8aed51ed6fe00513f6ca276c2",
+  "prompts": {
+    "dfbf3ec58ce16ae8": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019d95ac60ff710597ce79062790f69e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 179,
+      "overriden_lines": 0
+    }
+  }
+}

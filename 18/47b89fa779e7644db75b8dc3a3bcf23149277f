@@ -1,0 +1,22 @@
+bkms-cli/pkg/utils/stringx/stringx_test.go
+  s_cdfdade5d3f96d::t_108e5c1b7af83b 135,146-147
+bkms-cli/pkg/handler/appspec/yaml.go
+  s_cdfdade5d3f96d::t_55358f39445a46 5,9-10,32-33
+  s_cdfdade5d3f96d::t_4a4e6133fb75a6 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "1847b89fa779e7644db75b8dc3a3bcf23149277f",
+  "prompts": {},
+  "sessions": {
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

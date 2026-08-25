@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/general-pod-autoscaler.yaml
+  h_d56f85e7c6980c 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "dc906b3ba83fd71f63bd02da23d3520eaded754d",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

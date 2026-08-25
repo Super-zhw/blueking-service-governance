@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/extension/bscpcfg/serializer/serializer.go
+  s_a4af435e8c314b::t_c25d3aa85a1a02 97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "ce7394aae195781e5c18ced96b3412a8fdbd9fe0",
+  "prompts": {},
+  "sessions": {
+    "s_a4af435e8c314b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb2483e707c20a5d5a5540e27e058",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

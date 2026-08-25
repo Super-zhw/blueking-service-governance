@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder.go
+  h_83f239dc907c66 120,129,133,136,167,176-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "f1b584de90f7e595ee1be4f5c212fc4ff9968786",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

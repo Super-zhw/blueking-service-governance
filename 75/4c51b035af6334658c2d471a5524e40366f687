@@ -1,0 +1,16 @@
+apps/bkms-server/api/workspace.proto
+  h_83f239dc907c66 173,175
+apps/bkms-server/api/app.proto
+  h_83f239dc907c66 18,20,24,26,31,33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "754c51b035af6334658c2d471a5524e40366f687",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

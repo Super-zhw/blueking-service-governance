@@ -1,0 +1,83 @@
+bkms-cli/pkg/client/client.go
+  s_cf832fbada93ed::t_582fe7bc58a9a6 150-151,153,155
+  s_cf832fbada93ed::t_20302d4fc6713f 149,152,156-159,161-165,167-169,171-173,180
+  s_cf832fbada93ed::t_b8f688ba29ea4f 174-179
+  s_cf832fbada93ed::t_5fe146ebfd8783 181
+  s_cf832fbada93ed::t_259b39e666785e 154,160
+  h_2321bec5d80d15 166,170
+bkms-server/pkg/extension/component/devmode/router.go
+  s_cf832fbada93ed::t_c95d6d25dd7117 1-32
+bkms-cli/pkg/handler/publish/handler_test.go
+  s_cf832fbada93ed::t_efe35bdb416842 57-58,81,83,89-92,94,96-97,99-102,106,108-112,126,130,132-133,135
+  s_cf832fbada93ed::t_bdfde9ac0fb399 26
+  s_cf832fbada93ed::t_823e8ca6c9ffe4 50,93,105,129
+  s_cf832fbada93ed::t_905aad5c0e312c 136
+  s_cf832fbada93ed::t_59917531fa76de 33,59-80,82,84-88,95,98,103-104,107,113-125,127-128,131,134
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  s_cf832fbada93ed::t_c9924e434e7195 1-21,24-25,27-29,33-35,38-40,43-74,75-76,77,79-82,83-86,87-88,93-95,98-102,107-109,114-116,164,167-168,170-171,172,174,177-178,184-186,188-191,193-198,201,229-230,290,292,293-300,302,305-306,307-311,313
+  s_cf832fbada93ed::t_30ff0bbcae4cf0 22,37,98-99,120,138-140,145,148,153,165,176,180-181,199,203-206,282-289
+  s_cf832fbada93ed::t_6fd6ce1662a255 125,135,142,150,156-163,166,173,179
+  s_cf832fbada93ed::t_550355d80731bb 78,89-97,100-101,110-111,182-183,187,192,200,202
+  s_cf832fbada93ed::t_f385af7482ea92 121-124
+  s_cf832fbada93ed::t_951aad18fd27f4 23,26,30-32,41-42,102-106,129-130,132-133,137,151-152,207-228,231-281
+  s_cf832fbada93ed::t_c041df086d7837 117-119
+  s_cf832fbada93ed::t_6b014786c723d3 131
+  s_cf832fbada93ed::t_7137500881213b 134,136
+  s_cf832fbada93ed::t_e5c2184881615c 126-128
+  s_cf832fbada93ed::t_acc6e1de8b0005 303-304
+  s_cf832fbada93ed::t_440555fb6081b4 301
+  h_2321bec5d80d15 24,144,169,175,291
+  h_35547c76ab0580 36,141
+bkms-cli/pkg/client/app.go
+  s_cf832fbada93ed::t_1a450eb6ef4f74 62-64,69-73,75-80
+  s_cf832fbada93ed::t_d2d6b4425a8297 65-68,74
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_cf832fbada93ed::t_c82e0ef8bb9b61 3107,3110-3116,3119,3122-3126,3129-3144,3148-3149,3151-3167,3169-3173,3175-3183
+  s_cf832fbada93ed::t_dd26017c5e00a0 3184,3186
+bkms-cli/pkg/client/types.go
+  s_cf832fbada93ed::t_2562dc164db2db 35
+  s_cf832fbada93ed::t_10932c1c388054 36
+  s_cf832fbada93ed::t_4259e6ed1d4a6a 37-39
+  s_cf832fbada93ed::t_535c155f89ade1 40
+bkms-server/pkg/extension/component/devmode/serializer/preflight.go
+  s_cf832fbada93ed::t_02722de5f13ee2 1-30,35-43,48-62
+  s_cf832fbada93ed::t_b8fb69f5e46a24 31-34
+bkms-cli/cmd/app/publish/publish.go
+  s_cf832fbada93ed::t_9d544e76d21e12 68-69,73
+  h_35547c76ab0580 53
+bkms-cli/pkg/handler/publish/handler.go
+  s_cf832fbada93ed::t_e3ab489c9255d2 84-86,102-105,107,112,138-139
+  h_2321bec5d80d15 64-69,140,174,181,194,202,208,216-282
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 12084-12151,27640-27708
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 12081-12148,27637-27705
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 6642-6687,16638-16680
+bkms-server/pkg/infras/kubernetes/client/client.go
+  h_35547c76ab0580 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "b81469b895ab753e637ba4187a924eb6bc2d70ce",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    },
+    "h_35547c76ab0580": {
+      "author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  },
+  "sessions": {
+    "s_cf832fbada93ed": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a032852dc9791e9e62aed87c57b14e",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

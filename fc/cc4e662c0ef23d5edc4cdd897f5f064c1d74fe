@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/platmgt/portforward/service.go
+  h_35547c76ab0580 7,105,111,118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "fccc4e662c0ef23d5edc4cdd897f5f064c1d74fe",
+  "prompts": {},
+  "humans": {
+    "h_35547c76ab0580": {
+      "author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

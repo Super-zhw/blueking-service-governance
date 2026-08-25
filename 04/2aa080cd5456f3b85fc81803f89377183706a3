@@ -1,0 +1,19 @@
+apps/bkms-server/pkg/workload/bscpcfg/builder.go
+  s_798fa2e5a241a9::t_da73e3ed9d33eb 28-30,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "042aa080cd5456f3b85fc81803f89377183706a3",
+  "prompts": {},
+  "sessions": {
+    "s_798fa2e5a241a9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112ef3f072eca96b6be248d1162d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

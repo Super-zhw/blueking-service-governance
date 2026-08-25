@@ -1,0 +1,54 @@
+apps/bkms-server/pkg/extension/bscpcfg/handler/metadata.go
+  s_c5a0075d2153a8::t_810c933c5ca39f 61-62,64,70-71
+  s_c5a0075d2153a8::t_39f985058e83ac 65
+  s_c5a0075d2153a8::t_c0725707538b7c 13
+apps/bkms-server/pkg/extension/bscpcfg/model/metadata_store_test.go
+  s_c5a0075d2153a8::t_2a853d4406d8b1 275-451
+apps/bkms-server/pkg/extension/bscpcfg/service/types.go
+  s_c5a0075d2153a8::t_4857a01582f257 26-27
+apps/bkms-server/pkg/deploy/helm/postrenderer/bscp.go
+  s_c5a0075d2153a8::t_5f683734d5c804 86-89
+apps/bkms-server/pkg/extension/bscpcfg/model/metadata_store.go
+  s_c5a0075d2153a8::t_a90f0793c0eea5 123-126
+apps/bkms-server/pkg/extension/bscpcfg/serializer/serializer.go
+  s_c5a0075d2153a8::t_7e3bf20c0d50ad 10-11,16,19-26,31,124,176,247
+  s_c5a0075d2153a8::t_578e930e8aa34f 27-29
+  s_c5a0075d2153a8::t_4ad46f21c82dc0 32-33
+  s_c5a0075d2153a8::t_f99d8e866645cc 56-57
+  s_c5a0075d2153a8::t_41d209d34f28cd 122-123
+  s_c5a0075d2153a8::t_dd2cd1cfcf990c 125-126
+  s_c5a0075d2153a8::t_18bff80028fb1d 44-45,47-48
+  s_a4af435e8c314b::t_6f27794ae31463 30,34-43,46,49
+  s_a4af435e8c314b::t_85ff97f05983c3 50-52
+apps/bkms-server/pkg/extension/bscpcfg/model/metadata.go
+  s_c5a0075d2153a8::t_51c82095668a8b 16-17,52-53,76
+  s_c5a0075d2153a8::t_ba2d5c42303c58 77-78
+apps/bkms-server/pkg/deploy/helm/postrenderer/bscp_test.go
+  s_c5a0075d2153a8::t_19bbcd66dc3c1a 508-663
+apps/bkms-server/pkg/extension/bscpcfg/service/manager.go
+  s_c5a0075d2153a8::t_2b432ce3902a4e 82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "5b234295588e60a0888b77bdffaa896d96e69a23",
+  "prompts": {},
+  "sessions": {
+    "s_a4af435e8c314b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb2483e707c20a5d5a5540e27e058",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    },
+    "s_c5a0075d2153a8": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fb5ce916772d78acc02482531b623",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

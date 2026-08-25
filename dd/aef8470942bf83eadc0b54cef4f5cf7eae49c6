@@ -1,0 +1,21 @@
+bkms-cli/Makefile
+  s_8a2ad61a7177ed::t_b429f46724f624 14-16,33,36,39,74
+bkms-cli/Makefile.release
+  s_8a2ad61a7177ed::t_fea382acd18f5a 1-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "ddaef8470942bf83eadc0b54cef4f5cf7eae49c6",
+  "prompts": {},
+  "sessions": {
+    "s_8a2ad61a7177ed": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f183672b67c1ea8ec7205ceeecb74",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

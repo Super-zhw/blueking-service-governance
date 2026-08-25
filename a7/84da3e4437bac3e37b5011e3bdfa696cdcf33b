@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/infras/cloudapi/bscp/types.go
+  s_9cc14c08eecf03::t_97b9b3259d2b12 72,74-83,86-91,95-111
+apps/bkms-server/pkg/infras/cloudapi/bscp/validator.go
+  s_9cc14c08eecf03::t_3c67d4cdef52de 37-39,43-47,55-57
+  s_9cc14c08eecf03::t_315a7ff9ae4511 1-30,32-36,40-42,48-49,58-61,63-66
+apps/bkms-server/pkg/infras/cloudapi/bscp/bscp.go
+  s_9cc14c08eecf03::t_38c0d247fa63a8 127-161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "a784da3e4437bac3e37b5011e3bdfa696cdcf33b",
+  "prompts": {},
+  "sessions": {
+    "s_9cc14c08eecf03": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019e059a75477a87a8e901062d41ca13",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

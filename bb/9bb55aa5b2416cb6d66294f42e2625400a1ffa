@@ -1,0 +1,21 @@
+apps/bkms-server/tests/apis/v2/bscp-config/folder.bru
+  s_07aba98c4b4754::t_e9e42e119d1fdc 19
+apps/bkms-server/tests/apis/common.js
+  s_07aba98c4b4754::t_7db320bd4e51f8 260
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bb9bb55aa5b2416cb6d66294f42e2625400a1ffa",
+  "prompts": {},
+  "sessions": {
+    "s_07aba98c4b4754": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ea6a1217077158532a1a203cade1e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

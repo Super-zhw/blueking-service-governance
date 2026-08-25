@@ -1,0 +1,28 @@
+apps/bkms-server/pkg/extension/addon/gpa/serialize_test.go
+  h_d56f85e7c6980c 210,218-219,305-306,311,320-321
+apps/bkms-server/pkg/extension/addon/gpa/serialize.go
+  h_d56f85e7c6980c 183,186-187,206-207,214
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/general-pod-autoscaler.yaml
+  h_d56f85e7c6980c 1-18
+apps/bkms-server/pkg/common/bkerrs/err_detail_code.go
+  h_d56f85e7c6980c 25-27
+apps/bkms-server/pkg/extension/addon/gpa/types.go
+  h_d56f85e7c6980c 4-5
+apps/bkms-server/pkg/extension/addon/gpa/service_test.go
+  h_d56f85e7c6980c 10,104-145
+apps/bkms-server/pkg/extension/addon/gpa/handler/gpa.go
+  h_d56f85e7c6980c 143-149
+apps/bkms-server/pkg/extension/addon/gpa/service.go
+  h_d56f85e7c6980c 5,8,22-23,48-51,57-60,145-156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "763714c92b004b3cda97379ea7383f172156242d",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/infras/kubernetes/discovery/utils.go
+  h_d56f85e7c6980c 14-16,31
+apps/bkms-server/pkg/extension/addon/gpa/handler/gpa.go
+  h_d56f85e7c6980c 32-44,156,309
+apps/bkms-server/pkg/extension/addon/gpa/service.go
+  h_d56f85e7c6980c 139-144,146
+apps/bkms-server/pkg/extension/addon/gpa/service_test.go
+  h_d56f85e7c6980c 105-106,109,111,126-127,129-166,170,181-201
+apps/bkms-server/pkg/core/env/clusteraddon/assets/addons/general-pod-autoscaler.yaml
+  h_d56f85e7c6980c 8,14-15
+apps/bkms-server/pkg/infras/kubernetes/discovery/discovery_test.go
+  h_d56f85e7c6980c 65,73,81,117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "735b7947a49d8e66c1229eaa8691c72d8153a918",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+apps/bkms-server/pkg/extension/bscpcfg/model/snapshot.go
+  s_798fa2e5a241a9::t_2615956a20ce53 32-34
+apps/bkms-server/pkg/extension/bscpcfg/model/snapshot_test.go
+  s_798fa2e5a241a9::t_eb2207fb12b6ce 1-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "442cc7835df3b16d4bc241fc97cc508e9f83f4e5",
+  "prompts": {},
+  "sessions": {
+    "s_798fa2e5a241a9": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f112ef3f072eca96b6be248d1162d",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

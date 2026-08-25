@@ -1,0 +1,14 @@
+apps/bkms-server/pkg/platmgt/workspace/service_test.go
+  h_83f239dc907c66 5,18-20,77,126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5461201b39cd5e20598171affa136636433827ae",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

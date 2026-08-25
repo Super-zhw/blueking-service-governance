@@ -1,0 +1,18 @@
+bkms-cli/cmd/app/publish/publish.go
+  h_35547c76ab0580 53
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  h_35547c76ab0580 36,141
+bkms-server/pkg/infras/kubernetes/client/client.go
+  h_35547c76ab0580 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "deecea1dd724f5cb658536665cce6a5b03e90ea5",
+  "prompts": {},
+  "humans": {
+    "h_35547c76ab0580": {
+      "author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

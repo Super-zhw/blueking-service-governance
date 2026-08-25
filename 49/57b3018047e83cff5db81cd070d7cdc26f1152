@@ -1,0 +1,28 @@
+apps/bkms-server/pkg/extension/depservice/envvars/builder_test.go
+  h_d56f85e7c6980c 23,28,32,35-36,43,48,57,61,66
+apps/bkms-server/pkg/extension/depservice/model/binding.go
+  h_d56f85e7c6980c 1-45
+apps/bkms-server/pkg/extension/depservice/envvars/builder.go
+  h_d56f85e7c6980c 20-25,28,30,32,35,38-40
+apps/bkms-server/pkg/extension/depservice/handler/router.go
+  h_d56f85e7c6980c 1-46
+apps/bkms-server/pkg/workload/appmodelcore/workload/workload_test.go
+  h_d56f85e7c6980c 10,91,180,1183,1185,1205-1229,1239,1250
+apps/bkms-server/pkg/extension/depservice/model/binding_store.go
+  h_d56f85e7c6980c 1-217
+apps/bkms-server/pkg/extension/depservice/manager.go
+  h_d56f85e7c6980c 26,32-33,35,223-451
+apps/bkms-server/docs/depservice.md
+  h_d56f85e7c6980c 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "4957b3018047e83cff5db81cd070d7cdc26f1152",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+apps/bkms-server/cmd/worker.go
+  h_83f239dc907c66 114-118,120-122
+apps/bkms-server/pkg/infras/worker/worker_suite_test.go
+  h_83f239dc907c66 1,4-5,11-13,15-18,20-21
+apps/bkms-server/pkg/infras/worker/worker.go
+  h_83f239dc907c66 1-432
+apps/bkms-server/pkg/infras/worker/worker_integration_test.go
+  h_83f239dc907c66 1-496
+apps/bkms-server/pkg/infras/worker/README.md
+  h_83f239dc907c66 1-244
+apps/bkms-server/pkg/infras/worker/async.go
+  h_83f239dc907c66 1,9-16,18-22,25-27,29-45,48
+apps/bkms-server/pkg/server/task/task.go
+  h_83f239dc907c66 5
+apps/bkms-server/pkg/infras/worker/types_test.go
+  h_83f239dc907c66 1-163
+apps/bkms-server/pkg/infras/worker/metrics.go
+  h_83f239dc907c66 1-70
+apps/bkms-server/pkg/infras/worker/types.go
+  h_83f239dc907c66 1-210
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "5ee44c0ce297dda82ec3e29130ec521b03d479ad",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}

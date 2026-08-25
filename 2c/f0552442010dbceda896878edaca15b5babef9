@@ -1,0 +1,19 @@
+bkms-cli/test/e2e/app_appspec_test.go
+  s_cdfdade5d3f96d::t_8d2bc7210f72d6 280-282,284-286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "2cf0552442010dbceda896878edaca15b5babef9",
+  "prompts": {},
+  "sessions": {
+    "s_cdfdade5d3f96d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f8486bd777c5cb46d528bba05be70",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

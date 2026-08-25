@@ -1,0 +1,31 @@
+apps/bkms-server/pkg/infras/cloudapi/bkcmdb/bkcmdb.go
+  5eba70107c246041 1-160
+apps/bkms-server/pkg/config/types.go
+  5eba70107c246041 34
+apps/bkms-server/pkg/infras/cloudapi/bkcmdb/client.go
+  5eba70107c246041 1-11
+apps/bkms-server/pkg/infras/cloudapi/bkcmdb/types.go
+  5eba70107c246041 1-60
+apps/bkms-server/pkg/infras/cloudapi/bkcmdb/stub.go
+  5eba70107c246041 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "578ef9ffbf1defac3c177fc2ad98a138a3338115",
+  "prompts": {
+    "5eba70107c246041": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019dd72a4fd571ba9c00799633b94958",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang",
+      "messages": [],
+      "total_additions": 469,
+      "total_deletions": 0,
+      "accepted_lines": 469,
+      "overriden_lines": 0
+    }
+  }
+}

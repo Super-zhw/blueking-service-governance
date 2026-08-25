@@ -1,0 +1,24 @@
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  s_b7613983d19f8b::t_030068b2e9beb6 389-517
+  s_b7613983d19f8b::t_437761d8a82cae 518-623
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/validator.go
+  s_b7613983d19f8b::t_bfa10a069bc158 81-105
+apps/bkms-server/pkg/infras/cloudapi/bkmonitor/time_series.go
+  s_b7613983d19f8b::t_dfc11f3b709e75 1-13,15-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7558fb3d043e2b549162994ad8a5fdcbd62b9af6",
+  "prompts": {},
+  "sessions": {
+    "s_b7613983d19f8b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019eca583fd3715da5000bed0156b111",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

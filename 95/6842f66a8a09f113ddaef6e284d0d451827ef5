@@ -1,0 +1,29 @@
+apps/bkms-server/pkg/observability/apm/middleware.go
+  s_6956b6484857e1::t_760335e2a70dda 61,64-65
+  s_6956b6484857e1::t_9a662a1d3e416c 102,104
+  s_6956b6484857e1::t_52e5c87bf6d7dd 82,91
+  s_6956b6484857e1::t_7cc7fa499ce308 9-10,76-77,96-103
+  s_6956b6484857e1::t_5cf39b6f3c92dd 70,71
+  s_6956b6484857e1::t_3a94d10b10cea0 104
+  s_6956b6484857e1::t_2e1f08f286badb 62-63
+  s_6956b6484857e1::t_5506f31e0cc4d9 72,74-75,78,83
+  s_6956b6484857e1::t_f439c6aab422ed 66-68
+  s_6956b6484857e1::t_3fce716b0ae8c5 84-85
+  s_6956b6484857e1::t_d1dea2a7126117 73,79-81,86-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "956842f66a8a09f113ddaef6e284d0d451827ef5",
+  "prompts": {},
+  "sessions": {
+    "s_6956b6484857e1": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f59a17b307dfeb37e93806f0c6e16",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder.go
+  s_07aba98c4b4754::t_e4549110e26a3b 207-210
+apps/bkms-server/pkg/deploy/helm/postrenderer/builder_test.go
+  s_07aba98c4b4754::t_4619ffbb3d76cc 7,17
+  s_07aba98c4b4754::t_4758f50c537f3d 136-154
+apps/bkms-server/pkg/infras/trafficmanager/trafficmanager_suite_test.go
+  s_07aba98c4b4754::t_a1d22f498da1f6 1-13
+apps/bkms-server/pkg/infras/trafficmanager/trafficmanager_stub.go
+  s_07aba98c4b4754::t_2d28a2d046cfba 25,33
+apps/bkms-server/pkg/infras/trafficmanager/trafficmanager_stub_test.go
+  s_07aba98c4b4754::t_c90020bf97fea1 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "52322d56b79bda9dbe1089a37eb41ccd57b36908",
+  "prompts": {},
+  "sessions": {
+    "s_07aba98c4b4754": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ea6a1217077158532a1a203cade1e",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

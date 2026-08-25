@@ -1,0 +1,26 @@
+apps/bkms-server/pkg/infras/cloudapi/bscp/types.go
+  s_61b8ebaef08db3::t_06c7f0370cf726 358-517
+apps/bkms-server/pkg/infras/cloudapi/bscp/client.go
+  s_61b8ebaef08db3::t_c4a100c571048e 55-68
+apps/bkms-server/pkg/infras/cloudapi/bscp/hook.go
+  s_61b8ebaef08db3::t_6a5a02ebb0dfc9 1-7,9-309
+  s_61b8ebaef08db3::t_271247382ecceb 8
+apps/bkms-server/pkg/infras/cloudapi/bscp/stub.go
+  s_61b8ebaef08db3::t_0bc5602e10c8f3 223-310
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "096e6ac1eba3000de26fd3dc08cd25584117e550",
+  "prompts": {},
+  "sessions": {
+    "s_61b8ebaef08db3": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019f176208f874a9b3029d6b82ba89d7",
+        "model": "unknown"
+      },
+      "human_author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}

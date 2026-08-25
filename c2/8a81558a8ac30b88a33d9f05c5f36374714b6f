@@ -1,0 +1,14 @@
+apps/bkms-server/Makefile
+  h_d56f85e7c6980c 65,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c28a81558a8ac30b88a33d9f05c5f36374714b6f",
+  "prompts": {},
+  "humans": {
+    "h_d56f85e7c6980c": {
+      "author": "porterlin <porterlin@tencent.com>"
+    }
+  }
+}

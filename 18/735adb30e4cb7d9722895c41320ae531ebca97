@@ -1,0 +1,18 @@
+apps/bkms-server/pkg/deploy/serializer/appmodel_deploy.go
+  h_83f239dc907c66 6,145,163
+apps/bkms-server/pkg/deploy/handler/appmodel_deploy_steps.go
+  h_83f239dc907c66 17,293,296,373
+apps/bkms-server/pkg/deploy/serializer/appmodel_deploy_test.go
+  h_83f239dc907c66 11,20-21,33,51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "18735adb30e4cb7d9722895c41320ae531ebca97",
+  "prompts": {},
+  "humans": {
+    "h_83f239dc907c66": {
+      "author": "narasux <suzh9@mail2.sysu.edu.cn>"
+    }
+  }
+}
