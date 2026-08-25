@@ -1,0 +1,18 @@
+bkms-cli/.agents/prompts/app-create.md
+  h_2321bec5d80d15 40-41,53
+bkms-cli/.agents/prompts/app-update.md
+  h_2321bec5d80d15 47,101-102,115
+bkms-cli/.agents/prompts/env.md
+  h_2321bec5d80d15 59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "d574f71f8f0e0f070170db0c2daa28511501fe11",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
