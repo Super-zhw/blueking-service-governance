@@ -1,0 +1,58 @@
+bkms-cli/pkg/handler/instance/port_forward_listener.go
+  s_8a178421446668::t_9fe1efea84c525 69,84
+bkms-cli/pkg/handler/instance/port_forward_bridge_test.go
+  s_8a178421446668::t_70b6ec63ce1567 30-31,379
+  s_8a178421446668::t_ee873f8d994273 29,95,157,222,252,276,303
+  h_2321bec5d80d15 96-97,158-159,223-224,253-254,277-278,304-305
+bkms-cli/Makefile
+  s_8a178421446668::t_f921a4daf941a3 234,236-237
+  s_8a178421446668::t_ead895f9b394bd 235
+bkms-cli/pkg/handler/instance/port_forward_listener_test.go
+  s_8a178421446668::t_dc90097afa4425 15,44,75
+  h_2321bec5d80d15 16-17,45-46,76-77
+bkms-server/cmd/portforward_whitelist.go
+  h_2321bec5d80d15 1-137
+bkms-server/pkg/infras/cloudapi/txcmdb/types.go
+  h_2321bec5d80d15 6,9,12,17,42,57
+bkms-server/pkg/observability/bkmonitor/alert/handler/event.go
+  h_2321bec5d80d15 68-70,90
+bkms-server/pkg/platmgt/portforward/model.go
+  h_2321bec5d80d15 1-9
+bkms-server/pkg/platmgt/portforward/portforward_suite_test.go
+  h_2321bec5d80d15 1-27
+bkms-server/pkg/platmgt/portforward/service.go
+  h_2321bec5d80d15 1-97
+bkms-server/pkg/platmgt/portforward/service_test.go
+  h_2321bec5d80d15 1-92
+bkms-server/pkg/platmgt/portforward/store.go
+  h_2321bec5d80d15 1-103
+bkms-server/pkg/platmgt/portforward/store_test.go
+  h_2321bec5d80d15 1-134
+bkms-server/pkg/server/registry/registry.go
+  h_2321bec5d80d15 39,123-124,227-228
+bkms-server/pkg/workload/instance/handler/port_forward.go
+  h_2321bec5d80d15 14,18,61-83
+bkms-cli/cmd/app/instance/port_forward.go
+  h_2321bec5d80d15 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "a3a7c313788c7ae9028eb340f98b335a28c1e299",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_8a178421446668": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcad42aae7b469bfba4e6374d840f",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

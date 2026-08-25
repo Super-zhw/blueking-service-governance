@@ -1,0 +1,103 @@
+bkms-cli/pkg/client/mocks/mock_client.go
+  s_2925c2e0e5358a::t_db5176f7cc7c02 2872-3023
+  s_2925c2e0e5358a::t_387b308848db67 3024-3241
+  s_2925c2e0e5358a::t_8926b7f414b6e7 3242-3321
+  s_2925c2e0e5358a::t_c7f86179ce6b48 3322-3347
+bkms-cli/cmd/root/root.go
+  s_2925c2e0e5358a::t_5b6fd0b6d06f96 80-81
+  s_2925c2e0e5358a::t_ddf57208a26b48 15
+bkms-cli/cmd/envvar/importvar/env.go
+  s_2925c2e0e5358a::t_3f967546bd9052 2-10,12-15,18-24,28,33-34,43-55,58-63
+  s_2925c2e0e5358a::t_783c44b878cf94 11,16-17,25-27,29-32,35-42,56-57
+bkms-cli/cmd/envvar/export/app.go
+  s_2925c2e0e5358a::t_71c148ef23cc41 2-70
+bkms-cli/cmd/envvar/export/export.go
+  s_2925c2e0e5358a::t_29dd9db946725b 1,3-25
+bkms-cli/cmd/envvar/envvar.go
+  s_2925c2e0e5358a::t_87402191f8a7ee 1-6,13-19,21,24-27,29,39-41
+  s_2925c2e0e5358a::t_b11cfbe1e3151b 20,22-23,31,33,35,37
+  s_2925c2e0e5358a::t_96af56a6177941 7-12,28,30,32,34,36,38
+bkms-cli/cmd/envvar/importvar/importvar.go
+  s_2925c2e0e5358a::t_2347623a53192b 1,3-25
+bkms-cli/pkg/client/types.go
+  s_2925c2e0e5358a::t_442be17cdc67bf 181-195
+  s_2925c2e0e5358a::t_e5c16bdab33e8a 196,206-209,212-227
+  s_2925c2e0e5358a::t_66480475523b99 228-230
+  s_2925c2e0e5358a::t_1e79980ddb01a4 197-205
+  s_2925c2e0e5358a::t_fcb8cbf482eaba 210-211
+bkms-cli/cmd/envvar/importvar/public.go
+  s_2925c2e0e5358a::t_485bc10762e53a 2-10,12-15,18-24,28-30,36-39,48-60,63-67
+  s_2925c2e0e5358a::t_4b5d050757f562 11,16-17,25-27,31-35,40-47,61-62
+bkms-cli/cmd/envvar/export/public.go
+  s_2925c2e0e5358a::t_e28952d6da1932 2-63
+bkms-cli/cmd/envvar/importvar/app.go
+  s_2925c2e0e5358a::t_4fcfa2e34a8e07 2-10,12-15,18-24,28,33-34,43-55,58-63
+  s_2925c2e0e5358a::t_43e5eacdaa1a59 11,16-17,25-27,29-32,35-42,56-57
+bkms-cli/pkg/client/env_var.go
+  s_2925c2e0e5358a::t_089ce4c4c25d0c 6
+  s_2925c2e0e5358a::t_630c9f0e029e24 1-5,7-12,19-36
+  s_2925c2e0e5358a::t_0fa0ffd27d6805 88-121,141-174,184-212,302-428,444-457
+  s_2925c2e0e5358a::t_9775aa1f406506 38-86
+  s_2925c2e0e5358a::t_cde89cae19a539 13-18,37,87
+bkms-cli/cmd/envvar/export/env.go
+  s_2925c2e0e5358a::t_7e8727acce460c 2-44
+bkms-cli/cmd/envvar/list/app.go
+  s_2925c2e0e5358a::t_11eb73001a8b96 2-52
+bkms-cli/cmd/envvar/del/del.go
+  s_2925c2e0e5358a::t_4fd1e525ca9d5c 1,3-20,23-25
+  s_2925c2e0e5358a::t_7d684670250c6c 1-25
+bkms-cli/cmd/envvar/update/app.go
+  s_2925c2e0e5358a::t_838178d1ab7a5d 2-77
+bkms-cli/cmd/envvar/create/create.go
+  s_2925c2e0e5358a::t_e231bfd3c5f67b 1,3-20,23-25
+  s_2925c2e0e5358a::t_0e7550989fec15 1-25
+bkms-cli/cmd/envvar/del/app.go
+  s_2925c2e0e5358a::t_46930ac9d292ea 2-41
+bkms-cli/cmd/envvar/list/public.go
+  s_2925c2e0e5358a::t_0b9f1bb378d9c6 2-55
+bkms-cli/cmd/envvar/update/update.go
+  s_2925c2e0e5358a::t_5fbcbdf8b94029 1,3-20,23-25
+  s_2925c2e0e5358a::t_02588b7e12f3da 1-25
+bkms-cli/cmd/envvar/list/app_env.go
+  s_2925c2e0e5358a::t_14a7b49c3bef38 2-55
+bkms-cli/cmd/envvar/update/public.go
+  s_2925c2e0e5358a::t_4742f02c915c39 2-78
+bkms-cli/cmd/envvar/del/public.go
+  s_2925c2e0e5358a::t_a30446d1c1bcae 2-45
+bkms-cli/cmd/envvar/create/public.go
+  s_2925c2e0e5358a::t_9eb85e332618da 2-77
+  s_2925c2e0e5358a::t_aa3d38cead34ab 78
+bkms-cli/cmd/envvar/list/list.go
+  s_2925c2e0e5358a::t_ae755c44880228 1,3-23,26-28
+  s_2925c2e0e5358a::t_f65d310b4c47d5 1-28
+bkms-cli/cmd/envvar/create/app.go
+  s_2925c2e0e5358a::t_6fc7703eebfba9 2-59
+  s_2925c2e0e5358a::t_c40cd0e4e5ed51 60
+bkms-cli/cmd/envvar/importvar/preview_output.go
+  s_2925c2e0e5358a::t_c38bdec9aa5e2a 2-68
+bkms-cli/cmd/envvar/update/env.go
+  s_2925c2e0e5358a::t_9bbe9dc3e5c739 1-75
+bkms-cli/cmd/envvar/del/env.go
+  s_2925c2e0e5358a::t_ea4834ccf2eaf1 1-45
+bkms-cli/cmd/envvar/create/env.go
+  s_2925c2e0e5358a::t_2c5dcb7202b089 1-63
+  s_2925c2e0e5358a::t_d2a1079a325f33 64
+bkms-cli/cmd/envvar/list/env.go
+  s_2925c2e0e5358a::t_827d92d7c14d79 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b79c5e5f5648cf13757a22dd32bafdf37fb18a8b",
+  "prompts": {},
+  "sessions": {
+    "s_2925c2e0e5358a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcfe05740780994a05bef9d7a5d40",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+bkms-cli/.agents/prompts/app-appspec.md
+  h_2321bec5d80d15 3,13-14,21,23-27,62-74,83-85,482-580
+bkms-cli/cmd/app/appspec/appspec.go
+  h_2321bec5d80d15 26,32,44-45,64-65
+bkms-cli/cmd/app/appspec/devmode/dev_mode.go
+  h_2321bec5d80d15 1-46
+bkms-cli/cmd/app/appspec/devmode/disable.go
+  h_2321bec5d80d15 1-65
+bkms-cli/cmd/app/appspec/devmode/enable.go
+  h_2321bec5d80d15 1-65
+bkms-cli/cmd/app/appspec/devmode/reset.go
+  h_2321bec5d80d15 1-66
+bkms-cli/cmd/app/appspec/devmode/view.go
+  h_2321bec5d80d15 1-67
+bkms-cli/cmd/app/appspec/underlayip/disable.go
+  h_2321bec5d80d15 1-72
+bkms-cli/cmd/app/appspec/underlayip/enable.go
+  h_2321bec5d80d15 1-71
+bkms-cli/cmd/app/appspec/underlayip/reset.go
+  h_2321bec5d80d15 1-68
+bkms-cli/cmd/app/appspec/underlayip/underlay_ip.go
+  h_2321bec5d80d15 1-43
+bkms-cli/cmd/app/appspec/underlayip/view.go
+  h_2321bec5d80d15 1-68
+bkms-cli/pkg/client/appspec.go
+  h_2321bec5d80d15 33-36,164-169
+bkms-cli/pkg/handler/appspec/edit.go
+  h_2321bec5d80d15 32-36,40,46,52,58,64,70,76,82,88,94,100,106,116-166,210-213,216,218,221
+bkms-cli/pkg/handler/appspec/edit_test.go
+  h_2321bec5d80d15 1-139
+bkms-cli/pkg/handler/appspec/output.go
+  h_2321bec5d80d15 78-90,95,129-136,284-304,321-334
+bkms-cli/pkg/handler/appspec/output_test.go
+  h_2321bec5d80d15 53-94,126-157
+bkms-cli/pkg/handler/appspec/types.go
+  h_2321bec5d80d15 102-106,139-143,166-170,183-186
+bkms-cli/pkg/handler/appspec/view.go
+  h_2321bec5d80d15 138-145,194,198-201
+bkms-cli/test/e2e/app_appspec_test.go
+  h_2321bec5d80d15 63-75,309-395
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ec74776a80f65bb1b0ae0f8de3f86af616af6e80",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

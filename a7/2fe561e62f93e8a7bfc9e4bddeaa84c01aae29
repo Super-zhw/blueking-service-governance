@@ -1,0 +1,25 @@
+bkms-server/cmd/migration/refresh_workspace_bkmonitor_perms.go
+  s_f97ee55aac9378::t_18d61168d0ff75 71,210,236,261
+  s_f97ee55aac9378::t_f9ece0c1bc167b 72-74
+  s_f97ee55aac9378::t_79684307bd3b84 207-209
+  s_f97ee55aac9378::t_ae3926df61f720 211-213
+  s_f97ee55aac9378::t_4fe63be7935967 237
+  s_f97ee55aac9378::t_9b596f22dfdcbb 258-260
+  s_f97ee55aac9378::t_3128f6fb162c18 262-264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "a72fe561e62f93e8a7bfc9e4bddeaa84c01aae29",
+  "prompts": {},
+  "sessions": {
+    "s_f97ee55aac9378": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feaae58627d15b0fa4e4d15ae74e9",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

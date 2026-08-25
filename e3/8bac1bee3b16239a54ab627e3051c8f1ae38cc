@@ -1,0 +1,44 @@
+bkms-cli/cmd/app/publish/publish.go
+  h_2321bec5d80d15 34,44,49,89
+bkms-cli/pkg/client/client.go
+  h_2321bec5d80d15 149,150,151,152-153,154,155-157,158,159-160,161,162,163,164,165-166,167,168-169
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 2891-2946
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 35,36
+bkms-cli/pkg/config/config.go
+  h_2321bec5d80d15 74
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 216,221,242-243,244-245,246,247,270,328,329,333
+bkms-cli/pkg/handler/publish/handler_test.go
+  h_2321bec5d80d15 156
+bkms-server/pkg/bkintegrations/handler/bcs.go
+  h_2321bec5d80d15 24,245,246,247,248,249,250-253,254,255,256,257,258-268,269,270-272,273,274-275,276-283,284,285,286
+bkms-server/pkg/bkintegrations/serializer/bcs.go
+  h_2321bec5d80d15 88,89-91,92
+bkms-server/pkg/infras/cloudapi/bcs/client.go
+  h_2321bec5d80d15 57-58,293,294,295,296-297,298,299-317,318,319-320,321-322,323-351
+bkms-server/pkg/infras/cloudapi/bcs/stub.go
+  h_2321bec5d80d15 138,139-141,142-143,144,145
+bkms-server/pkg/infras/cloudapi/bcs/types.go
+  h_2321bec5d80d15 70,71,72-79
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 11157,11158-11173,11174,11175-11178,11179,11180-11190,23885-23892
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 11154,11155-11170,11171,11172-11175,11176,11177-11187,23882-23889
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 4348-4352,15845,15846,15847,15848-15853,15854,15855-15864
+bkms-server/pkg/bkintegrations/router.go
+  h_2321bec5d80d15 70-71,132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e38bac1bee3b16239a54ab627e3051c8f1ae38cc",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

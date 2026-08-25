@@ -1,0 +1,22 @@
+bkms-server/pkg/observability/apm/middleware.go
+  s_f77341672ea62d::t_fef97281eaa1d8 63
+  s_f77341672ea62d::t_803eed2a1139fa 29
+  s_f77341672ea62d::t_344bc80a9b259e 62
+  s_f77341672ea62d::t_02b07a84dd8f10 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b6a2e9e9821cc013e6970580729f24bf6989789c",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

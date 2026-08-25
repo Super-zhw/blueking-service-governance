@@ -1,0 +1,36 @@
+bkms-cli/cmd/app/publish/publish.go
+  h_2321bec5d80d15 44
+bkms-cli/pkg/client/client.go
+  h_2321bec5d80d15 149,160,163,166
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 35
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 216,244-245,248,332,337
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 10853-10886,19660-19667,24471-24481
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 10850-10883,19657-19664,24468-24478
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 1785-1789,5056-5062,15385-15404
+bkms-server/pkg/bkintegrations/handler/bcs.go
+  h_2321bec5d80d15 245,248
+bkms-server/pkg/bkintegrations/router.go
+  h_2321bec5d80d15 70
+bkms-server/pkg/bkintegrations/serializer/bcs.go
+  h_2321bec5d80d15 96
+bkms-server/pkg/infras/cloudapi/bcs/client.go
+  h_2321bec5d80d15 294-296,299,319,322-323
+bkms-server/pkg/infras/cloudapi/bcs/stub.go
+  h_2321bec5d80d15 139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f89df7b55f40f1d15ca9574c23e4fc5c07ce578b",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

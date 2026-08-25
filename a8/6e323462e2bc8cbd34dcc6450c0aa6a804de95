@@ -1,0 +1,38 @@
+bkms-cli/cmd/app/appspec/devmode/reset.go
+  s_f97ee55aac9378::t_48e156845067ec 42-43
+bkms-cli/pkg/client/appspec.go
+  s_f97ee55aac9378::t_4bf90868fd5074 27-29,31-39,41
+bkms-cli/cmd/app/appspec/devmode/disable.go
+  s_f97ee55aac9378::t_cf316292db2526 42
+bkms-cli/cmd/app/appspec/underlayip/reset.go
+  s_f97ee55aac9378::t_a05db5310c4305 40
+bkms-cli/cmd/app/appspec/underlayip/view.go
+  s_f97ee55aac9378::t_0c06eaede161a1 38
+bkms-cli/cmd/app/appspec/devmode/enable.go
+  s_f97ee55aac9378::t_99ced7e872d2f8 42-43
+bkms-cli/cmd/app/appspec/underlayip/enable.go
+  s_f97ee55aac9378::t_b0cbdb3a50ebb4 40
+bkms-cli/cmd/app/appspec/underlayip/disable.go
+  s_f97ee55aac9378::t_961b6cd164ca36 40
+bkms-cli/cmd/app/appspec/underlayip/underlay_ip.go
+  s_f97ee55aac9378::t_ad07a43aba3fab 31-33
+bkms-cli/cmd/app/appspec/devmode/dev_mode.go
+  s_f97ee55aac9378::t_2ed3cc46ca62f7 31,35-37
+  s_f97ee55aac9378::t_1bb46efa15c28e 32-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a86e323462e2bc8cbd34dcc6450c0aa6a804de95",
+  "prompts": {},
+  "sessions": {
+    "s_f97ee55aac9378": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feaae58627d15b0fa4e4d15ae74e9",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

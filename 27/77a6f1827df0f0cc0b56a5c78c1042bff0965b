@@ -1,0 +1,63 @@
+bkms-server/pkg/observability/apm/apm_test.go
+  s_f77341672ea62d::t_0060a61b80196f 130-131
+  s_f77341672ea62d::t_a536798af1ce79 70-75
+  s_f77341672ea62d::t_dd5f39081ec476 23,26
+  s_f77341672ea62d::t_fbf58bd0834292 121-126
+bkms-server/pkg/common/logging/init.go
+  s_f77341672ea62d::t_bc8f0295d79b0a 98
+  s_f77341672ea62d::t_b455af345837ed 97
+bkms-server/pkg/observability/apm/log.go
+  s_f77341672ea62d::t_221ee8883fe320 39,48,52,73,75-80,90,99,102-107
+  s_f77341672ea62d::t_52f1bc550e82a5 49
+  s_f77341672ea62d::t_482b900ed8be8f 50
+  s_f77341672ea62d::t_a6bde603d6efb6 51
+  s_f77341672ea62d::t_082b29971b7d14 36-37,41,53
+  s_f77341672ea62d::t_f502e7fcb2d35c 1-33,35,38,40,42-47,54-72,74,81-89,91-98,100-101,108-109
+  s_f77341672ea62d::t_52b577ec574683 34
+bkms-server/pkg/observability/apm/middleware.go
+  s_f77341672ea62d::t_ff3d271a3ecd8e 29,34,41-42,45-46,49-58
+  s_f77341672ea62d::t_e8f9ba199fd29f 62-63
+  s_f77341672ea62d::t_59b2396f67c2b0 44
+  s_f77341672ea62d::t_7f19d265198ba7 59-61
+bkms-server/pkg/observability/apm/trace.go
+  s_f77341672ea62d::t_caf53a0998e9e5 1-118
+bkms-server/pkg/common/logging/logging_test.go
+  s_f77341672ea62d::t_eeebf28d0bd6b0 28,31,207-208,210,223,233
+  s_f77341672ea62d::t_c20914940c745d 38-48
+bkms-server/pkg/common/logging/otel.go
+  s_f77341672ea62d::t_53f846a35df8a3 21-27,29-49
+  s_f77341672ea62d::t_b1e67a360e2487 1-20,28
+bkms-server/pkg/observability/apm/apm.go
+  s_f77341672ea62d::t_fecadc367b37cb 118
+  s_f77341672ea62d::t_a6b8758efc7cc5 123
+  s_f77341672ea62d::t_04167f54d9fb6f 124,139,154-158
+  s_f77341672ea62d::t_3895d2a1aa177f 128
+  s_f77341672ea62d::t_a09026387a0e13 141
+  s_f77341672ea62d::t_d44d02e133e8c2 84-85,91,93-94,97,100-103,105,108-109,111-112,114,125,140,150
+  s_f77341672ea62d::t_88d0a39c067899 90,110,113,115-117
+  s_f77341672ea62d::t_767403fab1cfbd 121,129-133,135-138
+  s_f77341672ea62d::t_63a9c7b9d6c602 126-127
+  s_f77341672ea62d::t_ec91950cedf36f 146-147
+  s_f77341672ea62d::t_4064cd9a81becb 148-149
+  s_f77341672ea62d::t_3e63f175c0a5f8 119
+  s_f77341672ea62d::t_9de6603ca9998f 151-153
+bkms-server/pkg/server/server.go
+  s_f77341672ea62d::t_6084eabd44a262 114
+  s_f77341672ea62d::t_297de2e1e7e789 115-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "2777a6f1827df0f0cc0b56a5c78c1042bff0965b",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+bkms-cli/cmd/envvar/create/env.go
+  s_2925c2e0e5358a::t_1925c2297dc2f6 13,15,24,26,29,37,54,60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "4b3887ea5ae79cb060c40c18039745bacc3f0867",
+  "prompts": {},
+  "sessions": {
+    "s_2925c2e0e5358a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019fcfe05740780994a05bef9d7a5d40",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

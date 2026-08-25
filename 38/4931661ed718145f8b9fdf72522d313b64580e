@@ -1,0 +1,14 @@
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  h_2321bec5d80d15 24,290
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "384931661ed718145f8b9fdf72522d313b64580e",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

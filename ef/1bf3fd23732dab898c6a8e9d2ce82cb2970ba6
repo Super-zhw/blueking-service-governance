@@ -1,0 +1,21 @@
+bkms-server/pkg/extension/component/devmode/assets/trpc/utils.sh
+  s_cf832fbada93ed::t_8aab67c0454424 114-115,122-130
+bkms-server/pkg/extension/component/devmode/assets/taf/utils.sh
+  s_cf832fbada93ed::t_229520edc3b97e 110-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "ef1bf3fd23732dab898c6a8e9d2ce82cb2970ba6",
+  "prompts": {},
+  "sessions": {
+    "s_cf832fbada93ed": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a032852dc9791e9e62aed87c57b14e",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

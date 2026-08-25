@@ -1,0 +1,25 @@
+bkms-server/pkg/common/logging/init.go
+  s_f77341672ea62d::t_d3a8d9a4652451 26,28,45,47-53,57-60,63-75
+  s_f77341672ea62d::t_cd3cf8b3673d12 29
+  s_f77341672ea62d::t_562ee6503c599e 46,54
+  s_f77341672ea62d::t_a83186d7488714 55
+bkms-server/pkg/common/logging/logging_test.go
+  s_f77341672ea62d::t_eeebf28d0bd6b0 28,31,207-208,210,223,233
+  s_f77341672ea62d::t_c20914940c745d 38-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "dfc8cdaeab056e51a647207b68f6df52cdb76fe7",
+  "prompts": {},
+  "sessions": {
+    "s_f77341672ea62d": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019ff0b78ac27a5aa3e7fd8c32c97d20",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

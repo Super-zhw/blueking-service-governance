@@ -1,0 +1,42 @@
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  s_cf832fbada93ed::t_30ff0bbcae4cf0 22,36,97-98,119,137-139,144,147,152,164,175,179-180,198,202-205,281-288
+  s_cf832fbada93ed::t_6fd6ce1662a255 124,141,149,155-162,165,168,172,178
+  s_cf832fbada93ed::t_550355d80731bb 77,88-96,99-100,109-110,181-182,186,191,199,201
+  s_cf832fbada93ed::t_f385af7482ea92 120-123
+  s_cf832fbada93ed::t_951aad18fd27f4 23-24,26,30-32,40-41,101-105,128-129,131-132,136,143,150-151,174,206-227,230-280
+  s_cf832fbada93ed::t_c041df086d7837 116-118
+  s_cf832fbada93ed::t_6b014786c723d3 130
+  s_cf832fbada93ed::t_7137500881213b 133-135
+  s_cf832fbada93ed::t_e5c2184881615c 125-127
+  s_cf832fbada93ed::t_c9924e434e7195 289-290,304-305
+  s_cf832fbada93ed::t_acc6e1de8b0005 302-303
+  s_cf832fbada93ed::t_440555fb6081b4 300
+bkms-cli/pkg/handler/publish/handler_test.go
+  s_cf832fbada93ed::t_59917531fa76de 33,59-80,82,84-88,95,98,103-104,107,113-125,127-128,131,134
+bkms-cli/pkg/client/types.go
+  s_cf832fbada93ed::t_535c155f89ade1 40
+bkms-cli/cmd/app/publish/publish.go
+  s_cf832fbada93ed::t_9d544e76d21e12 71-72,76
+bkms-cli/pkg/handler/publish/handler.go
+  s_cf832fbada93ed::t_e3ab489c9255d2 86-88,104-107,109,114,140-142
+bkms-cli/pkg/client/app.go
+  s_cf832fbada93ed::t_d2d6b4425a8297 65-68,74
+bkms-cli/pkg/client/client.go
+  s_cf832fbada93ed::t_259b39e666785e 154,160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "fc98d5f6985c0930d8ff142037d560157672b38b",
+  "prompts": {},
+  "sessions": {
+    "s_cf832fbada93ed": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a032852dc9791e9e62aed87c57b14e",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

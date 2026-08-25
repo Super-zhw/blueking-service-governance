@@ -1,0 +1,62 @@
+bkms-cli/cmd/envvar/create/app.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/create/create.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/create/env.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/create/public.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/delete/app.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/delete/delete.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/delete/env.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/delete/public.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/export/app.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/export/env.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/export/export.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/export/public.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/importvar/app.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/importvar/env.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/importvar/importvar.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/importvar/preview_output.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/importvar/public.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/list/app.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/list/env.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/list/list.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/list/public.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/update/app.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/update/env.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/update/public.go
+  h_2321bec5d80d15 1
+bkms-cli/cmd/envvar/update/update.go
+  h_2321bec5d80d15 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "01ace2e43044e48d1ff5517e03eafd8840b6760f",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

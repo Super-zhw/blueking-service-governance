@@ -1,0 +1,56 @@
+bkms-server/pkg/workload/instance/handler/instance.go
+  s_2e9abd3e72fc6b::t_d184b14ecd9836 39
+  s_2e9abd3e72fc6b::t_2babc6a15fe3e1 299
+bkms-server/pkg/observability/metrics/metrics.go
+  s_2e9abd3e72fc6b::t_5e366e288528a0 21-22,28,71,74,76,87,99,110,187,189-198,200-210,211-243,244-256,259,270,306-314,315-337,338-359,361-366,367-385
+  s_2e9abd3e72fc6b::t_aa190d9c01785e 360
+  s_66f5627389c49a::t_ec9ab6a790a463 386
+  s_2e9abd3e72fc6b::t_1e2d3041135689 27,40-68,72-73
+  h_2321bec5d80d15 122-123,126-127,133-134,137-138,144-145,148-149,188,199,277,279,282,284,287,289
+bkms-server/pkg/server/task/build.go
+  s_2e9abd3e72fc6b::t_d43bfc0a085ac1 361
+  s_2e9abd3e72fc6b::t_c7cdb19f3ba774 44
+  s_2e9abd3e72fc6b::t_3b543db37f16bd 358-360
+bkms-server/pkg/server/task/helm_deploy.go
+  s_2e9abd3e72fc6b::t_51f48b2f14c129 167-168
+  s_2e9abd3e72fc6b::t_d2704f48453492 110-112,124-126
+  s_2e9abd3e72fc6b::t_3fbac1a03dbf89 161-166
+  s_2e9abd3e72fc6b::t_c81974ff1762d7 36
+bkms-server/pkg/build/build/build.go
+  s_2e9abd3e72fc6b::t_e5002054688108 34
+  s_2e9abd3e72fc6b::t_56d98143e9da4b 114-115
+bkms-server/pkg/server/task/appmodel_deploy.go
+  s_2e9abd3e72fc6b::t_7bbf865079b5fa 187-192
+  s_2e9abd3e72fc6b::t_a883c4461cee33 193-194
+  s_2e9abd3e72fc6b::t_1053497732dda8 34
+  s_2e9abd3e72fc6b::t_75e78dc24bbf9c 93-95,104-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "61104a53b7f6e394fa05d9af07ffc8dac61b0d1c",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_2e9abd3e72fc6b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb1c3121736aa3ad246b47021fcf",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_66f5627389c49a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb0c318b7bb2bacf2155f26c8c7a",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

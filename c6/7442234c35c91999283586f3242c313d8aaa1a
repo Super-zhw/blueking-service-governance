@@ -1,0 +1,21 @@
+bkms-cli/test/e2e/framework/helpers.go
+  s_51c10609b3f84c::t_71df8fdf02b9d6 27
+bkms-cli/test/e2e/auth_test.go
+  s_51c10609b3f84c::t_c00fc4f4e3db9a 38,45,51,61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c67442234c35c91999283586f3242c313d8aaa1a",
+  "prompts": {},
+  "sessions": {
+    "s_51c10609b3f84c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a01d121abe7173a932d607ac796a0b",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

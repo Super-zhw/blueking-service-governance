@@ -1,0 +1,64 @@
+bkms-server/pkg/workload/instance/handler/instance.go
+  s_2e9abd3e72fc6b::t_d184b14ecd9836 39
+  s_2e9abd3e72fc6b::t_2babc6a15fe3e1 299
+bkms-server/pkg/observability/metrics/metrics.go
+  s_2e9abd3e72fc6b::t_5e366e288528a0 21-22,59,62,64,75,87,98,175,177-187,189-199,200-209,212,223,259-263,264-266,269,270-272,273-294,296-301,302-320
+  s_2e9abd3e72fc6b::t_aa190d9c01785e 295
+  s_66f5627389c49a::t_ec9ab6a790a463 321
+  s_2e9abd3e72fc6b::t_1e2d3041135689 27,39-50,51-56,60-61
+  h_2321bec5d80d15 110-111,114-115,121-122,125-126,132-133,136-137,176,188,230,232,235,237,240,242
+bkms-server/pkg/server/task/build.go
+  s_2e9abd3e72fc6b::t_d43bfc0a085ac1 361
+  s_2e9abd3e72fc6b::t_c7cdb19f3ba774 44
+  s_2e9abd3e72fc6b::t_3b543db37f16bd 358,360
+  s_0533769496d1f6::t_1a36ba67448e88 359
+bkms-server/pkg/server/task/helm_deploy.go
+  s_2e9abd3e72fc6b::t_51f48b2f14c129 167-168
+  s_2e9abd3e72fc6b::t_d2704f48453492 110-112,124-126
+  s_2e9abd3e72fc6b::t_3fbac1a03dbf89 161-166
+  s_2e9abd3e72fc6b::t_c81974ff1762d7 36
+bkms-server/pkg/build/build/build.go
+  s_2e9abd3e72fc6b::t_56d98143e9da4b 113
+bkms-server/pkg/server/task/appmodel_deploy.go
+  s_2e9abd3e72fc6b::t_7bbf865079b5fa 187-192
+  s_2e9abd3e72fc6b::t_a883c4461cee33 193-194
+  s_2e9abd3e72fc6b::t_1053497732dda8 34
+  s_2e9abd3e72fc6b::t_75e78dc24bbf9c 93-95,104-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "1886c746cee8f557d2cf63538ea73e15a97946c7",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_0533769496d1f6": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feec9dff87b92a27e07cec9eeb1eb",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_2e9abd3e72fc6b": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb1c3121736aa3ad246b47021fcf",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    },
+    "s_66f5627389c49a": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "019feb0c318b7bb2bacf2155f26c8c7a",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
