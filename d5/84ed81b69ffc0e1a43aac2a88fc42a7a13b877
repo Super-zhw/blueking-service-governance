@@ -1,0 +1,54 @@
+bkms-cli/cmd/app/app.go
+  h_2321bec5d80d15 34,54-55
+bkms-cli/cmd/app/delete.go
+  h_2321bec5d80d15 32,42,49,51,73-83
+bkms-cli/cmd/app/deploy/delete.go
+  h_2321bec5d80d15 28,33,43,46,53,76-85
+bkms-cli/cmd/app/deploy/precheck.go
+  h_2321bec5d80d15 26,29,37,50,53,55,68-113
+bkms-cli/cmd/app/get.go
+  h_2321bec5d80d15 28,34,43,46,49,61,65,78-91,99,103,107
+bkms-cli/cmd/app/instance/delete.go
+  h_2321bec5d80d15 25,36,46,49,63-118
+bkms-cli/cmd/app/instance/polaris.go
+  h_2321bec5d80d15 25,35,49,52-55,58-60,73-83,86-90,91-114,115-126
+bkms-cli/cmd/app/polaris/weight.go
+  h_2321bec5d80d15 31,43,45,48,51,60,69
+bkms-cli/cmd/app/update/update.go
+  h_2321bec5d80d15 1-31,1-40,33-35,38-40
+bkms-cli/cmd/env/create.go
+  h_2321bec5d80d15 25,41,43-53,56,68-96
+bkms-cli/cmd/env/delete.go
+  h_2321bec5d80d15 43,53,80-91
+bkms-cli/cmd/env/get.go
+  h_2321bec5d80d15 26,41,44,56,60,72-89
+bkms-cli/cmd/env/update.go
+  h_2321bec5d80d15 32,37,39-40,42,44-45,50-51,56,65
+bkms-cli/pkg/client/client.go
+  h_2321bec5d80d15 372-374,375-380,381,382-386
+bkms-cli/pkg/client/env.go
+  h_2321bec5d80d15 74-75
+bkms-cli/pkg/handler/app/update_build_config.go
+  h_2321bec5d80d15 1-30,1-44,33-37,40-42,44
+bkms-cli/pkg/handler/env/update.go
+  h_2321bec5d80d15 30
+bkms-cli/cmd/app/update/build_config.go
+  h_2321bec5d80d15 1-101
+bkms-cli/pkg/client/app.go
+  h_2321bec5d80d15 134-211
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 5337-5399
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 79-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "d584ed81b69ffc0e1a43aac2a88fc42a7a13b877",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
