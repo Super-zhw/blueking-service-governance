@@ -1,0 +1,24 @@
+bkms-cli/.agents/prompts/app-appspec.md
+  h_2321bec5d80d15 280,281,352,353
+bkms-cli/.agents/prompts/app-create.md
+  h_2321bec5d80d15 38,39,69,70
+bkms-cli/.agents/prompts/app-deploy.md
+  h_2321bec5d80d15 28-29,50,51,52,53,54,55,56,57,62,63,64,65
+bkms-cli/.agents/prompts/app-update.md
+  h_2321bec5d80d15 38,39,40,41,44,45,46,48,70,71,72,73,75,76,77,78,79,80,81,82,97,98,99,100,110,111,112,114
+bkms-cli/.agents/prompts/env.md
+  h_2321bec5d80d15 55,56,57,58,59,60,63,64,65,66,67,68,79-80,83-93,132
+bkms-cli/.agents/prompts/envvar.md
+  h_2321bec5d80d15 56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "d01f0dd9bd42caea07a263ff0f07f6ca30abc10e",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
