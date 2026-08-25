@@ -1,0 +1,16 @@
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 64-69,140,174,181,194,202,208,216-282
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  h_2321bec5d80d15 134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "e46408e114dbb57c87decf530e62149cbccafdf1",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

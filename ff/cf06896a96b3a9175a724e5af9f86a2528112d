@@ -1,0 +1,19 @@
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  s_cf832fbada93ed::t_6fd6ce1662a255 134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "ffcf06896a96b3a9175a724e5af9f86a2528112d",
+  "prompts": {},
+  "sessions": {
+    "s_cf832fbada93ed": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a032852dc9791e9e62aed87c57b14e",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

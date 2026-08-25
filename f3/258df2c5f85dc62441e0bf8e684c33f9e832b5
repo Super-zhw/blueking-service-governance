@@ -1,0 +1,22 @@
+bkms-cli/pkg/client/client.go
+  h_2321bec5d80d15 166,170
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 12084-12151,27640-27708
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 12081-12148,27637-27705
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 6642-6687,16638-16680
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  h_2321bec5d80d15 143,168,174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "f3258df2c5f85dc62441e0bf8e684c33f9e832b5",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
