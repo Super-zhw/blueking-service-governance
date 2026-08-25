@@ -1,0 +1,24 @@
+bkms-cli/.agents/prompts/app-appspec.md
+  h_2321bec5d80d15 125,128
+bkms-cli/.agents/prompts/app-create.md
+  h_2321bec5d80d15 5,31,39-40,71,84-105,150-170
+bkms-cli/.agents/prompts/app-instance-port-forward.md
+  h_2321bec5d80d15 106,111,114,120,126
+bkms-cli/.agents/prompts/app-polaris.md
+  h_2321bec5d80d15 47
+bkms-cli/.agents/prompts/env.md
+  h_2321bec5d80d15 3,16-17,19,21,45,57,71
+bkms-cli/.agents/prompts/envvar.md
+  h_2321bec5d80d15 7-8,64,73-75,137,143-145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "dc5a730699cf430f626ea4edacf321e915efc149",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
