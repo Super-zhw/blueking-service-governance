@@ -1,0 +1,22 @@
+bkms-cli/.agents/prompts/app-appspec.md
+  h_2321bec5d80d15 280,352
+bkms-cli/.agents/prompts/app-create.md
+  h_2321bec5d80d15 38,69
+bkms-cli/.agents/prompts/app-deploy.md
+  h_2321bec5d80d15 50,52,54,56,62,64
+bkms-cli/.agents/prompts/app-update.md
+  h_2321bec5d80d15 38,40,44,46,70,72,75,77,79,81,97,99,110,112
+bkms-cli/.agents/prompts/env.md
+  h_2321bec5d80d15 55,57,59,63,65,67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "c42baab682b1b84317b0db890be05181fe9b8398",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
