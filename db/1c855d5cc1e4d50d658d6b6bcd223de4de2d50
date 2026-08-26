@@ -1,0 +1,30 @@
+bkms-cli/.agents/prompts/app-instance-port-forward.md
+  h_2321bec5d80d15 34-35,41-42,49,56,68,81,114,120,126
+bkms-cli/.agents/prompts/app-publish.md
+  h_2321bec5d80d15 20,23,39,42
+bkms-cli/.agents/prompts/env.md
+  h_2321bec5d80d15 55,56,57,58,59,60,63,64,65,66,67,68,79-80,83-93,103,107,110,113,120-121,132
+bkms-cli/cmd/env/get.go
+  h_2321bec5d80d15 26-27,34,39,41,44-45,47-49,68-69,72-73
+bkms-cli/.agents/prompts/app-appspec.md
+  h_2321bec5d80d15 280,281,352,353
+bkms-cli/.agents/prompts/app-create.md
+  h_2321bec5d80d15 38,39,40-41,53,72,73
+bkms-cli/.agents/prompts/app-deploy.md
+  h_2321bec5d80d15 28-29,50,51,52,53,54,55,56,57,62,63,64,65
+bkms-cli/.agents/prompts/app-update.md
+  h_2321bec5d80d15 38,39,40,41,44,45,47,48,70,71,72,73,75,76,77,78,79,80,81,82,97,98,99,100,101-102,112,113,115,116
+bkms-cli/.agents/prompts/envvar.md
+  h_2321bec5d80d15 56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "db1c855d5cc1e4d50d658d6b6bcd223de4de2d50",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
