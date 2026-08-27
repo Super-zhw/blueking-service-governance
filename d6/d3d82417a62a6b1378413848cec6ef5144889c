@@ -1,0 +1,24 @@
+bkms-cli/cmd/app/delete.go
+  h_2321bec5d80d15 33,43-46,55-62,75
+bkms-cli/cmd/app/deploy/delete.go
+  h_2321bec5d80d15 34,47-50,59,74
+bkms-cli/cmd/app/instance/delete.go
+  h_2321bec5d80d15 37,47-50,53,60,69,84
+bkms-cli/cmd/env/create.go
+  h_2321bec5d80d15 54-66
+bkms-cli/cmd/env/delete.go
+  h_2321bec5d80d15 34,44-47,59,78
+bkms-cli/pkg/utils/cmd/confirm.go
+  h_2321bec5d80d15 29-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "d6d3d82417a62a6b1378413848cec6ef5144889c",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
