@@ -1,0 +1,20 @@
+bkms-cli/cmd/env/create.go
+  h_2321bec5d80d15 70
+bkms-cli/cmd/env/delete.go
+  h_2321bec5d80d15 76
+bkms-cli/cmd/env/get.go
+  h_2321bec5d80d15 73
+bkms-cli/cmd/env/update.go
+  h_2321bec5d80d15 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "9099f3c35549c758f58277427cbb68f4f1f68aa8",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
