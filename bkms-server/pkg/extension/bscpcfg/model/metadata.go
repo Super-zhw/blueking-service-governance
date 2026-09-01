@@ -29,12 +29,9 @@ type Metadata struct {
 	AppID string `bson:"appID" validate:"required"`
 	// BscpBizID BSCP 业务 ID
 	BscpBizID string `bson:"bscpBizID" validate:"required"`
-	// WorkloadName 指定被注入 bscp 配置的目标 workload 名称
-	WorkloadName string `bson:"workloadName"`
-	// WorkloadKind 目标工作负载类型
-	WorkloadKind string `bson:"workloadKind"`
-	// MountPath 配置文件在容器中的挂载路径（所有环境共享同一路径）
-	MountPath string `bson:"mountPath"`
+
+	// project key BK-BSCP-00012
+	// project id  12
 
 	// CredentialID BSCP Credential ID（每个业务下唯一，名称固定为 bkms-credential）
 	CredentialID string `bson:"credentialID"`
@@ -46,6 +43,13 @@ type Metadata struct {
 	FeedAddr string `bson:"feedAddr"`
 	// PostHookID BSCP 后置脚本 ID
 	PostHookID string `bson:"postHookID,omitempty"`
+
+	// WorkloadKind 目标工作负载类型
+	WorkloadKind string `bson:"workloadKind"`
+	// WorkloadName 指定被注入 bscp 配置的目标 workload 名称
+	WorkloadName string `bson:"workloadName"`
+	// MountPath 配置文件在容器中的挂载路径（所有环境共享同一路径）
+	MountPath string `bson:"mountPath"`
 
 	// Operator 最近操作人
 	Operator string `bson:"operator"`
