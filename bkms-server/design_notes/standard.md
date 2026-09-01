@@ -156,13 +156,3 @@ AppModel 大类内，trpc 与 taf 的差别仅在三处：`configKind`+配置格
   复用、`UpdateAppStandardSpec`。
 - **依赖 PR #142 的部分**（待合入后再接）：plain 配置文件创建（三表模型 + `configKind=plain`）。
 - **一期不做**：框架特有能力（admin 命令、APM 提取）；polaris/devmode 的通用化下沉（后续单独排期）。
-
-## 落地文件清单
-
-- `pkg/core/app/app.go`、`serializer/app.go`、`serializer/validate.go`、`serializer/app_standard.go`
-- `pkg/core/app/handler/app.go`、`app_standard.go`、`router.go`
-- `pkg/workload/appmodelcore/appmodel/entities.go`、`standard/standard.go`、`standard/plugin.go`
-- `pkg/deploy/handler/standard_deploy.go`、`router.go`、`pre_checker.go`
-- `pkg/workload/envvars/listers.go`、`pkg/observability/metrics/metrics.go`
-- `bkms-cli/pkg/constant/constant.go`
-- plain 配置接入：复用 PR #142 的 `appcfg` 三表 + `plainfiles`（合入后）
