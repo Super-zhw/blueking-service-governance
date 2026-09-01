@@ -113,7 +113,7 @@ pipeline / platform 三处现存的类型限制。
 | 通用基座 | 部署：AppModel 部署（记录/状态/快照/下架）、预检、总览、扩缩容、灰度、批量删除 | 自动继承 |
 | 通用基座 | 环境与泳道：标准环境 CRUD、**特性环境**、**泳道列表**、部署状态聚合 | 自动继承 |
 | 通用基座 | 工作负载渲染：GameDeployment、规格、配额、探针、生命周期、卷、更新策略、副本、拉取密钥、labels/annotations、Route ENI、组件、联邦转换 | 自动继承 |
-| 通用基座 | 实例：列表/watch、WebConsole、端口转发、实例日志、环境事件 | 自动继承 |
+| 通用基座 | 实例：列表/watch、WebConsole、端口转发（port-forward）、实例日志、环境事件 | 自动继承 |
 | 通用基座 | 环境变量：应用级、scoped、内置、运行时、导入导出、依赖服务 | 自动继承 |
 | 通用基座 | AppSpec：resources/updateStrategy/probe/lifecycle/labels/annotations/tkeRouteEni + 三段式 | 自动继承 |
 | 通用基座 | 组件：定义 CRUD、预览、内置组件 | 自动继承 |
