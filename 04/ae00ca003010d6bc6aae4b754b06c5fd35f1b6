@@ -1,0 +1,54 @@
+bkms-cli/pkg/constant/constant.go
+  h_2321bec5d80d15 31-32
+bkms-server/design_notes/standard.md
+  h_2321bec5d80d15 1-168
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 8501,9078-9514,11485-11539,20623,20629-20636,20686-20693,22635-22636,30080-30105
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 8498,9075-9511,11482-11536,20620,20626-20633,20683-20690,22632-22633,30077-30102
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 1485,1489-1492,1524-1527,2817,7905-7922,14671,14865-15142,16388-16421
+bkms-server/pkg/core/app/app.go
+  h_2321bec5d80d15 38-39,68-71,85-91,177
+bkms-server/pkg/core/app/handler/app.go
+  h_2321bec5d80d15 155-159,712-715
+bkms-server/pkg/core/app/handler/app_standard.go
+  h_2321bec5d80d15 1-134
+bkms-server/pkg/core/app/router.go
+  h_2321bec5d80d15 44-45,81-82
+bkms-server/pkg/core/app/serializer/app.go
+  h_2321bec5d80d15 69,177,183,189-190,219-220,294-298
+bkms-server/pkg/core/app/serializer/app_standard.go
+  h_2321bec5d80d15 1-66
+bkms-server/pkg/core/app/serializer/validate.go
+  h_2321bec5d80d15 105-114
+bkms-server/pkg/deploy/handler/standard_deploy.go
+  h_2321bec5d80d15 1-162
+bkms-server/pkg/deploy/pre_checker.go
+  h_2321bec5d80d15 148
+bkms-server/pkg/deploy/router.go
+  h_2321bec5d80d15 73-86,142-161
+bkms-server/pkg/extension/addon/hostport/store.go
+  h_2321bec5d80d15 34-35
+bkms-server/pkg/observability/metrics/metrics.go
+  h_2321bec5d80d15 510
+bkms-server/pkg/workload/appmodelcore/appmodel/entities.go
+  h_2321bec5d80d15 180-181,343-349
+bkms-server/pkg/workload/appmodelcore/standard/plugin.go
+  h_2321bec5d80d15 19-21
+bkms-server/pkg/workload/appmodelcore/standard/standard.go
+  h_2321bec5d80d15 1-188
+bkms-server/pkg/workload/envvars/listers.go
+  h_2321bec5d80d15 139-140
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "04ae00ca003010d6bc6aae4b754b06c5fd35f1b6",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
