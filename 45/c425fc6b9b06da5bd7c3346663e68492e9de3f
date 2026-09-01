@@ -1,0 +1,16 @@
+bkms-cli/npm/package-lock.json
+  h_2321bec5d80d15 3,9
+bkms-cli/npm/package.json
+  h_2321bec5d80d15 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "45c425fc6b9b06da5bd7c3346663e68492e9de3f",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
