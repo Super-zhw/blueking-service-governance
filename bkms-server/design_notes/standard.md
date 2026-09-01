@@ -105,45 +105,33 @@ pipeline / platform 三处现存的类型限制。
 
 ## 能力清单（全量）
 
-按「能力归属」分四类。standard 作为 AppModel 族通用基座，通用基座能力全部天然继承。
-
-### 1. 通用基座能力（type 无关或 AppModel 族门控，standard 自动继承）
-
-- **应用生命周期**：创建 / 查询 / 列表 / 删除、显示名更新、ID 自动后缀、应用组件管理（增改删）。
-- **构建**：构建配置、镜像 Tag 策略（semver/custom）、开始构建、构建记录、构建日志、推荐 Tag。
-- **配置文件**：CRUD、内容编辑、版本管理（回滚/对比/删除）、overlay/base 双层、按环境配置、local/BSCP 源、操作审计。
-- **部署**：AppModel 部署（记录/状态/资源快照/下架）、部署前环境变量预检、部署总览、扩缩容、灰度更新、批量删除实例。
-- **环境与泳道**：标准环境 CRUD、**特性环境**（创建/列表/独占 namespace）、**泳道列表**、部署状态聚合（含特性环境/泳道）。
-- **工作负载渲染**：GameDeployment、容器规格、资源配额、探针、生命周期钩子、卷挂载、更新策略、副本数、镜像拉取密钥、labels/annotations、TKE Route ENI、组件渲染、联邦 Deployment 转换。
-- **实例**：列表 / watch、WebConsole、端口转发、实例日志、环境事件。
-- **环境变量**：应用级 CRUD、scoped 三级作用域、内置变量（BKMS_*）、运行时变量（BKMS_POD_IP 等）、导入/导出/预览、依赖服务变量。
-- **AppSpec**：resources / updateStrategy / probe / lifecycle / labels / annotations / tkeRouteEni 等 section + 默认值/环境覆盖/生效值三段式。
-- **组件**：组件定义 CRUD、预览、内置组件（NodePort / 卷挂载等）。
-- **可观测**：资源拓扑（图/节点/事件/Manifest）、实例监控指标时序、告警策略（CRUD/同步/事件/告警组）、APM 实例管理。
-- **镜像**：镜像列表、快照同步、制品晋级、镜像 Tag 占用/删除、部署记录、平台 builder/runner 镜像、自定义构建镜像候选。
-
-### 2. 开放能力（概念跨类型，当前实现耦合在 trpc/taf 或需放开，standard 后续应支持）
-
-- **polaris**：注册中心配置、环境实例权重/隔离/统计（能力与框架无关，当前 patch/校验耦合 trpc yaml）。
-- **devmode**：开发模式热更新（当前 trpc/taf 两套路径与脚本，需抽象通用）。
-- **BSCP**：配置管理元信息、环境绑定与下发（当前仅 trpc 注入 workloadKind）。
-- **GPA 自动扩缩容**：配置与状态（按 appID 存，当前仅经部署总览暴露）。
-- **HostPort**：联邦集群随机 HostPort 端口映射。
-- **端口池**：PortPool 管理（环境级）。
-- **平台通用构建（platform）**：当前硬校验仅 trpc-go，需放开到 go/python/node。
-- **一键构建部署 / 构建触发**：构建成功后自动部署、自动触发策略（当前 trpc/taf 各一份，触发为 stub）。
-
-### 3. 框架特有能力（真正依赖框架配置，standard 一期不做）
-
-- 框架配置文件（framework）及渲染（ConfigMap + init 容器运行时变量替换）。
-- admin 命令（trpc HTTP + yaml 解析；taf 私有协议 + xml）。
-- APM 服务名提取（trpc yaml / taf xml）。
-- tRPC 服务名解析、Telemetry 配置解析（依赖 trpc/taf 框架配置）。
-
-### 4. Helm 特有能力（standard 不适用）
-
-- Helm chart 来源（Helm/BCS/Git）、values 文件、Helm 部署（预览/回滚/下架）、Helm Chart 构建与制品/semver、
-  Helm PostRenderer（组件/BSCP sidecar/泳道标签）、Service 同步、部署并发锁。
+| 归属 | 能力 | standard 处理 |
+|------|------|--------------|
+| 通用基座 | 应用生命周期：创建/查询/列表/删除、显示名、ID 后缀、组件管理 | 自动继承 |
+| 通用基座 | 构建：构建配置、Tag 策略、开始构建、构建记录/日志、推荐 Tag | 自动继承 |
+| 通用基座 | 配置文件：CRUD、内容编辑、版本管理、overlay/base、按环境、local/BSCP、审计 | 自动继承 |
+| 通用基座 | 部署：AppModel 部署（记录/状态/快照/下架）、预检、总览、扩缩容、灰度、批量删除 | 自动继承 |
+| 通用基座 | 环境与泳道：标准环境 CRUD、**特性环境**、**泳道列表**、部署状态聚合 | 自动继承 |
+| 通用基座 | 工作负载渲染：GameDeployment、规格、配额、探针、生命周期、卷、更新策略、副本、拉取密钥、labels/annotations、Route ENI、组件、联邦转换 | 自动继承 |
+| 通用基座 | 实例：列表/watch、WebConsole、端口转发、实例日志、环境事件 | 自动继承 |
+| 通用基座 | 环境变量：应用级、scoped、内置、运行时、导入导出、依赖服务 | 自动继承 |
+| 通用基座 | AppSpec：resources/updateStrategy/probe/lifecycle/labels/annotations/tkeRouteEni + 三段式 | 自动继承 |
+| 通用基座 | 组件：定义 CRUD、预览、内置组件 | 自动继承 |
+| 通用基座 | 可观测：拓扑、监控指标、告警策略、APM 实例 | 自动继承 |
+| 通用基座 | 镜像：列表、快照、晋级、tag 占用/删除、部署记录、builder/runner、自定义镜像 | 自动继承 |
+| 开放能力 | polaris：注册/权重/隔离/统计 | 后续下沉（当前耦合 trpc yaml） |
+| 开放能力 | devmode：开发模式热更新 | 后续抽象（当前 trpc/taf 两套路径/脚本） |
+| 开放能力 | BSCP：配置元信息、环境绑定与下发 | 后续支持（当前仅 trpc 注入 workloadKind） |
+| 开放能力 | GPA 自动扩缩容 | 后续支持（当前仅经部署总览暴露） |
+| 开放能力 | HostPort：联邦集群随机端口映射 | 后续支持 |
+| 开放能力 | 端口池：PortPool 管理 | 后续支持 |
+| 开放能力 | 平台通用构建 platform | 需放开到 go/python/node |
+| 开放能力 | 一键构建部署 / 构建触发 | 待加（当前 trpc/taf 各一份） |
+| 框架特有 | 框架配置文件及渲染（ConfigMap + init 容器） | 一期不做 |
+| 框架特有 | admin 命令（trpc HTTP / taf 私有协议） | 一期不做 |
+| 框架特有 | APM 服务名提取（trpc yaml / taf xml） | 一期不做 |
+| 框架特有 | tRPC 服务名解析 / Telemetry 解析 | 一期不做 |
+| Helm 特有 | chart 来源/values/部署/chart 构建/制品/semver/PostRenderer/Service 同步/部署锁 | 不适用 |
 
 ## 各类型特有能力清单
 
