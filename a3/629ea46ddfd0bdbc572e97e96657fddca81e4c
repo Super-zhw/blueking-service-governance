@@ -1,0 +1,14 @@
+bkms-server/design_notes/appmodel-app-types.md
+  h_2321bec5d80d15 1,5-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a3629ea46ddfd0bdbc572e97e96657fddca81e4c",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
