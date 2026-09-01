@@ -13,7 +13,7 @@ Standard 是新增的一种「语言无关的通用应用类型」，支持 go /
 | trpc / taf | AppModel 大类（框架特化） | 框架 + 框架配置文件 + appmodel |
 | **standard** | AppModel 大类（通用基座） | 纯 appmodel + plain 配置文件 |
 
-命名定为 `standard`，挂进 appmodel 家族（`IsAppModelType`），语言做子字段（`standardSpec.language`）。
+命名定为 `standard`，挂进 AppModel 大类，语言做子字段（`standardSpec.language`）。
 
 ## 与 AppModel 大类的关系
 
@@ -55,9 +55,9 @@ standard 需支持现有三种构建方式，`buildConfig.sourceType` 取值与 
 
 其中 `codeRepository` 内部又分两种镜像构建方式（`imageBuildMode`）：
 
-- `repositoryDockerfile`：仓库内 Dockerfile 构建（默认），type 无关。
-- `platform`：平台通用构建（builder/runner 基础镜像 + 命令），当前后端硬校验仅 trpc-go
-  （`pkg/build/build/service.go`），standard 需放开到 go/python/node。
+- `repositoryDockerfile`：仓库内 Dockerfile 构建（默认），与类型无关。
+- `platform`：平台通用构建（builder/runner 基础镜像 + 命令），当前后端硬校验仅 trpc-go，
+  standard 需放开到 go/python/node。
 
 构建配置统一存 `build_configs`（`sourceType` + 对应的 `imageBuildConfig` / `repoBuildConfig` /
 `pipelineBuildConfig`），standard 与 trpc 同构、无需新增表；需改动的点是放开 imageRegistry /
@@ -150,73 +150,91 @@ AppSpec（resources/updateStrategy/probe/lifecycle/labels/annotations 等 8 个 
 
 ### 问题 1：trpc/taf/standard 的能力差异（详细对比）
 
-三者在「通用基座」上完全一致，差异只落在「框架特化」与「开放能力」两个维度。逐项对比（附代码收敛点）：
+三者在「通用基座」上完全一致，差异只落在「框架特化」与「开放能力」两个维度。逐项对比（末列标注该
+差异归属哪一层）：
 
-| 能力 | trpc | taf | standard | 差异收敛点 |
-|------|------|-----|----------|-----------|
-| workload 渲染（GameDeployment） | ✅ | ✅ | ✅ | 共享 `workload/builder.go`，type 无关 |
-| AppSpec / envVars / 组件 | ✅ | ✅ | ✅ | 共享，type 无关 |
-| 部署（记录/状态/快照） | ✅ | ✅ | ✅ | 共享 `deploy/handler/appmodel_deploy_steps.go` |
-| 构建（三种方式） | ✅ | ✅ | ✅ | 共享 `build_configs` |
-| 配置文件 `configKind` | `framework`(yaml) | `framework`(xml) | `plain` | `appcfg` Meta 三表 |
-| 配置文件渲染 | trpc plugin（polaris patch + init 渲染） | taf plugin（init 渲染） | plainfiles（模板渲染） | `GetWorkloadPlugin(Workload.Type)` |
-| 创建逻辑 | `trpc.Service.Create` | `taf.Service.Create` | `standard.Service.Create` | `createAppByType` 分发 |
-| spec 更新 | `UpdateAppTrpcSpec` | `UpdateAppTafSpec` | `UpdateAppStandardSpec` | 各自独立路由 |
-| 语言子字段 | `go/cpp`（TrpcSpec） | - | `go/python/node`（StandardSpec） | `XxxSpec`/`XxxConfig` |
-| admin 命令 | HTTP + yaml 解析 | Tars SDK + xml | 无 | framework 特化 |
-| APM 服务名 | trpc yaml 解析 | taf xml 解析 | 无 | framework 特化 |
-| polaris | trpc yaml patch（开放，待下沉） | - | 待支持 | 开放能力 |
-| devmode | trpc 路径/脚本（开放，待抽象） | taf 路径/脚本 | 待支持 | 开放能力 |
+| 能力 | trpc | taf | standard | 归属 |
+|------|------|-----|----------|------|
+| workload 渲染（GameDeployment） | ✅ | ✅ | ✅ | 通用基座 |
+| AppSpec / envVars / 组件 | ✅ | ✅ | ✅ | 通用基座 |
+| 部署（记录/状态/快照） | ✅ | ✅ | ✅ | 通用基座 |
+| 构建（三种方式） | ✅ | ✅ | ✅ | 通用基座 |
+| 配置文件类型 | 框架配置（yaml） | 框架配置（xml） | plain 配置 | 框架特化（configKind） |
+| 配置文件渲染 | 框架渲染 + polaris 注入 | 框架渲染 | plain 模板渲染 | 框架特化 |
+| 创建逻辑 | 各自一份 | 各自一份 | 各自一份 | 框架特化 |
+| spec 更新入口 | 有 | 有 | 有 | 框架特化 |
+| 语言子字段 | go/cpp | 无 | go/python/node | 框架特化 |
+| admin 命令 | HTTP + yaml 解析 | 私有协议 + xml | 无 | 框架特化 |
+| APM 服务名提取 | yaml 解析 | xml 解析 | 无 | 框架特化 |
+| polaris | yaml 注入（待下沉） | - | 待支持 | 开放能力 |
+| devmode | 专用路径/脚本（待抽象） | 专用路径/脚本 | 待支持 | 开放能力 |
 
 维护方式（三层抽象）：
 
-1. **通用基座**（workload/envVars/AppSpec/组件/部署/构建）→ 共享，type 无关；`IsAppModelType` 一个
-   开关挂入，约 20 处门控（GetApp/DeleteApp/部署状态/实例/拓扑/envVars 等）自动生效。
-2. **框架特化层** → 收敛到 `workload/plugin` 注册表（`plugin.go` 的 `Type()/Start()`，`builder.go:88`
-   `GetWorkloadPlugin(Workload.Type)`）+ `configKind` 区分。每种框架一个 plugin，配置解析/渲染、admin、
-   APM 等框架差异都在 plugin 内实现，不散落 `switch app.Type`。
-3. **开放能力层**（polaris/devmode）→ 下沉为通用能力，通过 AppSpec section 或组件按需启用，与框架解耦。
+1. **通用基座**（渲染 / AppSpec / envVars / 组件 / 部署 / 构建）→ 三类共享；新类型只需被识别为
+   AppModel 族即可挂入，约 20 处功能门控自动生效。
+2. **框架特化层**（配置文件类型与渲染、创建逻辑、spec、admin、APM、语言）→ 收敛为一个「框架特化组件」
+   注册机制 + `configKind` 区分；每种框架一个特化组件，框架差异封闭在组件内，不散落类型分支。
+3. **开放能力层**（polaris / devmode）→ 下沉为通用能力，按需启用，与框架解耦。
 
-收益：新增一种框架只需「注册 plugin + 加 `XxxSpec` + `configKind` 解析」，而非在每处 `switch app.Type`
-补分支——trpc/taf 当前恰恰是被写死成硬编码分支的「specialized generic app」，standard 是把它们抽基座
-后的形态。
+收益：新增一种框架只需「注册一个特化组件 + 定义 spec + 声明配置类型」，而非在每处类型分支补逻辑——
+trpc/taf 当前恰恰是被写死成硬编码分支的「特化应用」，standard 是把它们抽掉框架特化后的通用基座形态。
 
-### 问题 2：未来框架扩展的实现路径
+### 问题 2：实现 standard 之后，如何扩展到更多框架
 
-把 trpc/taf 视为「specialized generic app」后，新增开源框架（以 gRPC-Go 为例）的落地路径分三步：
+前提是 standard（通用基座 + plain 配置 + 语言子字段）已落地。此后若要扩展更多框架（开源 Go/Python
+框架、gRPC-Go 等），有三条可行路径，需要一起权衡：
 
-**第 1 步：显式化「框架特化」接口（当前隐含在 trpc/taf 里）**
+**方案 A：框架 = 通用应用的「特化组件」**
 
-| 特化点 | 接口形态 | 现有实现 |
-|-------|---------|---------|
-| 配置解析/渲染 | `WorkloadPlugin`（`Type()/Start()` → `Storage/ExtraResources/InitContainers`） | `trpc/plugin.go`、`taf/plugin.go` |
-| 创建/更新参数 | `Service.Create/Update`（`CreateParams`/`UpdateParams`） | `trpc/trpc.go`、`taf/taf.go` |
-| spec 结构 | `Application.XxxSpec` + `Workload.XxxConfig` | `TrpcSpec`/`TrpcConfig`、`TafSpec`/`TafConfig` |
-| admin 命令 | 独立 admin 包 | `trpc/admincmd`、`taf/admincmd` |
-| APM 提取 | `apm.go` 的 `GetApmServiceName` 分支 | trpc/taf 两个 arm |
+思路：把「框架」视为对 standard 通用基座的「特化」。框架专属行为（配置格式与渲染、admin 命令、APM
+提取、devmode 路径、语言）封装为一个可插拔的「框架特化组件」，挂到通用基座之上；新增框架 = 新增一个
+特化组件，通用基座（部署 / AppSpec / envVars / 组件 / 构建）与开放能力（polaris / devmode）不动。
 
-**第 2 步：trpc/taf 对齐新模型（随 PR #142 完成）**
+**能力差异的处理**：框架特化能力（配置文件类型与渲染、创建逻辑、spec、admin、APM、语言）全部封闭在
+特化组件内，组件对外统一接口、对内各自实现差异；没有某能力的框架（如 standard 无 admin/APM）组件内
+留空即可。开放能力（polaris/devmode）不归属任何框架，下沉为通用能力按需启用，框架只是可选消费者。
 
-- 框架配置文件从「1:1、挂载全环境」迁移到 Meta 三表 `configKind=framework`，与 plain 同套能力。
-- trpc/taf 的 `Create` 走与 standard 相同的基座流程，仅注入 `configKind=framework` + framework plugin。
+- 优点：通用基座长期稳定，框架差异被隔离、不污染公共逻辑；新增是「加法」不是「改法」，风险低；与
+  「trpc / taf 本质也是两个特化组件」的定位自洽。
+- 缺点：需先把现有 trpc/taf 里散落的框架分支收敛成统一的特化组件（一次重构成本）；「特化组件」的
+  能力边界（配置 / 渲染 / admin / APM / devmode / 语言）要提前定清，否则日后仍会回退到补分支。
 
-**第 3 步：新增一种框架（gRPC-Go 示例）**
+**方案 B：框架的「声明式定义」（配置驱动，零代码扩展）**
 
-1. 新建 `pkg/workload/appmodelcore/grpcgo/`：`plugin.go`（实现 `WorkloadPlugin`）、`service.go`
-   （`Service.Create/Update`）、按需 `admincmd/`、`patcher/`。
-2. `appmodel/entities.go` 加 `WorkloadTypeGrpcGo` + `Workload.GrpcGoConfig`；`core/app/app.go` 加
-   `AppTypeGrpcGo`（入 `IsAppModelType`）+ `GrpcGoSpec`。
-3. `workload/init.go` 注册 plugin；`handler/app.go` `createAppByType` 加 case；serializer 加
-   `GrpcGoSpecInput` + `ToGrpcGoCreateParams`；如需 admin/APM 则对应新增分支。
-4. `configKind=framework` 配置解析 + admin/APM 作为该 plugin 的私有实现，与 trpc/taf 平级。
+思路：把框架能力做成「数据」而非「代码」——用一份「框架定义」声明配置格式与挂载、admin 命令模板、
+APM 提取规则、devmode 路径、支持的语言，平台按定义通用解析。新增框架只写定义、不写代码。
 
-结果：新增框架 = 新增「框架特化层」的 N 个文件，通用基座（部署/AppSpec/envVars/组件/构建）与开放能力
-（polaris/devmode）全部复用，不触碰通用逻辑。
+**能力差异的处理**：所有能力差异数据化进「框架定义」——配置（格式/挂载/渲染方式）、admin（协议/端口
+提取模板）、APM（service 名提取规则）、devmode（路径/脚本模板）、语言（枚举）各是一段声明，平台按定义
+通用执行。难点是表达力：高度框架特异的行为需在定义里留「逃逸」出口（如允许嵌入脚本），否则覆盖不住。
+
+- 优点：扩展门槛最低，非核心框架无需写代码；大量「相似框架」可用一套模板覆盖，维护成本低。
+- 缺点：声明式 schema 的「表达力」是难点——高度框架特异的行为（如私有 admin 协议）很难用声明覆盖，
+  最终会逃逸回代码；早期投入大、有过设计风险。
+
+**方案 C：维持现状「平铺类型 + 硬编码分支」**
+
+思路：继续为每种框架加一个类型，在各处补分支。
+
+**能力差异的处理**：不抽象，每项能力差异在公共逻辑里各加一个类型分支——配置渲染、admin、APM、devmode、
+语言每一处都要补一份。差异无法封闭，随框架数增长；语言若也平铺成类型，进一步放大。
+
+- 优点：零重构，短期最快。
+- 缺点：已被现有 trpc/taf 的「镜像复制、需同步维护」反证，分支随框架数近平方增长；语言若也做成类型
+  更是爆炸，不可持续。
+
+**推荐**：近期走 A（把 trpc/taf 收敛为「特化组件」、standard 作为通用基座落地），中长期向 B 演进
+（把特化组件里可声明化的部分——配置格式、admin 模板、APM 规则——沉淀为「声明式框架定义」，仅对真正
+框架特异的行为保留代码特化）。C 不推荐。
+
+这样，当下做 standard 时就为「特化组件」预留好能力边界（哪些走通用基座、哪些走特化、哪些走开放能力），
+未来加 gRPC-Go 或某 Go 框架时只需新增一个特化组件（或一份框架定义），不触碰公共逻辑。
 
 ## 一期实现范围与依赖
 
-- **不依赖 PR #142 的部分**（可先做）：type 常量 + `IsAppModelType`、`standardSpec.language`、
-  AppModel `standardConfig`、standard 创建 service、`/standard-deploys` 部署路由、envVars/AppSpec/组件
-  复用、`UpdateAppStandardSpec`、放开三种构建方式（imageRegistry / pipeline / platform）。
+- **不依赖 PR #142 的部分**（可先做）：新增类型并归入 AppModel 大类、语言子字段
+  （`standardSpec.language`）、工作负载的 standard 配置、standard 的创建逻辑、`/standard-deploys`
+  部署路由、envVars/AppSpec/组件复用、spec 更新接口、放开三种构建方式（imageRegistry / pipeline / platform）。
 - **依赖 PR #142 的部分**（待合入后再接）：plain 配置文件创建（三表模型 + `configKind=plain`）。
 - **一期不做**：框架特有能力（admin 命令、APM 提取）；polaris/devmode 的通用化下沉（后续单独排期）。
