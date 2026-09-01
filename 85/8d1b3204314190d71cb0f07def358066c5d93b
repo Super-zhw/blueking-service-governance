@@ -1,0 +1,14 @@
+bkms-server/design_notes/standard.md
+  h_2321bec5d80d15 106,108,110,112-123,125,127-134,136,138-146,164-166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "858d1b3204314190d71cb0f07def358066c5d93b",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
