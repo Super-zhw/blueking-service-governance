@@ -1,9 +1,10 @@
-# Standard 应用类型（通用/标准应用）
+# AppModel 应用类型体系
 
 ## 概述
 
-Standard 是新增的一种「语言无关的通用应用类型」，支持 go / python / nodejs 等语言。它复用 tRPC 应用
-的 AppModel + GameDeployment 部署链路，但**不绑定任何特定框架**。
+本文描述 AppModel 大类的应用类型体系：trpc / taf 是框架特化类型，standard 是新增的「语言无关的通用
+应用类型」，支持 go / python / nodejs 等语言。standard 复用 tRPC 应用的 AppModel + GameDeployment
+部署链路，但**不绑定任何特定框架**。
 
 与现有类型定位对照：
 
