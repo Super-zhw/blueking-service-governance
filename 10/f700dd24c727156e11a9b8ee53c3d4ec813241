@@ -1,0 +1,16 @@
+bkms-server/design_notes/standard.md
+  h_2321bec5d80d15 1-168
+bkms-server/pkg/extension/addon/hostport/store.go
+  h_2321bec5d80d15 34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "10f700dd24c727156e11a9b8ee53c3d4ec813241",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
