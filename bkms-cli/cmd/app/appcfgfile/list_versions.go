@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appcfgfile"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
@@ -31,12 +32,11 @@ import (
 
 // NewListVersionsCmd returns a Command instance for 'app app-cfg-file list-versions' sub command.
 func NewListVersionsCmd() *cobra.Command {
-	var appID, envName, cfgFileName, outputFormat string
+	var appID, workspaceID, envName, cfgFileName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "list-versions",
-		Short:  "List all history versions of an application config file",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "list-versions",
+		Short: "List all history versions of an application config file",
 		Long: `List all history versions of the application config file selected by app and environment.
 
 When --env is omitted, this command lists versions of the default application-level config.
@@ -53,7 +53,16 @@ When an application has multiple config files in the same environment, use --nam
 
   # Output in JSON format
   bkms-cli app app-cfg-file list-versions --app demo --env prod -o json`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			result, err := handler.ListVersions(cmd.Context(), client.New(), appID, envName, cfgFileName)
 			if err != nil {
 				return errors.Wrap(err, "list app config file versions")
@@ -72,7 +81,8 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

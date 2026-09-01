@@ -25,25 +25,34 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewResetCmd returns a Command instance for 'appspec update-strategy reset' sub command.
 func NewResetCmd() *cobra.Command {
-	var appID, envName string
+	var appID, workspaceID, envName string
 
 	cmd := &cobra.Command{
-		Use:    "reset",
-		Short:  "Reset update-strategy env override to default",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "reset",
+		Short: "Reset update-strategy env override to default",
 		Long: `Reset the environment-specific update strategy override back to the default configuration.
 
 This command removes the environment overlay so that the environment inherits
 the default application-level update strategy. The --env flag is required.`,
 		Example: `  # Reset env override to default
   bkms-cli app appspec update-strategy reset --app my-app --env prod`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if envName == "" {
 				return errors.New("reset requires --env to be specified")
 			}
@@ -57,7 +66,8 @@ the default application-level update strategy. The --env flag is required.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required for reset)")
 
 	_ = cmd.MarkFlagRequired("app")

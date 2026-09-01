@@ -26,13 +26,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // NewAppCmd returns a Command instance for 'envvar update app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, key, updatedKey, value, description string
+	var appID, workspaceID, key, updatedKey, value, description string
 	var sensitive, noSensitive bool
 
 	cmd := &cobra.Command{
@@ -52,6 +53,14 @@ Use --sensitive to mark as sensitive, or --no-sensitive to unmark.`,
   bkms-cli envvar update app --app <appID> --key MY_VAR --sensitive`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if sensitive && noSensitive {
 				return errors.New("--sensitive and --no-sensitive cannot be used together")
 			}
@@ -92,7 +101,8 @@ Use --sensitive to mark as sensitive, or --no-sensitive to unmark.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&key, "key", "", "current environment variable key (required)")
 	cmd.Flags().StringVar(&updatedKey, "updated-key", "", "new environment variable key (optional, defaults to --key)")
 	cmd.Flags().StringVar(&value, "value", "", "environment variable value")

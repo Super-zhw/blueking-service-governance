@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/deploy"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
@@ -91,6 +92,14 @@ Deploy file fields by type:
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if err := deploy.CreateDeploy(cmd.Context(), workspaceID, appID, envName, deploySpecFile); err != nil {
 				return errors.Wrap(err, "create app deploy")
 			}
@@ -100,7 +109,7 @@ Deploy file fields by type:
 	}
 
 	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVarP(&deploySpecFile, "deploy-spec-file", "f", "", "deploy spec file path")
 

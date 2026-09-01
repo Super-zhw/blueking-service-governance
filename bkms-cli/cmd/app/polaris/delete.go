@@ -24,12 +24,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // NewDeleteCmd returns a Command instance for 'app polaris delete' sub command
 func NewDeleteCmd() *cobra.Command {
-	var appID, configName string
+	var appID, workspaceID, configName string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
@@ -46,9 +48,18 @@ in the polaris service.
 Cluster-side instance deregistration takes effect on the next deployment.`,
 		Example: `  # Delete a polaris config by name
   bkms-cli app polaris delete --app my-app --name polaris-xxxxx`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			// 调用后端 API 删除北极星配置
-			err := client.New().DeleteAppPolarisConfig(cmd.Context(), appID, configName)
+			err = client.New().DeleteAppPolarisConfig(cmd.Context(), appID, configName)
 			if err != nil {
 				return errors.Wrap(err, "delete app polaris config")
 			}
@@ -59,7 +70,8 @@ Cluster-side instance deregistration takes effect on the next deployment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().
 		StringVar(&configName, "name", "", "polaris config name from list (e.g. polaris-xxxxx), not polarisName")
 

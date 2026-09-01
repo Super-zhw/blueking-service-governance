@@ -25,25 +25,34 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewEnableCmd returns a Command instance for 'appspec underlay-ip enable' sub command.
 func NewEnableCmd() *cobra.Command {
-	var appID, envName string
+	var appID, workspaceID, envName string
 
 	cmd := &cobra.Command{
-		Use:    "enable",
-		Short:  "Enable underlay IP networking",
-		PreRun: cmdutil.CommonPreRun,
-		Long:   `Enable the underlay IP networking mode for the application.`,
+		Use:   "enable",
+		Short: "Enable underlay IP networking",
+		Long:  `Enable the underlay IP networking mode for the application.`,
 		Example: `  # Enable underlay IP in the default config
   bkms-cli app appspec underlay-ip enable --app my-app
 
   # Enable underlay IP for a specific environment
   bkms-cli app appspec underlay-ip enable --app my-app --env prod`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if err := appspec.SetEnabledHandler(
 				cmd.Context(), appID, envName, client.AppSpecSectionTkeRouteEni, true,
 			); err != nil {
@@ -59,7 +68,8 @@ func NewEnableCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
 
 	_ = cmd.MarkFlagRequired("app")

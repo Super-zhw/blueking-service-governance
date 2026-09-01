@@ -23,13 +23,15 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/component"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // NewCreateCmd returns a Command instance for 'app component create' sub command
 func NewCreateCmd() *cobra.Command {
-	var appID, refName, compName string
+	var appID, workspaceID, refName, compName string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -48,7 +50,16 @@ The change takes effect after the next deployment.`,
 
   # Reference with an explicit application-local name
   bkms-cli app component create --app my-app --ref shared-limits --name my-limits`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			name, err := handler.CreateAppComponentRef(cmd.Context(), client.New(), appID, refName, compName)
 			if err != nil {
 				return errors.Wrap(err, "create app component reference")
@@ -60,7 +71,8 @@ The change takes effect after the next deployment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&refName, "ref", "", "workspace component instance name")
 	cmd.Flags().StringVar(&compName, "name", "", "application-local component instance name")
 

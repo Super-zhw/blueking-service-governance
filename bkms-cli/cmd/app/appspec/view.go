@@ -19,8 +19,10 @@
 package appspec
 
 import (
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -28,12 +30,11 @@ import (
 
 // NewViewCmd creates the view subcommand (query all sections at once).
 func NewViewCmd() *cobra.Command {
-	var appID, envName, outputFormat string
+	var appID, workspaceID, envName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View all AppSpec sections",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View all AppSpec sections",
 		Long: `View all AppSpec sections for an application.
 
 When --env is not specified, shows the default configuration.
@@ -47,12 +48,22 @@ Start command is always shown as global config regardless of --env.`,
 
   # Output in JSON format
   bkms-cli app appspec view --app my-app -o json`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			return appspec.ViewAllHandler(cmd.Context(), appID, envName, outputFormat)
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

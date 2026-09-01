@@ -26,13 +26,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // NewAppCmd returns a Command instance for 'envvar create for app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, key, value, description string
+	var appID, workspaceID, key, value, description string
 	var sensitive bool
 
 	cmd := &cobra.Command{
@@ -51,6 +52,14 @@ The key must be unique within the application.`,
   bkms-cli envvar create app --app <appID> --key MY_VAR --value my-value --description "My variable"`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			key = strings.TrimSpace(key)
 
 			result, err := client.New().
@@ -69,7 +78,8 @@ The key must be unique within the application.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&key, "key", "", "environment variable key (required)")
 	cmd.Flags().StringVar(&value, "value", "", "environment variable value")
 	cmd.Flags().StringVar(&description, "description", "", "variable description")

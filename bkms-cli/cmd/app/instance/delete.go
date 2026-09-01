@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	instancehandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
@@ -33,7 +34,7 @@ import (
 
 // NewInstanceDeleteCmd returns a Command instance for 'app instance delete' sub command
 func NewInstanceDeleteCmd() *cobra.Command {
-	var appID, envName, instanceIDsStr string
+	var appID, workspaceID, envName, instanceIDsStr string
 	var yes bool
 
 	cmd := &cobra.Command{
@@ -50,11 +51,19 @@ The fleet will have fewer instances than expected until you manually restore rep
   bkms-cli app instance delete --app myapp --env prod --instance-ids pod1,pod2 --yes`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
 			return runInstanceDelete(cmd, appID, envName, instanceIDsStr, yes)
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "comma-separated instance IDs (required)")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "skip confirmation prompt")

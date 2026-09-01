@@ -25,14 +25,16 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	instancehandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/params"
 )
 
 // NewPolarisCmd returns a Command instance for 'app instance polaris' sub command
 func NewPolarisCmd() *cobra.Command {
-	var appID, envName, instanceIDsStr string
+	var appID, workspaceID, envName, instanceIDsStr string
 	var weight int
 	var isolate bool
 	var weightSet, isolateSet bool
@@ -51,16 +53,25 @@ At least one of --weight or --isolate must be specified.`,
   # Restore traffic weight
   bkms-cli app instance polaris --app myapp --env prod --instance-ids pod1 --weight 100`,
 		PreRunE: func(c *cobra.Command, a []string) error {
+			cmdutil.CommonPreRun(c, a)
 			weightSet = c.Flags().Changed("weight")
 			isolateSet = c.Flags().Changed("isolate")
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
 			return runInstancePolaris(cmd, appID, envName, instanceIDsStr, weight, isolate, weightSet, isolateSet)
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "comma-separated instance IDs (required)")
 	cmd.Flags().IntVar(&weight, "weight", 0, "target Polaris traffic weight (0=drain, 100=normal)")
