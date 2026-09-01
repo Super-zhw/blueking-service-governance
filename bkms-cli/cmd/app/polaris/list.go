@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -31,7 +32,7 @@ import (
 
 // NewListCmd returns a Command instance for 'app polaris list' sub command
 func NewListCmd() *cobra.Command {
-	var appID, outputFormat string
+	var appID, workspaceID, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -52,6 +53,14 @@ Use -o yaml or -o json to see envWeights, envStates, warnings, and serviceLabels
   bkms-cli app polaris list --app my-app -o yaml`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			configs, err := client.New().ListAppPolarisConfigs(cmd.Context(), appID)
 			if err != nil {
 				return errors.Wrap(err, "list app polaris configs")
@@ -65,7 +74,8 @@ Use -o yaml or -o json to see envWeights, envStates, warnings, and serviceLabels
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 
 	_ = cmd.MarkFlagRequired("app")

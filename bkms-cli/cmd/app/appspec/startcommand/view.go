@@ -24,6 +24,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -31,12 +32,11 @@ import (
 
 // NewViewCmd returns a Command instance for 'appspec start-command view' sub command.
 func NewViewCmd() *cobra.Command {
-	var appID, outputFormat string
+	var appID, workspaceID, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View application start command configuration",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View application start command configuration",
 		Long: `View the application start command and arguments configuration.
 
 Displays the current container entrypoint command and arguments for the application.`,
@@ -45,7 +45,16 @@ Displays the current container entrypoint command and arguments for the applicat
 
   # Output in JSON format
   bkms-cli app appspec start-command view --app my-app -o json`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			result, err := appspec.ViewStartCommandHandler(cmd.Context(), appID)
 			if err != nil {
 				return errors.Wrap(err, "view start command")
@@ -66,7 +75,8 @@ Displays the current container entrypoint command and arguments for the applicat
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 
 	_ = cmd.MarkFlagRequired("app")

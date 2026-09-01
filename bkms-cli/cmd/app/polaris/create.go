@@ -27,12 +27,14 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // NewCreateCmd returns a Command instance for 'app polaris create' sub command
 func NewCreateCmd() *cobra.Command {
-	var appID, specFile string
+	var appID, workspaceID, specFile string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -91,10 +93,19 @@ YAML spec file fields:
   # polarisNamespace: Test
   # servicePort: 9090
   # operator: zhangsan,lisi`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			// 读取并解析 YAML 规格文件
-			if _, err := os.Stat(specFile); err != nil {
-				return errors.Wrapf(err, "polaris spec file %s not found", specFile)
+			if _, statErr := os.Stat(specFile); statErr != nil {
+				return errors.Wrapf(statErr, "polaris spec file %s not found", specFile)
 			}
 			fileContent, err := os.ReadFile(specFile)
 			if err != nil {
@@ -121,7 +132,8 @@ YAML spec file fields:
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "polaris spec file path (YAML)")
 
 	_ = cmd.MarkFlagRequired("app")

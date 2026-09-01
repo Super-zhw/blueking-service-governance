@@ -24,6 +24,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/constant"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	deployhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/deploy"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
@@ -31,7 +32,7 @@ import (
 
 // NewDeployDeleteCmd returns a Command instance for 'app deploy delete' sub command
 func NewDeployDeleteCmd() *cobra.Command {
-	var appID, envName, deployID string
+	var appID, workspaceID, envName, deployID string
 	var yes bool
 
 	cmd := &cobra.Command{
@@ -49,7 +50,16 @@ For trpc and taf applications, the entire environment deployment is removed.`,
 
   # Delete without confirmation prompt
   bkms-cli app deploy delete --app myapp --env test --yes`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			app, err := client.New().GetApp(cmd.Context(), appID)
 			if err != nil {
 				return errors.Wrap(err, "get app")
@@ -73,7 +83,8 @@ For trpc and taf applications, the entire environment deployment is removed.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&deployID, "deploy-id", "", "deploy record ID (required for helm apps)")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "skip confirmation prompt")

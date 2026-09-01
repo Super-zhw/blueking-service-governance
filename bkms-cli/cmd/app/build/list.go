@@ -26,12 +26,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
 )
 
 // NewListCmd returns a Command instance for 'app build list' sub command
 func NewListCmd() *cobra.Command {
-	var appID, keyword, outputFormat string
+	var appID, workspaceID, keyword, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -48,7 +50,16 @@ specified application. You can filter results using keywords.`,
 
   # Output in JSON format
   bkms-cli app build list --app demo -o json`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			records, err := client.New().ListBuildRecords(cmd.Context(), appID, keyword)
 			if err != nil {
 				return errors.Wrap(err, "list build records")
@@ -63,7 +74,8 @@ specified application. You can filter results using keywords.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&keyword, "keyword", "", "filter by keyword")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

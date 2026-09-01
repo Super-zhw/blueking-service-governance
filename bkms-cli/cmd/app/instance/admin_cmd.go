@@ -27,6 +27,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/constant"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -49,6 +50,14 @@ via the admin port. Only Trpc type applications are supported.`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
 			if err != nil {
 				return errors.Wrap(err, "get instance IDs")
@@ -82,7 +91,7 @@ via the admin port. Only Trpc type applications are supported.`,
 	}
 
 	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "instance IDs, comma separated")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
@@ -122,6 +131,14 @@ application type:
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
 			if err != nil {
 				return errors.Wrap(err, "get instance IDs")
@@ -177,7 +194,7 @@ application type:
 	}
 
 	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "instance IDs, comma separated")
 	cmd.Flags().StringVar(&method, "method", "", "HTTP method for Trpc admin cmd (GET/POST/PUT)")

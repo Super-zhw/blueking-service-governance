@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
@@ -34,7 +35,7 @@ const (
 
 // NewAppCmd returns a Command instance for 'envvar export app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, scope, envName, filePath string
+	var appID, workspaceID, scope, envName, filePath string
 
 	cmd := &cobra.Command{
 		Use:   "app",
@@ -61,6 +62,14 @@ Use -f to write it to a file.`,
   bkms-cli envvar export app --app <appID> --scope effectiveByEnv --env <env-name> -f vars.env`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if scope == exportScopeEffectiveByEnv && envName == "" {
 				return errors.New("--env is required when --scope is effectiveByEnv")
 			}
@@ -77,7 +86,8 @@ Use -f to write it to a file.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&scope, "scope", exportScopeAppDefined,
 		"export scope: appDefined (default) or effectiveByEnv")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required when scope=effectiveByEnv)")

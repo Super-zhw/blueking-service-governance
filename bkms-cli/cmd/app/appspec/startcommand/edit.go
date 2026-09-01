@@ -24,18 +24,18 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewEditCmd returns a Command instance for 'appspec start-command edit' sub command.
 func NewEditCmd() *cobra.Command {
-	var appID, specFile string
+	var appID, workspaceID, specFile string
 
 	cmd := &cobra.Command{
-		Use:    "edit",
-		Short:  "Edit application start command",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "edit",
+		Short: "Edit application start command",
 		Long: `Edit the application start command and arguments from a YAML file.
 
 The YAML file should contain 'command' and/or 'args' fields as string arrays.
@@ -61,7 +61,16 @@ unless explicitly overridden in the YAML file.`,
   #     language: go
   #     fileName: trpc_go.yaml
   #     filePath: /usr/local/trpc/conf`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if err := appspec.EditStartCommandHandler(cmd.Context(), appID, specFile); err != nil {
 				return errors.Wrap(err, "edit start command")
 			}
@@ -71,7 +80,8 @@ unless explicitly overridden in the YAML file.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "path to YAML spec file (required)")
 
 	_ = cmd.MarkFlagRequired("app")

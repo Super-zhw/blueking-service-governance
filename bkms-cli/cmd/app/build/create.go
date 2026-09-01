@@ -26,11 +26,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewCreateCmd returns a Command instance for 'app build create' sub command
 func NewCreateCmd() *cobra.Command {
-	var appID, branch, imageTag string
+	var appID, workspaceID, branch, imageTag string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -41,7 +43,16 @@ This command triggers a new build process for the specified application using
 the provided branch and image tag.`,
 		Example: `  # Create a build for an application
   bkms-cli app build create --app demo --branch main --image-tag v1.0.0`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			opts := client.BuildOptions{
 				Branch:   branch,
 				ImageTag: imageTag,
@@ -56,7 +67,8 @@ the provided branch and image tag.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&branch, "branch", "", "code branch to build")
 	cmd.Flags().StringVar(&imageTag, "image-tag", "", "image tag to build")
 

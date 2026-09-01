@@ -23,13 +23,15 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/component"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // NewDeleteCmd returns a Command instance for 'app component delete' sub command
 func NewDeleteCmd() *cobra.Command {
-	var appID, compName string
+	var appID, workspaceID, compName string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
@@ -44,7 +46,16 @@ The change takes effect after the next deployment. Only trpc and taf apps
 are supported.`,
 		Example: `  # Remove a component instance from an application
   bkms-cli app component delete --app my-app --name my-limits`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if err := handler.DeleteAppComponent(cmd.Context(), client.New(), appID, compName); err != nil {
 				return errors.Wrap(err, "delete app component")
 			}
@@ -55,7 +66,8 @@ are supported.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&compName, "name", "", "application-local component instance name")
 
 	_ = cmd.MarkFlagRequired("app")

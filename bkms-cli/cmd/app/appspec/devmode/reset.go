@@ -25,25 +25,34 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewResetCmd returns a Command instance for 'appspec dev-mode reset' sub command.
 func NewResetCmd() *cobra.Command {
-	var appID, envName string
+	var appID, workspaceID, envName string
 
 	cmd := &cobra.Command{
-		Use:    "reset",
-		Short:  "Reset dev-mode configuration for an environment",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "reset",
+		Short: "Reset dev-mode configuration for an environment",
 		Long: `Remove the development mode configuration for an application environment.
 
 This clears the environment setting entirely, effectively disabling dev-mode for the
 specified environment.`,
 		Example: `  # Reset dev-mode for an environment
   bkms-cli app appspec dev-mode reset --app my-app --env prod`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if err := appspec.ResetHandler(
 				cmd.Context(), appID, envName, client.AppSpecSectionDevMode,
 			); err != nil {
@@ -55,7 +64,8 @@ specified environment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 
 	_ = cmd.MarkFlagRequired("app")

@@ -22,6 +22,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/deploy"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
@@ -111,6 +112,14 @@ This command supports four update modes, specified via the 'updateMode' field in
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if err := deploy.UpdateDeploy(cmd.Context(), workspaceID, appID, envName, updateSpecFile); err != nil {
 				return errors.Wrap(err, "update app deploy")
 			}
@@ -120,7 +129,7 @@ This command supports four update modes, specified via the 'updateMode' field in
 	}
 
 	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVarP(&updateSpecFile, "update-spec-file", "f", "", "update spec file path")
 

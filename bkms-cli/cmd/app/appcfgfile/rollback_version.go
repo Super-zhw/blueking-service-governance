@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appcfgfile"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
@@ -30,13 +31,12 @@ import (
 
 // NewRollbackVersionCmd returns a Command instance for 'app app-cfg-file rollback-version' sub command.
 func NewRollbackVersionCmd() *cobra.Command {
-	var appID, envName, cfgFileName, versionID, description string
+	var appID, workspaceID, envName, cfgFileName, versionID, description string
 	var version int64
 
 	cmd := &cobra.Command{
-		Use:    "rollback-version",
-		Short:  "Rollback an application config file to one history version",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "rollback-version",
+		Short: "Rollback an application config file to one history version",
 		Long: `Rollback the application config file selected by app and environment to one history version.
 
 Use exactly one of --version or --version-id to identify the target history version.
@@ -54,7 +54,16 @@ When an application has multiple config files in the same environment, use --nam
 
   # Roll back and record a description
   bkms-cli app app-cfg-file rollback-version --app demo --env prod --version 7 --description "rollback prod values"`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			versionRef, err := parseVersionRefOptions(cmd, version, versionID)
 			if err != nil {
 				return err
@@ -85,7 +94,8 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

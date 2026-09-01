@@ -23,12 +23,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
 // NewWeightCmd returns a Command instance for 'app polaris weight' sub command
 func NewWeightCmd() *cobra.Command {
-	var appID, configName, envName string
+	var appID, workspaceID, configName, envName string
 	var weight int32
 
 	cmd := &cobra.Command{
@@ -46,7 +48,16 @@ Weight range: 0-10000 (0 = drain all traffic, 100 = normal weight).`,
 
   # Restore normal weight
   bkms-cli app polaris weight --app myapp --config myconfig --env test --weight 100`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if weight < 0 || weight > 10000 {
 				return errors.New("--weight must be in range 0-10000")
 			}
@@ -63,7 +74,8 @@ Weight range: 0-10000 (0 = drain all traffic, 100 = normal weight).`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&configName, "config", "", "Polaris config name (required)")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().Int32Var(&weight, "weight", 0, "global weight for all instances (0-10000, required)")

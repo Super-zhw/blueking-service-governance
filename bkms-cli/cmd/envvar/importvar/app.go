@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -31,7 +32,7 @@ import (
 
 // NewAppCmd returns a Command instance for 'envvar import app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, filePath, outputFormat string
+	var appID, workspaceID, filePath, outputFormat string
 	var preview bool
 
 	cmd := &cobra.Command{
@@ -62,10 +63,18 @@ Use --preview to see what would be imported without making any changes.`,
   # Note: app import does NOT allow scope metadata (scopeType/scopeValue).`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			if preview {
-				previewResult, err := client.New().PreviewAppEnvVars(cmd.Context(), appID, filePath)
-				if err != nil {
-					return errors.Wrap(err, "preview app env vars")
+				previewResult, previewErr := client.New().PreviewAppEnvVars(cmd.Context(), appID, filePath)
+				if previewErr != nil {
+					return errors.Wrap(previewErr, "preview app env vars")
 				}
 				return formatPreviewOutput(cmd.Context(), previewResult, outputFormat)
 			}
@@ -81,7 +90,8 @@ Use --preview to see what would be imported without making any changes.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVarP(&filePath, "file", "f", "", "path to the .env file to import")
 	cmd.Flags().BoolVar(&preview, "preview", false, "preview import without making changes")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)

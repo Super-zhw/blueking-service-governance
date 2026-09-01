@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/publish"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/params"
@@ -31,7 +32,7 @@ import (
 
 // NewCmd 创建 publish 命令
 func NewCmd() *cobra.Command {
-	var appID, envName, file, instances string
+	var appID, workspaceID, envName, file, instances string
 	var publishAll bool
 
 	cmd := &cobra.Command{
@@ -53,6 +54,14 @@ bkms-cli app publish --app myapp --env stage -f /path/to/binary --instance-ids p
 bkms-cli app publish --app myapp --env stage -f /path/to/binary --all`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			specifiedInstanceIDs := params.NormalizeInstIDs(instances, ",")
 
 			if publishAll && len(specifiedInstanceIDs) > 0 {
@@ -77,7 +86,8 @@ bkms-cli app publish --app myapp --env stage -f /path/to/binary --all`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "Application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "Environment name (required)")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to the binary file to publish (required)")
 	cmd.Flags().

@@ -26,13 +26,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
 )
 
 // NewAppCmd returns a Command instance for 'envvar list app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, envName, outputFormat string
+	var appID, workspaceID, envName, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "app",
@@ -55,8 +56,15 @@ Sensitive values are masked with '******'.`,
   bkms-cli envvar list app --app <appID> --env <env-name> -o json`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			var data any
-			var err error
 
 			if envName != "" {
 				// 带 --env：查询应用在某环境下最终生效的全部环境变量
@@ -78,7 +86,8 @@ Sensitive values are masked with '******'.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, lists effective vars when specified)")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

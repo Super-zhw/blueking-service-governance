@@ -19,9 +19,11 @@
 package underlayip
 
 import (
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -29,13 +31,12 @@ import (
 
 // NewViewCmd returns a Command instance for 'appspec underlay-ip view' sub command.
 func NewViewCmd() *cobra.Command {
-	var appID, envName, outputFormat string
+	var appID, workspaceID, envName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View underlay-ip configuration",
-		PreRun: cmdutil.CommonPreRun,
-		Long:   `View the underlay IP networking configuration for the application.`,
+		Use:   "view",
+		Short: "View underlay-ip configuration",
+		Long:  `View the underlay IP networking configuration for the application.`,
 		Example: `  # View default underlay-ip config
   bkms-cli app appspec underlay-ip view --app my-app
 
@@ -44,7 +45,16 @@ func NewViewCmd() *cobra.Command {
 
   # Output in JSON format
   bkms-cli app appspec underlay-ip view --app my-app -o json`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			return appspec.ViewHandler(
 				cmd.Context(),
 				appID,
@@ -55,7 +65,8 @@ func NewViewCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

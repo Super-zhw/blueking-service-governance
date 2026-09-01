@@ -23,14 +23,16 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/component"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
 )
 
 // NewListCmd returns a Command instance for 'app component list' sub command
 func NewListCmd() *cobra.Command {
-	var appID, kind, outputFormat string
+	var appID, workspaceID, kind, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -48,7 +50,16 @@ Use --kind to filter. Only trpc and taf apps are supported.`,
 
   # Output in JSON format
   bkms-cli app component list --app my-app -o json`,
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			appID = resolvedAppID
+
 			comps, err := handler.ListAppComponents(cmd.Context(), client.New(), appID, kind)
 			if err != nil {
 				return errors.Wrap(err, "list app components")
@@ -63,7 +74,8 @@ Use --kind to filter. Only trpc and taf apps are supported.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&kind, "kind", "", "filter by kind: ref | inst")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

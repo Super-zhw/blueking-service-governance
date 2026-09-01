@@ -23,13 +23,16 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewPortForwardCmd returns a Command instance for 'app instance port-forward' sub command.
 func NewPortForwardCmd() *cobra.Command {
 	// opts is the options for port-forward
 	var opts handler.PortForwardOptions
+	var workspaceID string
 
 	cmd := &cobra.Command{
 		Use:   "port-forward [LOCAL_PORT:]REMOTE_PORT",
@@ -50,8 +53,17 @@ Port argument format:
 
   # Forward with custom local address
   bkms-cli app instance port-forward --app myapp --env test --instance pod-1 18080:8080 --local-address 0.0.0.0`,
-		Args: cobra.ExactArgs(1),
+		Args:   cobra.ExactArgs(1),
+		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			resolvedAppID, err := apphandler.ResolveAppID(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), opts.AppID,
+			)
+			if err != nil {
+				return errors.Wrap(err, "resolve app")
+			}
+			opts.AppID = resolvedAppID
+
 			localPort, remotePort, err := handler.ParsePortArg(args[0])
 			if err != nil {
 				return errors.Wrap(err, "invalid port argument")
@@ -62,7 +74,8 @@ Port argument format:
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.AppID, "app", "", "application ID (required)")
+	cmd.Flags().StringVar(&opts.AppID, "app", "", "application ID or name (required)")
+	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	cmd.Flags().StringVar(&opts.EnvName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&opts.InstanceID, "instance", "", "target Pod instance ID (required)")
 	cmd.Flags().StringVar(&opts.LocalAddress, "local-address", "127.0.0.1", "local listening address")
