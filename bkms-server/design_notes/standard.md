@@ -103,31 +103,47 @@ pipeline / platform 三处现存的类型限制。
 - `app_config_files`：内容记录（`metaID` 关联 Meta，默认 + 各环境实例）
 - `app_config_file_versions`：不可变版本快照
 
-## 能力分类（修正）
+## 能力清单（全量）
 
-能力分三类，避免把「开放能力」误判为「框架特有」：
+按「能力归属」分四类。standard 作为 AppModel 族通用基座，通用基座能力全部天然继承。
 
-### 1. 通用基座能力（AppModel 族内 type 无关，standard 天然拥有）
+### 1. 通用基座能力（type 无关或 AppModel 族门控，standard 自动继承）
 
-创建/查询/列表/删除应用、构建配置、AppModel workload（command/args/envVars/image/resources）、
-AppSpec（resources/updateStrategy/probe/lifecycle/labels/annotations 等 8 个 section）、环境变量
-（app 级 + scoped）、组件、GameDeployment 部署（记录/状态/资源快照）、实例（list/watch/webconsole）、
-拓扑、实例日志、镜像 tag 记录/晋级。
+- **应用生命周期**：创建 / 查询 / 列表 / 删除、显示名更新、ID 自动后缀、应用组件管理（增改删）。
+- **构建**：构建配置、镜像 Tag 策略（semver/custom）、开始构建、构建记录、构建日志、推荐 Tag。
+- **配置文件**：CRUD、内容编辑、版本管理（回滚/对比/删除）、overlay/base 双层、按环境配置、local/BSCP 源、操作审计。
+- **部署**：AppModel 部署（记录/状态/资源快照/下架）、部署前环境变量预检、部署总览、扩缩容、灰度更新、批量删除实例。
+- **环境与泳道**：标准环境 CRUD、**特性环境**（创建/列表/独占 namespace）、**泳道列表**、部署状态聚合（含特性环境/泳道）。
+- **工作负载渲染**：GameDeployment、容器规格、资源配额、探针、生命周期钩子、卷挂载、更新策略、副本数、镜像拉取密钥、labels/annotations、TKE Route ENI、组件渲染、联邦 Deployment 转换。
+- **实例**：列表 / watch、WebConsole、端口转发、实例日志、环境事件。
+- **环境变量**：应用级 CRUD、scoped 三级作用域、内置变量（BKMS_*）、运行时变量（BKMS_POD_IP 等）、导入/导出/预览、依赖服务变量。
+- **AppSpec**：resources / updateStrategy / probe / lifecycle / labels / annotations / tkeRouteEni 等 section + 默认值/环境覆盖/生效值三段式。
+- **组件**：组件定义 CRUD、预览、内置组件（NodePort / 卷挂载等）。
+- **可观测**：资源拓扑（图/节点/事件/Manifest）、实例监控指标时序、告警策略（CRUD/同步/事件/告警组）、APM 实例管理。
+- **镜像**：镜像列表、快照同步、制品晋级、镜像 Tag 占用/删除、部署记录、平台 builder/runner 镜像、自定义构建镜像候选。
 
-### 2. 开放类能力（跨类型、不应与框架强耦合，standard 后续也应支持）
+### 2. 开放能力（概念跨类型，当前实现耦合在 trpc/taf 或需放开，standard 后续应支持）
 
-- **polaris（服务注册/发现）**：能力本身与框架无关，任何 go/python/node 服务都可能注册北极星。
-  当前实现耦合在 trpc plugin 里（对 trpc YAML 做 patch），后续应下沉为通用能力（如走组件或 AppSpec）。
-- **devmode（开发模式热更新）**：能力本身与框架无关。当前实现按 trpc/taf 硬编码了 work 路径与脚本集，
-  后续应抽象出通用 devmode（standard 用通用路径/脚本）。
+- **polaris**：注册中心配置、环境实例权重/隔离/统计（能力与框架无关，当前 patch/校验耦合 trpc yaml）。
+- **devmode**：开发模式热更新（当前 trpc/taf 两套路径与脚本，需抽象通用）。
+- **BSCP**：配置管理元信息、环境绑定与下发（当前仅 trpc 注入 workloadKind）。
+- **GPA 自动扩缩容**：配置与状态（按 appID 存，当前仅经部署总览暴露）。
+- **HostPort**：联邦集群随机 HostPort 端口映射。
+- **端口池**：PortPool 管理（环境级）。
+- **平台通用构建（platform）**：当前硬校验仅 trpc-go，需放开到 go/python/node。
+- **一键构建部署 / 构建触发**：构建成功后自动部署、自动触发策略（当前 trpc/taf 各一份，触发为 stub）。
 
-### 3. 框架特有能力（真正与框架绑定，standard 一期不做）
+### 3. 框架特有能力（真正依赖框架配置，standard 一期不做）
 
-- 框架配置文件（`configKind=framework`，trpc YAML / taf XML）
-- admin 命令（trpc 走 HTTP + YAML 解析发现 admin IP/port；taf 走 Tars SDK + XML）
-- APM 服务名提取（trpc 解析 telemetry/server 配置；taf 解析 XML）
-- 语言相关解析（trpc 的 go/cpp 影响配置文件名后缀与 admin 解析路径）
-- BSCP 元数据、平台 Dockerfile 构建（现仅 trpc）
+- 框架配置文件（framework）及渲染（ConfigMap + init 容器运行时变量替换）。
+- admin 命令（trpc HTTP + yaml 解析；taf 私有协议 + xml）。
+- APM 服务名提取（trpc yaml / taf xml）。
+- tRPC 服务名解析、Telemetry 配置解析（依赖 trpc/taf 框架配置）。
+
+### 4. Helm 特有能力（standard 不适用）
+
+- Helm chart 来源（Helm/BCS/Git）、values 文件、Helm 部署（预览/回滚/下架）、Helm Chart 构建与制品/semver、
+  Helm PostRenderer（组件/BSCP sidecar/泳道标签）、Service 同步、部署并发锁。
 
 ## 各类型特有能力清单
 
@@ -145,6 +161,9 @@ AppSpec（resources/updateStrategy/probe/lifecycle/labels/annotations 等 8 个 
 | devmode（开放类，待抽象） | - | - | ✅ | ✅ | 待支持 |
 | 语言子字段 | - | - | go/cpp | - | go/python/node |
 | AppSpec / envVars / 组件 | - | - | ✅ | ✅ | ✅ |
+| 一键构建部署（构建+自动部署） | - | - | ✅ | ✅ | 待加 |
+| Helm chart 构建 / 制品 / semver | ✅ | ✅ | - | - | - |
+| 实例操作（扩缩容/灰度/批量删除/端口转发） | - | - | ✅ | ✅ | ✅ |
 
 ## AppModel 大类内差别梳理与维护机制
 
