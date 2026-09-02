@@ -29,12 +29,6 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 )
 
-// ListInstancesOptions 查询实例列表参数。
-type ListInstancesOptions struct {
-	// Status 按实例状态过滤，如 Running。
-	Status string
-}
-
 // ListInstances 获取应用在指定环境下的全部实例，并自动处理分页。
 func ListInstances(
 	ctx context.Context,

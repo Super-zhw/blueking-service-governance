@@ -19,7 +19,6 @@
 package instance
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -126,8 +125,33 @@ application type:
   bkms-cli app instance exec-admin-cmd --app myapp --env test --instance-ids pod1 --command "taf.viewversion"`,
 		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runExecAdminCmd(cmd, cmdutil.GetWorkspaceID(workspaceID), appID, envName,
-				instanceIDsStr, method, urlPath, paramsJSON, body, command, outputFormat)
+			instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
+			if err != nil {
+				return errors.Wrap(err, "get instance IDs")
+			}
+
+			opts := handler.ExecAdminCmdOptions{
+				InstanceIDs: instanceIDs,
+				Method:      method,
+				URL:         urlPath,
+				ParamsJSON:  paramsJSON,
+				Body:        body,
+				Command:     command,
+			}
+
+			results, err := handler.ExecAdminCmd(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID, envName, opts,
+			)
+			if err != nil {
+				return errors.Wrap(err, "exec admin cmd")
+			}
+
+			formatted, err := output.FormatData(cmd.Context(), results, outputFormat)
+			if err != nil {
+				return errors.Wrap(err, "format output")
+			}
+			fmt.Println(formatted)
+			return nil
 		},
 	}
 
@@ -147,60 +171,4 @@ application type:
 	_ = cmd.MarkFlagRequired("instance-ids")
 
 	return cmd
-}
-
-func runExecAdminCmd(
-	cmd *cobra.Command, workspaceID, appID, envName,
-	instanceIDsStr, method, urlPath, paramsJSON, body, command, outputFormat string,
-) error {
-	instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
-	if err != nil {
-		return errors.Wrap(err, "get instance IDs")
-	}
-
-	app, err := client.New().GetAppMinimal(cmd.Context(), workspaceID, appID)
-	if err != nil {
-		return errors.Wrap(err, "get app info")
-	}
-
-	opts := handler.ExecAdminCmdOptions{
-		InstanceIDs: instanceIDs,
-		Method:      method,
-		URL:         urlPath,
-		Body:        body,
-		Command:     command,
-	}
-
-	switch app.Type {
-	case constant.AppTypeTrpc:
-		if method == "" {
-			return errors.New("--method is required for Trpc app")
-		}
-		if urlPath == "" {
-			return errors.New("--url is required for Trpc app")
-		}
-		if paramsJSON != "" {
-			if parseErr := json.Unmarshal([]byte(paramsJSON), &opts.Params); parseErr != nil {
-				return errors.Wrap(parseErr, "parse --params")
-			}
-		}
-	case constant.AppTypeTaf:
-		if command == "" {
-			return errors.New("--command is required for Taf app")
-		}
-	default:
-		return errors.Errorf("unsupported app type for admin cmd: %s", app.Type)
-	}
-
-	results, err := handler.ExecAdminCmd(cmd.Context(), workspaceID, appID, envName, opts)
-	if err != nil {
-		return errors.Wrap(err, "exec admin cmd")
-	}
-
-	formatted, err := output.FormatData(cmd.Context(), results, outputFormat)
-	if err != nil {
-		return errors.Wrap(err, "format output")
-	}
-	fmt.Println(formatted)
-	return nil
 }
