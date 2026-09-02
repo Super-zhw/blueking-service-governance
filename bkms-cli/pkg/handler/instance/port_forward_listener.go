@@ -64,53 +64,7 @@ func RunPortForwardListener(
 	})
 
 	g.Go(func() error {
-		for {
-			conn, acceptErr := ln.Accept()
-			if acceptErr != nil {
-				// listener 被关闭（ctx 取消或异常），退出 accept 循环。
-				select {
-				case <-gCtx.Done():
-					return nil
-				default:
-					return errors.Wrap(acceptErr, "accept connection")
-				}
-			}
-
-			slog.Debug("accepted new connection",
-				"local_addr", conn.LocalAddr().String(),
-				"remote_addr", conn.RemoteAddr().String(),
-			)
-
-			// 获取信号量，达到最大并发数时阻塞等待。
-			if acquireErr := sem.Acquire(gCtx, 1); acquireErr != nil {
-				_ = conn.Close()
-				return acquireErr //nolint:wrapcheck // context 已取消，直接返回
-			}
-
-			g.Go(func() error {
-				defer sem.Release(1)
-
-				slog.Debug("opening port-forward tunnel",
-					"instance_id", opts.InstanceID,
-					"remote_port", opts.RemotePort,
-				)
-
-				if connErr := handlePortForwardConnection(gCtx, cli, opts, conn); connErr != nil {
-					slog.Error("port-forward connection failed",
-						"instance_id", opts.InstanceID,
-						"remote_port", opts.RemotePort,
-						"error", connErr.Error(),
-					)
-				} else {
-					slog.Debug("port-forward connection closed normally",
-						"instance_id", opts.InstanceID,
-						"remote_port", opts.RemotePort,
-					)
-				}
-				// 单个连接失败不应终止整个 listener。
-				return nil
-			})
-		}
+		return acceptAndForward(gCtx, ln, sem, g, cli, opts)
 	})
 
 	if err = g.Wait(); err != nil {
@@ -118,6 +72,60 @@ func RunPortForwardListener(
 	}
 	slog.Info("port-forward stopped")
 	return nil
+}
+
+func acceptAndForward(
+	ctx context.Context,
+	ln net.Listener,
+	sem *semaphore.Weighted,
+	g *errgroup.Group,
+	cli portForwardTunnelClient,
+	opts PortForwardOptions,
+) error {
+	for {
+		conn, acceptErr := ln.Accept()
+		if acceptErr != nil {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+				return errors.Wrap(acceptErr, "accept connection")
+			}
+		}
+
+		slog.Debug("accepted new connection",
+			"local_addr", conn.LocalAddr().String(),
+			"remote_addr", conn.RemoteAddr().String(),
+		)
+
+		if acquireErr := sem.Acquire(ctx, 1); acquireErr != nil {
+			_ = conn.Close()
+			return acquireErr //nolint:wrapcheck // context 已取消，直接返回
+		}
+
+		g.Go(func() error {
+			defer sem.Release(1)
+
+			slog.Debug("opening port-forward tunnel",
+				"instance_id", opts.InstanceID,
+				"remote_port", opts.RemotePort,
+			)
+
+			if connErr := handlePortForwardConnection(ctx, cli, opts, conn); connErr != nil {
+				slog.Error("port-forward connection failed",
+					"instance_id", opts.InstanceID,
+					"remote_port", opts.RemotePort,
+					"error", connErr.Error(),
+				)
+			} else {
+				slog.Debug("port-forward connection closed normally",
+					"instance_id", opts.InstanceID,
+					"remote_port", opts.RemotePort,
+				)
+			}
+			return nil
+		})
+	}
 }
 
 func isLoopbackAddress(address string) bool {

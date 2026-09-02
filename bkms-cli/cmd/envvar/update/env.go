@@ -56,58 +56,17 @@ Only specified fields will be updated.`,
   bkms-cli envvar update env --env <env-name> --key MY_VAR --description "New description"`,
 		PreRun: cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if sensitive && noSensitive {
-				return errors.New("--sensitive and --no-sensitive cannot be used together")
-			}
-
-			key = strings.TrimSpace(key)
-			updatedKey = strings.TrimSpace(updatedKey)
-
-			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
-			cli := client.New()
-
-			// 解析 env name → envID
-			envID, err := envhandler.ResolveEnvIDByName(cmd.Context(), cli, workspaceID, envName)
-			if err != nil {
-				return err
-			}
-
-			// 解析 key → varID
-			varID, err := envhandler.ResolveEnvScopedEnvVarID(cmd.Context(), cli, envID, key)
-			if err != nil {
-				return errors.Wrapf(err, "resolve env var '%s' in env '%s'", key, envName)
-			}
-
-			// --updated-key 不传时默认使用 --key 的值（不改名）
-			effectiveKey := updatedKey
-			if effectiveKey == "" {
-				effectiveKey = key
-			}
-
-			opts := client.UpdateScopedEnvVarOptions{
-				Key: effectiveKey,
-			}
-			if cmd.Flags().Changed("value") {
-				opts.Value = &value
-			}
-			if cmd.Flags().Changed("description") {
-				opts.Description = &description
-			}
-			if sensitive {
-				t := true
-				opts.IsSensitive = &t
-			} else if noSensitive {
-				f := false
-				opts.IsSensitive = &f
-			}
-
-			result, err := cli.UpdateScopedEnvVar(cmd.Context(), workspaceID, varID, opts)
-			if err != nil {
-				return errors.Wrap(err, "update env scoped env var")
-			}
-
-			console.Info("Updated env var: key=%s, id=%s\n", result.Key, result.ID)
-			return nil
+			return runUpdateEnvScopedVar(
+				cmd,
+				workspaceID,
+				envName,
+				key,
+				updatedKey,
+				value,
+				description,
+				sensitive,
+				noSensitive,
+			)
 		},
 	}
 
@@ -124,4 +83,39 @@ Only specified fields will be updated.`,
 	_ = cmd.MarkFlagRequired("key")
 
 	return cmd
+}
+
+func runUpdateEnvScopedVar(
+	cmd *cobra.Command,
+	workspaceID, envName, key, updatedKey, value, description string,
+	sensitive, noSensitive bool,
+) error {
+	if sensitive && noSensitive {
+		return errors.New("--sensitive and --no-sensitive cannot be used together")
+	}
+
+	key = strings.TrimSpace(key)
+	updatedKey = strings.TrimSpace(updatedKey)
+
+	workspaceID = cmdutil.GetWorkspaceID(workspaceID)
+	cli := client.New()
+
+	envID, err := envhandler.ResolveEnvIDByName(cmd.Context(), cli, workspaceID, envName)
+	if err != nil {
+		return err
+	}
+
+	varID, err := envhandler.ResolveEnvScopedEnvVarID(cmd.Context(), cli, envID, key)
+	if err != nil {
+		return errors.Wrapf(err, "resolve env var '%s' in env '%s'", key, envName)
+	}
+
+	opts := buildScopedUpdateOpts(cmd, key, updatedKey, value, description, sensitive, noSensitive)
+	result, err := cli.UpdateScopedEnvVar(cmd.Context(), workspaceID, varID, opts)
+	if err != nil {
+		return errors.Wrap(err, "update env scoped env var")
+	}
+
+	console.Info("Updated env var: key=%s, id=%s\n", result.Key, result.ID)
+	return nil
 }
