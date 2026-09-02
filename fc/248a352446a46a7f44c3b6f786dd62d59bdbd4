@@ -1,0 +1,25 @@
+bkms-cli/cmd/envvar/update/env.go
+  s_cf5c6c2083dad1::t_d799d573d0ff5a 59-69,87-121
+bkms-cli/cmd/envvar/update/workspace.go
+  s_cf5c6c2083dad1::t_e1b4a7da89b47a 67-77,94-154
+bkms-cli/cmd/root/root.go
+  s_cf5c6c2083dad1::t_7034f23667f1f7 74,103-125
+bkms-cli/pkg/handler/instance/port_forward_listener.go
+  s_cf5c6c2083dad1::t_17698f7485732d 67-68,70-75,77-92,94,96-104,106-115,118,120-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "fc248a352446a46a7f44c3b6f786dd62d59bdbd4",
+  "prompts": {},
+  "sessions": {
+    "s_cf5c6c2083dad1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "s_cf5c6c2083dad1",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
