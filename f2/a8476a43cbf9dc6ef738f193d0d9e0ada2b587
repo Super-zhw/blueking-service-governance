@@ -1,0 +1,146 @@
+bkms-cli/cmd/app/appcfgfile/delete_version.go
+  h_2321bec5d80d15 53
+bkms-cli/cmd/app/appcfgfile/edit.go
+  h_2321bec5d80d15 60
+bkms-cli/cmd/app/appcfgfile/list_versions.go
+  h_2321bec5d80d15 55
+bkms-cli/cmd/app/appcfgfile/rollback_version.go
+  h_2321bec5d80d15 56
+bkms-cli/cmd/app/appcfgfile/view.go
+  h_2321bec5d80d15 56
+bkms-cli/cmd/app/appcfgfile/view_version.go
+  h_2321bec5d80d15 57
+bkms-cli/cmd/app/appspec/annotations/edit.go
+  h_2321bec5d80d15 53
+bkms-cli/cmd/app/appspec/annotations/reset.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/annotations/view.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/appspec/devmode/disable.go
+  h_2321bec5d80d15 44
+bkms-cli/cmd/app/appspec/devmode/enable.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/devmode/reset.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/devmode/view.go
+  h_2321bec5d80d15 46
+bkms-cli/cmd/app/appspec/labels/edit.go
+  h_2321bec5d80d15 53
+bkms-cli/cmd/app/appspec/labels/reset.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/labels/view.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/appspec/lifecycle/edit.go
+  h_2321bec5d80d15 65
+bkms-cli/cmd/app/appspec/lifecycle/reset.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/lifecycle/view.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/appspec/probe/edit.go
+  h_2321bec5d80d15 74
+bkms-cli/cmd/app/appspec/probe/reset.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/probe/view.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/appspec/resources/edit.go
+  h_2321bec5d80d15 55
+bkms-cli/cmd/app/appspec/resources/reset.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/resources/view.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/appspec/startcommand/edit.go
+  h_2321bec5d80d15 63
+bkms-cli/cmd/app/appspec/startcommand/view.go
+  h_2321bec5d80d15 47
+bkms-cli/cmd/app/appspec/underlayip/disable.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/underlayip/enable.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/underlayip/reset.go
+  h_2321bec5d80d15 42
+bkms-cli/cmd/app/appspec/underlayip/view.go
+  h_2321bec5d80d15 46
+bkms-cli/cmd/app/appspec/updatestrategy/edit.go
+  h_2321bec5d80d15 52
+bkms-cli/cmd/app/appspec/updatestrategy/reset.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/appspec/updatestrategy/view.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/appspec/view.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/build/create.go
+  h_2321bec5d80d15 45
+bkms-cli/cmd/app/build/list.go
+  h_2321bec5d80d15 52
+bkms-cli/cmd/app/component/create.go
+  h_2321bec5d80d15 52
+bkms-cli/cmd/app/component/delete.go
+  h_2321bec5d80d15 48
+bkms-cli/cmd/app/component/list.go
+  h_2321bec5d80d15 52
+bkms-cli/cmd/app/delete.go
+  h_2321bec5d80d15 48
+bkms-cli/cmd/app/deploy/create.go
+  h_2321bec5d80d15 91
+bkms-cli/cmd/app/deploy/delete.go
+  h_2321bec5d80d15 52
+bkms-cli/cmd/app/deploy/list.go
+  h_2321bec5d80d15 68
+bkms-cli/cmd/app/deploy/precheck.go
+  h_2321bec5d80d15 55
+bkms-cli/cmd/app/deploy/update.go
+  h_2321bec5d80d15 111
+bkms-cli/cmd/app/get.go
+  h_2321bec5d80d15 51
+bkms-cli/cmd/app/image/list.go
+  h_2321bec5d80d15 52
+bkms-cli/cmd/app/instance/admin_cmd.go
+  h_2321bec5d80d15 49,122
+bkms-cli/cmd/app/instance/delete.go
+  h_2321bec5d80d15 51
+bkms-cli/cmd/app/instance/list.go
+  h_2321bec5d80d15 49
+bkms-cli/cmd/app/instance/polaris.go
+  h_2321bec5d80d15 55-57
+bkms-cli/cmd/app/instance/port_forward.go
+  h_2321bec5d80d15 55-56
+bkms-cli/cmd/app/polaris/create.go
+  h_2321bec5d80d15 95
+bkms-cli/cmd/app/polaris/delete.go
+  h_2321bec5d80d15 50,52
+bkms-cli/cmd/app/polaris/list.go
+  h_2321bec5d80d15 53
+bkms-cli/cmd/app/polaris/update.go
+  h_2321bec5d80d15 92
+bkms-cli/cmd/app/polaris/weight.go
+  h_2321bec5d80d15 50
+bkms-cli/cmd/app/publish/publish.go
+  h_2321bec5d80d15 54
+bkms-cli/cmd/app/update/build_config.go
+  h_2321bec5d80d15 81
+bkms-cli/cmd/envvar/create/app.go
+  h_2321bec5d80d15 52
+bkms-cli/cmd/envvar/delete/app.go
+  h_2321bec5d80d15 41
+bkms-cli/cmd/envvar/export/app.go
+  h_2321bec5d80d15 62
+bkms-cli/cmd/envvar/importvar/app.go
+  h_2321bec5d80d15 63
+bkms-cli/cmd/envvar/list/app.go
+  h_2321bec5d80d15 56,59
+bkms-cli/cmd/envvar/update/app.go
+  h_2321bec5d80d15 53
+bkms-cli/pkg/utils/cmd/cmd.go
+  h_2321bec5d80d15 23,27,50-52,56-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "f2a8476a43cbf9dc6ef738f193d0d9e0ada2b587",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
