@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
@@ -43,16 +42,8 @@ This command triggers a new build process for the specified application using
 the provided branch and image tag.`,
 		Example: `  # Create a build for an application
   bkms-cli app build create --app demo --branch main --image-tag v1.0.0`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			opts := client.BuildOptions{
 				Branch:   branch,
 				ImageTag: imageTag,

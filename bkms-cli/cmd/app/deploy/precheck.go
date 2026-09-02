@@ -27,7 +27,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	deployhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/deploy"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
@@ -53,16 +52,8 @@ Only supported for trpc and taf application types.`,
 
   # Output as JSON for scripting
   bkms-cli app deploy precheck --app myapp --env prod -o json`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			return runDeployPrecheck(cmd, appID, envName, outputFormat)
 		},
 	}

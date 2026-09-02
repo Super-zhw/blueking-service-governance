@@ -23,7 +23,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/deploy"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
@@ -89,17 +88,9 @@ Deploy file fields by type:
 
   # 4. Deploy to multiple environments at once
   bkms-cli app deploy create --app my-app --env prod,staging,test -f trpc-deploy.yaml`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			if err := deploy.CreateDeploy(cmd.Context(), workspaceID, appID, envName, deploySpecFile); err != nil {
 				return errors.Wrap(err, "create app deploy")
 			}

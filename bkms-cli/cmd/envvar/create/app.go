@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
@@ -50,16 +49,8 @@ The key must be unique within the application.`,
 
   # Create with description
   bkms-cli envvar create app --app <appID> --key MY_VAR --value my-value --description "My variable"`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			key = strings.TrimSpace(key)
 
 			result, err := client.New().

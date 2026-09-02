@@ -24,7 +24,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -51,16 +50,8 @@ Use -o yaml or -o json to see envWeights, envStates, warnings, and serviceLabels
 
   # Output in YAML format
   bkms-cli app polaris list --app my-app -o yaml`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			configs, err := client.New().ListAppPolarisConfigs(cmd.Context(), appID)
 			if err != nil {
 				return errors.Wrap(err, "list app polaris configs")

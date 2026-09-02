@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
@@ -43,16 +42,8 @@ This clears the environment setting entirely, effectively disabling dev-mode for
 specified environment.`,
 		Example: `  # Reset dev-mode for an environment
   bkms-cli app appspec dev-mode reset --app my-app --env prod`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			if err := appspec.ResetHandler(
 				cmd.Context(), appID, envName, client.AppSpecSectionDevMode,
 			); err != nil {

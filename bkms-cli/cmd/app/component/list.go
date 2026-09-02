@@ -23,7 +23,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/component"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
@@ -50,16 +49,8 @@ Use --kind to filter. Only trpc and taf apps are supported.`,
 
   # Output in JSON format
   bkms-cli app component list --app my-app -o json`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			comps, err := handler.ListAppComponents(cmd.Context(), client.New(), appID, kind)
 			if err != nil {
 				return errors.Wrap(err, "list app components")

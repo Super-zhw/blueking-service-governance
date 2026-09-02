@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
 )
@@ -54,17 +53,10 @@ Sensitive values are masked with '******'.`,
 
   # Output as JSON
   bkms-cli envvar list app --app <appID> --env <env-name> -o json`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			var data any
+			var err error
 
 			if envName != "" {
 				// 带 --env：查询应用在某环境下最终生效的全部环境变量

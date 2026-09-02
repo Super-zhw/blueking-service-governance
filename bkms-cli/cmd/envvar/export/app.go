@@ -24,7 +24,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
@@ -60,16 +59,8 @@ Use -f to write it to a file.`,
 
   # Export effective env vars to a file
   bkms-cli envvar export app --app <appID> --scope effectiveByEnv --env <env-name> -f vars.env`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			if scope == exportScopeEffectiveByEnv && envName == "" {
 				return errors.New("--env is required when --scope is effectiveByEnv")
 			}

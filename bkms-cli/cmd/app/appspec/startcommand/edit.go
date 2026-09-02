@@ -24,7 +24,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
@@ -61,16 +60,8 @@ unless explicitly overridden in the YAML file.`,
   #     language: go
   #     fileName: trpc_go.yaml
   #     filePath: /usr/local/trpc/conf`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			if err := appspec.EditStartCommandHandler(cmd.Context(), appID, specFile); err != nil {
 				return errors.Wrap(err, "edit start command")
 			}

@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
@@ -40,16 +39,8 @@ func NewResetCmd() *cobra.Command {
 		Long:  `Reset the environment-specific underlay IP override back to the default configuration.`,
 		Example: `  # Reset env override to default
   bkms-cli app appspec underlay-ip reset --app my-app --env prod`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			if envName == "" {
 				return errors.New("reset requires --env to be specified")
 			}

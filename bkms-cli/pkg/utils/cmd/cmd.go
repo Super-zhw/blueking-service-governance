@@ -20,9 +20,11 @@
 package cmd
 
 import (
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/config"
+	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 )
 
 // SkipAuthAnnotationKey 允许在 cmd 注解中设置为 "true" 以跳过认证
@@ -45,13 +47,40 @@ func IsAuthRequired(cmd *cobra.Command) bool {
 	return true
 }
 
-// CommonPreRun 通用的命令预处理函数，聚合各子命令共用的 PreRun 逻辑。
-// 后续新增预处理逻辑只需在此函数中追加即可。
-//
-// 目前实现的主要逻辑：
-// - 对于需求 workspace flag 的命令，如果配置文件中未提供，要求通过参数强制提供
-func CommonPreRun(cmd *cobra.Command, args []string) {
+// CommonPreRun 通用 PreRun
+// 当配置无默认 workspace 时将 --workspace 标记为必填。
+func CommonPreRun(cmd *cobra.Command, _ []string) {
 	requireWorkspace(cmd)
+}
+
+// GetWorkspaceID 返回 flag 值，为空时回退到配置默认值。
+func GetWorkspaceID(flagValue string) string {
+	if flagValue != "" {
+		return flagValue
+	}
+	return config.G.Defaults.WorkspaceID
+}
+
+// ResolveAppPreRunE workspace 必填检查 + 将 --app 的 ID/name 解析为确定的 app ID。
+// 通过 cmd.Flags().Set 回写，StringVar 绑定的变量自动更新； 无 app 参数时仅做 workspace 检查。
+func ResolveAppPreRunE(cmd *cobra.Command, _ []string) error {
+	requireWorkspace(cmd)
+	appFlag := cmd.Flags().Lookup("app")
+	if appFlag == nil || appFlag.Value.String() == "" {
+		return nil
+	}
+	wsID := ""
+	if wsFlag := cmd.Flags().Lookup("workspace"); wsFlag != nil {
+		wsID = wsFlag.Value.String()
+	}
+	wsID = GetWorkspaceID(wsID)
+
+	resolved, err := apphandler.ResolveAppID(cmd.Context(), wsID, appFlag.Value.String())
+	if err != nil {
+		return errors.Wrap(err, "resolve app")
+	}
+
+	return cmd.Flags().Set("app", resolved)
 }
 
 // requireWorkspace 当配置中未设置默认 WorkspaceID 时，将 --workspace flag 标记为必填。
@@ -62,13 +91,4 @@ func requireWorkspace(cmd *cobra.Command) {
 	if config.G.Defaults.WorkspaceID == "" {
 		_ = cmd.MarkFlagRequired("workspace")
 	}
-}
-
-// GetWorkspaceID 获取 workspaceID，优先使用用户通过 flag 传入的值，
-// 若为空则回退到配置中的默认值。
-func GetWorkspaceID(flagValue string) string {
-	if flagValue != "" {
-		return flagValue
-	}
-	return config.G.Defaults.WorkspaceID
 }

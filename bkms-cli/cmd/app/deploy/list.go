@@ -25,7 +25,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/deploy"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -66,17 +65,9 @@ is optional. Otherwise, you must specify it explicitly.`,
 
   # List deploy records for multiple environments
   bkms-cli app deploy list --app demo --env prod,staging,test`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			records, err := deploy.ListDeploy(cmd.Context(), workspaceID, appID, envName, trafficLaneName, keyword)
 			if records != nil {
 				formatted, formatErr := output.FormatData(cmd.Context(), records, outputFormat)

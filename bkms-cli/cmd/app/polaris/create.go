@@ -27,7 +27,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
@@ -93,16 +92,8 @@ YAML spec file fields:
   # polarisNamespace: Test
   # servicePort: 9090
   # operator: zhangsan,lisi`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			// 读取并解析 YAML 规格文件
 			if _, statErr := os.Stat(specFile); statErr != nil {
 				return errors.Wrapf(statErr, "polaris spec file %s not found", specFile)
