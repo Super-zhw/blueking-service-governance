@@ -31,14 +31,8 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
-// NewCreateCmd returns a Command instance for 'app polaris create' sub command
-func NewCreateCmd() *cobra.Command {
-	var appID, workspaceID, specFile string
-
-	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a polaris config for an application",
-		Long: `Create a new polaris config for an application from a YAML spec file.
+const (
+	createPolarisLong = `Create a new polaris config for an application from a YAML spec file.
 
 The YAML spec file structure is consistent with the backend API request body.
 
@@ -70,8 +64,10 @@ YAML spec file fields:
   enableHealthCheck:  Enable polaris health check for registered instances (bool, default false).
                       When enabled, polaris will actively probe instance health
   serviceLabels:      Labels applied to ALL registered polaris instances (map[string]string).
-                      Can be used for polaris routing rules and traffic management`,
-		Example: `  # Create a polaris config from a YAML spec file:
+                      Can be used for polaris routing rules and traffic management
+`
+
+	createPolarisExample = `  # Create a polaris config from a YAML spec file:
   bkms-cli app polaris create --app my-app -f polaris.yaml
 
   # Example polaris.yaml (use existing polaris service):
@@ -91,7 +87,19 @@ YAML spec file fields:
   # polarisName: my-new-service
   # polarisNamespace: Test
   # servicePort: 9090
-  # operator: zhangsan,lisi`,
+  # operator: zhangsan,lisi
+`
+)
+
+// NewCreateCmd returns a Command instance for 'app polaris create' sub command
+func NewCreateCmd() *cobra.Command {
+	var appID, workspaceID, specFile string
+
+	cmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Create a polaris config for an application",
+		Long:    createPolarisLong,
+		Example: createPolarisExample,
 		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// 读取并解析 YAML 规格文件
