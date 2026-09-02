@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	instancehandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
@@ -53,19 +52,14 @@ At least one of --weight or --isolate must be specified.`,
   # Restore traffic weight
   bkms-cli app instance polaris --app myapp --env prod --instance-ids pod1 --weight 100`,
 		PreRunE: func(c *cobra.Command, a []string) error {
-			cmdutil.CommonPreRun(c, a)
+			if err := cmdutil.ResolveAppPreRunE(c, a); err != nil {
+				return err
+			}
 			weightSet = c.Flags().Changed("weight")
 			isolateSet = c.Flags().Changed("isolate")
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
 			return runInstancePolaris(cmd, appID, envName, instanceIDsStr, weight, isolate, weightSet, isolateSet)
 		},
 	}

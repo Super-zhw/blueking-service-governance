@@ -78,16 +78,8 @@ Use 'app get --app myapp -o yaml' to view the current config as a reference.`,
   #     pipelineID: p-abc123
   #     params:
   #       BKMS_IMAGE_TAG: latest`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			return runAppUpdateBuildConfig(cmd, appID, specFile)
 		},
 	}

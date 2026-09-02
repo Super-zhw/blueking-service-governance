@@ -27,7 +27,6 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/constant"
-	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/app"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -47,17 +46,9 @@ This command queries the admin command list from application instances
 via the admin port. Only Trpc type applications are supported.`,
 		Example: `  # List admin commands
   bkms-cli app instance list-admin-cmds --app myapp --env test --instance-ids pod1,pod2`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
 			if err != nil {
 				return errors.Wrap(err, "get instance IDs")
@@ -128,17 +119,9 @@ application type:
 
   # Execute Taf admin command (auto-detected by app type)
   bkms-cli app instance exec-admin-cmd --app myapp --env test --instance-ids pod1 --command "taf.viewversion"`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
-			resolvedAppID, err := apphandler.ResolveAppID(
-				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID,
-			)
-			if err != nil {
-				return errors.Wrap(err, "resolve app")
-			}
-			appID = resolvedAppID
-
 			instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
 			if err != nil {
 				return errors.Wrap(err, "get instance IDs")
