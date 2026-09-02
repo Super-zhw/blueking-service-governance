@@ -38,10 +38,16 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
+// optionalFlag access token flag
+type optionalFlag struct {
+	isSet bool
+	value string
+}
+
 // NewLoginCmd create login command
 func NewLoginCmd() *cobra.Command {
-	var accessToken string
 	var useBkTicket bool
+	accessToken := new(optionalFlag)
 
 	cmd := &cobra.Command{
 		Use:   "login",
@@ -50,11 +56,18 @@ func NewLoginCmd() *cobra.Command {
 			cmdutil.SkipAuthAnnotationKey: "true",
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if accessToken != "" && useBkTicket {
+			if accessToken.isSet && useBkTicket {
 				return errors.New("cannot use both access-token and bk-ticket at the same time")
 			}
-			if accessToken != "" {
-				return login(accessToken)
+			if accessToken.isSet {
+				token := strings.TrimSpace(accessToken.value)
+				if token != "" {
+					return login(token)
+				}
+				if len(args) > 0 {
+					return login(strings.TrimSpace(args[0]))
+				}
+				return loginByAccessToken()
 			}
 			if useBkTicket {
 				return loginByBkTicket()
@@ -63,8 +76,9 @@ func NewLoginCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&accessToken, "access-token", "", "BlueKing AccessToken")
+	cmd.Flags().Var(accessToken, "access-token", "BlueKing AccessToken")
 	cmd.Flags().BoolVar(&useBkTicket, "bk-ticket", false, "BlueKing User Ticket")
+	cmd.Flags().Lookup("access-token").NoOptDefVal = "interactive"
 	return cmd
 }
 
@@ -123,7 +137,7 @@ func loginByBkTicket() error {
 // login 用户登录
 func login(accessToken string) error {
 	fmt.Printf("User login... ")
-	username, err := client.New().ValidateAccessToken(accessToken)
+	username, err := client.New().ValidateAccessToken(strings.TrimSpace(accessToken))
 	if err != nil {
 		return errors.Wrap(err, "login with access token")
 	}
@@ -141,3 +155,17 @@ func login(accessToken string) error {
 func getAccessTokenURL() string {
 	return config.G.BkmsBaseURL + "/user_token/token?redirect_login=true"
 }
+
+func (f *optionalFlag) Set(s string) error {
+	if s == "interactive" {
+		f.isSet = true
+		return nil
+	}
+	f.value = s
+	f.isSet = true
+	return nil
+}
+
+func (f *optionalFlag) String() string { return f.value }
+
+func (f *optionalFlag) Type() string { return "string" }
