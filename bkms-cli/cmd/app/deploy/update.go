@@ -27,6 +27,7 @@ import (
 )
 
 const (
+	// updateDeployLong help text
 	updateDeployLong = `Update an existing deployment for an application.
 
 The --env flag supports multiple environment names separated by commas (e.g. --env prod,staging).
@@ -59,7 +60,7 @@ This command supports four update modes, specified via the 'updateMode' field in
     instanceIDs: Pod names separated by semicolon (required)
     Uses InplaceUpdate strategy by default.
 `
-
+	// updateDeployExample help text
 	updateDeployExample = `  # 1. Full update (update-full.yaml):
   updateMode: Full
   imageTag: v1.0.0

@@ -32,6 +32,7 @@ import (
 )
 
 const (
+	// updatePolarisLong help text
 	updatePolarisLong = `Update an existing polaris config from a YAML spec file (partial update).
 
 Only fields present in the YAML file will be updated; omitted fields remain unchanged.
@@ -66,7 +67,7 @@ Updatable YAML spec file fields:
   operator:           Owner of a platform-created polaris service (comma-separated).
                       Omitted field is left unchanged; empty string is rejected
 `
-
+	// updatePolarisExample help text
 	updatePolarisExample = `  # Update service port
   bkms-cli app polaris update --app my-app --name polaris-xxxxx -f update.yaml
 

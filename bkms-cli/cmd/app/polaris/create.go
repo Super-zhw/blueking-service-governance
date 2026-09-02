@@ -32,6 +32,7 @@ import (
 )
 
 const (
+	// createPolarisLong help text
 	createPolarisLong = `Create a new polaris config for an application from a YAML spec file.
 
 The YAML spec file structure is consistent with the backend API request body.
@@ -66,7 +67,7 @@ YAML spec file fields:
   serviceLabels:      Labels applied to ALL registered polaris instances (map[string]string).
                       Can be used for polaris routing rules and traffic management
 `
-
+	// createPolarisExample help text
 	createPolarisExample = `  # Create a polaris config from a YAML spec file:
   bkms-cli app polaris create --app my-app -f polaris.yaml
 
