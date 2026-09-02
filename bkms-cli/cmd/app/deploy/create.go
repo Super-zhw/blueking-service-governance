@@ -27,14 +27,9 @@ import (
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
-// NewCreateCmd returns a Command instance for 'app deploy create' sub command
-func NewCreateCmd() *cobra.Command {
-	var appID, envName, deploySpecFile, workspaceID string
-
-	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a new application deploy",
-		Long: `Create a new deploy for an application.
+const (
+	// createDeployLong 抽离方法内，避免超过 80 行数
+	createDeployLong = `Create a new deploy for an application.
 
 Supported application types: helm, trpc, taf.
 
@@ -59,8 +54,11 @@ Deploy file fields by type:
 
   [taf]
     imageTag:      Image tag (required)
-    replicas:      Number of replicas, >= 1 (required)`,
-		Example: `  # 1. Helm deploy file (helm-deploy.yaml):
+    replicas:      Number of replicas, >= 1 (required)
+`
+
+	// createDeployExample 抽离方法内，避免超过 80 行数
+	createDeployExample = `  # 1. Helm deploy file (helm-deploy.yaml):
   imageTag: v1.0.0
   chartVersion: 1.2.3
   valuesFile: values-prod
@@ -87,14 +85,26 @@ Deploy file fields by type:
   bkms-cli app deploy create --app my-app --env prod -f taf-deploy.yaml
 
   # 4. Deploy to multiple environments at once
-  bkms-cli app deploy create --app my-app --env prod,staging,test -f trpc-deploy.yaml`,
+  bkms-cli app deploy create --app my-app --env prod,staging,test -f trpc-deploy.yaml
+`
+)
+
+// NewCreateCmd returns a Command instance for 'app deploy create' sub command
+func NewCreateCmd() *cobra.Command {
+	var appID, envName, deploySpecFile, workspaceID string
+
+	cmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Create a new application deploy",
+		Long:    createDeployLong,
+		Example: createDeployExample,
 		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
-			if err := deploy.CreateDeploy(cmd.Context(), workspaceID, appID, envName, deploySpecFile); err != nil {
+			if err := deploy.CreateDeploy(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID, envName, deploySpecFile,
+			); err != nil {
 				return errors.Wrap(err, "create app deploy")
 			}
-
 			return nil
 		},
 	}

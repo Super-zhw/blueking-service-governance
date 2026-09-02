@@ -31,14 +31,8 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
-// NewUpdateCmd returns a Command instance for 'app polaris update' sub command
-func NewUpdateCmd() *cobra.Command {
-	var appID, workspaceID, configName, specFile string
-
-	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update a polaris config for an application",
-		Long: `Update an existing polaris config from a YAML spec file (partial update).
+const (
+	updatePolarisLong = `Update an existing polaris config from a YAML spec file (partial update).
 
 Only fields present in the YAML file will be updated; omitted fields remain unchanged.
 This allows you to modify specific aspects of the config without affecting others.
@@ -70,8 +64,10 @@ Updatable YAML spec file fields:
   scopeEnvNames:      Replace the environments where this config takes effect ([]string).
                       An empty list clears the scope
   operator:           Owner of a platform-created polaris service (comma-separated).
-                      Omitted field is left unchanged; empty string is rejected`,
-		Example: `  # Update service port
+                      Omitted field is left unchanged; empty string is rejected
+`
+
+	updatePolarisExample = `  # Update service port
   bkms-cli app polaris update --app my-app --name polaris-xxxxx -f update.yaml
 
   # Example update.yaml (change port):
@@ -88,7 +84,19 @@ Updatable YAML spec file fields:
   #   region: shenzhen
 
   # Example update.yaml (change owner of a platform-created service):
-  # operator: zhangsan,lisi`,
+  # operator: zhangsan,lisi
+`
+)
+
+// NewUpdateCmd returns a Command instance for 'app polaris update' sub command
+func NewUpdateCmd() *cobra.Command {
+	var appID, workspaceID, configName, specFile string
+
+	cmd := &cobra.Command{
+		Use:     "update",
+		Short:   "Update a polaris config for an application",
+		Long:    updatePolarisLong,
+		Example: updatePolarisExample,
 		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// 读取并解析 YAML 规格文件
@@ -109,8 +117,7 @@ Updatable YAML spec file fields:
 			delete(body, "direct")
 
 			// 调用后端 API 更新北极星配置
-			err = client.New().PatchAppPolarisConfig(cmd.Context(), appID, configName, body)
-			if err != nil {
+			if err = client.New().PatchAppPolarisConfig(cmd.Context(), appID, configName, body); err != nil {
 				return errors.Wrap(err, "update app polaris config")
 			}
 

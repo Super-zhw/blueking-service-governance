@@ -26,19 +26,8 @@ import (
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
-// NewUpdateCmd returns a Command instance for 'app deploy update' sub command
-// 更新模式：
-// Full update：全量更新；更新内容：镜像Tag+配置；该更新模式会重建Workload、Pod。
-// Config update：全量更新；更新内容：仅配置；该更新模式会重建Workload、Pod。
-// Image update： 全量更新；更新内容：仅镜像Tag + 更新策略，策略：RollingUpdate（滚动更新，重建 Pod）、InplaceUpdate（原地更新，重启 Pod）
-// Grayscale update： 灰度更新，更新内容：镜像Tag + 实例名称，默认为 InplaceUpdate（原地更新，重启 Pod）
-func NewUpdateCmd() *cobra.Command {
-	var appID, envName, updateSpecFile, workspaceID string
-
-	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update an existing application deployment",
-		Long: `Update an existing deployment for an application.
+const (
+	updateDeployLong = `Update an existing deployment for an application.
 
 The --env flag supports multiple environment names separated by commas (e.g. --env prod,staging).
 When multiple environments are specified, the update will be executed for each environment sequentially.
@@ -68,8 +57,10 @@ This command supports four update modes, specified via the 'updateMode' field in
   [Grayscale] - Grayscale/Canary update for specific instances
     imageTag:      Image tag (required)
     instanceIDs: Pod names separated by semicolon (required)
-    Uses InplaceUpdate strategy by default.`,
-		Example: `  # 1. Full update (update-full.yaml):
+    Uses InplaceUpdate strategy by default.
+`
+
+	updateDeployExample = `  # 1. Full update (update-full.yaml):
   updateMode: Full
   imageTag: v1.0.0
 
@@ -107,14 +98,31 @@ This command supports four update modes, specified via the 'updateMode' field in
   bkms-cli app deploy update --workspace ws-demo --app my-app --env prod -f update-full.yaml
 
   # 5. Update multiple environments at once
-  bkms-cli app deploy update --app my-app --env prod,staging,test -f update-image.yaml`,
+  bkms-cli app deploy update --app my-app --env prod,staging,test -f update-image.yaml
+`
+)
+
+// NewUpdateCmd returns a Command instance for 'app deploy update' sub command
+// 更新模式：
+// Full update：全量更新；更新内容：镜像Tag+配置；该更新模式会重建Workload、Pod。
+// Config update：全量更新；更新内容：仅配置；该更新模式会重建Workload、Pod。
+// Image update： 全量更新；更新内容：仅镜像Tag + 更新策略，策略：RollingUpdate（滚动更新，重建 Pod）、InplaceUpdate（原地更新，重启 Pod）
+// Grayscale update： 灰度更新，更新内容：镜像Tag + 实例名称，默认为 InplaceUpdate（原地更新，重启 Pod）
+func NewUpdateCmd() *cobra.Command {
+	var appID, envName, updateSpecFile, workspaceID string
+
+	cmd := &cobra.Command{
+		Use:     "update",
+		Short:   "Update an existing application deployment",
+		Long:    updateDeployLong,
+		Example: updateDeployExample,
 		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
-			if err := deploy.UpdateDeploy(cmd.Context(), workspaceID, appID, envName, updateSpecFile); err != nil {
+			if err := deploy.UpdateDeploy(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID, envName, updateSpecFile,
+			); err != nil {
 				return errors.Wrap(err, "update app deploy")
 			}
-
 			return nil
 		},
 	}
