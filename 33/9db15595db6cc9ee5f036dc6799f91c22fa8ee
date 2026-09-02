@@ -1,0 +1,18 @@
+bkms-cli/cmd/app/instance/admin_cmd.go
+  h_2321bec5d80d15 128-154
+bkms-cli/pkg/handler/instance/admin_cmd.go
+  h_2321bec5d80d15 24,37,45,50,52,57-91
+bkms-cli/pkg/handler/instance/types.go
+  h_2321bec5d80d15 112-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "339db15595db6cc9ee5f036dc6799f91c22fa8ee",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
