@@ -29,7 +29,7 @@ import (
 
 // NewViewCmd returns a Command instance for 'appspec dev-mode view' sub command.
 func NewViewCmd() *cobra.Command {
-	var appID, workspaceID, envName, outputFormat string
+	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "view",
@@ -55,8 +55,7 @@ and are read-only.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

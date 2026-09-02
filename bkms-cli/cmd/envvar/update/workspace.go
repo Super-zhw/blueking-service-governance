@@ -117,7 +117,7 @@ Only specified fields will be updated.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&key, "key", "", "current environment variable key (required)")
 	cmd.Flags().StringVar(&updatedKey, "updated-key", "", "new environment variable key (optional, defaults to --key)")
 	cmd.Flags().StringVar(&scope, "scope", "", "scope in format 'workspace' or 'envType:<value>' (default: workspace)")

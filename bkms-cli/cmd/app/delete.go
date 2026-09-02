@@ -30,7 +30,6 @@ import (
 // NewDeleteCmd returns a Command instance for 'app delete' sub command
 func NewDeleteCmd() *cobra.Command {
 	var appID string
-	var workspaceID string
 	var yes bool
 
 	cmd := &cobra.Command{
@@ -73,8 +72,7 @@ WARNING: This operation is irreversible. The application and all its configurati
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "skip confirmation prompt")
 	_ = cmd.MarkFlagRequired("app")
 

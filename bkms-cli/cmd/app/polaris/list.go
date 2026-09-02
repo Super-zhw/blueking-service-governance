@@ -31,7 +31,7 @@ import (
 
 // NewListCmd returns a Command instance for 'app polaris list' sub command
 func NewListCmd() *cobra.Command {
-	var appID, workspaceID, outputFormat string
+	var appID, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -65,8 +65,7 @@ Use -o yaml or -o json to see envWeights, envStates, warnings, and serviceLabels
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 
 	_ = cmd.MarkFlagRequired("app")

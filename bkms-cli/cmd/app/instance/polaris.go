@@ -33,7 +33,7 @@ import (
 
 // NewPolarisCmd returns a Command instance for 'app instance polaris' sub command
 func NewPolarisCmd() *cobra.Command {
-	var appID, workspaceID, envName, instanceIDsStr string
+	var appID, envName, instanceIDsStr string
 	var weight int
 	var isolate bool
 	var weightSet, isolateSet bool
@@ -64,8 +64,7 @@ At least one of --weight or --isolate must be specified.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "comma-separated instance IDs (required)")
 	cmd.Flags().IntVar(&weight, "weight", 0, "target Polaris traffic weight (0=drain, 100=normal)")

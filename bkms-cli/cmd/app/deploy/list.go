@@ -84,7 +84,7 @@ is optional. Otherwise, you must specify it explicitly.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(&trafficLaneName, "trafficLane", "", "traffic lane name")

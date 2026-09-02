@@ -71,7 +71,7 @@ The --env flag specifies the target environment name.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&key, "key", "", "environment variable key (required)")
 	cmd.Flags().StringVar(&value, "value", "", "environment variable value")

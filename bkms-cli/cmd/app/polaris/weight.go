@@ -29,7 +29,7 @@ import (
 
 // NewWeightCmd returns a Command instance for 'app polaris weight' sub command
 func NewWeightCmd() *cobra.Command {
-	var appID, workspaceID, configName, envName string
+	var appID, configName, envName string
 	var weight int32
 
 	cmd := &cobra.Command{
@@ -65,8 +65,7 @@ Weight range: 0-10000 (0 = drain all traffic, 100 = normal weight).`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&configName, "config", "", "Polaris config name (required)")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().Int32Var(&weight, "weight", 0, "global weight for all instances (0-10000, required)")

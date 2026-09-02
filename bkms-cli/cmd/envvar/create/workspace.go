@@ -84,7 +84,7 @@ If --scope is not specified, the variable is created at workspace level.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&key, "key", "", "environment variable key (required)")
 	cmd.Flags().StringVar(&value, "value", "", "environment variable value")
 	cmd.Flags().StringVar(&scope, "scope", "", "scope in format 'workspace' or 'envType:<value>' (default: workspace)")

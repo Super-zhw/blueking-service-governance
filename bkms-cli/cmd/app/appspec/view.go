@@ -28,7 +28,7 @@ import (
 
 // NewViewCmd creates the view subcommand (query all sections at once).
 func NewViewCmd() *cobra.Command {
-	var appID, workspaceID, envName, outputFormat string
+	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "view",
@@ -52,8 +52,7 @@ Start command is always shown as global config regardless of --env.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

@@ -34,7 +34,7 @@ const (
 
 // NewAppCmd returns a Command instance for 'envvar export app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, workspaceID, scope, envName, filePath string
+	var appID, scope, envName, filePath string
 
 	cmd := &cobra.Command{
 		Use:   "app",
@@ -77,8 +77,7 @@ Use -f to write it to a file.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&scope, "scope", exportScopeAppDefined,
 		"export scope: appDefined (default) or effectiveByEnv")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required when scope=effectiveByEnv)")

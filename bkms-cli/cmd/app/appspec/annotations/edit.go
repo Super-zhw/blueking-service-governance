@@ -31,7 +31,7 @@ import (
 
 // NewEditCmd returns a Command instance for 'appspec annotations edit' sub command.
 func NewEditCmd() *cobra.Command {
-	var appID, workspaceID, envName, specFile string
+	var appID, envName, specFile string
 
 	cmd := &cobra.Command{
 		Use:   "edit",
@@ -71,8 +71,7 @@ When --env is provided, this command edits the annotations for that specific env
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "YAML spec file path (required)")
 

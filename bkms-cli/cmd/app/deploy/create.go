@@ -109,7 +109,7 @@ func NewCreateCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVarP(&deploySpecFile, "deploy-spec-file", "f", "", "deploy spec file path")

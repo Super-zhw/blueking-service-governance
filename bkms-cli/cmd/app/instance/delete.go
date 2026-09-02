@@ -33,7 +33,7 @@ import (
 
 // NewInstanceDeleteCmd returns a Command instance for 'app instance delete' sub command
 func NewInstanceDeleteCmd() *cobra.Command {
-	var appID, workspaceID, envName, instanceIDsStr string
+	var appID, envName, instanceIDsStr string
 	var yes bool
 
 	cmd := &cobra.Command{
@@ -54,8 +54,7 @@ The fleet will have fewer instances than expected until you manually restore rep
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "comma-separated instance IDs (required)")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "skip confirmation prompt")

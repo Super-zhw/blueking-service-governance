@@ -31,7 +31,7 @@ import (
 
 // NewListCmd returns a Command instance for 'app component list' sub command
 func NewListCmd() *cobra.Command {
-	var appID, workspaceID, kind, outputFormat string
+	var appID, kind, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -65,8 +65,7 @@ Use --kind to filter. Only trpc and taf apps are supported.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&kind, "kind", "", "filter by kind: ref | inst")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

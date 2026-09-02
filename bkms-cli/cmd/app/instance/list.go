@@ -32,7 +32,7 @@ import (
 
 // NewListCmd returns a Command instance for 'app instance list' sub command
 func NewListCmd() *cobra.Command {
-	var appID, workspaceID, envName, outputFormat string
+	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -68,8 +68,7 @@ and environment, including instance ID, IP, image, status, and age.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

@@ -31,7 +31,7 @@ import (
 
 // NewListVersionsCmd returns a Command instance for 'app app-cfg-file list-versions' sub command.
 func NewListVersionsCmd() *cobra.Command {
-	var appID, workspaceID, envName, cfgFileName, outputFormat string
+	var appID, envName, cfgFileName, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list-versions",
@@ -72,8 +72,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

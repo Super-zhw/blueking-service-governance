@@ -30,7 +30,7 @@ import (
 
 // NewRollbackVersionCmd returns a Command instance for 'app app-cfg-file rollback-version' sub command.
 func NewRollbackVersionCmd() *cobra.Command {
-	var appID, workspaceID, envName, cfgFileName, versionID, description string
+	var appID, envName, cfgFileName, versionID, description string
 	var version int64
 
 	cmd := &cobra.Command{
@@ -85,8 +85,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

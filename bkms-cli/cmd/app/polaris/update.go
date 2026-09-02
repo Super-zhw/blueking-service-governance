@@ -91,7 +91,7 @@ Updatable YAML spec file fields:
 
 // NewUpdateCmd returns a Command instance for 'app polaris update' sub command
 func NewUpdateCmd() *cobra.Command {
-	var appID, workspaceID, configName, specFile string
+	var appID, configName, specFile string
 
 	cmd := &cobra.Command{
 		Use:     "update",
@@ -128,8 +128,7 @@ func NewUpdateCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().
 		StringVar(&configName, "name", "", "polaris config name from list (e.g. polaris-xxxxx), not polarisName")
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "polaris update spec file path (YAML)")

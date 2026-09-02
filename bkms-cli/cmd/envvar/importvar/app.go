@@ -31,7 +31,7 @@ import (
 
 // NewAppCmd returns a Command instance for 'envvar import app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, workspaceID, filePath, outputFormat string
+	var appID, filePath, outputFormat string
 	var preview bool
 
 	cmd := &cobra.Command{
@@ -81,8 +81,7 @@ Use --preview to see what would be imported without making any changes.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&filePath, "file", "f", "", "path to the .env file to import")
 	cmd.Flags().BoolVar(&preview, "preview", false, "preview import without making changes")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)

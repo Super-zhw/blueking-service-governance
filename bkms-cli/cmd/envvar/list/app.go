@@ -32,7 +32,7 @@ import (
 
 // NewAppCmd returns a Command instance for 'envvar list app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, workspaceID, envName, outputFormat string
+	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "app",
@@ -78,8 +78,7 @@ Sensitive values are masked with '******'.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, lists effective vars when specified)")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

@@ -30,7 +30,7 @@ import (
 
 // NewDeleteCmd returns a Command instance for 'app polaris delete' sub command
 func NewDeleteCmd() *cobra.Command {
-	var appID, workspaceID, configName string
+	var appID, configName string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
@@ -59,8 +59,7 @@ Cluster-side instance deregistration takes effect on the next deployment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().
 		StringVar(&configName, "name", "", "polaris config name from list (e.g. polaris-xxxxx), not polarisName")
 

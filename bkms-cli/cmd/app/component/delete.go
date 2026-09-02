@@ -30,7 +30,7 @@ import (
 
 // NewDeleteCmd returns a Command instance for 'app component delete' sub command
 func NewDeleteCmd() *cobra.Command {
-	var appID, workspaceID, compName string
+	var appID, compName string
 
 	cmd := &cobra.Command{
 		Use:   "delete",
@@ -57,8 +57,7 @@ are supported.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&compName, "name", "", "application-local component instance name")
 
 	_ = cmd.MarkFlagRequired("app")

@@ -31,7 +31,7 @@ import (
 
 // NewDisableCmd returns a Command instance for 'appspec dev-mode disable' sub command.
 func NewDisableCmd() *cobra.Command {
-	var appID, workspaceID, envName string
+	var appID, envName string
 
 	cmd := &cobra.Command{
 		Use:   "disable",
@@ -54,8 +54,7 @@ After disabling, the application will need to be redeployed to take effect.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 
 	_ = cmd.MarkFlagRequired("app")

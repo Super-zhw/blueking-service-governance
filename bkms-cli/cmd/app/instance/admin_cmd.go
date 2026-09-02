@@ -85,7 +85,7 @@ via the admin port. Only Trpc type applications are supported.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "instance IDs, comma separated")
@@ -155,7 +155,7 @@ application type:
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "instance IDs, comma separated")

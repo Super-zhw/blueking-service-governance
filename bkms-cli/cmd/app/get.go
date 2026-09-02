@@ -32,7 +32,7 @@ import (
 
 // NewGetCmd returns a Command instance for 'app get' sub command
 func NewGetCmd() *cobra.Command {
-	var appID, workspaceID, outputFormat string
+	var appID, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -69,8 +69,7 @@ The output in YAML format is compatible with 'app create -f', enabling a read-mo
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 
 	_ = cmd.MarkFlagRequired("app")

@@ -31,7 +31,6 @@ import (
 func NewPortForwardCmd() *cobra.Command {
 	// opts is the options for port-forward
 	var opts handler.PortForwardOptions
-	var workspaceID string
 
 	cmd := &cobra.Command{
 		Use:   "port-forward [LOCAL_PORT:]REMOTE_PORT",
@@ -65,8 +64,7 @@ Port argument format:
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.AppID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &opts.AppID)
 	cmd.Flags().StringVar(&opts.EnvName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&opts.InstanceID, "instance", "", "target Pod instance ID (required)")
 	cmd.Flags().StringVar(&opts.LocalAddress, "local-address", "127.0.0.1", "local listening address")

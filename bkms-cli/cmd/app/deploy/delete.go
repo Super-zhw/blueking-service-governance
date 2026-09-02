@@ -31,7 +31,7 @@ import (
 
 // NewDeployDeleteCmd returns a Command instance for 'app deploy delete' sub command
 func NewDeployDeleteCmd() *cobra.Command {
-	var appID, workspaceID, envName, deployID string
+	var appID, envName, deployID string
 	var yes bool
 
 	cmd := &cobra.Command{
@@ -74,8 +74,7 @@ For trpc and taf applications, the entire environment deployment is removed.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&deployID, "deploy-id", "", "deploy record ID (required for helm apps)")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "skip confirmation prompt")

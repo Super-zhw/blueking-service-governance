@@ -32,7 +32,7 @@ import (
 
 // NewListCmd returns a Command instance for 'app build list' sub command
 func NewListCmd() *cobra.Command {
-	var appID, workspaceID, keyword, outputFormat string
+	var appID, keyword, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -65,8 +65,7 @@ specified application. You can filter results using keywords.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&keyword, "keyword", "", "filter by keyword")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

@@ -32,7 +32,7 @@ import (
 
 // NewAppCmd returns a Command instance for 'envvar create for app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, workspaceID, key, value, description string
+	var appID, key, value, description string
 	var sensitive bool
 
 	cmd := &cobra.Command{
@@ -69,8 +69,7 @@ The key must be unique within the application.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&key, "key", "", "environment variable key (required)")
 	cmd.Flags().StringVar(&value, "value", "", "environment variable value")
 	cmd.Flags().StringVar(&description, "description", "", "variable description")

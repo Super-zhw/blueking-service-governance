@@ -35,7 +35,7 @@ import (
 
 // NewPrecheckCmd returns a Command instance for 'app deploy precheck' sub command
 func NewPrecheckCmd() *cobra.Command {
-	var appID, workspaceID, envName, outputFormat string
+	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "precheck",
@@ -58,8 +58,7 @@ Only supported for trpc and taf application types.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 

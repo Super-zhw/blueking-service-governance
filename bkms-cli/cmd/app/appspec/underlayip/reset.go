@@ -31,7 +31,7 @@ import (
 
 // NewResetCmd returns a Command instance for 'appspec underlay-ip reset' sub command.
 func NewResetCmd() *cobra.Command {
-	var appID, workspaceID, envName string
+	var appID, envName string
 
 	cmd := &cobra.Command{
 		Use:   "reset",
@@ -56,8 +56,7 @@ func NewResetCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required for reset)")
 
 	_ = cmd.MarkFlagRequired("app")

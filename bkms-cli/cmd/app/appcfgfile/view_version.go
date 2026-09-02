@@ -31,7 +31,7 @@ import (
 
 // NewViewVersionCmd returns a Command instance for 'app app-cfg-file view-version' sub command.
 func NewViewVersionCmd() *cobra.Command {
-	var appID, workspaceID, envName, cfgFileName, versionID, outputFormat string
+	var appID, envName, cfgFileName, versionID, outputFormat string
 	var version int64
 
 	cmd := &cobra.Command{
@@ -79,8 +79,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

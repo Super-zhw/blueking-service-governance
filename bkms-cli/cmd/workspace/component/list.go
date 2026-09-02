@@ -68,7 +68,7 @@ is optional.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 
 	return cmd

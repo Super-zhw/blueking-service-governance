@@ -31,7 +31,7 @@ import (
 
 // NewCreateCmd returns a Command instance for 'app build create' sub command
 func NewCreateCmd() *cobra.Command {
-	var appID, workspaceID, branch, imageTag string
+	var appID, branch, imageTag string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -58,8 +58,7 @@ the provided branch and image tag.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&branch, "branch", "", "code branch to build")
 	cmd.Flags().StringVar(&imageTag, "image-tag", "", "image tag to build")
 

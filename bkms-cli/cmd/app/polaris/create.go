@@ -94,7 +94,7 @@ YAML spec file fields:
 
 // NewCreateCmd returns a Command instance for 'app polaris create' sub command
 func NewCreateCmd() *cobra.Command {
-	var appID, workspaceID, specFile string
+	var appID, specFile string
 
 	cmd := &cobra.Command{
 		Use:     "create",
@@ -132,8 +132,7 @@ func NewCreateCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "polaris spec file path (YAML)")
 
 	_ = cmd.MarkFlagRequired("app")

@@ -59,7 +59,7 @@ Valid types: development | test | staging | production`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&displayName, "display-name", "", "new display name")
 	cmd.Flags().StringVar(&envType, "type", "", "new environment type: development | test | staging | production")

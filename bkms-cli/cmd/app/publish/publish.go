@@ -31,7 +31,7 @@ import (
 
 // NewCmd 创建 publish 命令
 func NewCmd() *cobra.Command {
-	var appID, workspaceID, envName, file, instances string
+	var appID, envName, file, instances string
 	var publishAll bool
 
 	cmd := &cobra.Command{
@@ -77,8 +77,7 @@ bkms-cli app publish --app myapp --env stage -f /path/to/binary --all`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "Environment name (required)")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to the binary file to publish (required)")
 	cmd.Flags().

@@ -29,7 +29,7 @@ import (
 
 // NewBuildConfigCmd returns a Command instance for 'app update build-config' sub command
 func NewBuildConfigCmd() *cobra.Command {
-	var appID, workspaceID, specFile string
+	var appID, specFile string
 
 	cmd := &cobra.Command{
 		Use:   "build-config",
@@ -84,8 +84,7 @@ Use 'app get --app myapp -o yaml' to view the current config as a reference.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "YAML spec file path (required)")
 
 	_ = cmd.MarkFlagRequired("app")

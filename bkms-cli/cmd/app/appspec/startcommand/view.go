@@ -31,7 +31,7 @@ import (
 
 // NewViewCmd returns a Command instance for 'appspec start-command view' sub command.
 func NewViewCmd() *cobra.Command {
-	var appID, workspaceID, outputFormat string
+	var appID, outputFormat string
 
 	cmd := &cobra.Command{
 		Use:   "view",
@@ -66,8 +66,7 @@ Displays the current container entrypoint command and arguments for the applicat
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
 
 	_ = cmd.MarkFlagRequired("app")

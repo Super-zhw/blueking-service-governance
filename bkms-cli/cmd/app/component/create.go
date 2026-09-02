@@ -30,7 +30,7 @@ import (
 
 // NewCreateCmd returns a Command instance for 'app component create' sub command
 func NewCreateCmd() *cobra.Command {
-	var appID, workspaceID, refName, compName string
+	var appID, refName, compName string
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -62,8 +62,7 @@ The change takes effect after the next deployment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&refName, "ref", "", "workspace component instance name")
 	cmd.Flags().StringVar(&compName, "name", "", "application-local component instance name")
 

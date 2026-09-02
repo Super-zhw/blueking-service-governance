@@ -92,3 +92,15 @@ func requireWorkspace(cmd *cobra.Command) {
 		_ = cmd.MarkFlagRequired("workspace")
 	}
 }
+
+// AddAppFlags 注册 --app 和 --workspace flag
+// workspaceID 仅供 ResolveAppPreRunE 使用，不绑定变量。
+func AddAppFlags(cmd *cobra.Command, appID *string) {
+	cmd.Flags().StringVar(appID, "app", "", "application ID or name")
+	cmd.Flags().String("workspace", "", "workspace ID")
+}
+
+// AddWorkspaceFlag 注册 --workspace flag 并绑定变量（供 RunE 中直接使用 workspaceID 的场景）。
+func AddWorkspaceFlag(cmd *cobra.Command, workspaceID *string) {
+	cmd.Flags().StringVar(workspaceID, "workspace", "", "workspace ID")
+}

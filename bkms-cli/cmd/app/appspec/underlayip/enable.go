@@ -31,7 +31,7 @@ import (
 
 // NewEnableCmd returns a Command instance for 'appspec underlay-ip enable' sub command.
 func NewEnableCmd() *cobra.Command {
-	var appID, workspaceID, envName string
+	var appID, envName string
 
 	cmd := &cobra.Command{
 		Use:   "enable",
@@ -59,8 +59,7 @@ func NewEnableCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
 
 	_ = cmd.MarkFlagRequired("app")

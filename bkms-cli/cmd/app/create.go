@@ -144,7 +144,7 @@ func NewCreateCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "app spec file path (YAML)")
 
 	_ = cmd.MarkFlagRequired("file")

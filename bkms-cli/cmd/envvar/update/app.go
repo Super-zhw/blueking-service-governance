@@ -32,7 +32,7 @@ import (
 
 // NewAppCmd returns a Command instance for 'envvar update app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, workspaceID, key, updatedKey, value, description string
+	var appID, key, updatedKey, value, description string
 	var sensitive, noSensitive bool
 
 	cmd := &cobra.Command{
@@ -92,8 +92,7 @@ Use --sensitive to mark as sensitive, or --no-sensitive to unmark.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&key, "key", "", "current environment variable key (required)")
 	cmd.Flags().StringVar(&updatedKey, "updated-key", "", "new environment variable key (optional, defaults to --key)")
 	cmd.Flags().StringVar(&value, "value", "", "environment variable value")

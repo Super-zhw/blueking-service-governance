@@ -31,7 +31,7 @@ import (
 
 // NewEnableCmd returns a Command instance for 'appspec dev-mode enable' sub command.
 func NewEnableCmd() *cobra.Command {
-	var appID, workspaceID, envName string
+	var appID, envName string
 
 	cmd := &cobra.Command{
 		Use:   "enable",
@@ -55,8 +55,7 @@ production environments do not support development mode.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 
 	_ = cmd.MarkFlagRequired("app")

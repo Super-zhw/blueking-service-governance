@@ -67,7 +67,7 @@ Valid types: development | test | staging | production`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "YAML spec file path (required)")
 
 	_ = cmd.MarkFlagRequired("file")

@@ -30,7 +30,7 @@ import (
 
 // NewAppCmd returns a Command instance for 'envvar delete app' sub command.
 func NewAppCmd() *cobra.Command {
-	var appID, workspaceID, key string
+	var appID, key string
 
 	cmd := &cobra.Command{
 		Use:   "app",
@@ -49,8 +49,7 @@ func NewAppCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&key, "key", "", "environment variable key (required)")
 
 	_ = cmd.MarkFlagRequired("app")

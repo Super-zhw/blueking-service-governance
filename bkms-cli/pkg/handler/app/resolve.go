@@ -41,6 +41,9 @@ func ResolveAppID(ctx context.Context, workspaceID, input string) (string, error
 	if workspaceID == "" {
 		return input, nil
 	}
+	if input == "" {
+		return "", errors.New("app cannot be empty")
+	}
 
 	apps, err := client.New().ListApps(ctx, workspaceID)
 	if err != nil {
@@ -74,7 +77,7 @@ func resolveAppID(apps []client.AppMinimal, input string) (string, error) {
 }
 
 // resolveByPrefix 前缀匹配
-// 在精确匹配均未命中时，按 app ID 前缀最长匹配规则查找。
+// 按 ID 长度升序排序后取最短的 ID，即 input 覆盖比例最高的匹配
 // app ID 的结构为 name + "-" + 5位随机后缀，因此用户输入 name 本身就是 ID 的前缀。
 func resolveByPrefix(apps []client.AppMinimal, input string) (string, error) {
 	hits := lo.Filter(apps, func(a client.AppMinimal, _ int) bool {

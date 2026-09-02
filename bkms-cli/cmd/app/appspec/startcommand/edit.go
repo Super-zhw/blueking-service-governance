@@ -30,7 +30,7 @@ import (
 
 // NewEditCmd returns a Command instance for 'appspec start-command edit' sub command.
 func NewEditCmd() *cobra.Command {
-	var appID, workspaceID, specFile string
+	var appID, specFile string
 
 	cmd := &cobra.Command{
 		Use:   "edit",
@@ -71,8 +71,7 @@ unless explicitly overridden in the YAML file.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID or name (required)")
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "path to YAML spec file (required)")
 
 	_ = cmd.MarkFlagRequired("app")
