@@ -38,16 +38,10 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
-// optionalFlag access token flag
-type optionalFlag struct {
-	isSet bool
-	value string
-}
-
 // NewLoginCmd create login command
 func NewLoginCmd() *cobra.Command {
 	var useBkTicket bool
-	accessToken := new(optionalFlag)
+	var useAccessToken bool
 
 	cmd := &cobra.Command{
 		Use:   "login",
@@ -56,29 +50,27 @@ func NewLoginCmd() *cobra.Command {
 			cmdutil.SkipAuthAnnotationKey: "true",
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if accessToken.isSet && useBkTicket {
+			if useAccessToken && useBkTicket {
 				return errors.New("cannot use both access-token and bk-ticket at the same time")
 			}
-			if accessToken.isSet {
-				token := strings.TrimSpace(accessToken.value)
-				if token != "" {
-					return login(token)
-				}
-				if len(args) > 0 {
-					return login(strings.TrimSpace(args[0]))
-				}
-				return loginByAccessToken()
-			}
 			if useBkTicket {
+				// 交互式登录
 				return loginByBkTicket()
+			}
+			if useAccessToken {
+				if len(args) > 0 {
+					// 直接登录
+					return login(args[0])
+				}
+				// 交互式登录
+				return loginByAccessToken()
 			}
 			return loginByBrowser()
 		},
 	}
 
-	cmd.Flags().Var(accessToken, "access-token", "BlueKing AccessToken")
+	cmd.Flags().BoolVar(&useAccessToken, "access-token", false, "BlueKing AccessToken")
 	cmd.Flags().BoolVar(&useBkTicket, "bk-ticket", false, "BlueKing User Ticket")
-	cmd.Flags().Lookup("access-token").NoOptDefVal = "interactive"
 	return cmd
 }
 
@@ -155,17 +147,3 @@ func login(accessToken string) error {
 func getAccessTokenURL() string {
 	return config.G.BkmsBaseURL + "/user_token/token?redirect_login=true"
 }
-
-func (f *optionalFlag) Set(s string) error {
-	if s == "interactive" {
-		f.isSet = true
-		return nil
-	}
-	f.value = s
-	f.isSet = true
-	return nil
-}
-
-func (f *optionalFlag) String() string { return f.value }
-
-func (f *optionalFlag) Type() string { return "string" }
