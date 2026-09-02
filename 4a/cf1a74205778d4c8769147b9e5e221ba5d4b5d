@@ -1,0 +1,14 @@
+bkms-cli/cmd/auth/login.go
+  h_2321bec5d80d15 44,53,56-60,62-63,65,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "4acf1a74205778d4c8769147b9e5e221ba5d4b5d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
