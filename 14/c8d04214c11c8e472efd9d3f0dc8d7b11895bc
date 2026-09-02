@@ -1,0 +1,152 @@
+bkms-cli/npm/package-lock.json
+  h_2321bec5d80d15 3,9
+bkms-cli/npm/package.json
+  h_2321bec5d80d15 3
+bkms-cli/cmd/app/appcfgfile/delete_version.go
+  h_2321bec5d80d15 26,34,38-39,54,56-63,79-80
+bkms-cli/cmd/app/appcfgfile/edit.go
+  h_2321bec5d80d15 29,36,40-41,61,63-70,100-101
+bkms-cli/cmd/app/appcfgfile/list_versions.go
+  h_2321bec5d80d15 26,35,38-39,56,58-65,84-85
+bkms-cli/cmd/app/appcfgfile/rollback_version.go
+  h_2321bec5d80d15 26,34,38-39,57,59-66,97-98
+bkms-cli/cmd/app/appcfgfile/view.go
+  h_2321bec5d80d15 28,36,39-40,57,59-66,85-86
+bkms-cli/cmd/app/appcfgfile/view_version.go
+  h_2321bec5d80d15 26,35,39-40,58,60-67,91-92
+bkms-cli/cmd/app/appspec/annotations/edit.go
+  h_2321bec5d80d15 28,35,38-39,54,56-63,83-84
+bkms-cli/cmd/app/appspec/annotations/reset.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,69-70
+bkms-cli/cmd/app/appspec/annotations/view.go
+  h_2321bec5d80d15 22,26,34,37-38,51,53-60,65-66
+bkms-cli/cmd/app/appspec/devmode/disable.go
+  h_2321bec5d80d15 28,35,38-39,45,47-54,66-67
+bkms-cli/cmd/app/appspec/devmode/enable.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,67-68
+bkms-cli/cmd/app/appspec/devmode/reset.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,67-68
+bkms-cli/cmd/app/appspec/devmode/view.go
+  h_2321bec5d80d15 22,26,34,37-38,48,50-57,68-69
+bkms-cli/cmd/app/appspec/labels/edit.go
+  h_2321bec5d80d15 28,35,38-39,54,56-63,81-82
+bkms-cli/cmd/app/appspec/labels/reset.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,69-70
+bkms-cli/cmd/app/appspec/labels/view.go
+  h_2321bec5d80d15 22,26,34,37-38,51,53-60,65-66
+bkms-cli/cmd/app/appspec/lifecycle/edit.go
+  h_2321bec5d80d15 28,35,38-39,66,68-75,93-94
+bkms-cli/cmd/app/appspec/lifecycle/reset.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,69-70
+bkms-cli/cmd/app/appspec/lifecycle/view.go
+  h_2321bec5d80d15 22,26,34,37-38,51,53-60,65-66
+bkms-cli/cmd/app/appspec/probe/edit.go
+  h_2321bec5d80d15 28,35,38-39,75,77-84,102-103
+bkms-cli/cmd/app/appspec/probe/reset.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,69-70
+bkms-cli/cmd/app/appspec/probe/view.go
+  h_2321bec5d80d15 22,26,34,37-38,51,53-60,65-66
+bkms-cli/cmd/app/appspec/resources/edit.go
+  h_2321bec5d80d15 28,35,38-39,56,58-65,83-84
+bkms-cli/cmd/app/appspec/resources/reset.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,69-70
+bkms-cli/cmd/app/appspec/resources/view.go
+  h_2321bec5d80d15 22,26,34,37-38,51,53-60,65-66
+bkms-cli/cmd/app/appspec/startcommand/edit.go
+  h_2321bec5d80d15 27,34,37-38,64,66-73,83-84
+bkms-cli/cmd/app/appspec/startcommand/view.go
+  h_2321bec5d80d15 27,35,38-39,48,50-57,78-79
+bkms-cli/cmd/app/appspec/underlayip/disable.go
+  h_2321bec5d80d15 28,35,38-40,46,48-55,71-72
+bkms-cli/cmd/app/appspec/underlayip/enable.go
+  h_2321bec5d80d15 28,35,38-40,46,48-55,71-72
+bkms-cli/cmd/app/appspec/underlayip/reset.go
+  h_2321bec5d80d15 28,35,38-40,43,45-52,68-69
+bkms-cli/cmd/app/appspec/underlayip/view.go
+  h_2321bec5d80d15 22,26,34,37-39,48,50-57,68-69
+bkms-cli/cmd/app/appspec/updatestrategy/edit.go
+  h_2321bec5d80d15 28,35,38-39,53,55-62,82-83
+bkms-cli/cmd/app/appspec/updatestrategy/reset.go
+  h_2321bec5d80d15 28,35,38-39,46,48-55,69-70
+bkms-cli/cmd/app/appspec/updatestrategy/view.go
+  h_2321bec5d80d15 22,26,34,37-38,51,53-60,71-72
+bkms-cli/cmd/app/appspec/view.go
+  h_2321bec5d80d15 22,25,33,36-37,51,53-60,65-66
+bkms-cli/cmd/app/build/create.go
+  h_2321bec5d80d15 29-30,35,46,48-55,70-71
+bkms-cli/cmd/app/build/list.go
+  h_2321bec5d80d15 29-30,36,53,55-62,77-78
+bkms-cli/cmd/app/component/create.go
+  h_2321bec5d80d15 26,28,34,53,55-62,74-75
+bkms-cli/cmd/app/component/delete.go
+  h_2321bec5d80d15 26,28,34,49,51-58,69-70
+bkms-cli/cmd/app/component/list.go
+  h_2321bec5d80d15 26,28,35,53,55-62,77-78
+bkms-cli/cmd/app/delete.go
+  h_2321bec5d80d15 26,34,49,51-58,85-86
+bkms-cli/cmd/app/deploy/create.go
+  h_2321bec5d80d15 26,95-102,112
+bkms-cli/cmd/app/deploy/delete.go
+  h_2321bec5d80d15 27,35,53,55-62,86-87
+bkms-cli/cmd/app/deploy/list.go
+  h_2321bec5d80d15 28,72-79,97
+bkms-cli/cmd/app/deploy/precheck.go
+  h_2321bec5d80d15 30,32,39,56,58-65,70-71
+bkms-cli/cmd/app/deploy/update.go
+  h_2321bec5d80d15 25,115-122,132
+bkms-cli/cmd/app/get.go
+  h_2321bec5d80d15 28-29,36,52,54-61,81-82
+bkms-cli/cmd/app/image/list.go
+  h_2321bec5d80d15 29-30,36,53,55-62,78-79
+bkms-cli/cmd/app/instance/admin_cmd.go
+  h_2321bec5d80d15 30,53-60,94,134-141,197
+bkms-cli/cmd/app/instance/delete.go
+  h_2321bec5d80d15 28,37,54-60,65-66
+bkms-cli/cmd/app/instance/list.go
+  h_2321bec5d80d15 27,29,36,50,52-59,80-81
+bkms-cli/cmd/app/instance/polaris.go
+  h_2321bec5d80d15 28,30,37,56,62-68,73-74
+bkms-cli/cmd/app/instance/port_forward.go
+  h_2321bec5d80d15 26,28,35,56-57,59-66,77-78
+bkms-cli/cmd/app/polaris/create.go
+  h_2321bec5d80d15 30-31,37,96,98-105,107-108,135-136
+bkms-cli/cmd/app/polaris/delete.go
+  h_2321bec5d80d15 27-28,34,51,53-60,62,73-74
+bkms-cli/cmd/app/polaris/list.go
+  h_2321bec5d80d15 27,35,56-63,77-78
+bkms-cli/cmd/app/polaris/update.go
+  h_2321bec5d80d15 30-31,37,93,95-102,104-105,132-133
+bkms-cli/cmd/app/polaris/weight.go
+  h_2321bec5d80d15 26-27,33,51,53-60,77-78
+bkms-cli/cmd/app/publish/publish.go
+  h_2321bec5d80d15 27,35,57-64,89-90
+bkms-cli/cmd/app/update/build_config.go
+  h_2321bec5d80d15 26,32,81,83-90,95-96
+bkms-cli/cmd/envvar/create/app.go
+  h_2321bec5d80d15 29,36,55-62,81-82
+bkms-cli/cmd/envvar/delete/app.go
+  h_2321bec5d80d15 27,34,44-51,61-62
+bkms-cli/cmd/envvar/export/app.go
+  h_2321bec5d80d15 27,38,65-72,89-90
+bkms-cli/cmd/envvar/importvar/app.go
+  h_2321bec5d80d15 27,35,66-73,75-77,93-94
+bkms-cli/cmd/envvar/list/app.go
+  h_2321bec5d80d15 29,36,59-66,89-90
+bkms-cli/cmd/envvar/update/app.go
+  h_2321bec5d80d15 29,36,56-63,104-105
+bkms-cli/pkg/handler/app/resolve.go
+  h_2321bec5d80d15 1-97
+bkms-cli/pkg/handler/app/resolve_test.go
+  h_2321bec5d80d15 1-68,69-78,79-90,91-156,157-207,208-286,287
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "14c8d04214c11c8e472efd9d3f0dc8d7b11895bc",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
