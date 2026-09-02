@@ -1,0 +1,20 @@
+bkms-cli/cmd/app/create.go
+  h_2321bec5d80d15 32-34,111-114,118-131
+bkms-cli/cmd/app/deploy/update.go
+  h_2321bec5d80d15 30,63
+bkms-cli/cmd/app/polaris/create.go
+  h_2321bec5d80d15 35,70
+bkms-cli/cmd/app/polaris/update.go
+  h_2321bec5d80d15 35,70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "99d90e7e36fb27438323ef73232d7170bd61b426",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
