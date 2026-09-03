@@ -1,0 +1,14 @@
+bkms-cli/.goreleaser.yaml
+  h_2321bec5d80d15 55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e23a9e53e3c5df96d894f3c3046c310f6d5ca3b1",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
