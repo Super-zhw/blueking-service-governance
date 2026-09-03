@@ -52,3 +52,4 @@ changelog:
 
 release:
   make_latest: true
+  replace_existing_artifacts: true
