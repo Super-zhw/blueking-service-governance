@@ -301,6 +301,27 @@ func normalizeComponentOutputs(components []ComponentOutputObj) []ComponentOutpu
 }
 
 // -----------------------------------------------------------------------------
+// ResolveApp
+// -----------------------------------------------------------------------------
+
+// ResolveAppURIInput is the path input for resolving an app by ID or name.
+type ResolveAppURIInput struct {
+	WorkspaceID string `uri:"workspaceID" binding:"required,uri_slug"`
+	App         string `uri:"app" binding:"required"`
+}
+
+// ResolveAppOutput is the response for resolving an app.
+type ResolveAppOutput struct {
+	Data *ResolveAppOutputObj `json:"data"`
+}
+
+// ResolveAppOutputObj is the resolved app info.
+type ResolveAppOutputObj struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// -----------------------------------------------------------------------------
 // ListApps
 // -----------------------------------------------------------------------------
 

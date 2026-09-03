@@ -190,7 +190,6 @@ func (s *ApplicationStoreMongo) GetAppsByIDs(ctx context.Context, ids []string) 
 }
 
 // GetAppByName gets an application by name
-// Deprecated: use GetApp instead (only appID, no workspaceID + appName)
 func (s *ApplicationStoreMongo) GetAppByName(ctx context.Context, workspaceID, name string) (*Application, error) {
 	app := new(Application)
 	err := s.collection.FindOne(ctx, bson.M{"name": name, "workspaceID": workspaceID}).

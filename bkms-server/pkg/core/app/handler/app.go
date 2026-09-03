@@ -288,6 +288,60 @@ func newAppIDSuffix() string {
 	return "-" + s
 }
 
+// ResolveApp 通过 ID 或 Name 解析应用，返回应用 ID 和 Name。
+//
+//	@ID			ResolveApp
+//	@Summary	通过 ID 或 Name 解析应用
+//	@Tags		app
+//	@Produce	json
+//	@Security	BkUserInfo
+//	@Security	BkUserCredential
+//	@Param		workspaceID	path		string	true	"工作空间 ID"
+//	@Param		app			path		string	true	"应用 ID 或名称"
+//	@Success	200			{object}	serializer.ResolveAppOutput
+//	@Failure	404			{object}	bkerrs.GinErrorOutput
+//	@Router		/workspaces/{workspaceID}/apps/resolve/{app} [get]
+func (h *Handler) ResolveApp(c *gin.Context) {
+	var uriInput serializer.ResolveAppURIInput
+	if err := ginutils.BindURI(c, &uriInput); err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+	ctx := c.Request.Context()
+	input := uriInput.App
+
+	app, err := h.registry.AppStore.GetApp(ctx, input)
+	if err != nil && !errors.Is(err, bkmsapp.ErrAppNotFound) {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "resolve app by id"))
+		return
+	}
+	if app != nil {
+		ginutils.OK(c, serializer.ResolveAppOutput{
+			Data: &serializer.ResolveAppOutputObj{
+				ID:   app.ID,
+				Name: app.Name,
+			},
+		})
+		return
+	}
+
+	app, err = h.registry.AppStore.GetAppByName(ctx, uriInput.WorkspaceID, input)
+	if err != nil {
+		if errors.Is(err, bkmsapp.ErrAppNotFound) {
+			bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeNotFound, "app %s not found", input))
+			return
+		}
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "resolve app by name"))
+		return
+	}
+	ginutils.OK(c, serializer.ResolveAppOutput{
+		Data: &serializer.ResolveAppOutputObj{
+			ID:   app.ID,
+			Name: app.Name,
+		},
+	})
+}
+
 // GetApp 查询单个应用详情。
 //
 //	@ID			GetApp

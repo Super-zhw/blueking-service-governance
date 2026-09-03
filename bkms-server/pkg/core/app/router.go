@@ -29,6 +29,8 @@ type AppHandler interface {
 	GetAppIDAutoSuffix(c *gin.Context)
 	// 查询单个应用详情
 	GetApp(c *gin.Context)
+	// 通过 ID 或 Name 解析应用
+	ResolveApp(c *gin.Context)
 	// 查询 app 列表，只返回基本信息
 	ListApps(c *gin.Context)
 	// 删除单个应用
@@ -66,6 +68,8 @@ func Register(rg *gin.RouterGroup, h AppHandler) {
 	rg.GET("/apps/:appID", h.GetApp)
 	// 查询 app 列表，只返回基本信息
 	rg.GET("/workspaces/:workspaceID/apps", h.ListApps)
+	// 通过 ID 或 Name 解析应用
+	rg.GET("/workspaces/:workspaceID/apps/resolve/:app", h.ResolveApp)
 	// 删除单个应用
 	rg.DELETE("/apps/:appID", h.DeleteApp)
 	// 更新应用显示名称

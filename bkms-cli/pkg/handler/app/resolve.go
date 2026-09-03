@@ -22,42 +22,19 @@ package app
 import (
 	"context"
 
-	"github.com/pkg/errors"
-	"github.com/samber/lo"
-
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 )
 
 // ResolveAppID 将用户输入的 app 标识解析为确定的 app ID。
-//
-// 匹配策略：
-//  1. 精确匹配 app ID。
-//  2. 精确匹配 app Name，返回对应 ID。
-//  3. 都未命中 → 当作 ID 透传（可能是其他空间的 app，由服务端最终校验）。
 func ResolveAppID(ctx context.Context, workspaceID, input string) (string, error) {
-	if workspaceID == "" {
+	if workspaceID == "" || input == "" {
 		return input, nil
 	}
-	if input == "" {
-		return "", errors.New("app cannot be empty")
-	}
 
-	apps, err := client.New().ListApps(ctx, workspaceID)
+	resolved, err := client.New().ResolveApp(ctx, workspaceID, input)
 	if err != nil {
-		return "", errors.Wrap(err, "list apps for resolution")
+		return "", err
 	}
 
-	return resolveAppID(apps, input)
-}
-
-func resolveAppID(apps []client.AppMinimal, input string) (string, error) {
-	if _, found := lo.Find(apps, func(a client.AppMinimal) bool { return a.ID == input }); found {
-		return input, nil
-	}
-
-	if match, found := lo.Find(apps, func(a client.AppMinimal) bool { return a.Name == input }); found {
-		return match.ID, nil
-	}
-
-	return input, nil
+	return resolved, nil
 }

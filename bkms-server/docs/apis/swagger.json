@@ -8495,7 +8495,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "SSE 事件流；每条 data 为 podEvent 或 pluginEvent 之一，响应体本身不是该对象",
+                        "description": "SSE 事件流；每条 data 为 podEvent 或",
                         "schema": {
                             "$ref": "#/definitions/serializer.AppInstanceWatchStreamDoc"
                         }
@@ -14979,6 +14979,56 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspaces/{workspaceID}/apps/resolve/{app}": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "通过 ID 或 Name 解析应用",
+                "operationId": "ResolveApp",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "应用 ID 或名称",
+                        "name": "app",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ResolveAppOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
@@ -28830,6 +28880,25 @@
                 },
                 "type": {
                     "description": "代码仓库类型",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.ResolveAppOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.ResolveAppOutputObj"
+                }
+            }
+        },
+        "serializer.ResolveAppOutputObj": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

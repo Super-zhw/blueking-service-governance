@@ -7412,6 +7412,18 @@ definitions:
         description: 代码仓库类型
         type: string
     type: object
+  serializer.ResolveAppOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.ResolveAppOutputObj'
+    type: object
+  serializer.ResolveAppOutputObj:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   serializer.ResourceSpecInput:
     properties:
       backendGroup:
@@ -14662,7 +14674,7 @@ paths:
       - text/event-stream
       responses:
         "200":
-          description: SSE 事件流；每条 data 为 podEvent 或 pluginEvent 之一，响应体本身不是该对象
+          description: SSE 事件流；每条 data 为 podEvent 或
           schema:
             $ref: '#/definitions/serializer.AppInstanceWatchStreamDoc'
         "400":
@@ -19013,6 +19025,37 @@ paths:
       summary: 查询应用下的告警事件列表
       tags:
       - bkintegrations-bkmonitor
+  /workspaces/{workspaceID}/apps/resolve/{app}:
+    get:
+      operationId: ResolveApp
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      - description: 应用 ID 或名称
+        in: path
+        name: app
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ResolveAppOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 通过 ID 或 Name 解析应用
+      tags:
+      - app
   /workspaces/{workspaceID}/bkci-git-projects:
     get:
       operationId: ListBkCIOAuthGitProjects

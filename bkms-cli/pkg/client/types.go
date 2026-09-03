@@ -64,6 +64,8 @@ type Client interface {
 
 	// GetAppIDAutoSuffix 获取应用 ID 自动后缀
 	GetAppIDAutoSuffix(ctx context.Context) (string, error)
+	// ResolveApp 通过 ID 或 Name 解析应用，返回 appID
+	ResolveApp(ctx context.Context, workspaceID, input string) (string, error)
 	// ListApps 获取应用列表
 	ListApps(ctx context.Context, workspaceID string) ([]AppMinimal, error)
 	// GetAppMinimal 获取应用，过滤 ListApps 结果

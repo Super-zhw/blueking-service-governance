@@ -3695,6 +3695,78 @@ func (_c *MockClient_ListAppPolarisConfigs_Call) RunAndReturn(run func(ctx conte
 	return _c
 }
 
+// ResolveApp provides a mock function for the type MockClient
+func (_mock *MockClient) ResolveApp(ctx context.Context, workspaceID string, input string) (string, error) {
+	ret := _mock.Called(ctx, workspaceID, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResolveApp")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (string, error)); ok {
+		return returnFunc(ctx, workspaceID, input)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
+		r0 = returnFunc(ctx, workspaceID, input)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, workspaceID, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_ResolveApp_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResolveApp'
+type MockClient_ResolveApp_Call struct {
+	*mock.Call
+}
+
+// ResolveApp is a helper method to define mock.On call
+//   - ctx context.Context
+//   - workspaceID string
+//   - input string
+func (_e *MockClient_Expecter) ResolveApp(ctx any, workspaceID any, input any) *MockClient_ResolveApp_Call {
+	return &MockClient_ResolveApp_Call{Call: _e.mock.On("ResolveApp", ctx, workspaceID, input)}
+}
+
+func (_c *MockClient_ResolveApp_Call) Run(run func(ctx context.Context, workspaceID string, input string)) *MockClient_ResolveApp_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_ResolveApp_Call) Return(s string, err error) *MockClient_ResolveApp_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockClient_ResolveApp_Call) RunAndReturn(run func(ctx context.Context, workspaceID string, input string) (string, error)) *MockClient_ResolveApp_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListApps provides a mock function for the type MockClient
 func (_mock *MockClient) ListApps(ctx context.Context, workspaceID string) ([]client.AppMinimal, error) {
 	ret := _mock.Called(ctx, workspaceID)
