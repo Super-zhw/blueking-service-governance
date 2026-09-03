@@ -315,25 +315,23 @@ func (h *Handler) ResolveApp(c *gin.Context) {
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "resolve app by id"))
 		return
 	}
-	if app != nil {
-		ginutils.OK(c, serializer.ResolveAppOutput{
-			Data: &serializer.ResolveAppOutputObj{
-				ID:   app.ID,
-				Name: app.Name,
-			},
-		})
+	if app == nil {
+		app, err = h.registry.AppStore.GetAppByName(ctx, uriInput.WorkspaceID, input)
+		if err != nil {
+			if errors.Is(err, bkmsapp.ErrAppNotFound) {
+				bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeNotFound, "app %s not found", input))
+				return
+			}
+			bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "resolve app by name"))
+			return
+		}
+	}
+
+	if _, err = ginperm.ValidateAppByID(ctx, h.registry, app.ID, ginperm.TypeView); err != nil {
+		bkerrs.AbortWithErr(c, err)
 		return
 	}
 
-	app, err = h.registry.AppStore.GetAppByName(ctx, uriInput.WorkspaceID, input)
-	if err != nil {
-		if errors.Is(err, bkmsapp.ErrAppNotFound) {
-			bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeNotFound, "app %s not found", input))
-			return
-		}
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "resolve app by name"))
-		return
-	}
 	ginutils.OK(c, serializer.ResolveAppOutput{
 		Data: &serializer.ResolveAppOutputObj{
 			ID:   app.ID,
