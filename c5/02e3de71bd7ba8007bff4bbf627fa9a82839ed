@@ -1,0 +1,14 @@
+bkms-server/pkg/core/app/handler/app.go
+  h_2321bec5d80d15 318-325,328-331,334
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "c502e3de71bd7ba8007bff4bbf627fa9a82839ed",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
