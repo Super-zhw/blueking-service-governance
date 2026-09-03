@@ -853,22 +853,6 @@ func (c *SvcBasedClient) BatchUpdateInstance(
 	return nil
 }
 
-// GetEnvEffectiveDevMode 获取应用在某个环境下实际生效的开发模式配置
-func (c *SvcBasedClient) GetEnvEffectiveDevMode(ctx context.Context, appID, envName string) (*DevModeConfig, error) {
-	url := fmt.Sprintf("/bkms/v1/bkms-server/apps/%s/envs/%s/app-spec/dev-mode/effective", appID, envName)
-
-	var respData GetEnvEffectiveDevModeRespData
-	resp, err := c.cli.R().SetContext(ctx).SetResult(&respData).Get(url)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("get env effective dev mode failed: [%d] -> %s", resp.StatusCode(), resp.Body())
-	}
-
-	return respData.Data, nil
-}
-
 // ListAppInstances 获取应用实例列表
 func (c *SvcBasedClient) ListAppInstances(
 	ctx context.Context,

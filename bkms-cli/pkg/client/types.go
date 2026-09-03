@@ -74,8 +74,6 @@ type Client interface {
 	CreateApp(ctx context.Context, workspaceID string, body any) (*AppMinimal, error)
 	// DeleteApp 删除应用
 	DeleteApp(ctx context.Context, appID string) error
-	// UpdateAppDisplayName 更新应用显示名
-	UpdateAppDisplayName(ctx context.Context, appID, displayName string) error
 	// UpdateAppBuildConfig 更新应用构建配置
 	UpdateAppBuildConfig(ctx context.Context, appID string, body AppBuildConfigUpdateBody) error
 	// CreateAppBuild 执行应用构建
@@ -84,8 +82,6 @@ type Client interface {
 	ListBuildRecords(ctx context.Context, appID, keyword string) ([]BuildRecord, error)
 	// ListAppImages 获取应用镜像列表
 	ListAppImages(ctx context.Context, appID, keyword string) ([]Image, error)
-	// GetEnvEffectiveDevMode 获取应用在某个环境下实际生效的开发模式配置
-	GetEnvEffectiveDevMode(ctx context.Context, appID, envName string) (*DevModeConfig, error)
 
 	// ---------- 应用配置文件 ----------
 

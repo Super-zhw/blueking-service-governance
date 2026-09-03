@@ -55,11 +55,6 @@ type DevModeConfig struct {
 	MountPath string `json:"mountPath" yaml:"mountPath"`
 }
 
-// GetEnvEffectiveDevModeRespData 获取环境实际生效的开发模式配置返回数据
-type GetEnvEffectiveDevModeRespData struct {
-	Data *DevModeConfig `json:"data"`
-}
-
 // DevModePreflightData 开发模式 Publish 预检响应数据
 type DevModePreflightData struct {
 	// Token 用户 Token
