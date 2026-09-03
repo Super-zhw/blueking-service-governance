@@ -1,0 +1,16 @@
+bkms-cli/pkg/handler/app/resolve.go
+  h_2321bec5d80d15 31,33-35,54,58-59,62
+bkms-cli/pkg/handler/app/resolve_test.go
+  h_2321bec5d80d15 47,52-54,57,67,97,103,106,115,126,135-136,138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "cadc771e368b35167f816bff6f1d9df10e90cca7",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
