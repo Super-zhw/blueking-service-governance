@@ -1,0 +1,51 @@
+# extension-polaris.txt: app polaris 子命令
+# 对应 extension/polaris_test.go
+
+exec $BKMS_CLI_BIN app polaris list --app $BKMS_APP_ID
+stdout .
+
+exec $BKMS_CLI_BIN app polaris list --app $BKMS_APP_ID -o json
+stdout .
+
+! exec $BKMS_CLI_BIN app polaris list
+outcontains 'required'
+
+# create error cases
+! exec $BKMS_CLI_BIN app polaris create -f /tmp/nonexistent.yaml
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris create --app $BKMS_APP_ID
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris create --app $BKMS_APP_ID -f /tmp/nonexistent-polaris-spec-xyz.yaml
+outcontains 'not found'
+
+# update error cases
+! exec $BKMS_CLI_BIN app polaris update --name nonexistent -f /tmp/nonexistent.yaml
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris update --app $BKMS_APP_ID -f /tmp/nonexistent.yaml
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris update --app $BKMS_APP_ID --name nonexistent
+outcontains 'required'
+
+# delete error cases
+! exec $BKMS_CLI_BIN app polaris delete --name nonexistent
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris delete --app $BKMS_APP_ID
+outcontains 'required'
+
+# weight error cases
+! exec $BKMS_CLI_BIN app polaris weight --config some-config --env $BKMS_ENV_NAME --weight 100
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris weight --app $BKMS_APP_ID --env $BKMS_ENV_NAME --weight 100
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris weight --app $BKMS_APP_ID --config some-config --weight 100
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app polaris weight --app $BKMS_APP_ID --config some-config --env $BKMS_ENV_NAME
+outcontains 'required'

@@ -1,0 +1,25 @@
+# extension-component.txt: app component 子命令
+# 对应 extension/component_test.go
+
+exec $BKMS_CLI_BIN app component list --app $BKMS_APP_ID
+stdout .
+
+exec $BKMS_CLI_BIN app component list --app $BKMS_APP_ID -o json
+stdout .
+
+! exec $BKMS_CLI_BIN app component list
+outcontains 'required'
+
+# create error cases
+! exec $BKMS_CLI_BIN app component create --ref some-ref
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app component create --app $BKMS_APP_ID
+outcontains 'required'
+
+# delete error cases
+! exec $BKMS_CLI_BIN app component delete --name some-name
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app component delete --app $BKMS_APP_ID
+outcontains 'required'

@@ -1,0 +1,11 @@
+# app-instance.txt: app instance 子命令
+# 对应 app/instance_test.go
+
+exec $BKMS_CLI_BIN app instance list --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+stdout .
+
+! exec $BKMS_CLI_BIN app instance list --env test
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app instance list --app $BKMS_APP_ID
+outcontains 'required'

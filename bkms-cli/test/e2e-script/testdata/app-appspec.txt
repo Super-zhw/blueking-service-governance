@@ -1,0 +1,232 @@
+# app-appspec.txt: app appspec 全部子命令及边界场景测试
+# 对应 app/appspec_test.go
+
+# ==================== appspec view（聚合视图）====================
+
+# 缺 --app 参数应退出非 0 且含 "required"
+! exec $BKMS_CLI_BIN app appspec view
+outcontains 'required'
+
+# 正常聚合视图，输出各 section 标题
+exec $BKMS_CLI_BIN app appspec view --app $BKMS_APP_ID
+stdout '=== Resources ==='
+stdout '=== Update Strategy ==='
+stdout '=== Lifecycle ==='
+
+# -o json 输出含 resources/updateStrategy/underlayIP，不含 devMode
+exec $BKMS_CLI_BIN app appspec view --app $BKMS_APP_ID -o json
+jsonhas 'resources'
+jsonhas 'updateStrategy'
+jsonhas 'underlayIP'
+! jsonhas 'devMode'
+
+# --env + -o json 含 underlayIP 和 devMode
+exec $BKMS_CLI_BIN app appspec view --app $BKMS_APP_ID --env $BKMS_ENV_NAME -o json
+jsonhas 'underlayIP'
+jsonhas 'devMode'
+
+# --env 正常退出
+exec $BKMS_CLI_BIN app appspec view --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== resources ====================
+
+exec $BKMS_CLI_BIN app appspec resources view --app $BKMS_APP_ID
+
+exec $BKMS_CLI_BIN app appspec resources view --app $BKMS_APP_ID -o json
+
+exec $BKMS_CLI_BIN app appspec resources edit --app $BKMS_APP_ID -f resources.yaml
+
+exec $BKMS_CLI_BIN app appspec resources edit --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f resources.yaml
+
+exec $BKMS_CLI_BIN app appspec resources reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== update-strategy ====================
+
+exec $BKMS_CLI_BIN app appspec update-strategy view --app $BKMS_APP_ID
+
+exec $BKMS_CLI_BIN app appspec update-strategy view --app $BKMS_APP_ID -o json
+
+exec $BKMS_CLI_BIN app appspec update-strategy edit --app $BKMS_APP_ID -f update-strategy.yaml
+
+exec $BKMS_CLI_BIN app appspec update-strategy edit --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f update-strategy.yaml
+
+exec $BKMS_CLI_BIN app appspec update-strategy reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== lifecycle ====================
+
+exec $BKMS_CLI_BIN app appspec lifecycle view --app $BKMS_APP_ID
+
+exec $BKMS_CLI_BIN app appspec lifecycle view --app $BKMS_APP_ID -o json
+
+exec $BKMS_CLI_BIN app appspec lifecycle edit --app $BKMS_APP_ID -f lifecycle.yaml
+
+exec $BKMS_CLI_BIN app appspec lifecycle edit --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f lifecycle.yaml
+
+exec $BKMS_CLI_BIN app appspec lifecycle reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== probe ====================
+
+exec $BKMS_CLI_BIN app appspec probe view --app $BKMS_APP_ID
+
+exec $BKMS_CLI_BIN app appspec probe view --app $BKMS_APP_ID -o json
+
+exec $BKMS_CLI_BIN app appspec probe edit --app $BKMS_APP_ID -f probe.yaml
+
+exec $BKMS_CLI_BIN app appspec probe edit --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f probe.yaml
+
+exec $BKMS_CLI_BIN app appspec probe reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== labels ====================
+
+exec $BKMS_CLI_BIN app appspec labels view --app $BKMS_APP_ID
+
+exec $BKMS_CLI_BIN app appspec labels view --app $BKMS_APP_ID -o json
+
+exec $BKMS_CLI_BIN app appspec labels edit --app $BKMS_APP_ID -f labels.yaml
+
+exec $BKMS_CLI_BIN app appspec labels edit --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f labels.yaml
+
+exec $BKMS_CLI_BIN app appspec labels reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== annotations ====================
+
+exec $BKMS_CLI_BIN app appspec annotations view --app $BKMS_APP_ID
+
+exec $BKMS_CLI_BIN app appspec annotations view --app $BKMS_APP_ID -o json
+
+exec $BKMS_CLI_BIN app appspec annotations edit --app $BKMS_APP_ID -f annotations.yaml
+
+exec $BKMS_CLI_BIN app appspec annotations edit --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f annotations.yaml
+
+exec $BKMS_CLI_BIN app appspec annotations reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== resources 额外错误场景 ====================
+
+# edit 缺 -f 参数
+! exec $BKMS_CLI_BIN app appspec resources edit --app $BKMS_APP_ID
+outcontains 'required'
+
+# edit 传入非法 YAML
+! exec $BKMS_CLI_BIN app appspec resources edit --app $BKMS_APP_ID -f invalid.yaml
+
+# reset 缺 --env 参数
+! exec $BKMS_CLI_BIN app appspec resources reset --app $BKMS_APP_ID
+outcontains 'required'
+
+# ==================== start-command ====================
+
+exec $BKMS_CLI_BIN app appspec start-command view --app $BKMS_APP_ID
+stdout 'Command:'
+
+exec $BKMS_CLI_BIN app appspec start-command edit --app $BKMS_APP_ID -f start-command.yaml
+
+# edit 缺 -f 参数
+! exec $BKMS_CLI_BIN app appspec start-command edit --app $BKMS_APP_ID
+outcontains 'required'
+
+# ==================== underlay-ip ====================
+
+exec $BKMS_CLI_BIN app appspec underlay-ip view --app $BKMS_APP_ID
+stdout 'Enabled:'
+
+exec $BKMS_CLI_BIN app appspec underlay-ip view --app $BKMS_APP_ID -o json
+jsonhas 'enabled'
+
+exec $BKMS_CLI_BIN app appspec underlay-ip enable --app $BKMS_APP_ID
+exec $BKMS_CLI_BIN app appspec underlay-ip disable --app $BKMS_APP_ID
+
+exec $BKMS_CLI_BIN app appspec underlay-ip enable --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+exec $BKMS_CLI_BIN app appspec underlay-ip reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# reset 缺 --env 参数
+! exec $BKMS_CLI_BIN app appspec underlay-ip reset --app $BKMS_APP_ID
+
+# ==================== dev-mode（仅环境级）====================
+
+# 缺 --env 时各子命令应退出非 0
+! exec $BKMS_CLI_BIN app appspec dev-mode view --app $BKMS_APP_ID
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app appspec dev-mode enable --app $BKMS_APP_ID
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app appspec dev-mode disable --app $BKMS_APP_ID
+outcontains 'required'
+
+# 带 --env 正常操作
+exec $BKMS_CLI_BIN app appspec dev-mode view --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+stdout 'Enabled:'
+stdout 'Work Path:'
+
+exec $BKMS_CLI_BIN app appspec dev-mode enable --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+exec $BKMS_CLI_BIN app appspec dev-mode disable --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+exec $BKMS_CLI_BIN app appspec dev-mode reset --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+# ==================== 边界场景 ====================
+
+# 不存在的 app 应返回 not found
+! exec $BKMS_CLI_BIN app appspec view --app nonexistent-app-xyz123
+outcontains 'not found'
+
+# 不存在的文件应返回 not found
+! exec $BKMS_CLI_BIN app appspec resources edit --app $BKMS_APP_ID -f /tmp/nonexistent-file-xyz.yaml
+outcontains 'not found'
+
+# 不存在的 env 应退出非 0
+! exec $BKMS_CLI_BIN app appspec resources view --app $BKMS_APP_ID --env nonexistent-env-xyz123
+
+# 空文件应退出非 0 并含 "empty"
+! exec $BKMS_CLI_BIN app appspec resources edit --app $BKMS_APP_ID -f empty.yaml
+outcontains 'empty'
+
+# ==================== 内嵌 fixture 文件 ====================
+
+-- resources.yaml --
+replicas: 1
+cpuRequests: "0.1"
+cpuLimits: "1"
+memoryRequests: "50Mi"
+memoryLimits: "1Gi"
+
+-- update-strategy.yaml --
+maxSurge: "25%"
+maxUnavailable: "25%"
+
+-- lifecycle.yaml --
+terminationGracePeriodSeconds: 30
+
+-- probe.yaml --
+liveness:
+  handler:
+    type: HTTP
+    url: /healthz
+    port: 8080
+  initialDelaySeconds: 10
+  timeoutSeconds: 3
+  periodSeconds: 10
+  failureThreshold: 3
+
+-- labels.yaml --
+labels:
+  e2e-test: "true"
+  managed-by: bkms-cli
+
+-- annotations.yaml --
+annotations:
+  e2e-test: "true"
+  description: "appspec e2e test annotation"
+
+-- start-command.yaml --
+command:
+  - /usr/local/trpc/bin/container-start.sh
+args:
+  - -conf
+  - /usr/local/trpc/bin/trpc-go.yaml
+
+-- invalid.yaml --
+---
+not valid yaml content: [[[
+this is intentionally malformed
+
+-- empty.yaml --

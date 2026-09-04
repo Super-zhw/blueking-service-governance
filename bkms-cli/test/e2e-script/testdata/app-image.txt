@@ -1,0 +1,8 @@
+# app-image.txt: app image 子命令
+# 对应 app/image_test.go
+
+exec $BKMS_CLI_BIN app image list --app $BKMS_APP_ID
+stdout .
+
+! exec $BKMS_CLI_BIN app image list
+outcontains 'required'

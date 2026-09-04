@@ -1,0 +1,45 @@
+# deploy.txt: app deploy 子命令
+# 对应 deploy/deploy_test.go
+
+# list 正常退出
+exec $BKMS_CLI_BIN app deploy list --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+stdout .
+
+! exec $BKMS_CLI_BIN app deploy list --env test
+outcontains 'required'
+
+# 逗号分隔多个环境名正常退出
+exec $BKMS_CLI_BIN app deploy list --app $BKMS_APP_ID --env $BKMS_ENV_NAME,$BKMS_ENV_NAME
+stdout .
+
+# 不存在的环境失败
+! exec $BKMS_CLI_BIN app deploy list --app $BKMS_APP_ID --env nonexistent-env-12345
+outcontains 'not found'
+
+# precheck：仅验证命令不崩溃，不断言退出码
+exec $BKMS_CLI_BIN app deploy precheck --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+
+! exec $BKMS_CLI_BIN app deploy precheck --env $BKMS_ENV_NAME
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app deploy precheck --app $BKMS_APP_ID
+outcontains 'required'
+
+# create error cases
+! exec $BKMS_CLI_BIN app deploy create --env $BKMS_ENV_NAME -f /tmp/nonexistent.yaml
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app deploy create --app $BKMS_APP_ID --env $BKMS_ENV_NAME
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app deploy create --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f /tmp/nonexistent-deploy-spec-xyz.yaml
+outcontains 'not found'
+
+# delete error cases
+! exec $BKMS_CLI_BIN app deploy delete --env $BKMS_ENV_NAME --yes
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app deploy delete --app $BKMS_APP_ID --yes
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app deploy delete --app $BKMS_APP_ID --env nonexistent-env-12345 --yes

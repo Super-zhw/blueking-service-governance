@@ -21,7 +21,7 @@ the user to install them. ALWAYS prefer using `rg` rather than `find` or `grep`.
 * The root command is in `cmd/root/root.go`, where all subcommands are registered and auth/init logic lives.
 * Business logic and shared packages live under `pkg/`.
 * Unit tests are placed in each package's directory using Ginkgo + Gomega, following Go conventions.
-* E2E tests live in `test/e2e/` and exercise the built CLI binary directly.
+* E2E tests live in `test/e2e-script/` and exercise the built CLI binary directly via testscript txtar scripts.
 * When writing unit tests, refer to `pkg/config/config_test.go` for guidance on test structure, temporary config setup, and usage of Ginkgo/Gomega.
 
 ### Adding a new subcommand
@@ -69,10 +69,14 @@ the user to install them. ALWAYS prefer using `rg` rather than `find` or `grep`.
 
 ### E2E tests
 
-* E2E tests live in `test/e2e/` and use Ginkgo v2 + Gomega.
-* They exercise the compiled CLI binary directly via `framework.CLI`.
-* Before running, build the E2E binary and set required env vars: `make e2e-go-test`
-* The E2E framework auto-loads `test/e2e/.env` for environment configuration.
+* E2E tests live in `test/e2e-script/` and use **testscript** (`github.com/rogpeppe/go-internal/testscript`).
+* Test cases are txtar scripts under `testdata/` (authenticated) and `testdata-unauth/` (unauthenticated), driving the compiled CLI binary as a black box.
+* Because `testscript.Params.Dir` is non-recursive, all scripts must sit directly in those two directories — no subdirectories.
+* Setup hooks (`setup.go`) inject `$BKMS_CLI_BIN`, all `BKMS_*` vars, `$UNIQUE` (per-script millisecond timestamp for collision-free resource names), and `$APP_SPEC` (a generated spec file with a unique app name).
+* Custom script commands (`cmds.go`): `jsonhas <key>`, `jsonfield <key>=<val>`, `outcontains <substr>` (checks stdout+stderr combined). All support `!` negation.
+* txtar embedded files are literals — `$VAR` is NOT expanded inside them. Fixtures needing dynamic values must be generated in Setup.
+* Before running, build the E2E binary and set required env vars: `make e2e-script-test`
+* The E2E setup auto-loads `test/e2e-script/.env` for environment configuration.
 
 ## Common workflows
 

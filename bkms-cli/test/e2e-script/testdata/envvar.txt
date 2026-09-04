@@ -1,0 +1,70 @@
+# envvar.txt: envvar 子命令
+# 对应 envvar/envvar_test.go
+
+# list
+exec $BKMS_CLI_BIN envvar list scoped
+stdout .
+
+exec $BKMS_CLI_BIN envvar list app --app $BKMS_APP_ID
+stdout .
+
+# envvar 的 env 作用域需先通过后端 "get env by name" 接口解析环境，
+# 该接口在 stag 环境返回 "[404] -> 404 page not found"（服务端未注册该路由），
+# 因此所有 env 作用域的成功路径暂时跳过；待后端提供接口后取消注释。
+# 注意：env 作用域命令还要求显式 --workspace（不读配置里的默认值）。
+# exec $BKMS_CLI_BIN envvar list env --env $BKMS_ENV_NAME --workspace $BKMS_WORKSPACE_ID
+# stdout .
+
+! exec $BKMS_CLI_BIN envvar list app
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN envvar list env
+outcontains 'required'
+
+# scoped CRUD
+exec $BKMS_CLI_BIN envvar create scoped --key E2E_TEST_SCOPED_VAR --value test-value
+stdout .
+
+exec $BKMS_CLI_BIN envvar update scoped --key E2E_TEST_SCOPED_VAR --value updated-value
+stdout .
+
+exec $BKMS_CLI_BIN envvar delete scoped --key E2E_TEST_SCOPED_VAR
+stdout .
+
+# app CRUD
+exec $BKMS_CLI_BIN envvar create app --app $BKMS_APP_ID --key E2E_TEST_APP_VAR --value test-value
+stdout .
+
+exec $BKMS_CLI_BIN envvar update app --app $BKMS_APP_ID --key E2E_TEST_APP_VAR --value updated-value
+stdout .
+
+exec $BKMS_CLI_BIN envvar delete app --app $BKMS_APP_ID --key E2E_TEST_APP_VAR
+stdout .
+
+# env CRUD —— 同样依赖上述 404 的环境解析接口，暂时跳过
+# exec $BKMS_CLI_BIN envvar create env --env $BKMS_ENV_NAME --workspace $BKMS_WORKSPACE_ID --key E2E_TEST_ENV_VAR --value test-value
+# stdout .
+# exec $BKMS_CLI_BIN envvar update env --env $BKMS_ENV_NAME --workspace $BKMS_WORKSPACE_ID --key E2E_TEST_ENV_VAR --value updated-value
+# stdout .
+# exec $BKMS_CLI_BIN envvar delete env --env $BKMS_ENV_NAME --workspace $BKMS_WORKSPACE_ID --key E2E_TEST_ENV_VAR
+# stdout .
+
+# export
+exec $BKMS_CLI_BIN envvar export scoped
+stdout .
+
+exec $BKMS_CLI_BIN envvar export app --app $BKMS_APP_ID
+stdout .
+
+# export env —— 同样依赖上述 404 的环境解析接口，暂时跳过
+# exec $BKMS_CLI_BIN envvar export env --env $BKMS_ENV_NAME --workspace $BKMS_WORKSPACE_ID
+# stdout .
+
+# error cases
+! exec $BKMS_CLI_BIN envvar create scoped --value val
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN envvar delete scoped
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN envvar delete scoped --key NONEXISTENT_KEY_E2E_XYZ

@@ -1,0 +1,48 @@
+# extension-cfg-file.txt: app app-cfg-file 子命令
+# 对应 extension/cfg_file_test.go
+
+# view 正常退出
+exec $BKMS_CLI_BIN app app-cfg-file view --app $BKMS_APP_ID
+stdout .
+
+exec $BKMS_CLI_BIN app app-cfg-file view --app $BKMS_APP_ID -o json
+stdout .
+
+! exec $BKMS_CLI_BIN app app-cfg-file view
+outcontains 'required'
+
+# edit error cases
+! exec $BKMS_CLI_BIN app app-cfg-file edit -f /tmp/nonexistent.txt
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app app-cfg-file edit --app $BKMS_APP_ID
+
+! exec $BKMS_CLI_BIN app app-cfg-file edit --app $BKMS_APP_ID -f /tmp/nonexistent-cfg-file-xyz.txt
+
+# list-versions 正常退出
+exec $BKMS_CLI_BIN app app-cfg-file list-versions --app $BKMS_APP_ID
+stdout .
+
+exec $BKMS_CLI_BIN app app-cfg-file list-versions --app $BKMS_APP_ID -o json
+stdout .
+
+! exec $BKMS_CLI_BIN app app-cfg-file list-versions
+outcontains 'required'
+
+# view-version error cases
+! exec $BKMS_CLI_BIN app app-cfg-file view-version --version 1
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app app-cfg-file view-version --app $BKMS_APP_ID
+
+# rollback-version error cases
+! exec $BKMS_CLI_BIN app app-cfg-file rollback-version --version 1
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app app-cfg-file rollback-version --app $BKMS_APP_ID
+
+# delete-version error cases
+! exec $BKMS_CLI_BIN app app-cfg-file delete-version --version 1
+outcontains 'required'
+
+! exec $BKMS_CLI_BIN app app-cfg-file delete-version --app $BKMS_APP_ID
