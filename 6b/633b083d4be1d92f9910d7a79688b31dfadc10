@@ -1,0 +1,19 @@
+bkms-server/pkg/core/app/appcfg/service_base.go
+  s_6b5819985ab49f::t_3c46392ac108d1 166-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "6b633b083d4be1d92f9910d7a79688b31dfadc10",
+  "prompts": {},
+  "sessions": {
+    "s_6b5819985ab49f": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a07a9083f878a0829e572941e1d845",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
