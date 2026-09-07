@@ -1,0 +1,28 @@
+bkms-server/pkg/infras/cloudapi/bscp/config_credential.go
+  h_2321bec5d80d15 30-51,52,53-59,60,61-84,85,86-127,128,129-155,156,157-172
+bkms-server/pkg/infras/cloudapi/bscp/config_hook.go
+  h_2321bec5d80d15 31-52,53,54-60,61,62-100,101,102-168,169,170-175
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  h_2321bec5d80d15 44,60-62,155,178,294,325,361,368,371,383,390,411,435,468,497,517
+bkms-server/pkg/extension/bscpcfg/service/permission.go
+  h_2321bec5d80d15 40
+bkms-server/pkg/infras/cloudapi/bscp/config_bscp.go
+  h_2321bec5d80d15 188,223,234,257,260,270,274
+bkms-server/pkg/infras/cloudapi/bscp/config_client.go
+  h_2321bec5d80d15 47,49,51
+bkms-server/pkg/infras/cloudapi/bscp/config_stub.go
+  h_2321bec5d80d15 67,69,78,83,85
+bkms-server/pkg/infras/cloudapi/bscp/types.go
+  h_2321bec5d80d15 90-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "a012c989e4b1a82b18feb536148d5617314d51b7",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
