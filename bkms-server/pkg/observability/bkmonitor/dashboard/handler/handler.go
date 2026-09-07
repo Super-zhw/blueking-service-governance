@@ -41,6 +41,8 @@ func New(registry *storereg.Registry, service *bkmdashboard.Service) *Handler {
 // wrapError 将底层错误转换为统一的 bkerrs 错误码。
 func (h *Handler) wrapError(err error, action string) error {
 	switch {
+	case errors.Is(err, bkmdashboard.ErrDashboardNotExist):
+		return bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, action)
 	case errors.Is(err, bkmdashboard.ErrDuplicate):
 		return bkerrs.Wrap(err, bkerrs.ErrCodeAlreadyExists, action)
 	case errors.Is(err, bkmdashboard.ErrNotFound):

@@ -27,55 +27,39 @@ import (
 )
 
 var _ = Describe("MergeDashboardTree", func() {
-	It("should override title and rebuild url/uri for bound dashboards", func() {
+	It("should override title for bound dashboards", func() {
 		tree := []*bkmapi.DashboardDirectoryNode{
 			{
 				ID:    0,
 				UID:   "",
 				Title: "General",
 				Dashboards: []bkmapi.DashboardItem{
-					{ID: 1, UID: "uid-1", Title: "老标题", URI: "db/old", URL: "/grafana/d/uid-1/old"},
-					{ID: 2, UID: "uid-2", Title: "另一个", URI: "db/another", URL: "/grafana/d/uid-2/another"},
+					{ID: 1, UID: "test-uid-1", Title: "Old Title", URI: "db/old", URL: "/grafana/d/test-uid-1/old"},
+					{
+						ID:    2,
+						UID:   "test-uid-2",
+						Title: "Another Title",
+						URI:   "db/another",
+						URL:   "/grafana/d/test-uid-2/another",
+					},
 				},
 			},
 		}
 		records := []AppDashboard{
-			{AppID: "app-a", UID: "uid-1", Title: "各服务Prometheus指标"},
+			{AppID: "app-a", UID: "test-uid-1", Title: "Prometheus Metrics"},
 		}
 
 		merged := MergeDashboardTree(tree, records)
 
-		Expect(merged[0].Dashboards[0].Title).To(Equal("各服务Prometheus指标"))
-		Expect(merged[0].Dashboards[0].URL).To(Equal(
-			"/grafana/d/uid-1/e59084-e69c8d-e58aa1-prometheuse68c87-e6a087"))
-		Expect(merged[0].Dashboards[0].URI).To(Equal(
-			"db/e59084-e69c8d-e58aa1-prometheuse68c87-e6a087"))
+		// title is overridden by the binding record
+		Expect(merged[0].Dashboards[0].Title).To(Equal("Prometheus Metrics"))
+		// slug/uri/url keep the values returned by bkmonitor
+		Expect(merged[0].Dashboards[0].URI).To(Equal("db/old"))
+		Expect(merged[0].Dashboards[0].URL).To(Equal("/grafana/d/test-uid-1/old"))
 
-		// 未绑定的仪表盘保持不变
-		Expect(merged[0].Dashboards[1].Title).To(Equal("另一个"))
-		Expect(merged[0].Dashboards[1].URL).To(Equal("/grafana/d/uid-2/another"))
-	})
-
-	It("should handle pure ASCII title slug", func() {
-		tree := []*bkmapi.DashboardDirectoryNode{
-			{
-				ID:    0,
-				UID:   "",
-				Title: "General",
-				Dashboards: []bkmapi.DashboardItem{
-					{ID: 1, UID: "bfwy0guc537y8a", Title: "Old", URI: "db/old", URL: "/grafana/d/bfwy0guc537y8a/old"},
-				},
-			},
-		}
-		records := []AppDashboard{
-			{AppID: "app-a", UID: "bfwy0guc537y8a", Title: "yxscampaignserver"},
-		}
-
-		merged := MergeDashboardTree(tree, records)
-
-		Expect(merged[0].Dashboards[0].Title).To(Equal("yxscampaignserver"))
-		Expect(merged[0].Dashboards[0].URL).To(Equal("/grafana/d/bfwy0guc537y8a/yxscampaignserver"))
-		Expect(merged[0].Dashboards[0].URI).To(Equal("db/yxscampaignserver"))
+		// unbound dashboards remain unchanged
+		Expect(merged[0].Dashboards[1].Title).To(Equal("Another Title"))
+		Expect(merged[0].Dashboards[1].URL).To(Equal("/grafana/d/test-uid-2/another"))
 	})
 
 	It("should leave tree unchanged when there are no records", func() {
@@ -85,7 +69,7 @@ var _ = Describe("MergeDashboardTree", func() {
 				UID:   "",
 				Title: "General",
 				Dashboards: []bkmapi.DashboardItem{
-					{ID: 1, UID: "uid-1", Title: "t1", URI: "db/t1", URL: "/grafana/d/uid-1/t1"},
+					{ID: 1, UID: "test-uid-1", Title: "t1", URI: "db/t1", URL: "/grafana/d/test-uid-1/t1"},
 				},
 			},
 		}

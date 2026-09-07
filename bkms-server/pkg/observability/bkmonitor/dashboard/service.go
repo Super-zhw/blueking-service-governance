@@ -19,11 +19,7 @@
 package dashboard
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -43,23 +39,15 @@ func NewService(store AppDashboardStore) *Service {
 	return &Service{store: store, newClient: bkmapi.NewMonitorClient}
 }
 
-// List 获取应用绑定的仪表盘目录树（已缝合应用自定义数据）。
+// List 获取应用绑定的仪表盘目录树
 func (s *Service) List(
 	ctx context.Context,
 	ws *workspace.Workspace,
 	appID, operator string,
 ) ([]*bkmapi.DashboardDirectoryNode, error) {
-	bkMonitorProjectID, err := ws.ResolveBkMonitorProjectID()
+	tree, err := s.fetchDirectoryTree(ctx, ws, operator)
 	if err != nil {
-		return nil, errors.Wrap(err, "resolve bkmonitor space id")
-	}
-	client, err := s.newClient(operator)
-	if err != nil {
-		return nil, errors.Wrap(err, "new bkmonitor client")
-	}
-	tree, err := client.GetDashboardDirectoryTree(ctx, bkMonitorProjectID)
-	if err != nil {
-		return nil, errors.Wrapf(err, "get dashboard directory tree, bk_biz_id=%d", bkMonitorProjectID)
+		return nil, err
 	}
 	records, err := s.store.ListByApp(ctx, appID)
 	if err != nil {
@@ -68,15 +56,25 @@ func (s *Service) List(
 	return MergeDashboardTree(tree, records), nil
 }
 
-// Create 创建应用仪表盘绑定。
-func (s *Service) Create(ctx context.Context, appID, uid, title, creator string) error {
-	_, err := s.store.Create(ctx, &AppDashboard{
+// Create 创建应用仪表盘绑定，创建前会校验 uid 在 bkmonitor 侧真实存在。
+func (s *Service) Create(
+	ctx context.Context,
+	ws *workspace.Workspace,
+	appID, uid, title, operator string,
+) error {
+	tree, err := s.fetchDirectoryTree(ctx, ws, operator)
+	if err != nil {
+		return err
+	}
+	if !dashboardExists(tree, uid) {
+		return errors.Wrapf(ErrDashboardNotExist, "uid=%s", uid)
+	}
+	if _, err = s.store.Create(ctx, &AppDashboard{
 		AppID:   appID,
 		UID:     uid,
 		Title:   title,
-		Creator: creator,
-	})
-	if err != nil {
+		Creator: operator,
+	}); err != nil {
 		return errors.Wrapf(err, "create app dashboard binding, appID=%s, uid=%s", appID, uid)
 	}
 	return nil
@@ -98,9 +96,7 @@ func (s *Service) Delete(ctx context.Context, appID, uid string) error {
 	return nil
 }
 
-// MergeDashboardTree 将应用已绑定的仪表盘记录缝合进目录树：
-// 对树中每个仪表盘，若其 uid 命中应用的自定义绑定，则用绑定里的 title 覆盖，
-// 并重建 url/uri（grafana 的 url 携带 title 对应的 slug，title 变化会导致 url 变化）。
+// MergeDashboardTree 将应用绑定的仪表盘记录与监控侧数据合并
 func MergeDashboardTree(
 	tree []*bkmapi.DashboardDirectoryNode,
 	records []AppDashboard,
@@ -113,69 +109,46 @@ func MergeDashboardTree(
 		return r.UID, r
 	})
 
-	for _, node := range tree {
+	lo.ForEach(tree, func(node *bkmapi.DashboardDirectoryNode, _ int) {
 		if node == nil {
-			continue
+			return
 		}
-		for i := range node.Dashboards {
-			item := &node.Dashboards[i]
-			record, ok := recordMap[item.UID]
-			if !ok {
-				continue
+		lo.ForEach(node.Dashboards, func(item bkmapi.DashboardItem, i int) {
+			if record, ok := recordMap[item.UID]; ok {
+				node.Dashboards[i].Title = record.Title
 			}
-			item.Title = record.Title
-			item.Slug = slugify(record.Title)
-			item.URI = "db/" + item.Slug
-			item.URL = "/grafana/d/" + item.UID + "/" + item.Slug
-		}
-	}
+		})
+	})
 
 	return tree
 }
 
-// slugify 生成 grafana 风格的 slug，参考 grafana/pkg/infra/slugify 的核心算法：
-// ASCII 字母数字转小写保留；空白与常见标点（空格、'-'、'_'、'/'、'.' 等）被忽略；
-// 其它字符（含 CJK）按 UTF-8 字节的十六进制（小写）编码；段与段之间以 '-' 连接。
-func slugify(value string) string {
-	value = strings.ToLower(value)
-	var buffer bytes.Buffer
-	lastInvalid := false
-
-	for _, c := range value {
-		if isValidSlugChar(c) {
-			if lastInvalid {
-				buffer.WriteByte('-')
-			}
-			buffer.WriteRune(c)
-			lastInvalid = false
-			continue
-		}
-
-		if isOmittedSlugChar(c) {
-			lastInvalid = true
-			continue
-		}
-
-		p := make([]byte, utf8.UTFMax)
-		n := utf8.EncodeRune(p, c)
-		if lastInvalid {
-			buffer.WriteByte('-')
-		}
-		for i := 0; i < n; i++ {
-			fmt.Fprintf(&buffer, "%x", p[i])
-		}
-		lastInvalid = true
+// fetchDirectoryTree 解析 bkmonitor 项目并拉取仪表盘目录树。
+func (s *Service) fetchDirectoryTree(
+	ctx context.Context,
+	ws *workspace.Workspace,
+	operator string,
+) ([]*bkmapi.DashboardDirectoryNode, error) {
+	bkMonitorProjectID, err := ws.ResolveBkMonitorProjectID()
+	if err != nil {
+		return nil, errors.Wrap(err, "resolve bkmonitor space id")
 	}
-
-	return strings.Trim(buffer.String(), "-")
+	client, err := s.newClient(operator)
+	if err != nil {
+		return nil, errors.Wrap(err, "new bkmonitor client")
+	}
+	tree, err := client.GetDashboardDirectoryTree(ctx, bkMonitorProjectID)
+	if err != nil {
+		return nil, errors.Wrapf(err, "get dashboard directory tree, bk_biz_id=%d", bkMonitorProjectID)
+	}
+	return tree, nil
 }
 
-// isValidSlugChar reports whether c is a valid slug character (lowercase ASCII letter or digit).
-func isValidSlugChar(c rune) bool {
-	return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
-}
-
-// isOmittedSlugChar reports whether c should be omitted from the slug.
-func isOmittedSlugChar(c rune) bool {
-	return strings.ContainsRune(" ,\"'\n\r\x00?().-_[]/\\!{}%", c)
+// dashboardExists reports whether the given uid exists in the directory tree.
+func dashboardExists(tree []*bkmapi.DashboardDirectoryNode, uid string) bool {
+	return lo.SomeBy(tree, func(node *bkmapi.DashboardDirectoryNode) bool {
+		return node != nil && lo.ContainsBy(node.Dashboards, func(item bkmapi.DashboardItem) bool {
+			return item.UID == uid
+		})
+	})
 }

@@ -38,6 +38,9 @@ var (
 
 	// ErrDuplicate 应用已绑定相同 uid 的仪表盘
 	ErrDuplicate = errors.New("AppDashboard duplicate uid error")
+
+	// ErrDashboardNotExist 提交的仪表盘 uid 在 bkmonitor 侧不存在
+	ErrDashboardNotExist = errors.New("dashboard uid does not exist in bkmonitor")
 )
 
 var _ AppDashboardStore = &StoreMongo{}

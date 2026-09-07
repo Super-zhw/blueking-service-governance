@@ -29,11 +29,11 @@ import (
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 )
 
-// ListAppDashboards 获取应用绑定的仪表盘列表（目录树 + 应用自定义数据）。
+// ListAppDashboards 获取应用绑定的仪表盘列表
 //
 //	@ID			ListAppDashboards
 //	@Summary	获取应用绑定的仪表盘列表
-//	@Tags		bkintegrations-bkmonitor
+//	@Tags		bkmonitor-dashboard
 //	@Produce	json
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential
@@ -74,7 +74,7 @@ func (h *Handler) ListAppDashboards(c *gin.Context) {
 //
 //	@ID			CreateAppDashboard
 //	@Summary	创建应用仪表盘绑定
-//	@Tags		bkintegrations-bkmonitor
+//	@Tags		bkmonitor-dashboard
 //	@Accept		json
 //	@Produce	json
 //	@Security	BkUserInfo
@@ -100,7 +100,13 @@ func (h *Handler) CreateAppDashboard(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Create(ctx, app.ID, bodyInput.UID, bodyInput.Title, auth.MustGetUser(ctx).ID); err != nil {
+	ws, err := h.registry.WorkspaceStore.Get(ctx, app.WorkspaceID)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "get workspace"))
+		return
+	}
+
+	if err = h.service.Create(ctx, ws, app.ID, bodyInput.UID, bodyInput.Title, auth.MustGetUser(ctx).ID); err != nil {
 		bkerrs.AbortWithErr(c, h.wrapError(err, "create app dashboard"))
 		return
 	}
@@ -112,7 +118,7 @@ func (h *Handler) CreateAppDashboard(c *gin.Context) {
 //
 //	@ID			UpdateAppDashboard
 //	@Summary	更新应用仪表盘绑定
-//	@Tags		bkintegrations-bkmonitor
+//	@Tags		bkmonitor-dashboard
 //	@Accept		json
 //	@Produce	json
 //	@Security	BkUserInfo
@@ -159,7 +165,7 @@ func (h *Handler) UpdateAppDashboard(c *gin.Context) {
 //
 //	@ID			DeleteAppDashboard
 //	@Summary	删除应用仪表盘绑定
-//	@Tags		bkintegrations-bkmonitor
+//	@Tags		bkmonitor-dashboard
 //	@Produce	json
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential

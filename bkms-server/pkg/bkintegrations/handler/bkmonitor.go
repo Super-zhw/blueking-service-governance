@@ -31,12 +31,10 @@ import (
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	bkmapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkmonitor"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
 	bkmmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor"
-	dashboardserializer "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard/serializer"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
@@ -498,7 +496,7 @@ func (h *Handler) GetInstanceTimeSeries(c *gin.Context) {
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential
 //	@Param		workspaceID	path		string	true	"工作空间 ID"
-//	@Success	200			{object}	dashboardserializer.ListDashboardsResp
+//	@Success	200			{object}	serializer.ListDashboardsResp
 //	@Failure	400			{object}	bkerrs.GinErrorOutput
 //	@Router		/workspaces/{workspaceID}/bkmonitor/dashboards [get]
 func (h *Handler) ListDashboardDirectoryTree(c *gin.Context) {
@@ -515,42 +513,53 @@ func (h *Handler) ListDashboardDirectoryTree(c *gin.Context) {
 		return
 	}
 
-	tree, err := h.fetchDashboardDirectoryTree(ctx, ws)
-	if err != nil {
-		bkerrs.AbortWithErr(c, err)
-		return
-	}
-
-	ginutils.OK(
-		c,
-		&dashboardserializer.ListDashboardsResp{Data: dashboardserializer.NewDashboardDirectoryOutputs(tree)},
-	)
-}
-
-// fetchDashboardDirectoryTree 解析工作空间的 bkmonitor 项目并拉取仪表盘目录树。
-func (h *Handler) fetchDashboardDirectoryTree(
-	ctx context.Context,
-	ws *workspace.Workspace,
-) ([]*bkmapi.DashboardDirectoryNode, error) {
 	bkBizID, err := ws.ResolveBkMonitorProjectID()
 	if err != nil {
-		return nil, bkerrs.Wrapf(
-			err,
-			bkerrs.ErrCodeInvalidRequest,
-			"bk monitor project is not ready for workspace %s",
-			ws.ID,
+		bkerrs.AbortWithErr(
+			c,
+			bkerrs.Wrapf(
+				err,
+				bkerrs.ErrCodeInvalidRequest,
+				"bk monitor project is not ready for workspace %s",
+				ws.ID,
+			),
 		)
+		return
 	}
 
 	client, err := bkmapi.NewMonitorClient(auth.MustGetUser(ctx).ID)
 	if err != nil {
-		return nil, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "new bkmonitor client")
+		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "new bkmonitor client"))
+		return
 	}
 
 	tree, err := client.GetDashboardDirectoryTree(ctx, bkBizID)
 	if err != nil {
-		return nil, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "list dashboard directory tree")
+		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "list dashboard directory tree"))
+		return
 	}
 
-	return tree, nil
+	ginutils.OK(c, &serializer.ListDashboardsResp{
+		Data: lo.Map(tree, func(node *bkmapi.DashboardDirectoryNode, _ int) *serializer.DashboardDirectoryOutput {
+			return &serializer.DashboardDirectoryOutput{
+				ID:    node.ID,
+				UID:   node.UID,
+				Title: node.Title,
+				URI:   node.URI,
+				URL:   node.URL,
+				Dashboards: lo.Map(
+					node.Dashboards,
+					func(item bkmapi.DashboardItem, _ int) *serializer.DashboardOutput {
+						return &serializer.DashboardOutput{
+							ID:    item.ID,
+							UID:   item.UID,
+							Title: item.Title,
+							URI:   item.URI,
+							URL:   item.URL,
+						}
+					},
+				),
+			}
+		}),
+	})
 }

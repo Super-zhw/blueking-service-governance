@@ -229,3 +229,27 @@ type InstanceTimeSeriesResp struct {
 	// Data 指标名称 -> 时序数据的映射
 	Data map[string]*MetricTimeSeries `json:"data"`
 }
+
+// DashboardOutput 仪表盘输出
+type DashboardOutput struct {
+	ID    int64  `json:"id"`
+	UID   string `json:"uid"`
+	Title string `json:"title"`
+	URI   string `json:"uri"`
+	URL   string `json:"url"`
+}
+
+// DashboardDirectoryOutput 仪表盘目录输出
+type DashboardDirectoryOutput struct {
+	Dashboards []*DashboardOutput `json:"dashboards"`
+	ID         int64              `json:"id"`
+	UID        string             `json:"uid"`
+	Title      string             `json:"title"`
+	URI        string             `json:"uri"`
+	URL        string             `json:"url"`
+}
+
+// ListDashboardsResp 获取仪表盘目录树列表的响应
+type ListDashboardsResp struct {
+	Data []*DashboardDirectoryOutput `json:"data"`
+}

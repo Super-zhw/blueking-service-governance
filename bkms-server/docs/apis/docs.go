@@ -1770,7 +1770,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bkintegrations-bkmonitor"
+                    "bkmonitor-dashboard"
                 ],
                 "summary": "获取应用绑定的仪表盘列表",
                 "operationId": "ListAppDashboards",
@@ -1787,7 +1787,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/serializer.ListDashboardsResp"
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.ListDashboardsResp"
                         }
                     },
                     "400": {
@@ -1814,7 +1814,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bkintegrations-bkmonitor"
+                    "bkmonitor-dashboard"
                 ],
                 "summary": "创建应用仪表盘绑定",
                 "operationId": "CreateAppDashboard",
@@ -1875,7 +1875,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bkintegrations-bkmonitor"
+                    "bkmonitor-dashboard"
                 ],
                 "summary": "更新应用仪表盘绑定",
                 "operationId": "UpdateAppDashboard",
@@ -1938,7 +1938,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bkintegrations-bkmonitor"
+                    "bkmonitor-dashboard"
                 ],
                 "summary": "删除应用仪表盘绑定",
                 "operationId": "DeleteAppDashboard",
@@ -16564,7 +16564,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/serializer.ListDashboardsResp"
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.ListDashboardsResp"
                         }
                     },
                     "400": {
@@ -18883,8 +18883,65 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardDirectoryOutput": {
+            "type": "object",
+            "properties": {
+                "dashboards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardOutput"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.EmptyOutput": {
             "type": "object"
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.ListDashboardsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardDirectoryOutput"
+                    }
+                }
+            }
         },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_autodeploy_serializer.BuildRecordOutputObj": {
             "type": "object",
@@ -19592,8 +19649,77 @@ const docTemplate = `{
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_extension_depservice_serializer.EmptyOutput": {
             "type": "object"
         },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardDirectoryOutput": {
+            "type": "object",
+            "properties": {
+                "dashboards": {
+                    "description": "Dashboards 目录下的仪表盘列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardOutput"
+                    }
+                },
+                "id": {
+                    "description": "ID 目录 ID",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "Title 目录标题",
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "UID 目录 uid",
+                    "type": "string"
+                },
+                "uri": {
+                    "description": "URI 目录 URI",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL 目录访问 URL",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID 仪表盘 ID",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "Title 仪表盘标题",
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "UID 仪表盘 uid",
+                    "type": "string"
+                },
+                "uri": {
+                    "description": "URI 仪表盘 URI",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL 仪表盘访问 URL",
+                    "type": "string"
+                }
+            }
+        },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput": {
             "type": "object"
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.ListDashboardsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data 仪表盘目录树",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardDirectoryOutput"
+                    }
+                }
+            }
         },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_usergroup_serializer.EmptyOutput": {
             "type": "object"
@@ -23536,63 +23662,6 @@ const docTemplate = `{
                 }
             }
         },
-        "serializer.DashboardDirectoryOutput": {
-            "type": "object",
-            "properties": {
-                "dashboards": {
-                    "description": "Dashboards 目录下的仪表盘列表",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/serializer.DashboardOutput"
-                    }
-                },
-                "id": {
-                    "description": "ID 目录 ID",
-                    "type": "integer"
-                },
-                "title": {
-                    "description": "Title 目录标题",
-                    "type": "string"
-                },
-                "uid": {
-                    "description": "UID 目录 uid",
-                    "type": "string"
-                },
-                "uri": {
-                    "description": "URI 目录 URI",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "URL 目录访问 URL",
-                    "type": "string"
-                }
-            }
-        },
-        "serializer.DashboardOutput": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "ID 仪表盘 ID",
-                    "type": "integer"
-                },
-                "title": {
-                    "description": "Title 仪表盘标题",
-                    "type": "string"
-                },
-                "uid": {
-                    "description": "UID 仪表盘 uid",
-                    "type": "string"
-                },
-                "uri": {
-                    "description": "URI 仪表盘 URI",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "URL 仪表盘访问 URL",
-                    "type": "string"
-                }
-            }
-        },
         "serializer.DeleteClusterAddonOutput": {
             "type": "object",
             "properties": {
@@ -26659,18 +26728,6 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/serializer.CustomRuntimeImagesOutputObjs"
-                }
-            }
-        },
-        "serializer.ListDashboardsResp": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "description": "Data 仪表盘目录树",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/serializer.DashboardDirectoryOutput"
-                    }
                 }
             }
         },

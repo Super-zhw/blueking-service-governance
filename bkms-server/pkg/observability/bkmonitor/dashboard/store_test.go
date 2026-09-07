@@ -58,7 +58,7 @@ var _ = Describe("AppDashboardStoreMongo", func() {
 
 	Describe("Create", func() {
 		It("should create a binding successfully", func() {
-			d := &AppDashboard{AppID: "app-a", UID: "uid-1", Title: "我的仪表盘", Creator: "user1"}
+			d := &AppDashboard{AppID: "app-a", UID: "uid-1", Title: "My Dashboard", Creator: "user1"}
 			id, err := store.Create(ctx, d)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(id).NotTo(Equal(bson.NilObjectID))
@@ -114,14 +114,14 @@ var _ = Describe("AppDashboardStoreMongo", func() {
 		})
 
 		It("should update title", func() {
-			newTitle := "新标题"
+			newTitle := "New Title"
 			err := store.Update(ctx, "app-a", "uid-1", &AppDashboardUpdateData{Title: &newTitle})
 			Expect(err).NotTo(HaveOccurred())
 
 			list, err := store.ListByApp(ctx, "app-a")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(list).To(HaveLen(1))
-			Expect(list[0].Title).To(Equal("新标题"))
+			Expect(list[0].Title).To(Equal("New Title"))
 		})
 
 		It("should update uid", func() {
