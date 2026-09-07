@@ -89,6 +89,8 @@ type Handler interface {
 	GetEnvApm(c *gin.Context)
 	// GetInstanceTimeSeries 查询实例监控指标时序数据
 	GetInstanceTimeSeries(c *gin.Context)
+	// ListDashboardDirectoryTree 获取工作空间下的仪表盘目录树
+	ListDashboardDirectoryTree(c *gin.Context)
 
 	// --- BkHCM（蓝鲸海垫）相关 API ---
 
@@ -141,6 +143,7 @@ func Register(rg *gin.RouterGroup, h Handler) {
 	rg.PUT("/envs/:envID/bkmonitor/apms/:apmID", h.BindApmToEnv)
 	rg.GET("/envs/:envID/bkmonitor/apms", h.GetEnvApm)
 	rg.GET("/apps/:appID/envs/:envName/bkmonitor/instance-time-series", h.GetInstanceTimeSeries)
+	rg.GET("/workspaces/:workspaceID/bkmonitor/dashboards", h.ListDashboardDirectoryTree)
 
 	// --- BkHCM 相关路由 ---
 	rg.POST("/bkhcm/regions", h.ListBkHCMRegions)

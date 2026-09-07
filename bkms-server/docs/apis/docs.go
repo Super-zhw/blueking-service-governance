@@ -127,6 +127,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/apps/{appID}/app-config-file-defs/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-files"
+                ],
+                "summary": "修改应用配置文件的逻辑定义信息",
+                "operationId": "AppConfigFileDefUpdate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "应用配置文件 Def ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新逻辑定义信息请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.AppConfigFileDefUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.AppConfigFileDefUpdateOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/{appID}/app-config-file/versions": {
             "get": {
                 "security": [
@@ -1677,6 +1739,230 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/serializer.GetAppSpecOverviewOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/bkmonitor/dashboards": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkintegrations-bkmonitor"
+                ],
+                "summary": "获取应用绑定的仪表盘列表",
+                "operationId": "ListAppDashboards",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ListDashboardsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkintegrations-bkmonitor"
+                ],
+                "summary": "创建应用仪表盘绑定",
+                "operationId": "CreateAppDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "绑定请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.AppDashboardCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/bkmonitor/dashboards/{uid}": {
+            "put": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkintegrations-bkmonitor"
+                ],
+                "summary": "更新应用仪表盘绑定",
+                "operationId": "UpdateAppDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "仪表盘 uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.AppDashboardUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkintegrations-bkmonitor"
+                ],
+                "summary": "删除应用仪表盘绑定",
+                "operationId": "DeleteAppDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "仪表盘 uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput"
                         }
                     },
                     "400": {
@@ -16247,6 +16533,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspaces/{workspaceID}/bkmonitor/dashboards": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkintegrations-bkmonitor"
+                ],
+                "summary": "获取工作空间下的仪表盘目录树",
+                "operationId": "ListDashboardDirectoryTree",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ListDashboardsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/workspaces/{workspaceID}/bkmonitor/user-groups": {
             "get": {
                 "security": [
@@ -19263,6 +19592,9 @@ const docTemplate = `{
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_extension_depservice_serializer.EmptyOutput": {
             "type": "object"
         },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput": {
+            "type": "object"
+        },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_usergroup_serializer.EmptyOutput": {
             "type": "object"
         },
@@ -19507,6 +19839,91 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.AppConfigFileDefOutputObj": {
+            "type": "object",
+            "properties": {
+                "baseAppConfigFileID": {
+                    "description": "基础应用配置文件 ID",
+                    "type": "string"
+                },
+                "configKind": {
+                    "description": "配置种类",
+                    "type": "string"
+                },
+                "contentSourceType": {
+                    "description": "文件内容来源",
+                    "type": "string"
+                },
+                "currentVersion": {
+                    "description": "当前生效版本号",
+                    "type": "integer"
+                },
+                "envName": {
+                    "description": "环境名称",
+                    "type": "string"
+                },
+                "fileFormat": {
+                    "description": "文件格式",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Def ID",
+                    "type": "string"
+                },
+                "isUnifiedConfig": {
+                    "description": "是否统一配置",
+                    "type": "boolean"
+                },
+                "mountDir": {
+                    "description": "容器内挂载目录",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "文件名称",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "文件类型",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "最后修改时间",
+                    "type": "string"
+                },
+                "updater": {
+                    "description": "最后修改人",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.AppConfigFileDefUpdateInput": {
+            "type": "object",
+            "properties": {
+                "isUnifiedConfig": {
+                    "description": "是否统一配置；不传表示不修改。true = 统一配置；false = 按环境独立配置。",
+                    "type": "boolean"
+                },
+                "mountDir": {
+                    "description": "容器内挂载目录；不传表示不修改。",
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "name": {
+                    "description": "应用配置文件名称；不传表示不修改，传时不能为空。",
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                }
+            }
+        },
+        "serializer.AppConfigFileDefUpdateOutput": {
+            "type": "object",
+            "properties": {
+                "item": {
+                    "$ref": "#/definitions/serializer.AppConfigFileDefOutputObj"
+                }
+            }
+        },
         "serializer.AppConfigFileEmptyOutput": {
             "type": "object"
         },
@@ -19657,6 +20074,40 @@ const docTemplate = `{
                 "version": {
                     "description": "版本号",
                     "type": "integer"
+                }
+            }
+        },
+        "serializer.AppDashboardCreateInput": {
+            "type": "object",
+            "required": [
+                "title",
+                "uid"
+            ],
+            "properties": {
+                "title": {
+                    "description": "Title 仪表盘标题",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "uid": {
+                    "description": "UID 仪表盘 uid",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "serializer.AppDashboardUpdateInput": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "description": "Title 仪表盘标题（可选）",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "uid": {
+                    "description": "UID 仪表盘 uid（可选，变更绑定的仪表盘）",
+                    "type": "string",
+                    "minLength": 1
                 }
             }
         },
@@ -23085,6 +23536,63 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.DashboardDirectoryOutput": {
+            "type": "object",
+            "properties": {
+                "dashboards": {
+                    "description": "Dashboards 目录下的仪表盘列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.DashboardOutput"
+                    }
+                },
+                "id": {
+                    "description": "ID 目录 ID",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "Title 目录标题",
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "UID 目录 uid",
+                    "type": "string"
+                },
+                "uri": {
+                    "description": "URI 目录 URI",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL 目录访问 URL",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.DashboardOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID 仪表盘 ID",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "Title 仪表盘标题",
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "UID 仪表盘 uid",
+                    "type": "string"
+                },
+                "uri": {
+                    "description": "URI 仪表盘 URI",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL 仪表盘访问 URL",
+                    "type": "string"
+                }
+            }
+        },
         "serializer.DeleteClusterAddonOutput": {
             "type": "object",
             "properties": {
@@ -26151,6 +26659,18 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/serializer.CustomRuntimeImagesOutputObjs"
+                }
+            }
+        },
+        "serializer.ListDashboardsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data 仪表盘目录树",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.DashboardDirectoryOutput"
+                    }
                 }
             }
         },

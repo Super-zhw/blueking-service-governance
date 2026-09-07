@@ -495,3 +495,49 @@ func (s *StubClient) GetAlertDetail(ctx context.Context, req *AlertDetailReq) (m
 		"related_info":  map[string]any{"cluster": "stub-cluster"},
 	}, nil
 }
+
+// GetDashboardDirectoryTree 模拟获取仪表盘目录树
+func (s *StubClient) GetDashboardDirectoryTree(ctx context.Context, bkBizID int64) ([]*DashboardDirectoryNode, error) {
+	log.Infof(ctx, "Stub: GetDashboardDirectoryTree request: bkBizID=%d", bkBizID)
+	return []*DashboardDirectoryNode{
+		{
+			ID:    0,
+			UID:   "",
+			Title: "General",
+			Dashboards: []DashboardItem{
+				{
+					ID:            23914,
+					UID:           "qEPv0hcSz",
+					Title:         "kubernetes集群资源-Pod",
+					URI:           "db/kubernetesji-qun-zi-yuan-pod",
+					URL:           "/grafana/d/qEPv0hcSz/kubernetesji-qun-zi-yuan-pod",
+					Slug:          "kubernetesji-qun-zi-yuan-pod",
+					Tags:          []string{"bkmonitor", "k8s"},
+					Editable:      true,
+					HasPermission: true,
+				},
+			},
+		},
+		{
+			ID:    100268,
+			UID:   "afwxwj5d28x6of",
+			Title: "各服务Prometheus指标",
+			URI:   "db/e59084-e69c8d-e58aa1-prometheuse68c87-e6a087",
+			URL:   "/grafana/dashboards/f/afwxwj5d28x6of/e59084-e69c8d-e58aa1-prometheuse68c87-e6a087",
+			Dashboards: []DashboardItem{
+				{
+					ID:            100272,
+					UID:           "bfwy0guc537y8a",
+					Title:         "yxscampaignserver",
+					URI:           "db/yxscampaignserver",
+					URL:           "/grafana/d/bfwy0guc537y8a/yxscampaignserver",
+					Slug:          "yxscampaignserver",
+					Tags:          []string{"prometheus", "yxscampaignserver"},
+					Editable:      true,
+					HasPermission: true,
+				},
+			},
+			HasFolderPermission: true,
+		},
+	}, nil
+}

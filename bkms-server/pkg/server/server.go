@@ -76,6 +76,8 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/apm"
 	bkmalert "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert"
 	bkmalerthandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/handler"
+	bkmdashboard "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard"
+	bkmdashboardhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard/handler"
 	bkmusergroup "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/usergroup"
 	bkmusergrouphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/usergroup/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/instancelog"
@@ -181,6 +183,13 @@ func RegisterRouter(ctx context.Context, cfg config.Config, serverRole string) *
 	bkintegrations.Register(v1, bkintegrationshandler.New(storereg.G()))
 	bkmusergroup.Register(v1, bkmusergrouphandler.New(storereg.G(), bkmusergroup.New()))
 	bkmalert.Register(v1, bkmalerthandler.New(storereg.G()))
+	bkmdashboard.Register(
+		v1,
+		bkmdashboardhandler.New(
+			storereg.G(),
+			bkmdashboard.NewService(storereg.G().AppDashboardStore),
+		),
+	)
 	clusteraddon.Register(v1, clusteraddonhandler.New(storereg.G()))
 	polaris.Register(v1, polarishandler.New(storereg.G()))
 	hostport.Register(v1, hostporthandler.New(storereg.G()))

@@ -55,6 +55,7 @@ import (
 	bkmmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor"
 	alertstrategy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/strategy"
 	alertstrategyhooks "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/strategy/hooks"
+	bkmdashboard "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/platmgt/admin"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/platmgt/portforward"
 	workspaceadmin "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/platmgt/workspace/admin"
@@ -134,6 +135,7 @@ type Registry struct {
 	PolarisVarReader *polarisenvvars.Reader
 	// 蓝鲸监控类
 	ApmInstConfigStore bkmmodel.ApmInstConfigStore
+	AppDashboardStore  bkmdashboard.AppDashboardStore
 	AlertStrategyStore alertstrategy.Store
 	// 操作审计类
 	OperationRecordStore audit.OperationRecordStore
@@ -244,6 +246,7 @@ func (r *Registry) initStores(mongoClient *mongo.Client, dbName string) {
 	r.PolarisVarReader = polarisenvvars.NewReader(r.PolarisConfigStore)
 	// 蓝鲸监控类
 	r.ApmInstConfigStore = mustInit(bkmmodel.NewApmInstConfigStoreMongo(mongoClient, dbName))
+	r.AppDashboardStore = mustInit(bkmdashboard.NewStoreMongo(mongoClient, dbName))
 	r.AlertStrategyStore = mustInit(alertstrategy.NewStoreMongo(mongoClient, dbName))
 	// 操作审计类
 	r.OperationRecordStore = mustInit(audit.NewOperationRecordStoreMongo(mongoClient, dbName))

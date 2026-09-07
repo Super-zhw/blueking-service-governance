@@ -867,6 +867,8 @@ definitions:
     type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_extension_depservice_serializer.EmptyOutput:
     type: object
+  github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput:
+    type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_usergroup_serializer.EmptyOutput:
     type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_workload_appmodelcore_appdefaults_serializer.EmptyOutput:
@@ -1033,6 +1035,68 @@ definitions:
       name:
         type: string
     type: object
+  serializer.AppConfigFileDefOutputObj:
+    properties:
+      baseAppConfigFileID:
+        description: 基础应用配置文件 ID
+        type: string
+      configKind:
+        description: 配置种类
+        type: string
+      contentSourceType:
+        description: 文件内容来源
+        type: string
+      currentVersion:
+        description: 当前生效版本号
+        type: integer
+      envName:
+        description: 环境名称
+        type: string
+      fileFormat:
+        description: 文件格式
+        type: string
+      id:
+        description: Def ID
+        type: string
+      isUnifiedConfig:
+        description: 是否统一配置
+        type: boolean
+      mountDir:
+        description: 容器内挂载目录
+        type: string
+      name:
+        description: 文件名称
+        type: string
+      type:
+        description: 文件类型
+        type: string
+      updatedAt:
+        description: 最后修改时间
+        type: string
+      updater:
+        description: 最后修改人
+        type: string
+    type: object
+  serializer.AppConfigFileDefUpdateInput:
+    properties:
+      isUnifiedConfig:
+        description: 是否统一配置；不传表示不修改。true = 统一配置；false = 按环境独立配置。
+        type: boolean
+      mountDir:
+        description: 容器内挂载目录；不传表示不修改。
+        maxLength: 255
+        type: string
+      name:
+        description: 应用配置文件名称；不传表示不修改，传时不能为空。
+        maxLength: 64
+        minLength: 1
+        type: string
+    type: object
+  serializer.AppConfigFileDefUpdateOutput:
+    properties:
+      item:
+        $ref: '#/definitions/serializer.AppConfigFileDefOutputObj'
+    type: object
   serializer.AppConfigFileEmptyOutput:
     type: object
   serializer.AppConfigFileOutputObj:
@@ -1141,6 +1205,31 @@ definitions:
       version:
         description: 版本号
         type: integer
+    type: object
+  serializer.AppDashboardCreateInput:
+    properties:
+      title:
+        description: Title 仪表盘标题
+        minLength: 1
+        type: string
+      uid:
+        description: UID 仪表盘 uid
+        minLength: 1
+        type: string
+    required:
+    - title
+    - uid
+    type: object
+  serializer.AppDashboardUpdateInput:
+    properties:
+      title:
+        description: Title 仪表盘标题（可选）
+        minLength: 1
+        type: string
+      uid:
+        description: UID 仪表盘 uid（可选，变更绑定的仪表盘）
+        minLength: 1
+        type: string
     type: object
   serializer.AppDefinedEnvVarOutputObj:
     properties:
@@ -3479,6 +3568,47 @@ definitions:
         description: 是否包含分支/Tag 名称
         type: boolean
     type: object
+  serializer.DashboardDirectoryOutput:
+    properties:
+      dashboards:
+        description: Dashboards 目录下的仪表盘列表
+        items:
+          $ref: '#/definitions/serializer.DashboardOutput'
+        type: array
+      id:
+        description: ID 目录 ID
+        type: integer
+      title:
+        description: Title 目录标题
+        type: string
+      uid:
+        description: UID 目录 uid
+        type: string
+      uri:
+        description: URI 目录 URI
+        type: string
+      url:
+        description: URL 目录访问 URL
+        type: string
+    type: object
+  serializer.DashboardOutput:
+    properties:
+      id:
+        description: ID 仪表盘 ID
+        type: integer
+      title:
+        description: Title 仪表盘标题
+        type: string
+      uid:
+        description: UID 仪表盘 uid
+        type: string
+      uri:
+        description: URI 仪表盘 URI
+        type: string
+      url:
+        description: URL 仪表盘访问 URL
+        type: string
+    type: object
   serializer.DeleteClusterAddonOutput:
     properties:
       message:
@@ -5540,6 +5670,14 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/serializer.CustomRuntimeImagesOutputObjs'
+    type: object
+  serializer.ListDashboardsResp:
+    properties:
+      data:
+        description: Data 仪表盘目录树
+        items:
+          $ref: '#/definitions/serializer.DashboardDirectoryOutput'
+        type: array
     type: object
   serializer.ListDeployableImageTagsOutput:
     properties:
@@ -9236,6 +9374,45 @@ paths:
       summary: 查询单个应用详情
       tags:
       - app
+  /apps/{appID}/app-config-file-defs/{id}:
+    put:
+      consumes:
+      - application/json
+      operationId: AppConfigFileDefUpdate
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 应用配置文件 Def ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新逻辑定义信息请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.AppConfigFileDefUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.AppConfigFileDefUpdateOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 修改应用配置文件的逻辑定义信息
+      tags:
+      - app-config-files
   /apps/{appID}/app-config-file/versions:
     get:
       operationId: ListAppConfigFileVersions
@@ -10213,6 +10390,146 @@ paths:
       summary: 获取应用 AppSpec 配置概况
       tags:
       - app-spec
+  /apps/{appID}/bkmonitor/dashboards:
+    get:
+      operationId: ListAppDashboards
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListDashboardsResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取应用绑定的仪表盘列表
+      tags:
+      - bkintegrations-bkmonitor
+    post:
+      consumes:
+      - application/json
+      operationId: CreateAppDashboard
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 绑定请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.AppDashboardCreateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 创建应用仪表盘绑定
+      tags:
+      - bkintegrations-bkmonitor
+  /apps/{appID}/bkmonitor/dashboards/{uid}:
+    delete:
+      operationId: DeleteAppDashboard
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 仪表盘 uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 删除应用仪表盘绑定
+      tags:
+      - bkintegrations-bkmonitor
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateAppDashboard
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 仪表盘 uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: 更新请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.AppDashboardUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 更新应用仪表盘绑定
+      tags:
+      - bkintegrations-bkmonitor
   /apps/{appID}/bscpcfg/envs:
     get:
       operationId: ListBscpCfgEnvBindings
@@ -19366,6 +19683,32 @@ paths:
       - BkUserInfo: []
       - BkUserCredential: []
       summary: 获取工作空间下的 APM 列表
+      tags:
+      - bkintegrations-bkmonitor
+  /workspaces/{workspaceID}/bkmonitor/dashboards:
+    get:
+      operationId: ListDashboardDirectoryTree
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListDashboardsResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取工作空间下的仪表盘目录树
       tags:
       - bkintegrations-bkmonitor
   /workspaces/{workspaceID}/bkmonitor/user-groups:

@@ -857,3 +857,55 @@ type TimeSeriesUnifyQueryResp struct {
 	// Metrics 指标信息列表
 	Metrics []TimeSeriesMetricInfo `json:"metrics" mapstructure:"metrics"`
 }
+
+// ---- 仪表盘（Dashboard）相关类型 ----
+
+// DashboardItem 仪表盘目录树中的仪表盘项。
+type DashboardItem struct {
+	// ID 仪表盘 ID
+	ID int64 `json:"id" mapstructure:"id"`
+	// UID 仪表盘 uid（全局唯一）
+	UID string `json:"uid" mapstructure:"uid"`
+	// Title 仪表盘标题
+	Title string `json:"title" mapstructure:"title"`
+	// URI 仪表盘 URI
+	URI string `json:"uri" mapstructure:"uri"`
+	// URL 仪表盘访问 URL
+	URL string `json:"url" mapstructure:"url"`
+	// Slug 仪表盘 slug（标题的 url 友好形式）
+	Slug string `json:"slug" mapstructure:"slug"`
+	// Tags 标签
+	Tags []string `json:"tags" mapstructure:"tags"`
+	// IsStarred 是否收藏
+	IsStarred bool `json:"isStarred" mapstructure:"isStarred"`
+	// SortMeta 排序权重
+	SortMeta int64 `json:"sortMeta" mapstructure:"sortMeta"`
+	// Editable 是否可编辑
+	Editable bool `json:"editable" mapstructure:"editable"`
+	// HasPermission 是否有权限
+	HasPermission bool `json:"has_permission" mapstructure:"has_permission"`
+}
+
+// DashboardDirectoryNode 仪表盘目录树节点（目录），其下挂载若干仪表盘。
+type DashboardDirectoryNode struct {
+	// Dashboards 目录下的仪表盘列表
+	Dashboards []DashboardItem `json:"dashboards" mapstructure:"dashboards"`
+	// ID 目录 ID（根目录 General 为 0）
+	ID int64 `json:"id" mapstructure:"id"`
+	// UID 目录 uid（根目录为空）
+	UID string `json:"uid" mapstructure:"uid"`
+	// Title 目录标题
+	Title string `json:"title" mapstructure:"title"`
+	// URI 目录 URI
+	URI string `json:"uri" mapstructure:"uri"`
+	// URL 目录访问 URL
+	URL string `json:"url" mapstructure:"url"`
+	// Slug 目录 slug
+	Slug string `json:"slug" mapstructure:"slug"`
+	// Tags 标签
+	Tags []string `json:"tags" mapstructure:"tags"`
+	// IsStarred 是否收藏
+	IsStarred bool `json:"isStarred" mapstructure:"isStarred"`
+	// HasFolderPermission 是否有目录权限
+	HasFolderPermission bool `json:"has_folder_permission" mapstructure:"has_folder_permission"`
+}
