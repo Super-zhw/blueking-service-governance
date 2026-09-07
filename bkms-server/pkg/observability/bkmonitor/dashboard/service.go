@@ -39,21 +39,25 @@ func NewService(store AppDashboardStore) *Service {
 	return &Service{store: store, newClient: bkmapi.NewMonitorClient}
 }
 
-// List 获取应用绑定的仪表盘目录树
+// List 获取应用绑定的仪表盘列表
 func (s *Service) List(
 	ctx context.Context,
 	ws *workspace.Workspace,
 	appID, operator string,
-) ([]*bkmapi.DashboardDirectoryNode, error) {
-	tree, err := s.fetchDirectoryTree(ctx, ws, operator)
-	if err != nil {
-		return nil, err
-	}
+) ([]*bkmapi.DashboardItem, error) {
 	records, err := s.store.ListByApp(ctx, appID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "list app dashboard bindings, appID=%s", appID)
 	}
-	return MergeDashboardTree(tree, records), nil
+	if len(records) == 0 {
+		return []*bkmapi.DashboardItem{}, nil
+	}
+
+	tree, err := s.fetchDirectoryTree(ctx, ws, operator)
+	if err != nil {
+		return nil, err
+	}
+	return assembleDashboards(records, dashboardInfoMap(tree)), nil
 }
 
 // Create 创建应用仪表盘绑定，创建前会校验 uid 在 bkmonitor 侧真实存在。
@@ -96,33 +100,6 @@ func (s *Service) Delete(ctx context.Context, appID, uid string) error {
 	return nil
 }
 
-// MergeDashboardTree 将应用绑定的仪表盘记录与监控侧数据合并
-func MergeDashboardTree(
-	tree []*bkmapi.DashboardDirectoryNode,
-	records []AppDashboard,
-) []*bkmapi.DashboardDirectoryNode {
-	if len(records) == 0 {
-		return tree
-	}
-
-	recordMap := lo.SliceToMap(records, func(r AppDashboard) (string, AppDashboard) {
-		return r.UID, r
-	})
-
-	lo.ForEach(tree, func(node *bkmapi.DashboardDirectoryNode, _ int) {
-		if node == nil {
-			return
-		}
-		lo.ForEach(node.Dashboards, func(item bkmapi.DashboardItem, i int) {
-			if record, ok := recordMap[item.UID]; ok {
-				node.Dashboards[i].Title = record.Title
-			}
-		})
-	})
-
-	return tree
-}
-
 // fetchDirectoryTree 解析 bkmonitor 项目并拉取仪表盘目录树。
 func (s *Service) fetchDirectoryTree(
 	ctx context.Context,
@@ -150,5 +127,33 @@ func dashboardExists(tree []*bkmapi.DashboardDirectoryNode, uid string) bool {
 		return node != nil && lo.ContainsBy(node.Dashboards, func(item bkmapi.DashboardItem) bool {
 			return item.UID == uid
 		})
+	})
+}
+
+// dashboardInfoMap 转换
+func dashboardInfoMap(tree []*bkmapi.DashboardDirectoryNode) map[string]bkmapi.DashboardItem {
+	result := make(map[string]bkmapi.DashboardItem)
+	lo.ForEach(tree, func(node *bkmapi.DashboardDirectoryNode, _ int) {
+		if node == nil {
+			return
+		}
+		lo.ForEach(node.Dashboards, func(item bkmapi.DashboardItem, _ int) {
+			result[item.UID] = item
+		})
+	})
+	return result
+}
+
+// assembleDashboards 将绑定记录与 bkm 仪表盘信息组装为结果列表。
+func assembleDashboards(
+	records []AppDashboard,
+	infoMap map[string]bkmapi.DashboardItem,
+) []*bkmapi.DashboardItem {
+	return lo.Map(records, func(r AppDashboard, _ int) *bkmapi.DashboardItem {
+		item := &bkmapi.DashboardItem{UID: r.UID, Title: r.Title}
+		if info, ok := infoMap[r.UID]; ok {
+			item.URL = info.URL
+		}
+		return item
 	})
 }

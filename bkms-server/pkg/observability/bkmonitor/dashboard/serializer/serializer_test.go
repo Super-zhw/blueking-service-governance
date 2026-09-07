@@ -51,54 +51,33 @@ var _ = Describe("AppDashboard Serializer", func() {
 		})
 
 		It("should accept title only", func() {
-			title := "新标题"
+			title := "New Title"
 			Expect(validate.Struct(serializer.AppDashboardUpdateInput{Title: &title})).NotTo(HaveOccurred())
 		})
 	})
 
-	Describe("NewDashboardDirectoryOutputs", func() {
-		It("should convert tree into minimal output", func() {
-			tree := []*bkmapi.DashboardDirectoryNode{
-				{
-					ID:    100268,
-					UID:   "afwxwj5d28x6of",
-					Title: "各服务Prometheus指标",
-					Dashboards: []bkmapi.DashboardItem{
-						{
-							ID: 100272, UID: "bfwy0guc537y8a", Title: "yxscampaignserver",
-							URI: "db/yxscampaignserver", URL: "/grafana/d/bfwy0guc537y8a/yxscampaignserver",
-						},
-					},
-				},
+	Describe("NewDashboardOutputs", func() {
+		It("should convert dashboard items into minimal output", func() {
+			items := []*bkmapi.DashboardItem{
+				{UID: "test-uid-1", Title: "Test Dashboard", URL: "/grafana/d/test-uid-1/test"},
 			}
 
-			outputs := serializer.NewDashboardDirectoryOutputs(tree)
+			outputs := serializer.NewDashboardOutputs(items)
 
 			Expect(outputs).To(HaveLen(1))
-			Expect(outputs[0].ID).To(Equal(int64(100268)))
-			Expect(outputs[0].UID).To(Equal("afwxwj5d28x6of"))
-			Expect(outputs[0].Dashboards).To(HaveLen(1))
-			Expect(outputs[0].Dashboards[0].UID).To(Equal("bfwy0guc537y8a"))
+			Expect(outputs[0].UID).To(Equal("test-uid-1"))
+			Expect(outputs[0].Title).To(Equal("Test Dashboard"))
 		})
 	})
 
 	Describe("ListDashboardsResp", func() {
-		It("should marshal to the minimal dashboard tree shape", func() {
+		It("should marshal to the flat dashboard list shape", func() {
 			resp := serializer.ListDashboardsResp{
-				Data: []*serializer.DashboardDirectoryOutput{
+				Data: []*serializer.DashboardOutput{
 					{
-						ID:    100268,
-						UID:   "afwxwj5d28x6of",
-						Title: "各服务Prometheus指标",
-						Dashboards: []*serializer.DashboardOutput{
-							{
-								ID:    100272,
-								UID:   "bfwy0guc537y8a",
-								Title: "yxscampaignserver",
-								URI:   "db/yxscampaignserver",
-								URL:   "/grafana/d/bfwy0guc537y8a/yxscampaignserver",
-							},
-						},
+						UID:   "test-uid-1",
+						Title: "Test Dashboard",
+						URL:   "/grafana/d/test-uid-1/test",
 					},
 				},
 			}
@@ -109,10 +88,7 @@ var _ = Describe("AppDashboard Serializer", func() {
 			var decoded serializer.ListDashboardsResp
 			Expect(json.Unmarshal(data, &decoded)).NotTo(HaveOccurred())
 			Expect(decoded.Data).To(HaveLen(1))
-			Expect(decoded.Data[0].ID).To(Equal(int64(100268)))
-			Expect(decoded.Data[0].UID).To(Equal("afwxwj5d28x6of"))
-			Expect(decoded.Data[0].Dashboards).To(HaveLen(1))
-			Expect(decoded.Data[0].Dashboards[0].UID).To(Equal("bfwy0guc537y8a"))
+			Expect(decoded.Data[0].UID).To(Equal("test-uid-1"))
 		})
 	})
 })

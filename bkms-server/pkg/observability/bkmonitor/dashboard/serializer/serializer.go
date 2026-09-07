@@ -55,69 +55,29 @@ type AppDashboardUpdateInput struct {
 
 // DashboardOutput 仪表盘输出。
 type DashboardOutput struct {
-	// ID 仪表盘 ID
-	ID int64 `json:"id"`
 	// UID 仪表盘 uid
 	UID string `json:"uid"`
 	// Title 仪表盘标题
 	Title string `json:"title"`
-	// URI 仪表盘 URI
-	URI string `json:"uri"`
 	// URL 仪表盘访问 URL
 	URL string `json:"url"`
 }
 
-// DashboardDirectoryOutput 仪表盘目录输出。
-type DashboardDirectoryOutput struct {
-	// Dashboards 目录下的仪表盘列表
-	Dashboards []*DashboardOutput `json:"dashboards"`
-	// ID 目录 ID
-	ID int64 `json:"id"`
-	// UID 目录 uid
-	UID string `json:"uid"`
-	// Title 目录标题
-	Title string `json:"title"`
-	// URI 目录 URI
-	URI string `json:"uri"`
-	// URL 目录访问 URL
-	URL string `json:"url"`
-}
-
-// FromModel 从 bkmonitor 目录树节点填充输出字段。
-func (o *DashboardDirectoryOutput) FromModel(node *bkmapi.DashboardDirectoryNode) *DashboardDirectoryOutput {
-	if o == nil {
-		return nil
-	}
-	*o = DashboardDirectoryOutput{
-		ID:    node.ID,
-		UID:   node.UID,
-		Title: node.Title,
-		URI:   node.URI,
-		URL:   node.URL,
-		Dashboards: lo.Map(node.Dashboards, func(item bkmapi.DashboardItem, _ int) *DashboardOutput {
-			return &DashboardOutput{
-				ID:    item.ID,
-				UID:   item.UID,
-				Title: item.Title,
-				URI:   item.URI,
-				URL:   item.URL,
-			}
-		}),
-	}
-	return o
-}
-
-// NewDashboardDirectoryOutputs 将目录树转换为输出列表。
-func NewDashboardDirectoryOutputs(tree []*bkmapi.DashboardDirectoryNode) []*DashboardDirectoryOutput {
-	return lo.Map(tree, func(node *bkmapi.DashboardDirectoryNode, _ int) *DashboardDirectoryOutput {
-		return new(DashboardDirectoryOutput).FromModel(node)
+// NewDashboardOutputs 将仪表盘信息列表转换为输出列表。
+func NewDashboardOutputs(items []*bkmapi.DashboardItem) []*DashboardOutput {
+	return lo.Map(items, func(item *bkmapi.DashboardItem, _ int) *DashboardOutput {
+		return &DashboardOutput{
+			UID:   item.UID,
+			Title: item.Title,
+			URL:   item.URL,
+		}
 	})
 }
 
-// ListDashboardsResp 获取仪表盘目录树列表的响应。
+// ListDashboardsResp 获取应用绑定仪表盘列表的响应。
 type ListDashboardsResp struct {
-	// Data 仪表盘目录树
-	Data []*DashboardDirectoryOutput `json:"data"`
+	// Data 应用绑定的仪表盘列表
+	Data []*DashboardOutput `json:"data"`
 }
 
 // EmptyOutput is the JSON response for APIs that return no data.

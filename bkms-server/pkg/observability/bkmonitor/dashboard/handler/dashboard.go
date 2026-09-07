@@ -61,13 +61,13 @@ func (h *Handler) ListAppDashboards(c *gin.Context) {
 		return
 	}
 
-	tree, err := h.service.List(ctx, ws, app.ID, auth.MustGetUser(ctx).ID)
+	items, err := h.service.List(ctx, ws, app.ID, auth.MustGetUser(ctx).ID)
 	if err != nil {
 		bkerrs.AbortWithErr(c, h.wrapError(err, "list app dashboards"))
 		return
 	}
 
-	ginutils.OK(c, &serializer.ListDashboardsResp{Data: serializer.NewDashboardDirectoryOutputs(tree)})
+	ginutils.OK(c, &serializer.ListDashboardsResp{Data: serializer.NewDashboardOutputs(items)})
 }
 
 // CreateAppDashboard 创建应用仪表盘绑定。

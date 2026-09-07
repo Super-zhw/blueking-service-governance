@@ -16,7 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package dashboard_test
+package dashboard
 
 import (
 	"context"
@@ -29,7 +29,6 @@ import (
 	"go.uber.org/fx/fxtest"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
-	. "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard"
 )
 
 var _ = Describe("AppDashboardStoreMongo", func() {

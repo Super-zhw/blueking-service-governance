@@ -16,7 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package dashboard_test
+package dashboard
 
 import (
 	"testing"

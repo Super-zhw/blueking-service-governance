@@ -16,67 +16,77 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package dashboard_test
+package dashboard
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	bkmapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkmonitor"
-	. "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard"
 )
 
-var _ = Describe("MergeDashboardTree", func() {
-	It("should override title for bound dashboards", func() {
+var _ = Describe("dashboardInfoMap", func() {
+	It("should flatten the directory tree into a uid-indexed map", func() {
 		tree := []*bkmapi.DashboardDirectoryNode{
 			{
 				ID:    0,
 				UID:   "",
 				Title: "General",
 				Dashboards: []bkmapi.DashboardItem{
-					{ID: 1, UID: "test-uid-1", Title: "Old Title", URI: "db/old", URL: "/grafana/d/test-uid-1/old"},
+					{
+						ID:    1,
+						UID:   "test-uid-1",
+						Title: "Dashboard One",
+						URI:   "db/one",
+						URL:   "/grafana/d/test-uid-1/one",
+					},
+				},
+			},
+			{
+				ID:    100,
+				UID:   "folder-uid-1",
+				Title: "Folder One",
+				Dashboards: []bkmapi.DashboardItem{
 					{
 						ID:    2,
 						UID:   "test-uid-2",
-						Title: "Another Title",
-						URI:   "db/another",
-						URL:   "/grafana/d/test-uid-2/another",
+						Title: "Dashboard Two",
+						URI:   "db/two",
+						URL:   "/grafana/d/test-uid-2/two",
 					},
 				},
 			},
 		}
-		records := []AppDashboard{
-			{AppID: "app-a", UID: "test-uid-1", Title: "Prometheus Metrics"},
-		}
 
-		merged := MergeDashboardTree(tree, records)
+		infoMap := dashboardInfoMap(tree)
 
-		// title is overridden by the binding record
-		Expect(merged[0].Dashboards[0].Title).To(Equal("Prometheus Metrics"))
-		// slug/uri/url keep the values returned by bkmonitor
-		Expect(merged[0].Dashboards[0].URI).To(Equal("db/old"))
-		Expect(merged[0].Dashboards[0].URL).To(Equal("/grafana/d/test-uid-1/old"))
-
-		// unbound dashboards remain unchanged
-		Expect(merged[0].Dashboards[1].Title).To(Equal("Another Title"))
-		Expect(merged[0].Dashboards[1].URL).To(Equal("/grafana/d/test-uid-2/another"))
+		Expect(infoMap).To(HaveLen(2))
+		Expect(infoMap["test-uid-1"].ID).To(Equal(int64(1)))
+		Expect(infoMap["test-uid-2"].URL).To(Equal("/grafana/d/test-uid-2/two"))
 	})
+})
 
-	It("should leave tree unchanged when there are no records", func() {
-		tree := []*bkmapi.DashboardDirectoryNode{
-			{
-				ID:    0,
-				UID:   "",
-				Title: "General",
-				Dashboards: []bkmapi.DashboardItem{
-					{ID: 1, UID: "test-uid-1", Title: "t1", URI: "db/t1", URL: "/grafana/d/test-uid-1/t1"},
-				},
-			},
+var _ = Describe("assembleDashboards", func() {
+	It("should assemble bound records with bkmonitor info", func() {
+		records := []AppDashboard{
+			{AppID: "app-a", UID: "test-uid-1", Title: "Custom Title"},
+			{AppID: "app-a", UID: "test-uid-2", Title: "Another Title"},
+		}
+		infoMap := map[string]bkmapi.DashboardItem{
+			"test-uid-1": {UID: "test-uid-1", URL: "/grafana/d/test-uid-1/one"},
 		}
 
-		merged := MergeDashboardTree(tree, nil)
+		items := assembleDashboards(records, infoMap)
 
-		Expect(merged).To(Equal(tree))
-		Expect(merged[0].Dashboards[0].Title).To(Equal("t1"))
+		Expect(items).To(HaveLen(2))
+
+		// title comes from the binding record, url comes from bkmonitor
+		Expect(items[0].Title).To(Equal("Custom Title"))
+		Expect(items[0].URL).To(Equal("/grafana/d/test-uid-1/one"))
+
+		// records missing from bkmonitor are still returned with empty url
+		Expect(items[1].UID).To(Equal("test-uid-2"))
+		Expect(items[1].Title).To(Equal("Another Title"))
+		Expect(items[1].URL).To(BeEmpty())
 	})
 })
