@@ -86,7 +86,7 @@ type MonitorClient interface {
 	SearchAlert(ctx context.Context, req *SearchAlertReq) (*SearchAlertResp, error)
 	// GetAlertDetail 查询告警详情
 	GetAlertDetail(ctx context.Context, req *AlertDetailReq) (map[string]any, error)
-	// GetDashboardDirectoryTree 获取仪表盘目录树
+	// GetDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
 	GetDashboardDirectoryTree(ctx context.Context, bkBizID int64) ([]*DashboardDirectoryNode, error)
 }
 

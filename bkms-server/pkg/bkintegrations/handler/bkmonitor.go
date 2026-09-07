@@ -487,10 +487,10 @@ func (h *Handler) GetInstanceTimeSeries(c *gin.Context) {
 	ginutils.OK(c, &serializer.InstanceTimeSeriesResp{Data: respData})
 }
 
-// ListDashboardDirectoryTree 获取工作空间下的仪表盘目录树
+// ListDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
 //
 //	@ID			ListDashboardDirectoryTree
-//	@Summary	获取工作空间下的仪表盘目录树
+//	@Summary	获取蓝鲸监控仪表盘数据
 //	@Tags		bkintegrations-bkmonitor
 //	@Produce	json
 //	@Security	BkUserInfo

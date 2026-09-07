@@ -16549,7 +16549,7 @@ const docTemplate = `{
                 "tags": [
                     "bkintegrations-bkmonitor"
                 ],
-                "summary": "获取工作空间下的仪表盘目录树",
+                "summary": "获取蓝鲸监控仪表盘数据",
                 "operationId": "ListDashboardDirectoryTree",
                 "parameters": [
                     {
@@ -20147,6 +20147,7 @@ const docTemplate = `{
                 "title": {
                     "description": "Title 仪表盘标题",
                     "type": "string",
+                    "maxLength": 64,
                     "minLength": 1
                 },
                 "uid": {
@@ -20162,6 +20163,7 @@ const docTemplate = `{
                 "title": {
                     "description": "Title 仪表盘标题（可选）",
                     "type": "string",
+                    "maxLength": 64,
                     "minLength": 1
                 },
                 "uid": {

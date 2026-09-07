@@ -496,7 +496,7 @@ func (s *StubClient) GetAlertDetail(ctx context.Context, req *AlertDetailReq) (m
 	}, nil
 }
 
-// GetDashboardDirectoryTree 模拟获取仪表盘目录树
+// GetDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
 func (s *StubClient) GetDashboardDirectoryTree(ctx context.Context, bkBizID int64) ([]*DashboardDirectoryNode, error) {
 	log.Infof(ctx, "Stub: GetDashboardDirectoryTree request: bkBizID=%d", bkBizID)
 	return []*DashboardDirectoryNode{

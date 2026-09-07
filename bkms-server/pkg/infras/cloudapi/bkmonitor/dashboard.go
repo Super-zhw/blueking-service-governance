@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-// GetDashboardDirectoryTree 获取仪表盘目录树。
+// GetDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
 func (c *MonitorGatewayClient) GetDashboardDirectoryTree(
 	ctx context.Context,
 	bkBizID int64,

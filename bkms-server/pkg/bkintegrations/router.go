@@ -89,7 +89,7 @@ type Handler interface {
 	GetEnvApm(c *gin.Context)
 	// GetInstanceTimeSeries 查询实例监控指标时序数据
 	GetInstanceTimeSeries(c *gin.Context)
-	// ListDashboardDirectoryTree 获取工作空间下的仪表盘目录树
+	// ListDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
 	ListDashboardDirectoryTree(c *gin.Context)
 
 	// --- BkHCM（蓝鲸海垫）相关 API ---
