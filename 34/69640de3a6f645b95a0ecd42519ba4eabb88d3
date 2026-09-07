@@ -1,0 +1,18 @@
+bkms-server/pkg/extension/bscpcfg/handler/feature_flag.go
+  h_2321bec5d80d15 33
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  h_2321bec5d80d15 492
+bkms-server/pkg/extension/bscpcfg/service/types.go
+  h_2321bec5d80d15 25,70-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "3469640de3a6f645b95a0ecd42519ba4eabb88d3",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
