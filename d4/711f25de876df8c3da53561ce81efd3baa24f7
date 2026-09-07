@@ -1,0 +1,16 @@
+bkms-server/pkg/extension/bscpcfg/model/env_binding_store_test.go
+  h_2321bec5d80d15 1-199
+bkms-server/pkg/workload/bscpcfg/inject_test.go
+  h_2321bec5d80d15 1-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "d4711f25de876df8c3da53561ce81efd3baa24f7",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
