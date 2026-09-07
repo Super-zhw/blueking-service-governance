@@ -84,8 +84,22 @@ func (s *Service) Create(
 	return nil
 }
 
-// Update 更新应用仪表盘绑定。
-func (s *Service) Update(ctx context.Context, appID, uid string, updateData *AppDashboardUpdateData) error {
+// Update 更新应用仪表盘绑定，变更 uid 时会校验新 uid 在 bkmonitor 侧真实存在。
+func (s *Service) Update(
+	ctx context.Context,
+	ws *workspace.Workspace,
+	appID, uid, operator string,
+	updateData *AppDashboardUpdateData,
+) error {
+	if updateData.UID != nil && *updateData.UID != uid {
+		tree, err := s.fetchDirectoryTree(ctx, ws, operator)
+		if err != nil {
+			return err
+		}
+		if !dashboardExists(tree, *updateData.UID) {
+			return errors.Wrapf(ErrDashboardNotExist, "uid=%s", *updateData.UID)
+		}
+	}
 	if err := s.store.Update(ctx, appID, uid, updateData); err != nil {
 		return errors.Wrapf(err, "update app dashboard binding, appID=%s, uid=%s", appID, uid)
 	}

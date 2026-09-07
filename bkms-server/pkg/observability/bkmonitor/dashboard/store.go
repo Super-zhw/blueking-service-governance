@@ -85,6 +85,14 @@ func (s *StoreMongo) Create(ctx context.Context, d *AppDashboard) (bson.ObjectID
 	}
 	d.UpdatedAt = d.CreatedAt
 
+	count, err := s.collection.CountDocuments(ctx, bson.M{"appID": d.AppID, "uid": d.UID})
+	if err != nil {
+		return bson.NilObjectID, err
+	}
+	if count > 0 {
+		return bson.NilObjectID, ErrDuplicate
+	}
+
 	ret, err := s.collection.InsertOne(ctx, d)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
@@ -147,8 +155,14 @@ func (s *StoreMongo) Delete(ctx context.Context, appID, uid string) error {
 func (s *StoreMongo) updateOne(ctx context.Context, filter, update bson.M) error {
 	opts := options.UpdateOne().SetUpsert(false)
 	ret, err := s.collection.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return ErrDuplicate
+		}
+		return err
+	}
 	if ret != nil && ret.MatchedCount == 0 {
 		return ErrNotFound
 	}
-	return err
+	return nil
 }

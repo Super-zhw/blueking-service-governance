@@ -144,12 +144,19 @@ func (h *Handler) UpdateAppDashboard(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	if _, err := ginperm.ValidateAppByID(ctx, h.registry, uriInput.AppID, ginperm.TypeEdit); err != nil {
+	app, err := ginperm.ValidateAppByID(ctx, h.registry, uriInput.AppID, ginperm.TypeEdit)
+	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
 
-	err := h.service.Update(ctx, uriInput.AppID, uriInput.UID, &dashboard.AppDashboardUpdateData{
+	ws, err := h.registry.WorkspaceStore.Get(ctx, app.WorkspaceID)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "get workspace"))
+		return
+	}
+
+	err = h.service.Update(ctx, ws, app.ID, uriInput.UID, auth.MustGetUser(ctx).ID, &dashboard.AppDashboardUpdateData{
 		UID:   bodyInput.UID,
 		Title: bodyInput.Title,
 	})
