@@ -23,17 +23,16 @@ import (
 	"github.com/samber/lo"
 
 	bkmapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkmonitor"
-	_ "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/validators" // register global validators
 )
 
 // AppURIInput 路径参数（仅应用 ID）。
 type AppURIInput struct {
-	AppID string `uri:"appID" binding:"required,uri_slug"`
+	AppID string `uri:"appID" binding:"required,app_id,min=2"`
 }
 
 // AppDashboardURIInput 应用仪表盘路径参数。
 type AppDashboardURIInput struct {
-	AppID string `uri:"appID" binding:"required,uri_slug"`
+	AppID string `uri:"appID" binding:"required,app_id,min=2"`
 	UID   string `uri:"uid" binding:"required,min=1"`
 }
 
@@ -42,7 +41,7 @@ type AppDashboardCreateInput struct {
 	// UID 仪表盘 uid
 	UID string `json:"uid" binding:"required,min=1"`
 	// Title 仪表盘标题
-	Title string `json:"title" binding:"required,min=1"`
+	Title string `json:"title" binding:"required,min=1,max=64"`
 }
 
 // AppDashboardUpdateInput 更新应用仪表盘绑定请求。
@@ -50,7 +49,7 @@ type AppDashboardUpdateInput struct {
 	// UID 仪表盘 uid（可选，变更绑定的仪表盘）
 	UID *string `json:"uid" binding:"omitempty,min=1"`
 	// Title 仪表盘标题（可选）
-	Title *string `json:"title" binding:"omitempty,min=1"`
+	Title *string `json:"title" binding:"omitempty,min=1,max=64"`
 }
 
 // DashboardOutput 仪表盘输出。

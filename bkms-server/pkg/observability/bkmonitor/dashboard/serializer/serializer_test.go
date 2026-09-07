@@ -20,6 +20,7 @@ package serializer_test
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	. "github.com/onsi/ginkgo/v2"
@@ -42,6 +43,12 @@ var _ = Describe("AppDashboard Serializer", func() {
 			Expect(validate.Struct(serializer.AppDashboardCreateInput{})).To(HaveOccurred())
 			Expect(validate.Struct(serializer.AppDashboardCreateInput{UID: "u", Title: "t"})).
 				NotTo(HaveOccurred())
+		})
+
+		It("should reject title longer than 64 characters", func() {
+			longTitle := strings.Repeat("a", 65)
+			Expect(validate.Struct(serializer.AppDashboardCreateInput{UID: "u", Title: longTitle})).
+				To(HaveOccurred())
 		})
 	})
 
