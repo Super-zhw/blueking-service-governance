@@ -1,0 +1,16 @@
+bkms-server/pkg/infras/cloudapi/bscp/config_credential.go
+  h_2321bec5d80d15 91-234
+bkms-server/pkg/infras/cloudapi/bscp/config_hook.go
+  h_2321bec5d80d15 31-176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "1d8f45d0628fc59a63f97af6d0049262ab4e57d7",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
