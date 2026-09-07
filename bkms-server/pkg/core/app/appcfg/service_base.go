@@ -163,7 +163,8 @@ func (s *BaseAppCfgFileService) DeleteFile(
 
 	// 若删除的是默认实例，同时清理同 def 下的环境实例和 def 记录，不区分 configKind。
 	if acf.EnvName == EnvNameDefault {
-		siblings, err := s.FileStore.ListByDefID(ctx, acf.DefID)
+		var siblings []AppConfigFile
+		siblings, err = s.FileStore.ListByDefID(ctx, acf.DefID)
 		if err != nil {
 			return nil, errors.Wrap(err, "listing sibling env instances")
 		}
