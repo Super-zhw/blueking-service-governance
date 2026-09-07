@@ -1,0 +1,68 @@
+bkms-server/db/migrations/000012_app_dashboard_idx.down.json
+  h_2321bec5d80d15 1-6
+bkms-server/db/migrations/000012_app_dashboard_idx.md
+  h_2321bec5d80d15 1-4
+bkms-server/db/migrations/000012_app_dashboard_idx.up.json
+  h_2321bec5d80d15 1-15
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 130-191,1759-1982,16536-16578,19595-19597,19842-19926,20080-20113,23539-23595,26665-26676
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 127-188,1756-1979,16533-16575,19592-19594,19839-19923,20077-20110,23536-23592,26662-26673,31989
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 870-871,1038-1099,1209-1233,3571-3611,5674-5681,9377-9415,10393-10532,19688-19713
+bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  h_2321bec5d80d15 34,39,491-556
+bkms-server/pkg/bkintegrations/router.go
+  h_2321bec5d80d15 92-93,146
+bkms-server/pkg/infras/cloudapi/bkmonitor/client.go
+  h_2321bec5d80d15 89-90
+bkms-server/pkg/infras/cloudapi/bkmonitor/dashboard.go
+  h_2321bec5d80d15 1-59
+bkms-server/pkg/infras/cloudapi/bkmonitor/stub.go
+  h_2321bec5d80d15 498-543
+bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  h_2321bec5d80d15 860-911
+bkms-server/pkg/observability/bkmonitor/dashboard/handler/dashboard.go
+  h_2321bec5d80d15 1-191
+bkms-server/pkg/observability/bkmonitor/dashboard/handler/handler.go
+  h_2321bec5d80d15 1-51
+bkms-server/pkg/observability/bkmonitor/dashboard/model.go
+  h_2321bec5d80d15 1-71
+bkms-server/pkg/observability/bkmonitor/dashboard/module.go
+  h_2321bec5d80d15 1-29
+bkms-server/pkg/observability/bkmonitor/dashboard/router.go
+  h_2321bec5d80d15 1-41
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer.go
+  h_2321bec5d80d15 1-124
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer_suite_test.go
+  h_2321bec5d80d15 1-31
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer_test.go
+  h_2321bec5d80d15 1-118
+bkms-server/pkg/observability/bkmonitor/dashboard/service.go
+  h_2321bec5d80d15 1-181
+bkms-server/pkg/observability/bkmonitor/dashboard/service_test.go
+  h_2321bec5d80d15 1-98
+bkms-server/pkg/observability/bkmonitor/dashboard/store.go
+  h_2321bec5d80d15 1-151
+bkms-server/pkg/observability/bkmonitor/dashboard/store_test.go
+  h_2321bec5d80d15 1-163
+bkms-server/pkg/observability/bkmonitor/dashboard/suite_test.go
+  h_2321bec5d80d15 1-45
+bkms-server/pkg/observability/bkmonitor/module.go
+  h_2321bec5d80d15 28,49
+bkms-server/pkg/server/registry/registry.go
+  h_2321bec5d80d15 58,138,249
+bkms-server/pkg/server/server.go
+  h_2321bec5d80d15 79-80,186-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "9a7d0f704a359294bc2e5d1d3cc9047c1f9776f1",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

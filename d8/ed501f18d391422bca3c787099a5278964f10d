@@ -1,0 +1,20 @@
+bkms-server/pkg/observability/bkmonitor/dashboard/handler/dashboard.go
+  h_2321bec5d80d15 147-148,153-159
+bkms-server/pkg/observability/bkmonitor/dashboard/service.go
+  h_2321bec5d80d15 87-102
+bkms-server/pkg/observability/bkmonitor/dashboard/store.go
+  h_2321bec5d80d15 88-95,158-163,167
+bkms-server/pkg/observability/bkmonitor/dashboard/store_test.go
+  h_2321bec5d80d15 136-143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "d8ed501f18d391422bca3c787099a5278964f10d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

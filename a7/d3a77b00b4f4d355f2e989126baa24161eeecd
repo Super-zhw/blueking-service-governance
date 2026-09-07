@@ -1,0 +1,16 @@
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer.go
+  h_2321bec5d80d15 30,35,44,52
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer_test.go
+  h_2321bec5d80d15 23,47-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "a7d3a77b00b4f4d355f2e989126baa24161eeecd",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
