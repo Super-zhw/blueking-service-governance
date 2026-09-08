@@ -127,6 +127,8 @@ const (
 	ResourceTypePortPool ResourceType = "portPool"
 	// ResourceTypeAlertStrategy 告警策略
 	ResourceTypeAlertStrategy ResourceType = "alertStrategy"
+	// ResourceTypeDashboard 应用仪表盘绑定
+	ResourceTypeDashboard ResourceType = "dashboard"
 )
 
 // AllResourceTypes 所有资源类型
@@ -139,6 +141,7 @@ var AllResourceTypes = []ResourceType{
 	ResourceTypeClusterAddon,
 	ResourceTypePortPool,
 	ResourceTypeAlertStrategy,
+	ResourceTypeDashboard,
 }
 
 // DisplayName 资源类型展示用名称 TODO 国际化
@@ -160,6 +163,8 @@ func (t ResourceType) DisplayName() string {
 		return "端口池"
 	case ResourceTypeAlertStrategy:
 		return "告警策略"
+	case ResourceTypeDashboard:
+		return "仪表盘"
 	default:
 		// 默认返回原始值
 		return string(t)

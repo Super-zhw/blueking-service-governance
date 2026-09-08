@@ -23,6 +23,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard/serializer"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
@@ -111,6 +112,11 @@ func (h *Handler) CreateAppDashboard(c *gin.Context) {
 		return
 	}
 
+	go audit.AddOperationRecordAsync(ctx,
+		audit.OperationTypeCreate, audit.ResourceTypeDashboard, bodyInput.UID,
+		audit.WithDataAfter(bodyInput), audit.WithWorkspaceID(ws.ID), audit.WithAppID(app.ID),
+	)
+
 	ginutils.OK(c, serializer.EmptyOutput{})
 }
 
@@ -165,6 +171,11 @@ func (h *Handler) UpdateAppDashboard(c *gin.Context) {
 		return
 	}
 
+	go audit.AddOperationRecordAsync(ctx,
+		audit.OperationTypeUpdate, audit.ResourceTypeDashboard, uriInput.UID,
+		audit.WithDataAfter(bodyInput), audit.WithWorkspaceID(ws.ID), audit.WithAppID(app.ID),
+	)
+
 	ginutils.OK(c, serializer.EmptyOutput{})
 }
 
@@ -190,15 +201,27 @@ func (h *Handler) DeleteAppDashboard(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	if _, err := ginperm.ValidateAppByID(ctx, h.registry, uriInput.AppID, ginperm.TypeEdit); err != nil {
+	app, err := ginperm.ValidateAppByID(ctx, h.registry, uriInput.AppID, ginperm.TypeEdit)
+	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
 
-	if err := h.service.Delete(ctx, uriInput.AppID, uriInput.UID); err != nil {
+	ws, err := h.registry.WorkspaceStore.Get(ctx, app.WorkspaceID)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "get workspace"))
+		return
+	}
+
+	if err = h.service.Delete(ctx, uriInput.AppID, uriInput.UID); err != nil {
 		bkerrs.AbortWithErr(c, h.wrapError(err, "delete app dashboard"))
 		return
 	}
+
+	go audit.AddOperationRecordAsync(ctx,
+		audit.OperationTypeDelete, audit.ResourceTypeDashboard, uriInput.UID,
+		audit.WithWorkspaceID(ws.ID), audit.WithAppID(app.ID),
+	)
 
 	ginutils.OK(c, serializer.EmptyOutput{})
 }
