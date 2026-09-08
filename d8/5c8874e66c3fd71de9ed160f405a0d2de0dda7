@@ -1,0 +1,14 @@
+bkms-server/pkg/extension/bscpcfg/service/manager_test.go
+  h_2321bec5d80d15 1-257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "d85c8874e66c3fd71de9ed160f405a0d2de0dda7",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+bkms-server/cmd/migration/bind_bscp_project.go
+  h_2321bec5d80d15 43-44,51,57-58,61-64,73,80-83
+bkms-server/cmd/migration/list_bscp_projects.go
+  h_2321bec5d80d15 40-41,47,53-58,64,69-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "5ea3734968fd372585eeeeb30cb2a94b99a2b317",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
