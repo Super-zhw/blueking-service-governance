@@ -1,0 +1,16 @@
+bkms-server/pkg/misc/audit/model.go
+  h_2321bec5d80d15 130-131,144,166-167
+bkms-server/pkg/observability/bkmonitor/dashboard/handler/dashboard.go
+  h_2321bec5d80d15 26,115-119,174-178,204-205,210-216,221-225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "0783792fb7142b5267b0dd2f419059ec8ee4a50c",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
