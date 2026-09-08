@@ -1,0 +1,16 @@
+bkms-server/cmd/migration/app_bscpcfg_mgr.go
+  h_2321bec5d80d15 44-45,53-54,57-58,60-61,65-66,71,74-75,79-80,85,88-89,94-100,105-108,117,119
+bkms-server/pkg/core/workspace/serializer/workspace.go
+  h_2321bec5d80d15 75-78,101-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "dc70c9eaaa9268479159572ea0f4a3b22e4fcf55",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
