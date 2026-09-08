@@ -1,0 +1,36 @@
+bkms-cli/cmd/app/app.go
+  h_2321bec5d80d15 29,75-76
+bkms-cli/cmd/app/dashboard/create.go
+  h_2321bec5d80d15 1-65
+bkms-cli/cmd/app/dashboard/dashboard.go
+  h_2321bec5d80d15 1-41
+bkms-cli/cmd/app/dashboard/delete.go
+  h_2321bec5d80d15 1-60
+bkms-cli/cmd/app/dashboard/list.go
+  h_2321bec5d80d15 1-66
+bkms-cli/cmd/app/dashboard/update.go
+  h_2321bec5d80d15 1-77
+bkms-cli/cmd/workspace/dashboard/dashboard.go
+  h_2321bec5d80d15 1-38
+bkms-cli/cmd/workspace/dashboard/list.go
+  h_2321bec5d80d15 1-72
+bkms-cli/cmd/workspace/workspace.go
+  h_2321bec5d80d15 26,48-49
+bkms-cli/pkg/client/dashboard.go
+  h_2321bec5d80d15 1-158
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 477-545,961-962,1228-1290,3466-3533,4040-4107,5305-5376,5824-5892
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 208-220
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "fced4c508111a94ae89adf59c1628eca558058c1",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

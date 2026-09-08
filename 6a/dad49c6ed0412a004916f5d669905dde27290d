@@ -1,0 +1,18 @@
+bkms-cli/pkg/client/dashboard.go
+  h_2321bec5d80d15 29,31-32,56-68,73,76-78,87-99
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 4041,4048,4050,4053,4057,4098-4099,4103
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "6adad49c6ed0412a004916f5d669905dde27290d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
