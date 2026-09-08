@@ -1,0 +1,32 @@
+bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  h_2321bec5d80d15 516,536
+bkms-server/pkg/infras/cloudapi/bkmonitor/client.go
+  h_2321bec5d80d15 91-92
+bkms-server/pkg/infras/cloudapi/bkmonitor/dashboard.go
+  h_2321bec5d80d15 60-94
+bkms-server/pkg/infras/cloudapi/bkmonitor/stub.go
+  h_2321bec5d80d15 544-565
+bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  h_2321bec5d80d15 912-925
+bkms-server/pkg/observability/bkmonitor/dashboard/model.go
+  h_2321bec5d80d15 42-43,69
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer.go
+  h_2321bec5d80d15 26,31,36
+bkms-server/pkg/observability/bkmonitor/dashboard/service.go
+  h_2321bec5d80d15 69,72,91,95,130-151
+bkms-server/pkg/observability/bkmonitor/dashboard/store.go
+  h_2321bec5d80d15 57,128,137
+bkms-server/pkg/observability/bkmonitor/dashboard/store_test.go
+  h_2321bec5d80d15 117,124,129,141,147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "ed857c586c82545d785a6abb05f6f267cec6f49d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
