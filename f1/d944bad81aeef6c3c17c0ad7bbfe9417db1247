@@ -1,0 +1,14 @@
+bkms-server/pkg/extension/bscpcfg/model/feature_flag.go
+  h_2321bec5d80d15 117-124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "f1d944bad81aeef6c3c17c0ad7bbfe9417db1247",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
