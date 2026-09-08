@@ -54,7 +54,7 @@ type AppDashboardStore interface {
 	ListByApp(ctx context.Context, appID string) ([]AppDashboard, error)
 
 	// Update updates an app dashboard binding by app ID and uid.
-	Update(ctx context.Context, appID, uid string, updateData *AppDashboardUpdateData) error
+	Update(ctx context.Context, appID, uid, updater string, updateData *AppDashboardUpdateData) error
 
 	// Delete deletes an app dashboard binding by app ID and uid.
 	Delete(ctx context.Context, appID, uid string) error
@@ -125,7 +125,7 @@ func (s *StoreMongo) ListByApp(ctx context.Context, appID string) ([]AppDashboar
 // Update updates an app dashboard binding by app ID and uid.
 func (s *StoreMongo) Update(
 	ctx context.Context,
-	appID, uid string,
+	appID, uid, updater string,
 	updateData *AppDashboardUpdateData,
 ) error {
 	if updateData == nil {
@@ -134,6 +134,7 @@ func (s *StoreMongo) Update(
 
 	update, isEmpty := updateData.ToBSON()
 	if !isEmpty {
+		update["updater"] = updater
 		update["updatedAt"] = time.Now()
 		return s.updateOne(ctx, bson.M{"appID": appID, "uid": uid}, bson.M{"$set": update})
 	}

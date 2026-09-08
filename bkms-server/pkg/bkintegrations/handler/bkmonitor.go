@@ -513,7 +513,7 @@ func (h *Handler) ListDashboardDirectoryTree(c *gin.Context) {
 		return
 	}
 
-	bkBizID, err := ws.ResolveBkMonitorProjectID()
+	bkMonitorProjectID, err := ws.ResolveBkMonitorProjectID()
 	if err != nil {
 		bkerrs.AbortWithErr(
 			c,
@@ -533,7 +533,7 @@ func (h *Handler) ListDashboardDirectoryTree(c *gin.Context) {
 		return
 	}
 
-	tree, err := client.GetDashboardDirectoryTree(ctx, bkBizID)
+	tree, err := client.GetDashboardDirectoryTree(ctx, bkMonitorProjectID)
 	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "list dashboard directory tree"))
 		return

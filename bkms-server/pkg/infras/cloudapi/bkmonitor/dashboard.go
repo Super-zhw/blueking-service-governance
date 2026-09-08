@@ -57,3 +57,38 @@ func (c *MonitorGatewayClient) GetDashboardDirectoryTree(
 
 	return result, nil
 }
+
+// GetDashboardDetail 获取仪表盘详情，仪表盘不存在时返回 (nil, nil)。
+func (c *MonitorGatewayClient) GetDashboardDetail(
+	ctx context.Context,
+	bkBizID int64,
+	dashboardUID string,
+) (*DashboardDetail, error) {
+	params := map[string]string{
+		"bk_biz_id":     cast.ToString(bkBizID),
+		"dashboard_uid": dashboardUID,
+	}
+
+	resp, err := c.handleOperation(ctx, c.NewOperation(
+		bkapi.OperationConfig{
+			Name:   "get_dashboard_detail",
+			Method: http.MethodGet,
+			Path:   "/app/dashboard/get_dashboard_detail/",
+		},
+	).SetQueryParams(params))
+	if err != nil {
+		return nil, errors.Wrapf(err, "get dashboard detail failed, bk_biz_id: %d, uid: %s", bkBizID, dashboardUID)
+	}
+
+	// 仪表盘不存在时，data 为 null。
+	if resp["data"] == nil {
+		return nil, nil
+	}
+
+	result := new(DashboardDetail)
+	if err = mapstructure.Decode(resp["data"], result); err != nil {
+		return nil, errors.Wrapf(err, "decode dashboard detail failed, bk_biz_id: %d, uid: %s", bkBizID, dashboardUID)
+	}
+
+	return result, nil
+}

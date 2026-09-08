@@ -39,6 +39,8 @@ type AppDashboard struct {
 
 	// Creator 创建人
 	Creator string `bson:"creator"`
+	// Updater 更新人
+	Updater string `bson:"updater"`
 	// CreatedAt 创建时间
 	CreatedAt time.Time `bson:"createdAt"`
 	// UpdatedAt 更新时间
@@ -56,16 +58,13 @@ type AppDashboardUpdateData struct {
 // ToBSON converts AppDashboardUpdateData to bson.M for update operations.
 func (d *AppDashboardUpdateData) ToBSON() (bson.M, bool) {
 	data := bson.M{}
-	isEmpty := true
 
 	if d.UID != nil {
 		data["uid"] = *d.UID
-		isEmpty = false
 	}
 	if d.Title != nil {
 		data["title"] = *d.Title
-		isEmpty = false
 	}
 
-	return data, isEmpty
+	return data, len(data) == 0
 }

@@ -66,14 +66,10 @@ func (s *Service) Create(
 	ws *workspace.Workspace,
 	appID, uid, title, operator string,
 ) error {
-	tree, err := s.fetchDirectoryTree(ctx, ws, operator)
-	if err != nil {
+	if err := s.ensureDashboardExists(ctx, ws, operator, uid); err != nil {
 		return err
 	}
-	if !dashboardExists(tree, uid) {
-		return errors.Wrapf(ErrDashboardNotExist, "uid=%s", uid)
-	}
-	if _, err = s.store.Create(ctx, &AppDashboard{
+	if _, err := s.store.Create(ctx, &AppDashboard{
 		AppID:   appID,
 		UID:     uid,
 		Title:   title,
@@ -92,15 +88,11 @@ func (s *Service) Update(
 	updateData *AppDashboardUpdateData,
 ) error {
 	if updateData.UID != nil && *updateData.UID != uid {
-		tree, err := s.fetchDirectoryTree(ctx, ws, operator)
-		if err != nil {
+		if err := s.ensureDashboardExists(ctx, ws, operator, *updateData.UID); err != nil {
 			return err
 		}
-		if !dashboardExists(tree, *updateData.UID) {
-			return errors.Wrapf(ErrDashboardNotExist, "uid=%s", *updateData.UID)
-		}
 	}
-	if err := s.store.Update(ctx, appID, uid, updateData); err != nil {
+	if err := s.store.Update(ctx, appID, uid, operator, updateData); err != nil {
 		return errors.Wrapf(err, "update app dashboard binding, appID=%s, uid=%s", appID, uid)
 	}
 	return nil
@@ -135,13 +127,28 @@ func (s *Service) fetchDirectoryTree(
 	return tree, nil
 }
 
-// dashboardExists reports whether the given uid exists in the directory tree.
-func dashboardExists(tree []*bkmapi.DashboardDirectoryNode, uid string) bool {
-	return lo.SomeBy(tree, func(node *bkmapi.DashboardDirectoryNode) bool {
-		return node != nil && lo.ContainsBy(node.Dashboards, func(item bkmapi.DashboardItem) bool {
-			return item.UID == uid
-		})
-	})
+// ensureDashboardExists 校验仪表盘 uid 在 bkmonitor 侧真实存在。
+func (s *Service) ensureDashboardExists(
+	ctx context.Context,
+	ws *workspace.Workspace,
+	operator, uid string,
+) error {
+	bkMonitorProjectID, err := ws.ResolveBkMonitorProjectID()
+	if err != nil {
+		return errors.Wrap(err, "resolve bkmonitor space id")
+	}
+	client, err := s.newClient(operator)
+	if err != nil {
+		return errors.Wrap(err, "new bkmonitor client")
+	}
+	detail, err := client.GetDashboardDetail(ctx, bkMonitorProjectID, uid)
+	if err != nil {
+		return errors.Wrapf(err, "get dashboard detail, bk_biz_id=%d, uid=%s", bkMonitorProjectID, uid)
+	}
+	if detail == nil {
+		return errors.Wrapf(ErrDashboardNotExist, "uid=%s", uid)
+	}
+	return nil
 }
 
 // dashboardInfoMap 转换

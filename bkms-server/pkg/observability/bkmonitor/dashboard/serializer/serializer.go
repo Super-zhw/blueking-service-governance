@@ -23,16 +23,17 @@ import (
 	"github.com/samber/lo"
 
 	bkmapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkmonitor"
+	_ "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/validators" // register global validators
 )
 
 // AppURIInput 路径参数（仅应用 ID）。
 type AppURIInput struct {
-	AppID string `uri:"appID" binding:"required,app_id,min=2"`
+	AppID string `uri:"appID" binding:"required,uri_slug"`
 }
 
 // AppDashboardURIInput 应用仪表盘路径参数。
 type AppDashboardURIInput struct {
-	AppID string `uri:"appID" binding:"required,app_id,min=2"`
+	AppID string `uri:"appID" binding:"required,uri_slug"`
 	UID   string `uri:"uid" binding:"required,min=1"`
 }
 

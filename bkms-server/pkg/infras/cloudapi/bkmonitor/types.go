@@ -909,3 +909,17 @@ type DashboardDirectoryNode struct {
 	// HasFolderPermission 是否有目录权限
 	HasFolderPermission bool `json:"has_folder_permission" mapstructure:"has_folder_permission"`
 }
+
+// DashboardDetail 仪表盘详情（get_dashboard_detail 返回）。
+type DashboardDetail struct {
+	// ID 仪表盘 ID
+	ID int64 `json:"id" mapstructure:"id"`
+	// UID 仪表盘 uid
+	UID string `json:"uid" mapstructure:"uid"`
+	// Title 仪表盘标题
+	Title string `json:"title" mapstructure:"title"`
+	// Slug 仪表盘 slug
+	Slug string `json:"slug" mapstructure:"slug"`
+	// Version 仪表盘版本
+	Version int64 `json:"version" mapstructure:"version"`
+}

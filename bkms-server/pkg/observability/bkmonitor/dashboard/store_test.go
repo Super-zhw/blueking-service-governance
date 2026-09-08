@@ -114,18 +114,19 @@ var _ = Describe("AppDashboardStoreMongo", func() {
 
 		It("should update title", func() {
 			newTitle := "New Title"
-			err := store.Update(ctx, "app-a", "uid-1", &AppDashboardUpdateData{Title: &newTitle})
+			err := store.Update(ctx, "app-a", "uid-1", "tester", &AppDashboardUpdateData{Title: &newTitle})
 			Expect(err).NotTo(HaveOccurred())
 
 			list, err := store.ListByApp(ctx, "app-a")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(list).To(HaveLen(1))
 			Expect(list[0].Title).To(Equal("New Title"))
+			Expect(list[0].Updater).To(Equal("tester"))
 		})
 
 		It("should update uid", func() {
 			newUID := "uid-new"
-			err := store.Update(ctx, "app-a", "uid-1", &AppDashboardUpdateData{UID: &newUID})
+			err := store.Update(ctx, "app-a", "uid-1", "tester", &AppDashboardUpdateData{UID: &newUID})
 			Expect(err).NotTo(HaveOccurred())
 
 			list, err := store.ListByApp(ctx, "app-a")
@@ -137,13 +138,13 @@ var _ = Describe("AppDashboardStoreMongo", func() {
 			_, _ = store.Create(ctx, &AppDashboard{AppID: "app-a", UID: "uid-2", Title: "t2"})
 
 			newUID := "uid-2"
-			err := store.Update(ctx, "app-a", "uid-1", &AppDashboardUpdateData{UID: &newUID})
+			err := store.Update(ctx, "app-a", "uid-1", "tester", &AppDashboardUpdateData{UID: &newUID})
 			Expect(errors.Is(err, ErrDuplicate)).To(BeTrue())
 		})
 
 		It("should return not found when binding missing", func() {
 			newTitle := "x"
-			err := store.Update(ctx, "app-a", "uid-missing", &AppDashboardUpdateData{Title: &newTitle})
+			err := store.Update(ctx, "app-a", "uid-missing", "tester", &AppDashboardUpdateData{Title: &newTitle})
 			Expect(errors.Is(err, ErrNotFound)).To(BeTrue())
 		})
 	})

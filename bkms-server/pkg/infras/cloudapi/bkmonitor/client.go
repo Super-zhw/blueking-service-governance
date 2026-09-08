@@ -88,6 +88,8 @@ type MonitorClient interface {
 	GetAlertDetail(ctx context.Context, req *AlertDetailReq) (map[string]any, error)
 	// GetDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
 	GetDashboardDirectoryTree(ctx context.Context, bkBizID int64) ([]*DashboardDirectoryNode, error)
+	// GetDashboardDetail 获取仪表盘详情
+	GetDashboardDetail(ctx context.Context, bkBizID int64, dashboardUID string) (*DashboardDetail, error)
 }
 
 // ApiClient 蓝鲸监控 API 客户端

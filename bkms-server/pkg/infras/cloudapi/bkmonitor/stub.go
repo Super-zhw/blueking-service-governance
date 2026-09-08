@@ -541,3 +541,25 @@ func (s *StubClient) GetDashboardDirectoryTree(ctx context.Context, bkBizID int6
 		},
 	}, nil
 }
+
+// GetDashboardDetail 模拟获取仪表盘详情，未知 uid 返回 (nil, nil)。
+func (s *StubClient) GetDashboardDetail(
+	ctx context.Context,
+	bkBizID int64,
+	dashboardUID string,
+) (*DashboardDetail, error) {
+	log.Infof(ctx, "Stub: GetDashboardDetail request: bkBizID=%d, uid=%s", bkBizID, dashboardUID)
+	switch dashboardUID {
+	case "test-dashboard-uid-1":
+		return &DashboardDetail{ID: 1001, UID: dashboardUID, Title: "test dashboard", Slug: "test-dashboard"}, nil
+	case "test-dashboard-uid-2":
+		return &DashboardDetail{
+			ID:    2002,
+			UID:   dashboardUID,
+			Title: "example-dashboard",
+			Slug:  "example-dashboard",
+		}, nil
+	default:
+		return nil, nil
+	}
+}
