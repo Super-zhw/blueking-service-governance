@@ -1,0 +1,26 @@
+bkms-server/pkg/infras/cloudapi/bkmonitor/client.go
+  h_2321bec5d80d15 65-66
+bkms-server/pkg/infras/cloudapi/bkmonitor/monitor_client.go
+  h_2321bec5d80d15 251-279
+bkms-server/pkg/infras/cloudapi/bkmonitor/stub.go
+  h_2321bec5d80d15 171-184
+bkms-server/pkg/infras/cloudapi/bkmonitor/types.go
+  h_2321bec5d80d15 191-248
+bkms-server/pkg/infras/cloudapi/bkmonitor/types_test.go
+  h_2321bec5d80d15 1-69
+bkms-server/pkg/observability/bkmonitor/user_group_service.go
+  h_2321bec5d80d15 280-290,296,300
+bkms-server/pkg/server/taskqtask/appmodeldeploypoll/common.go
+  h_2321bec5d80d15 24-25,27-30,33,35-36,38,94-280
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "b9731acc100f613f2a92e9d93ba6d86925e86bc6",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
