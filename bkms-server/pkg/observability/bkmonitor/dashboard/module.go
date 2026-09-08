@@ -18,10 +18,15 @@
 
 package dashboard
 
-import "go.uber.org/fx"
+import (
+	"go.uber.org/fx"
+
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
+)
 
 // FxModule provides app dashboard binding dependencies via uber fx.
 var FxModule = fx.Module("bkmonitor-dashboard",
+	database.PrivateFxModule,
 	fx.Provide(
 		NewStoreMongo,
 		NewService,
