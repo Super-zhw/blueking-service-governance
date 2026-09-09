@@ -1,0 +1,20 @@
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  h_2321bec5d80d15 195,356,358-362,364-369,380-385,388-394,401
+bkms-server/pkg/infras/cloudapi/bscp/config_credential.go
+  h_2321bec5d80d15 165-170
+bkms-server/pkg/infras/cloudapi/bscp/config_hook.go
+  h_2321bec5d80d15 114-116,126-127
+bkms-server/pkg/infras/cloudapi/bscp/types.go
+  h_2321bec5d80d15 267-272,281-286,297-298
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "5644014afdda623146d43deb2ed44b750778205d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
