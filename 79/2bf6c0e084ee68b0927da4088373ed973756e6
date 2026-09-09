@@ -1,0 +1,14 @@
+bkms-server/pkg/infras/cloudapi/bscp/config_stub.go
+  h_2321bec5d80d15 40,46,52,65,71,83,89,101,107,113,119,128,137,149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "792bf6c0e084ee68b0927da4088373ed973756e6",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

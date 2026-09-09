@@ -1,0 +1,23 @@
+bkms-server/tests/apis/apps/bscpcfg/list-env-bindings.bru
+  s_24584e1cf7d8a0::t_98e3298a2c4217 27-28
+bkms-server/tests/apis/apps/bscpcfg/create-env-binding.bru
+  s_24584e1cf7d8a0::t_16a12db01a0ed6 18-20,24,29-31
+bkms-server/tests/apis/apps/bscpcfg/get-env-binding.bru
+  s_24584e1cf7d8a0::t_384efa080b3911 27-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "6c60d5525bc6f2179ce50a24f41831a84ca0a442",
+  "prompts": {},
+  "sessions": {
+    "s_24584e1cf7d8a0": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a06a0ffabd7ca1a9d9d597dc067507",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
