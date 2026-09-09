@@ -1,0 +1,30 @@
+bkms-server/configs/config.yaml
+  h_2321bec5d80d15 104-107
+bkms-server/pkg/common/config/types.go
+  h_2321bec5d80d15 177-180
+bkms-server/pkg/deploy/helm/postrenderer/bscp_test.go
+  h_2321bec5d80d15 88,102,134-135
+bkms-server/pkg/workload/bscpcfg/builder.go
+  h_2321bec5d80d15 28,70-73,125,135,182-190
+bkms-server/pkg/workload/bscpcfg/builder_test.go
+  h_2321bec5d80d15 32-40,49,73
+bkms-server/pkg/workload/bscpcfg/inject_map_test.go
+  h_2321bec5d80d15 145,155
+bkms-server/pkg/workload/bscpcfg/inject_test.go
+  h_2321bec5d80d15 31-33,37-45,132,142
+bkms-server/tests/configs/config.yaml
+  h_2321bec5d80d15 84-87
+charts/bkms-server/values.yaml
+  h_2321bec5d80d15 288-291
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "1c7d92b4851efc17b11532bc83aee12096897a81",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
