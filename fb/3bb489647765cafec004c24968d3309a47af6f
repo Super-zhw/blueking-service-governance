@@ -1,0 +1,50 @@
+bkms-cli/cmd/app/app.go
+  h_2321bec5d80d15 29,75-76
+bkms-cli/cmd/app/dashboard/create.go
+  h_2321bec5d80d15 1-31,32,33-39,40-41,42,43,44-45,46-52,53-57,58,59-64,65-67,68-70
+bkms-cli/cmd/app/dashboard/dashboard.go
+  h_2321bec5d80d15 1-41
+bkms-cli/cmd/app/dashboard/delete.go
+  h_2321bec5d80d15 1-60
+bkms-cli/cmd/app/dashboard/list.go
+  h_2321bec5d80d15 1-66
+bkms-cli/cmd/app/dashboard/update.go
+  h_2321bec5d80d15 1-31,32,33-35,36-37,38,39-40,41,41-42,43,44-46,47,48,49-58,59-62,63,64-66
+bkms-cli/cmd/workspace/dashboard/dashboard.go
+  h_2321bec5d80d15 1-38
+bkms-cli/cmd/workspace/dashboard/list.go
+  h_2321bec5d80d15 1-72
+bkms-cli/cmd/workspace/workspace.go
+  h_2321bec5d80d15 26,48-49
+bkms-cli/pkg/client/dashboard.go
+  h_2321bec5d80d15 1-28,29,30,31-32,33-36,37,38-50,51-58,59-60,61-64,63-69,70-82,83-86,87,88-89,90-92,93-100,101-105,106,107,108-116,117,118-135,136-156,157-173,174-178,179-180,181,182-205
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 477-545,961-962,1228-1290,2879-2952,3540-3607,4114,4115,4116-4121,4122,4123,4124,4125-4126,4127,4128-4130,4131,4132-4171,4172-4173,4174-4176,4177,4178-4181,5379-5450,5898,5899-5900,5901-5906,5907-5908,5909-5923,5924-5926,5927-5928,5929,5930-5942,5943,5944,5945,5946-5961,5962,5963-5966
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 208-210,211,212-213,214-218,219,220-222
+bkms-cli/pkg/client/dashboard_test.go
+  h_2321bec5d80d15 1-74
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 16536-16591,23657-23669,25232-25239
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 16533-16588,23654-23666,25227-25234
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 3613-3621,4699-4703,19712-19746
+bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  h_2321bec5d80d15 566-632
+bkms-server/pkg/bkintegrations/router.go
+  h_2321bec5d80d15 94-95,149
+bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  h_2321bec5d80d15 56-61,262-274
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "fb3bb489647765cafec004c24968d3309a47af6f",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
