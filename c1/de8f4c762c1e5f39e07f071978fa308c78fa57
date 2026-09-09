@@ -1,0 +1,58 @@
+bkms-cli/test/e2e/app/app_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/app/appspec_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/app/create_validate_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/app/crud_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/app/image_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/app/instance_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/app/suite_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/base/auth_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/base/config_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/base/env_crud_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/base/env_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/base/root_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/base/suite_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/base/workspace_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/deploy/build_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/deploy/deploy_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/deploy/suite_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/envvar/envvar_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/envvar/suite_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/extension/cfg_file_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/extension/component_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/extension/polaris_test.go
+  h_2321bec5d80d15 19
+bkms-cli/test/e2e/extension/suite_test.go
+  h_2321bec5d80d15 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "c1de8f4c762c1e5f39e07f071978fa308c78fa57",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
