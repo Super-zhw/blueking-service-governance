@@ -1,0 +1,18 @@
+bkms-server/configs/config.yaml
+  h_2321bec5d80d15 105,107
+bkms-server/tests/configs/config.yaml
+  h_2321bec5d80d15 85,87
+charts/bkms-server/values.yaml
+  h_2321bec5d80d15 289,291
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "8379bb85ce607c8bcd58eee59f1353ef9dc5f528",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
