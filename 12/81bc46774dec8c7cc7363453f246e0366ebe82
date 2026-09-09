@@ -1,0 +1,34 @@
+bkms-cli/cmd/app/dashboard/create.go
+  h_2321bec5d80d15 32,40-41,43,46-52,58
+bkms-cli/cmd/app/dashboard/update.go
+  h_2321bec5d80d15 32,36-37,39-40,43,47,63
+bkms-cli/pkg/client/dashboard.go
+  h_2321bec5d80d15 51-58,136-156
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 2879-2952
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 212-213
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 16536-16591,23657-23669,25232-25239
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 16533-16588,23654-23666,25227-25234
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 3613-3621,4699-4703,19712-19746
+bkms-server/pkg/bkintegrations/handler/bkmonitor.go
+  h_2321bec5d80d15 566-632
+bkms-server/pkg/bkintegrations/router.go
+  h_2321bec5d80d15 94-95,149
+bkms-server/pkg/bkintegrations/serializer/bkmonitor.go
+  h_2321bec5d80d15 56-61,262-274
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "1281bc46774dec8c7cc7363453f246e0366ebe82",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
