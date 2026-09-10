@@ -478,9 +478,9 @@ func (m *Manager) getOrCreateBscpEnv(
 		return nil, errors.Wrapf(err, "list environments for biz %s, project %d", bizID, projectID)
 	}
 
-	// 按名称匹配（大小写不敏感）
+	// 按类型、名称匹配
 	for _, env := range envResp.AllEnvironments() {
-		if strings.EqualFold(env.Spec.Name, envName) {
+		if strings.EqualFold(env.Spec.Type, bscpEnvType) && strings.EqualFold(env.Spec.Name, envName) {
 			return &env, nil
 		}
 	}
