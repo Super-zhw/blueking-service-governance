@@ -1,0 +1,52 @@
+bkms-cli/cmd/app/app.go
+  h_2321bec5d80d15 29,75-76
+bkms-cli/cmd/app/dashboard/create.go
+  h_2321bec5d80d15 1-31,32,33-39,40-41,42,43,44-45,46,47-51,52-57,58-60,61-63
+bkms-cli/cmd/app/dashboard/dashboard.go
+  h_2321bec5d80d15 1-41
+bkms-cli/cmd/app/dashboard/delete.go
+  h_2321bec5d80d15 1-60
+bkms-cli/cmd/app/dashboard/list.go
+  h_2321bec5d80d15 1-66
+bkms-cli/cmd/app/dashboard/update.go
+  h_2321bec5d80d15 1-31,32,33-35,36-37,38,39-40,41,41-42,43,44-46,47,48,49-58,59-62,63,64-66
+bkms-cli/cmd/workspace/dashboard/dashboard.go
+  h_2321bec5d80d15 1-38
+bkms-cli/cmd/workspace/dashboard/list.go
+  h_2321bec5d80d15 1-72
+bkms-cli/cmd/workspace/workspace.go
+  h_2321bec5d80d15 26,48-49
+bkms-cli/pkg/client/dashboard.go
+  h_2321bec5d80d15 1-24,25,26-29,30,31,32-33,34-37,38,39-51,52-53,54-57,56-62,63-75,76-79,80,81,82,83-85,86,87-93,94-98,99,100,101-109,110,111-114,115,116-117,118,119-128,129-132,133,134,135-145,146-150,151-154,155,156,157-168,169-172,173,174,175-183
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 477,478-479,480-485,486-487,488-502,503-504,505-506,507,508-520,521-524,525-534,535,536-539,955-956,1222-1284,3460-3527,4034,4035,4036-4041,4042,4043,4044,4045-4046,4047,4048-4050,4051,4052-4091,4092-4093,4094-4096,4097,4098-4101,5299-5370,5818,5819-5820,5821-5826,5827-5828,5829-5843,5844-5846,5847-5848,5849,5850-5862,5863,5864,5865,5866-5881,5882,5883-5886
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 208-210,211,212-214,215,216,217,218-220
+bkms-cli/pkg/client/dashboard_test.go
+  h_2321bec5d80d15 1-74
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 20175,25184-25185,32034
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 20178
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 1276
+bkms-server/pkg/observability/bkmonitor/dashboard/handler/dashboard.go
+  h_2321bec5d80d15 110,147-148,166
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer.go
+  h_2321bec5d80d15 48
+bkms-server/pkg/observability/bkmonitor/dashboard/serializer/serializer_test.go
+  h_2321bec5d80d15 41,43,49,53-55
+bkms-server/pkg/observability/bkmonitor/dashboard/service.go
+  h_2321bec5d80d15 63,67,69-70,76,92-93,96-97,134,139,142,146,150,153,155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "47f7b5d0eb76c12b8f6708f1d5340ff73433783e",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
