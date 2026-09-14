@@ -1,0 +1,26 @@
+bkms-server/pkg/core/app/appcfg/appcfgfiledef/handler.go
+  h_2321bec5d80d15 436-443
+bkms-server/pkg/core/app/appcfg/content.go
+  h_2321bec5d80d15 133-134,136
+bkms-server/pkg/server/taskqtask/appmodeldeploypoll/common.go
+  h_2321bec5d80d15 236
+bkms-server/pkg/workload/appmodelcore/taf/admincmd/admin_cmd.go
+  h_2321bec5d80d15 193
+bkms-server/pkg/workload/appmodelcore/taf/plugin.go
+  h_2321bec5d80d15 105
+bkms-server/pkg/workload/appmodelcore/trpc/admincmd/admin_cmd.go
+  h_2321bec5d80d15 464
+bkms-server/pkg/workload/appmodelcore/trpc/plugin.go
+  h_2321bec5d80d15 121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "32fdcd3a3aca650b152b58cd03e4853e348a091e",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
