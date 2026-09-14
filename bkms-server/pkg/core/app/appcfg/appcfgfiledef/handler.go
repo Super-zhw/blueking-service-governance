@@ -433,9 +433,14 @@ func (h *Handler) UpdateContent(c *gin.Context) {
 				return nil
 			}
 			arranger := arrangement.NewAppArranger(h.registry.AppStore)
-			_, err := arranger.ValidateFileContent(ctx, app, []byte(compiledContent), targetFile.GetConfigFormat())
-			if err != nil {
-				return errors.Wrap(appcfg.ErrInvalidConfigSpec, err.Error())
+			_, validateErr := arranger.ValidateFileContent(
+				ctx,
+				app,
+				[]byte(compiledContent),
+				targetFile.GetConfigFormat(),
+			)
+			if validateErr != nil {
+				return errors.Wrap(appcfg.ErrInvalidConfigSpec, validateErr.Error())
 			}
 			return nil
 		},

@@ -461,6 +461,7 @@ func (s *TrpcAdminService) GetAdminPort(cfg *AdminConfig) (string, error) {
 
 // GetAdminConfig 获取并解析 admin 配置
 func (s *TrpcAdminService) GetAdminConfig(ctx context.Context) (*AdminConfig, error) {
+	//nolint:staticcheck // 兼容 workload 层旧调用方，后续由 MountableFileProvider 替代
 	_, _, configContent, err := appcfg.GetEnvContent(
 		ctx,
 		s.AppConfigFileStore,

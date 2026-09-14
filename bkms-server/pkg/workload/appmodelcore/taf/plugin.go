@@ -102,6 +102,7 @@ func (p *Plugin) computeTafConfig(
 	if p.appConfigFileStore == nil {
 		return appModel.Workload.TafConfig.FileName, appModel.Workload.TafConfig.FileContent, nil
 	}
+	//nolint:staticcheck // 兼容 workload 层旧调用方，后续由 MountableFileProvider 替代
 	_, name, content, err := appcfg.GetEnvContent(
 		ctx,
 		p.appConfigFileStore,

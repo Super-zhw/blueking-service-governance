@@ -190,6 +190,7 @@ func (s *TafAdminService) Init(ctx context.Context) error {
 // 解析 local 字段中的 -p 参数获取端口号, -h 参数获取监听 IP
 func (s *TafAdminService) GetAdminConfig(ctx context.Context) (string, int32, error) {
 	// 获取配置文件内容
+	//nolint:staticcheck // 兼容 workload 层旧调用方，后续由 MountableFileProvider 替代
 	_, _, configContent, err := appcfg.GetEnvContent(
 		ctx,
 		s.Stores.AppConfigFileStore,

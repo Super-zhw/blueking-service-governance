@@ -118,6 +118,7 @@ func (p *Plugin) computeTrpcConfig(
 	if p.appConfigFileStore == nil {
 		content = appModel.Workload.TrpcConfig.FileContent
 	} else {
+		//nolint:staticcheck // 兼容 workload 层旧调用方，后续由 MountableFileProvider 替代
 		_, sourceName, content, err = appcfg.GetEnvContent(
 			ctx, p.appConfigFileStore, p.appConfigFileDefStore, app.ID, env.Name,
 		)

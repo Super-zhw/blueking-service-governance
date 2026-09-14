@@ -233,6 +233,7 @@ func resolveApmServiceName(
 		log.Errorf(ctx, "sync apm service config: get app model failed, app=%s env=%s: %v", app.ID, env.Name, err)
 		return ""
 	}
+	//nolint:staticcheck // 兼容 workload 层旧调用方，后续由 MountableFileProvider 替代
 	_, _, content, err := appcfg.GetEnvContent(
 		ctx, reg.AppConfigFileStore, reg.AppConfigFileDefStore, app.ID, env.Name,
 	)

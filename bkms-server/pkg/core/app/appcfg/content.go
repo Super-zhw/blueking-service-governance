@@ -130,9 +130,10 @@ func (s *AppCfgFileDefService) listEffectiveContents(
 			g = &fileGroup{}
 			groups[defHex] = g
 		}
-		if f.EnvName == EnvNameDefault {
+		switch f.EnvName {
+		case EnvNameDefault:
 			g.defaultFile = f
-		} else if f.EnvName == envName {
+		case envName:
 			g.envFile = f
 		}
 	}
