@@ -1,0 +1,14 @@
+.github/workflows/bkms-cli.yml
+  h_2321bec5d80d15 10,44-100,106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "47c142558077ae640d9d74a13d635bd961610304",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

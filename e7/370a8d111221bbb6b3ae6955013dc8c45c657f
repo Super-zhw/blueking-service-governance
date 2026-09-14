@@ -1,0 +1,14 @@
+cliff.toml
+  h_2321bec5d80d15 24,28-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e7370a8d111221bbb6b3ae6955013dc8c45c657f",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
