@@ -27,12 +27,14 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
+	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/instance/serializer"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/instance/watch"
 	polarisplugin "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/instance/watch/plugin/polaris"
+	publishplugin "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/instance/watch/plugin/publish"
 )
 
 // WatchAppInstances 订阅应用实例投影变更（SSE）
@@ -48,7 +50,7 @@ import (
 //	@Description	SSE 同一条流上推送两类事件，信封不同：
 //	@Description	1) Pod 事件 ADDED/MODIFIED/DELETED/ENDED，object 为实例投影；
 //	@Description	DELETED 只保证 id，ENDED 时 object 为 null；Pod 事件不承载附属数据，polarisInfos 恒为空数组。
-//	@Description	2) 附属数据事件 PLUGIN，带 plugin 标识来源（当前仅 polaris），object 为 {id, data}；
+//	@Description	2) 附属数据事件 PLUGIN，带 plugin 标识来源（如 polaris、devmodePublish），object 为 {id, data}；
 //	@Description	约 15s 一轮，仅该实例的附属数据有变化时推送。它不是实例的增删改，前端按 id 覆盖对应行的插件数据即可。
 //	@Description	3）附属数据首包取自 List 响应内嵌的 polarisInfos，增量只看 PLUGIN 事件。
 //	@Description	4）插件拉取失败时跳过本轮、不推事件也不拆流，页面保留上次已知状态。
@@ -114,8 +116,8 @@ func (h *Handler) WatchAppInstances(c *gin.Context) {
 	}
 }
 
-// newWatchManager 绑定目标集群的 Pod Watch，并把北极星作为附属数据插件注册进去
-// 插件注册只发生在这里：Watch 基础层不认识北极星，附属数据一律走插件层
+// newWatchManager 绑定目标集群的 Pod Watch，并把附属数据插件（北极星、开发模式发布状态）注册进去
+// 插件注册只发生在这里：Watch 基础层不认识具体附属数据源，附属数据一律走插件层
 // 插件拉取失败由 Runner 跳过本轮，不推事件也不拆流
 func (h *Handler) newWatchManager(clusterID, appID, envName string) *watch.Manager {
 	return watch.NewManager(
@@ -128,5 +130,10 @@ func (h *Handler) newWatchManager(clusterID, appID, envName string) *watch.Manag
 			)
 			return mgr.ListPolarisServiceInstances(ctx, appID, envName)
 		}),
+		publishplugin.New(
+			func(ctx context.Context, instanceIDs []string) (map[string]*devmode.PublishRecord, error) {
+				return h.registry.PublishRecordStore.ListLatestByInstance(ctx, appID, envName, instanceIDs)
+			},
+		),
 	)
 }
