@@ -1,0 +1,16 @@
+.github/workflows/bkms-cli.yml
+  h_2321bec5d80d15 48
+cliff.toml
+  h_2321bec5d80d15 24,28-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7ebc0c4ce8ec0c3e9b9e24f6bd32937436fa255a",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
