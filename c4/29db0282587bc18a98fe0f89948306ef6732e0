@@ -1,0 +1,28 @@
+bkms-server/db/migrations/000015_devmode_publish_records_idx.down.json
+  h_2321bec5d80d15 1-9
+bkms-server/db/migrations/000015_devmode_publish_records_idx.md
+  h_2321bec5d80d15 1-5
+bkms-server/db/migrations/000015_devmode_publish_records_idx.up.json
+  h_2321bec5d80d15 1-24
+bkms-server/pkg/extension/component/devmode/publish_record_store.go
+  h_2321bec5d80d15 47-53,140-184
+bkms-server/pkg/extension/component/devmode/publish_record_store_test.go
+  h_2321bec5d80d15 23,128-188
+bkms-server/pkg/workload/instance/handler/instance.go
+  h_2321bec5d80d15 116-118
+bkms-server/pkg/workload/instance/handler/list.go
+  h_2321bec5d80d15 27,203-235
+bkms-server/pkg/workload/instance/serializer/instance.go
+  h_2321bec5d80d15 33,309-310,404-435
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c429db0282587bc18a98fe0f89948306ef6732e0",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
