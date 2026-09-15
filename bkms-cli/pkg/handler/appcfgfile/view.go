@@ -111,7 +111,7 @@ func View(ctx context.Context, cli client.Client, appID, envName, cfgFileName st
 		Details:        details,
 		Content:        details.Content,
 		OverlayContent: details.OverlayContent,
-		EnvName:        formatEnvName(envName),
+		EnvName:        formatEnvName(file.EnvName),
 		IsFallback:     isFallback,
 	}, nil
 }
