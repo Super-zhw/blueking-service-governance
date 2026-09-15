@@ -30,6 +30,8 @@ const (
 	appConfigFileTypeNormal  = "normal"
 	appConfigFileTypeOverlay = "overlay"
 
+	appConfigFileContentSourceTypeLocal = "local"
+
 	editableContentFieldNone           = "none"
 	editableContentFieldContent        = "content"
 	editableContentFieldOverlayContent = "overlayContent"
@@ -45,7 +47,7 @@ type EditOptions struct {
 
 // EditResult contains the selected config file and update response.
 type EditResult struct {
-	// File is the selected app config file metadata from the list API.
+	// File is the app config file being edited.
 	File client.AppConfigFile
 	// Details is the raw details response read before updating the file.
 	Details *client.AppConfigFileDetails
@@ -62,12 +64,12 @@ func Edit(
 	appID, envName, cfgFileName string,
 	opts EditOptions,
 ) (*EditResult, error) {
-	files, err := cli.ListAppConfigFiles(ctx, appID, envName)
+	files, err := cli.ListAppConfigFiles(ctx, appID, "")
 	if err != nil {
 		return nil, errors.Wrap(err, "list app config files")
 	}
 
-	file, err := findCfgFileBy(files, envName, cfgFileName)
+	file, err := findOrCreate(ctx, cli, appID, files, envName, cfgFileName, opts)
 	if err != nil {
 		return nil, errors.Wrapf(err, "find app config file for app %s", appID)
 	}
@@ -106,6 +108,58 @@ func Edit(
 		UpdateResult: updateResult,
 		EnvName:      formatEnvName(envName),
 	}, nil
+}
+
+// findOrCreate 按环境获取配置文件，没有则创建 overlay 实例
+func findOrCreate(
+	ctx context.Context,
+	cli client.Client,
+	appID string,
+	files []client.AppConfigFile,
+	envName, cfgFileName string,
+	opts EditOptions,
+) (client.AppConfigFile, error) {
+	if envName == "" {
+		return findCfgFileBy(files, "", cfgFileName)
+	}
+
+	matches := findCfgFilesBy(files, envName, cfgFileName)
+	if len(matches) == 1 {
+		return matches[0], nil
+	}
+	if len(matches) > 1 {
+		return client.AppConfigFile{}, errors.Errorf(
+			"multiple app config files found for env %s%s: %s",
+			formatEnvName(envName),
+			formatCfgFileNameSuffix(cfgFileName),
+			formatCandidates(matches),
+		)
+	}
+
+	// 无环境实例 → 基于默认文件创建 overlay 环境实例
+	baseFile, err := findCfgFileBy(files, "", cfgFileName)
+	if err != nil {
+		return client.AppConfigFile{}, errors.Wrap(err, "find base app config file")
+	}
+	created, err := cli.CreateAppConfigFile(ctx, appID, client.CreateAppConfigFileOptions{
+		Name:                envName,
+		Type:                appConfigFileTypeOverlay,
+		BaseAppConfigFileID: baseFile.ID,
+		ContentSourceType:   appConfigFileContentSourceTypeLocal,
+		EnvName:             envName,
+		FileFormat:          baseFile.FileFormat,
+		Description:         opts.Description,
+	})
+	if err != nil {
+		return client.AppConfigFile{}, errors.Wrap(err, "create app config file for env")
+	}
+	if created == nil {
+		return client.AppConfigFile{}, errors.Errorf(
+			"empty created app config file for env %s",
+			formatEnvName(envName),
+		)
+	}
+	return *created, nil
 }
 
 func updateByEditableContentField(
