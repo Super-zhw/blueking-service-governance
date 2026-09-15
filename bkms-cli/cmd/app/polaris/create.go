@@ -37,9 +37,10 @@ const (
 
 The YAML spec file structure is consistent with the backend API request body.
 
-Note: After creating a polaris config, you need to trigger a deployment for the
-config to take effect in the cluster. polarisName and polarisNamespace cannot
-be changed after create.
+Note: By default (registerMode=on_deploy), a deployment is required for the config
+to take effect in the cluster. Set registerMode=immediate to register immediately
+when bound to environments, without deployment. polarisName, polarisNamespace and
+registerMode cannot be changed after create.
 
 YAML spec file fields:
 
@@ -64,6 +65,11 @@ YAML spec file fields:
                       If false, not-ready pods will be deregistered from polaris immediately
   enableHealthCheck:  Enable polaris health check for registered instances (bool, default false).
                       When enabled, polaris will actively probe instance health
+  registerMode:       Registration mode: on_deploy (default) or immediate.
+                      on_deploy takes effect after a deployment; immediate registers the
+                      service immediately when bound to environments, without deployment.
+                      Cannot be changed after create; immediate mode skips env-var and
+                      tRPC framework config injection
   serviceLabels:      Labels applied to ALL registered polaris instances (map[string]string).
                       Can be used for polaris routing rules and traffic management
 `
@@ -79,6 +85,7 @@ YAML spec file fields:
   # polarisNamespace: Production
   # polarisToken: "xxxx"
   # servicePort: 8080
+  # registerMode: immediate   # optional: immediate | on_deploy (default)
 
   # Example polaris.yaml (platform creates new service):
   # createNewService: true

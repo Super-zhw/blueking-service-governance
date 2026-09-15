@@ -42,6 +42,8 @@ type PolarisConfig struct {
 	KeepNotReadyPod bool `json:"keepNotReadyPod" yaml:"keepNotReadyPod"`
 	// 是否启用健康检查
 	EnableHealthCheck bool `json:"enableHealthCheck" yaml:"enableHealthCheck"`
+	// 注册模式: on_deploy（等部署后注册）/ immediate（绑定后立即注册）
+	RegisterMode string `json:"registerMode" yaml:"registerMode"`
 	// 服务标签
 	ServiceLabels map[string]string `json:"serviceLabels" yaml:"serviceLabels" table:"-"`
 	// 生效的环境列表
