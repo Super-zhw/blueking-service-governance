@@ -44,6 +44,8 @@ type ViewResult struct {
 	OverlayContent *string
 	// EnvName is the user-facing environment label used in output.
 	EnvName string
+	// IsFallback indicates the displayed file is the default file, not the requested env's instance.
+	IsFallback bool
 }
 
 // ViewOutput is the formatted output object for app config file view.
@@ -91,7 +93,7 @@ func View(ctx context.Context, cli client.Client, appID, envName, cfgFileName st
 		return nil, errors.Wrap(err, "list app config files")
 	}
 
-	file, err := findViewFile(files, envName, cfgFileName)
+	file, isFallback, err := findViewFile(files, envName, cfgFileName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "find app config file for app %s", appID)
 	}
@@ -110,6 +112,7 @@ func View(ctx context.Context, cli client.Client, appID, envName, cfgFileName st
 		Content:        details.Content,
 		OverlayContent: details.OverlayContent,
 		EnvName:        formatEnvName(envName),
+		IsFallback:     isFallback,
 	}, nil
 }
 
@@ -146,23 +149,28 @@ func findCfgFilesBy(files []client.AppConfigFile, envName, cfgFileName string) [
 }
 
 // findViewFile 按环境获取配置文件，如果没有则展示默认配置文件
-func findViewFile(files []client.AppConfigFile, envName, cfgFileName string) (client.AppConfigFile, error) {
+func findViewFile(
+	files []client.AppConfigFile,
+	envName, cfgFileName string,
+) (client.AppConfigFile, bool, error) {
 	if envName == "" {
-		return findCfgFileBy(files, "", cfgFileName)
+		file, err := findCfgFileBy(files, "", cfgFileName)
+		return file, false, err
 	}
 	matches := findCfgFilesBy(files, envName, cfgFileName)
 	if len(matches) == 1 {
-		return matches[0], nil
+		return matches[0], false, nil
 	}
 	if len(matches) > 1 {
-		return client.AppConfigFile{}, errors.Errorf(
+		return client.AppConfigFile{}, false, errors.Errorf(
 			"multiple app config files found for env %s%s: %s",
 			formatEnvName(envName),
 			formatCfgFileNameSuffix(cfgFileName),
 			formatCandidates(matches),
 		)
 	}
-	return findCfgFileBy(files, "", cfgFileName)
+	file, err := findCfgFileBy(files, "", cfgFileName)
+	return file, true, err
 }
 
 func formatEnvName(envName string) string {

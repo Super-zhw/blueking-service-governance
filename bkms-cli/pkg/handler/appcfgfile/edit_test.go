@@ -117,6 +117,7 @@ var _ = Describe("Edit", func() {
 		Expect(result.EnvName).To(Equal("prod"))
 		Expect(result.Details.CurrentVersion).To(Equal(int64(7)))
 		Expect(result.UpdateResult.CompiledContent).To(Equal(compiledContent))
+		Expect(result.Created).To(BeFalse())
 	})
 
 	It("updates OverlayContent when details marks a normal BSCP file overlay-editable", func() {
@@ -221,6 +222,7 @@ var _ = Describe("Edit", func() {
 		Expect(result.File.ID).To(Equal("prod-file"))
 		Expect(result.EnvName).To(Equal("prod"))
 		Expect(result.UpdateResult.CompiledContent).To(Equal(compiledContent))
+		Expect(result.Created).To(BeTrue())
 	})
 
 	It("creates an overlay env instance for another environment without touching existing instances", func() {
@@ -264,6 +266,7 @@ var _ = Describe("Edit", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result.File.ID).To(Equal("staging-file"))
 		Expect(result.EnvName).To(Equal("staging"))
+		Expect(result.Created).To(BeTrue())
 	})
 })
 
