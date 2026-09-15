@@ -125,6 +125,7 @@ var _ = Describe("View", func() {
 			Expect(result.EnvName).To(Equal("prod"))
 			Expect(result.Content).To(BeNil())
 			Expect(result.OverlayContent).To(Equal(&overlayContent))
+			Expect(result.IsFallback).To(BeFalse())
 
 			viewOutput, err := result.Output()
 			Expect(err).NotTo(HaveOccurred())
@@ -165,6 +166,7 @@ var _ = Describe("View", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.File.ID).To(Equal("default-file"))
 			Expect(result.Content).To(Equal(&content))
+			Expect(result.IsFallback).To(BeTrue())
 		})
 	})
 })

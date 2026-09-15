@@ -55,6 +55,8 @@ type EditResult struct {
 	UpdateResult *client.AppConfigFileContentUpdateResult
 	// EnvName is the user-facing environment label used in output.
 	EnvName string
+	// Created indicates the environment overlay was newly created for this edit.
+	Created bool
 }
 
 // Edit updates the app config file content selected by app and environment.
@@ -69,7 +71,7 @@ func Edit(
 		return nil, errors.Wrap(err, "list app config files")
 	}
 
-	file, err := findOrCreate(ctx, cli, appID, files, envName, cfgFileName, opts)
+	file, created, err := findOrCreate(ctx, cli, appID, files, envName, cfgFileName, opts.Description)
 	if err != nil {
 		return nil, errors.Wrapf(err, "find app config file for app %s", appID)
 	}
@@ -107,6 +109,7 @@ func Edit(
 		Details:      details,
 		UpdateResult: updateResult,
 		EnvName:      formatEnvName(envName),
+		Created:      created,
 	}, nil
 }
 
@@ -117,18 +120,19 @@ func findOrCreate(
 	appID string,
 	files []client.AppConfigFile,
 	envName, cfgFileName string,
-	opts EditOptions,
-) (client.AppConfigFile, error) {
+	description string,
+) (client.AppConfigFile, bool, error) {
 	if envName == "" {
-		return findCfgFileBy(files, "", cfgFileName)
+		file, err := findCfgFileBy(files, "", cfgFileName)
+		return file, false, err
 	}
 
 	matches := findCfgFilesBy(files, envName, cfgFileName)
 	if len(matches) == 1 {
-		return matches[0], nil
+		return matches[0], false, nil
 	}
 	if len(matches) > 1 {
-		return client.AppConfigFile{}, errors.Errorf(
+		return client.AppConfigFile{}, false, errors.Errorf(
 			"multiple app config files found for env %s%s: %s",
 			formatEnvName(envName),
 			formatCfgFileNameSuffix(cfgFileName),
@@ -139,7 +143,7 @@ func findOrCreate(
 	// 无环境实例 → 基于默认文件创建 overlay 环境实例
 	baseFile, err := findCfgFileBy(files, "", cfgFileName)
 	if err != nil {
-		return client.AppConfigFile{}, errors.Wrap(err, "find base app config file")
+		return client.AppConfigFile{}, false, errors.Wrap(err, "find base app config file")
 	}
 	created, err := cli.CreateAppConfigFile(ctx, appID, client.CreateAppConfigFileOptions{
 		Name:                envName,
@@ -148,18 +152,18 @@ func findOrCreate(
 		ContentSourceType:   appConfigFileContentSourceTypeLocal,
 		EnvName:             envName,
 		FileFormat:          baseFile.FileFormat,
-		Description:         opts.Description,
+		Description:         description,
 	})
 	if err != nil {
-		return client.AppConfigFile{}, errors.Wrap(err, "create app config file for env")
+		return client.AppConfigFile{}, false, errors.Wrap(err, "create app config file for env")
 	}
 	if created == nil {
-		return client.AppConfigFile{}, errors.Errorf(
+		return client.AppConfigFile{}, false, errors.Errorf(
 			"empty created app config file for env %s",
 			formatEnvName(envName),
 		)
 	}
-	return *created, nil
+	return *created, true, nil
 }
 
 func updateByEditableContentField(
