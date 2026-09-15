@@ -1,0 +1,16 @@
+bkms-cli/cmd/app/polaris/create.go
+  h_2321bec5d80d15 40-43,68-72,88
+bkms-cli/pkg/client/polaris.go
+  h_2321bec5d80d15 45-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cafea410bd2eb16a423eec0b456688092368ff6a",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
