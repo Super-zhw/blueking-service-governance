@@ -19,6 +19,8 @@
 package handler
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 
@@ -87,10 +89,11 @@ func (h *Handler) CreateDevModePublishRecords(c *gin.Context) {
 		return
 	}
 
-	// 写入操作审计记录（每个实例一条）
+	// 写入操作审计记录
+	recordCtx := context.WithoutCancel(ctx)
 	for _, result := range input.Results {
 		go audit.AddOperationRecordAsync(
-			ctx,
+			recordCtx,
 			audit.OperationTypePublish,
 			audit.ResourceTypeInstance,
 			result.Instance,

@@ -35,8 +35,10 @@ type PublishRecordRow struct {
 	FileSize   string `json:"fileSize"`
 	MD5        string `json:"md5"`
 	Status     string `json:"status"`
-	Operator   string `json:"operator"`
-	UpdatedAt  string `json:"updatedAt"`
+	// Message 失败原因等附加信息，仅在 JSON/YAML 输出中保留，表格不展示
+	Message   string `json:"message" table:"-"`
+	Operator  string `json:"operator"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // ListHistory 获取开发模式发布历史记录（展示格式）。
@@ -57,6 +59,7 @@ func ListHistory(
 			FileSize:   formatFileSize(record.FileSize),
 			MD5:        record.MD5,
 			Status:     record.Status,
+			Message:    record.Message,
 			Operator:   record.Operator,
 			UpdatedAt:  record.UpdatedAt,
 		}

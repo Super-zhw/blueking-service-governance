@@ -96,6 +96,9 @@ func (h *Publisher) PreCheck(instanceIDs []string, publishAll bool) error {
 
 	// 缓存后续发布阶段需要使用的上下文信息
 	h.preflight = preflight
+	if preflight.DevMode == nil {
+		return errors.New("server returned empty devMode config")
+	}
 	// WorkPath 由 server 端根据应用类型（trpc/taf）返回，如 /data/bkms/dev-mode/trpc 或 /data/bkms/dev-mode/taf
 	h.devModeBinPath = osfilepath.Join(preflight.DevMode.WorkPath, "/bin")
 	h.restartScriptPath = osfilepath.Join(preflight.DevMode.MountPath, "/restart.sh")
