@@ -167,6 +167,7 @@ var _ = Describe("View", func() {
 			Expect(result.File.ID).To(Equal("default-file"))
 			Expect(result.Content).To(Equal(&content))
 			Expect(result.IsFallback).To(BeTrue())
+			Expect(result.EnvName).To(Equal(defaultEnvLabel))
 		})
 	})
 })
