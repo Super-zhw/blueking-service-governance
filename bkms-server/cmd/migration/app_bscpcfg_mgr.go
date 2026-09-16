@@ -47,6 +47,9 @@ func NewAppBscpCfgMgrCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "app-bscpcfg-mgr",
 		Short: "Manage app bscp config",
+		Long: "启用或停用应用的 BSCP 配置管理能力。" +
+			"enable 初始化 credential/hook/metadata 并开启能力，" +
+			"disable 仅关闭能力开关（保留已建资源，停止后续注入）。",
 	}
 	cmd.PersistentFlags().StringVar(&srvCfg, "srvCfg", "", "server config file")
 	cmd.PersistentFlags().StringVar(&operator, "operator", "", "operator username (bk_username)")

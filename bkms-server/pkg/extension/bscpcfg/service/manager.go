@@ -82,14 +82,12 @@ func (m *Manager) InitMetadata(
 	// 获取或创建 Credential
 	cred, err := m.GetOrCreateCredential(ctx, params.BscpBizID, cast.ToInt64(params.BscpProjectID))
 	if err != nil {
-		metrics.BscpcfgStepFailed("credential")
 		return nil, errors.Wrap(err, "get or create bscpcfg credential")
 	}
 
 	// 获取或创建后置脚本
 	hookID, err := m.GetOrCreatePostHook(ctx, params.BscpBizID, cast.ToInt64(params.BscpProjectID), params.AppID)
 	if err != nil {
-		metrics.BscpcfgStepFailed("post_hook")
 		return nil, errors.Wrap(err, "get or create post hook")
 	}
 
@@ -166,7 +164,6 @@ func (m *Manager) CreateEnvBinding(
 	// 2. 按 envName 匹配或创建 BSCP 环境（类型由 bkms 环境类型映射而来）
 	bscpEnv, err := m.getOrCreateBscpEnv(ctx, bizID, projectID, params.EnvName, params.EnvType)
 	if err != nil {
-		metrics.BscpcfgStepFailed("bscp_env")
 		return nil, errors.Wrap(err, "get or create bscp environment")
 	}
 
@@ -183,13 +180,12 @@ func (m *Manager) CreateEnvBinding(
 		DataType:   bscpapi.DataTypeAny,
 	})
 	if err != nil {
-		metrics.BscpcfgStepFailed("bscp_app")
+		metrics.BscpcfgStepFailed("get_or_create_app")
 		return nil, errors.Wrap(err, "get or create bscp app")
 	}
 
 	// 3.1 刷新 workspace 权限范围（将 BSCP App 加入 IAM 权限组合）
 	if err = addBSCPPermissions(ctx, params.Workspace, bscpApp); err != nil {
-		metrics.BscpcfgStepFailed("refresh_permissions")
 		return nil, errors.Wrap(err, "refresh bscpcfg permissions")
 	}
 
@@ -203,7 +199,7 @@ func (m *Manager) CreateEnvBinding(
 			AppID:      bscpAppID,
 			PostHookID: postHookID,
 		}); err != nil {
-			metrics.BscpcfgStepFailed("bind_hook")
+			metrics.BscpcfgStepFailed("bind_post_hook")
 			return nil, errors.Wrap(err, "bind post hook to bscp app")
 		}
 		log.Infof(ctx, "bound post hook %d to bscp app %d (biz %s, project %d, env %s)",
@@ -213,7 +209,6 @@ func (m *Manager) CreateEnvBinding(
 	// 5. 刷新 Credential Scope
 	credID := cast.ToInt64(meta.CredentialID)
 	if err = m.RefreshCredentialScopes(ctx, bizID, projectID, credID, *bscpApp, *bscpEnv); err != nil {
-		metrics.BscpcfgStepFailed("refresh_scopes")
 		return nil, errors.Wrap(err, "refresh credential scopes")
 	}
 
@@ -332,8 +327,14 @@ func (m *Manager) GetCredentialByName(
 // GetOrCreateCredential 获取或创建 Credential（幂等）。
 func (m *Manager) GetOrCreateCredential(
 	ctx context.Context, bizID string, projectID int64,
-) (*bscpapi.Credential, error) {
-	cred, err := m.GetCredentialByName(ctx, bizID, projectID, credentialName)
+) (cred *bscpapi.Credential, err error) {
+	defer func() {
+		if err != nil {
+			metrics.BscpcfgStepFailed("get_or_create_credential")
+		}
+	}()
+
+	cred, err = m.GetCredentialByName(ctx, bizID, projectID, credentialName)
 	if err == nil {
 		return cred, nil
 	}
@@ -343,15 +344,15 @@ func (m *Manager) GetOrCreateCredential(
 	}
 
 	log.Infof(ctx, "credential %q not found in biz %s, project %d, creating...", credentialName, bizID, projectID)
-	_, createErr := m.client.CreateCredential(ctx, &bscpapi.CreateCredentialReq{
+	_, err = m.client.CreateCredential(ctx, &bscpapi.CreateCredentialReq{
 		BizID:     bizID,
 		ProjectID: projectID,
 		Name:      credentialName,
 		Memo:      "auto-created by bkms platform",
 	})
-	if createErr != nil {
+	if err != nil {
 		return nil, errors.Wrapf(
-			createErr,
+			err,
 			"create credential %q in biz %s, project %d",
 			credentialName,
 			bizID,
@@ -380,7 +381,13 @@ func (m *Manager) RefreshCredentialScopes(
 	projectID, credentialID int64,
 	app bscpapi.App,
 	env bscpapi.Environment,
-) error {
+) (err error) {
+	defer func() {
+		if err != nil {
+			metrics.BscpcfgStepFailed("refresh_credential_scopes")
+		}
+	}()
+
 	targetScope := bscpapi.CredentialScopeItem{
 		App:     app.Name,
 		Scope:   defaultScope,
@@ -427,7 +434,13 @@ func (m *Manager) RefreshCredentialScopes(
 // GetOrCreatePostHook 获取或创建后置脚本（幂等）。
 func (m *Manager) GetOrCreatePostHook(
 	ctx context.Context, bizID string, projectID int64, appID string,
-) (int64, error) {
+) (hookID int64, err error) {
+	defer func() {
+		if err != nil {
+			metrics.BscpcfgStepFailed("get_or_create_post_hook")
+		}
+	}()
+
 	hookName := fmt.Sprintf("bkms-post-hook-%s", appID)
 
 	// 先尝试查询是否已存在
@@ -464,7 +477,7 @@ func (m *Manager) GetOrCreatePostHook(
 	)
 
 	log.Infof(ctx, "post hook %q not found in biz %s, project %d, creating...", hookName, bizID, projectID)
-	hookID, err := m.client.CreateHook(ctx, &bscpapi.CreateHookReq{
+	hookID, err = m.client.CreateHook(ctx, &bscpapi.CreateHookReq{
 		BizID:        bizID,
 		ProjectID:    projectID,
 		Name:         hookName,
@@ -487,7 +500,13 @@ func (m *Manager) GetOrCreatePostHook(
 func (m *Manager) getOrCreateBscpEnv(
 	ctx context.Context,
 	bizID string, projectID int64, envName, envType string,
-) (*bscpapi.Environment, error) {
+) (env *bscpapi.Environment, err error) {
+	defer func() {
+		if err != nil {
+			metrics.BscpcfgStepFailed("get_or_create_env")
+		}
+	}()
+
 	bscpEnvType := ToBscpEnvType(envType)
 	if bscpEnvType == "" {
 		return nil, errors.Errorf("unsupported bkms env type %q", envType)
@@ -499,9 +518,9 @@ func (m *Manager) getOrCreateBscpEnv(
 	}
 
 	// 按类型、名称匹配
-	for _, env := range envResp.AllEnvironments() {
-		if strings.EqualFold(env.Spec.Type, bscpEnvType) && strings.EqualFold(env.Spec.Name, envName) {
-			return &env, nil
+	for _, e := range envResp.AllEnvironments() {
+		if strings.EqualFold(e.Spec.Type, bscpEnvType) && strings.EqualFold(e.Spec.Name, envName) {
+			return &e, nil
 		}
 	}
 
@@ -513,7 +532,7 @@ func (m *Manager) getOrCreateBscpEnv(
 		bscpEnvType,
 		projectID,
 	)
-	env, err := m.client.CreateEnvironment(ctx, &bscpapi.CreateEnvironmentReq{
+	env, err = m.client.CreateEnvironment(ctx, &bscpapi.CreateEnvironmentReq{
 		BizID:     bizID,
 		ProjectID: projectID,
 		Name:      envName,

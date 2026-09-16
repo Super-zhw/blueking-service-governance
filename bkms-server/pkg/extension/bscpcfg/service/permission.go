@@ -30,6 +30,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkcc"
 	bscpapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bscp"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 )
 
 // addBSCPPermissions 刷新 BSCP 权限范围到 workspace 的权限组合中
@@ -37,7 +38,13 @@ func addBSCPPermissions(
 	ctx context.Context,
 	ws *workspace.Workspace,
 	bscpApp *bscpapi.App,
-) error {
+) (err error) {
+	defer func() {
+		if err != nil {
+			metrics.BscpcfgStepFailed("refresh_permissions")
+		}
+	}()
+
 	client, err := bkcc.New(auth.MustGetUser(ctx))
 	if err != nil {
 		return errors.Wrap(err, "initial bkcc client")
