@@ -193,6 +193,11 @@ func BuildFromStore(
 		return nil, errors.Wrap(err, "validating bscp config snapshot")
 	}
 
+	// 镜像地址从配置读取，注入前校验非空，避免注入空镜像
+	if svccfg.G.BSCP.InitImage == "" || svccfg.G.BSCP.SidecarImage == "" {
+		return nil, errors.New("bscpcfg initImage/sidecarImage not configured")
+	}
+
 	fragment := Build(Params{
 		BscpBizID:    snapshot.Metadata.BscpBizID,
 		AppNames:     snapshot.GetBscpAppName(),

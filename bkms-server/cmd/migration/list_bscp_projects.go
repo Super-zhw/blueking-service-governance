@@ -38,13 +38,12 @@ func NewListBscpProjectsCmd() *cobra.Command {
 	var srvCfg string
 	var workspaceID string
 	var operator string
-	var accessToken string
 
 	cmd := &cobra.Command{
 		Use:   "list-bscp-projects",
 		Short: "List BSCP projects under a workspace",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runListBscpProjects(cmd.Context(), srvCfg, workspaceID, operator, accessToken)
+			return runListBscpProjects(cmd.Context(), srvCfg, workspaceID, operator)
 		},
 	}
 
@@ -54,18 +53,23 @@ func NewListBscpProjectsCmd() *cobra.Command {
 	_ = cmd.MarkFlagRequired("workspace")
 	cmd.Flags().StringVar(&operator, "operator", "", "operator username (bk_username)")
 	_ = cmd.MarkFlagRequired("operator")
-	cmd.Flags().StringVar(&accessToken, "access-token", "", "operator access token")
-	_ = cmd.MarkFlagRequired("access-token")
 
 	return cmd
 }
 
 // runListBscpProjects 从 workspace 取 bizID，再列出该 bizID 下的 BSCP 项目。
-func runListBscpProjects(ctx context.Context, srvCfg, workspaceID, operator, accessToken string) error {
+func runListBscpProjects(ctx context.Context, srvCfg, workspaceID, operator string) error {
 	cfg, err := config.Load(ctx, srvCfg)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
+
+	// 交互式读取 access token（密文输入，不回显），避免经命令行参数明文传递
+	accessToken, err := readAccessToken()
+	if err != nil {
+		return err
+	}
+
 	ctx = auth.WithUser(ctx, auth.User{
 		ID:   operator,
 		Cred: auth.UserCredential{AccessToken: accessToken},

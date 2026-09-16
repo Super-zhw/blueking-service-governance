@@ -110,41 +110,23 @@ func (s *FeatureFlagStoreMongo) Upsert(ctx context.Context, flag *FeatureFlag) e
 	}
 	flag.UpdatedAt = now
 
-	_, err := s.collection.UpdateOne(
-		ctx,
-		bson.M{"appID": flag.AppID},
-		bson.M{
-			"$set": bson.M{
-				"enabled":   flag.Enabled,
-				"operator":  flag.Operator,
-				"updatedAt": flag.UpdatedAt,
-			},
-			"$setOnInsert": bson.M{
-				"createdAt": flag.CreatedAt,
-			},
-		},
-		options.UpdateOne().SetUpsert(true),
-	)
-	if err != nil {
-		// 并发 upsert 时可能因 appID 唯一索引冲突而失败，重试一次（此时文档已存在，走更新分支）
-		if mongo.IsDuplicateKeyError(err) {
-			_, retryErr := s.collection.UpdateOne(
-				ctx,
-				bson.M{"appID": flag.AppID},
-				bson.M{
-					"$set": bson.M{
-						"enabled":   flag.Enabled,
-						"operator":  flag.Operator,
-						"updatedAt": flag.UpdatedAt,
-					},
-				},
-			)
-			if retryErr != nil {
-				return errors.Wrap(retryErr, "retry upsert feature flag after duplicate key")
-			}
-			return nil
-		}
+	filter := bson.M{"appID": flag.AppID}
+	set := bson.M{
+		"enabled":   flag.Enabled,
+		"operator":  flag.Operator,
+		"updatedAt": flag.UpdatedAt,
+	}
+	update := bson.M{"$set": set, "$setOnInsert": bson.M{"createdAt": flag.CreatedAt}}
+
+	_, err := s.collection.UpdateOne(ctx, filter, update, options.UpdateOne().SetUpsert(true))
+	if err == nil {
+		return nil
+	}
+	if !mongo.IsDuplicateKeyError(err) {
 		return errors.Wrap(err, "upsert feature flag")
 	}
-	return nil
+
+	// 并发 upsert 撞 appID 唯一索引：文档已存在，去掉 $setOnInsert 后重试一次
+	_, err = s.collection.UpdateOne(ctx, filter, bson.M{"$set": set})
+	return errors.Wrap(err, "retry upsert feature flag after duplicate key")
 }
