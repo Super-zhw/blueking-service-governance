@@ -48,7 +48,8 @@ func (c *ConfigApiClient) ListProjects(ctx context.Context, bizID string) ([]Pro
 	for _, item := range mapx.GetList(result, "data.projects") {
 		if v, ok := item.(map[string]any); ok {
 			projects = append(projects, Project{
-				ID: cast.ToInt64(mapx.Get(v, "id", 0)),
+				ID:        cast.ToInt64(mapx.Get(v, "id", 0)),
+				CreatedAt: mapx.GetStr(v, "revision.create_at"),
 				Spec: ProjectSpec{
 					Name:      mapx.GetStr(v, "spec.name"),
 					Key:       mapx.GetStr(v, "spec.key"),

@@ -46,6 +46,7 @@ func NewBindBscpProjectCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bind-bscp-project",
 		Short: "Bind a workspace to a BSCP project",
+		Long:  "将 workspace 绑定到 BSCP 项目（写入 BkBSCPProjectID/Key），是使用应用配置管理功能的前置条件。",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runBindBscpProject(cmd.Context(), srvCfg, workspaceID, projectKey, operator, execute)
 		},

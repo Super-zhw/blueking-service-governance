@@ -32,6 +32,12 @@ const (
 
 	// defaultScope 默认的 Credential Scope 规则，表示所有路径
 	defaultScope = "/**"
+
+	// BSCP 环境类型（对应 EnvironmentSpec.Type 的取值）
+	bscpEnvTypeProd    = "prod"
+	bscpEnvTypeStaging = "staging"
+	bscpEnvTypeTest    = "test"
+	bscpEnvTypeDev     = "dev"
 )
 
 // ErrCredentialNotFound Credential 未找到
@@ -72,13 +78,13 @@ type CreateEnvBindingParams struct {
 func ToBscpEnvType(bkmsEnvType string) string {
 	switch bkmsEnvType {
 	case string(bkmsenv.TypeProduction):
-		return "prod"
+		return bscpEnvTypeProd
 	case string(bkmsenv.TypeStaging):
-		return "staging"
+		return bscpEnvTypeStaging
 	case string(bkmsenv.TypeTest):
-		return "test"
+		return bscpEnvTypeTest
 	case string(bkmsenv.TypeDevelopment):
-		return "dev"
+		return bscpEnvTypeDev
 	default:
 		return ""
 	}
