@@ -42,6 +42,7 @@ func NewListBscpProjectsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list-bscp-projects",
 		Short: "List BSCP projects under a workspace",
+		Long:  "列出 workspace 对应业务下的 BSCP 项目，用于确认可绑定的目标项目。",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runListBscpProjects(cmd.Context(), srvCfg, workspaceID, operator)
 		},
