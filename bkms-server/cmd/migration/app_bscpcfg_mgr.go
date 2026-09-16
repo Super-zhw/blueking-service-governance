@@ -42,7 +42,6 @@ import (
 func NewAppBscpCfgMgrCmd() *cobra.Command {
 	var srvCfg string
 	var operator string
-	var accessToken string
 	var execute bool
 
 	cmd := &cobra.Command{
@@ -51,24 +50,22 @@ func NewAppBscpCfgMgrCmd() *cobra.Command {
 	}
 	cmd.PersistentFlags().StringVar(&srvCfg, "srvCfg", "", "server config file")
 	cmd.PersistentFlags().StringVar(&operator, "operator", "", "operator username (bk_username)")
-	cmd.PersistentFlags().StringVar(&accessToken, "access-token", "", "operator access token")
 	cmd.PersistentFlags().BoolVar(&execute, "execute", false, "actually execute (default is dry-run)")
 	_ = cmd.MarkPersistentFlagRequired("srvCfg")
 	_ = cmd.MarkPersistentFlagRequired("operator")
-	_ = cmd.MarkPersistentFlagRequired("access-token")
 
-	cmd.AddCommand(newEnableAppBscpCfgCmd(&srvCfg, &operator, &accessToken, &execute))
-	cmd.AddCommand(newDisableAppBscpCfgCmd(&srvCfg, &operator, &accessToken, &execute))
+	cmd.AddCommand(newEnableAppBscpCfgCmd(&srvCfg, &operator, &execute))
+	cmd.AddCommand(newDisableAppBscpCfgCmd(&srvCfg, &operator, &execute))
 	return cmd
 }
 
-func newEnableAppBscpCfgCmd(srvCfg, operator, accessToken *string, execute *bool) *cobra.Command {
+func newEnableAppBscpCfgCmd(srvCfg, operator *string, execute *bool) *cobra.Command {
 	var app string
 	cmd := &cobra.Command{
 		Use:   "enable",
 		Short: "Enable bscp config for app(s)",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runAppBscpCfg(cmd.Context(), *srvCfg, *operator, *accessToken, *execute, app, true)
+			return runAppBscpCfg(cmd.Context(), *srvCfg, *operator, *execute, app, true)
 		},
 	}
 	cmd.Flags().StringVar(&app, "app", "", "app ID(s), comma-separated")
@@ -76,13 +73,13 @@ func newEnableAppBscpCfgCmd(srvCfg, operator, accessToken *string, execute *bool
 	return cmd
 }
 
-func newDisableAppBscpCfgCmd(srvCfg, operator, accessToken *string, execute *bool) *cobra.Command {
+func newDisableAppBscpCfgCmd(srvCfg, operator *string, execute *bool) *cobra.Command {
 	var app string
 	cmd := &cobra.Command{
 		Use:   "disable",
 		Short: "Disable bscp config for app(s)",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runAppBscpCfg(cmd.Context(), *srvCfg, *operator, *accessToken, *execute, app, false)
+			return runAppBscpCfg(cmd.Context(), *srvCfg, *operator, *execute, app, false)
 		},
 	}
 	cmd.Flags().StringVar(&app, "app", "", "app ID(s), comma-separated")
@@ -93,7 +90,7 @@ func newDisableAppBscpCfgCmd(srvCfg, operator, accessToken *string, execute *boo
 // runAppBscpCfg 启用或停用指定应用的 bscp 配置。
 func runAppBscpCfg(
 	ctx context.Context,
-	srvCfg, operator, accessToken string,
+	srvCfg, operator string,
 	execute bool,
 	app string,
 	enable bool,
@@ -102,6 +99,13 @@ func runAppBscpCfg(
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
+
+	// 交互式读取 access token（密文输入，不回显），避免经命令行参数明文传递
+	accessToken, err := readAccessToken()
+	if err != nil {
+		return err
+	}
+
 	ctx = auth.WithUser(ctx, auth.User{
 		ID:   operator,
 		Cred: auth.UserCredential{AccessToken: accessToken},
@@ -193,13 +197,6 @@ func enableBscpCfgForApp(
 	mgr, err := svc.NewManager(user, reg.BscpCfgStore)
 	if err != nil {
 		return errors.Wrap(err, "create manager")
-	}
-
-	// 镜像地址已从编译期常量改为配置项，启用前校验非空，避免注入空镜像
-	if config.G.BSCP.InitImage == "" || config.G.BSCP.SidecarImage == "" {
-		return errors.New(
-			"bscpcfg initImage/sidecarImage not configured, set bscp.initImage and bscp.sidecarImage in config first",
-		)
 	}
 
 	var workloadName, workloadKind string

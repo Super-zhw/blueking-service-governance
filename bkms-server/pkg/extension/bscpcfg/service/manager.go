@@ -131,7 +131,7 @@ func (m *Manager) CreateEnvBinding(
 	flag, err := m.configStore.GetFeatureFlag(ctx, params.AppID)
 	if err != nil {
 		if errors.Is(err, model.ErrFeatureFlagNotFound) {
-			return nil, errors.New("bscpcfg feature flag not enabled, run app-bscpcfg-mgr enable first")
+			return nil, errors.New("bscpcfg feature flag is not enabled")
 		}
 		return nil, errors.Wrap(err, "get feature flag")
 	}
@@ -143,7 +143,7 @@ func (m *Manager) CreateEnvBinding(
 	meta, err := m.configStore.GetMetadata(ctx, params.AppID)
 	if err != nil {
 		if errors.Is(err, model.ErrMetadataNotFound) {
-			return nil, errors.New("bscpcfg metadata not initialized, please run app-bscpcfg-mgr enable CMD first")
+			return nil, errors.New("bscpcfg metadata is not initialized")
 		}
 		return nil, errors.Wrap(err, "get metadata")
 	}
@@ -151,7 +151,7 @@ func (m *Manager) CreateEnvBinding(
 	bizID := params.BscpBizID
 	projectIDStr := params.Workspace.BkSystems.BkBSCPProjectID
 	if projectIDStr == "" {
-		return nil, errors.New("workspace missing BkBSCPProjectID, please run bind-bscp-project CMD first")
+		return nil, errors.New("workspace is not bound to a BSCP project")
 	}
 	// 校验 meta.ProjectID 与 workspace 绑定一致，防止重绑项目后 credential/hook 跨项目错配
 	if meta.ProjectID != "" && meta.ProjectID != projectIDStr {

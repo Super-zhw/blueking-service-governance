@@ -41,14 +41,13 @@ func NewBindBscpProjectCmd() *cobra.Command {
 	var workspaceID string
 	var projectKey string
 	var operator string
-	var accessToken string
 	var execute bool
 
 	cmd := &cobra.Command{
 		Use:   "bind-bscp-project",
 		Short: "Bind a workspace to a BSCP project",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runBindBscpProject(cmd.Context(), srvCfg, workspaceID, projectKey, operator, accessToken, execute)
+			return runBindBscpProject(cmd.Context(), srvCfg, workspaceID, projectKey, operator, execute)
 		},
 	}
 
@@ -60,8 +59,6 @@ func NewBindBscpProjectCmd() *cobra.Command {
 	_ = cmd.MarkFlagRequired("projectKey")
 	cmd.Flags().StringVar(&operator, "operator", "", "operator username (bk_username)")
 	_ = cmd.MarkFlagRequired("operator")
-	cmd.Flags().StringVar(&accessToken, "access-token", "", "operator access token")
-	_ = cmd.MarkFlagRequired("access-token")
 	cmd.Flags().BoolVar(&execute, "execute", false, "actually execute (default is dry-run)")
 
 	return cmd
@@ -70,13 +67,20 @@ func NewBindBscpProjectCmd() *cobra.Command {
 // runBindBscpProject 查询 BSCP 项目并写回 workspace 的 BkBSCPProjectID / BkBSCPProjectKey。
 func runBindBscpProject(
 	ctx context.Context,
-	srvCfg, workspaceID, projectKey, operator, accessToken string,
+	srvCfg, workspaceID, projectKey, operator string,
 	execute bool,
 ) error {
 	cfg, err := config.Load(ctx, srvCfg)
 	if err != nil {
 		return errors.Wrap(err, "load config")
 	}
+
+	// 交互式读取 access token（密文输入，不回显），避免经命令行参数明文传递
+	accessToken, err := readAccessToken()
+	if err != nil {
+		return err
+	}
+
 	ctx = auth.WithUser(ctx, auth.User{
 		ID:   operator,
 		Cred: auth.UserCredential{AccessToken: accessToken},
