@@ -1,0 +1,18 @@
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 99-101
+bkms-cli/pkg/handler/publish/history.go
+  h_2321bec5d80d15 38-41,62
+bkms-server/pkg/extension/component/devmode/handler/publish_record.go
+  h_2321bec5d80d15 22-23,92-93,96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2833666b248611a299e7b1b6dc21da98ca7e76b0",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
