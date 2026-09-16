@@ -30,18 +30,18 @@ type Metadata struct {
 	// BscpBizID BSCP 业务 ID
 	BscpBizID string `bson:"bscpBizID" validate:"required"`
 	// ProjectID BSCP 项目 ID（数字，以 string 存储）
-	ProjectID string `bson:"projectID"`
+	ProjectID string `bson:"projectID" validate:"required"`
 	// ProjectKey BSCP 项目 Key（如 BK-BSCP-12345）
-	ProjectKey string `bson:"projectKey"`
+	ProjectKey string `bson:"projectKey" validate:"required"`
 
 	// CredentialID BSCP Credential ID（每个业务下唯一，名称固定为 bkms-credential）
-	CredentialID string `bson:"credentialID"`
+	CredentialID string `bson:"credentialID" validate:"required"`
 	// CredentialName BSCP Credential 名称
-	CredentialName string `bson:"credentialName"`
+	CredentialName string `bson:"credentialName" validate:"required"`
 	// Token BSCP Credential 的访问令牌（用于 sidecar 拉取配置）
-	Token string `bson:"token"`
+	Token string `bson:"token" validate:"required"`
 	// FeedAddr BSCP 服务订阅地址（sidecar 连接的 feed server 地址）
-	FeedAddr string `bson:"feedAddr"`
+	FeedAddr string `bson:"feedAddr" validate:"required"`
 	// PostHookID BSCP 后置脚本 ID
 	PostHookID string `bson:"postHookID,omitempty"`
 

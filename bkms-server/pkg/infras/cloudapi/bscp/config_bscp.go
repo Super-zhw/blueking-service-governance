@@ -274,7 +274,9 @@ func (c *ConfigApiClient) ListEnvApps(ctx context.Context, bizID string, project
 func (c *ConfigApiClient) GetOrCreateApp(ctx context.Context, req *CreateAppReq) (*App, error) {
 	services, err := c.ListEnvApps(ctx, req.BizID, req.ProjectID, req.EnvID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(
+			err, "list env apps for project %d, env %d", req.ProjectID, req.EnvID,
+		)
 	}
 
 	for _, svc := range services {

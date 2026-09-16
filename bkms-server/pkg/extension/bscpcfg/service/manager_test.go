@@ -231,14 +231,17 @@ var _ = Describe("Manager", func() {
 // createTestMetadata 创建一个满足 MetadataStore 校验的 Metadata。
 func createTestMetadata(ctx context.Context, store model.Store, appID string) {
 	err := store.CreateMetadata(ctx, &model.Metadata{
-		AppID:        appID,
-		BscpBizID:    "12345",
-		MountPath:    "/data/bscp",
-		CredentialID: "1",
-		Token:        "test-token",
-		FeedAddr:     "bscp-feed.example.com:9500",
-		WorkloadName: "test-workload",
-		Operator:     "tester",
+		AppID:          appID,
+		BscpBizID:      "12345",
+		ProjectID:      "12345",
+		ProjectKey:     "BK-BSCP-12345",
+		MountPath:      "/data/bscp",
+		CredentialID:   "1",
+		CredentialName: "bkms-credential",
+		Token:          "test-token",
+		FeedAddr:       "bscp-feed.example.com:9500",
+		WorkloadName:   "test-workload",
+		Operator:       "tester",
 	})
 	Expect(err).NotTo(HaveOccurred())
 }

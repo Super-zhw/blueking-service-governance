@@ -127,11 +127,23 @@ func (m *Manager) CreateEnvBinding(
 	ctx context.Context,
 	params *CreateEnvBindingParams,
 ) (*model.Snapshot, error) {
+	// 0. FeatureFlag 作为写接口前置门禁：未启用时拒绝
+	flag, err := m.configStore.GetFeatureFlag(ctx, params.AppID)
+	if err != nil {
+		if errors.Is(err, model.ErrFeatureFlagNotFound) {
+			return nil, errors.New("bscpcfg feature flag not enabled, run app-bscpcfg-mgr enable first")
+		}
+		return nil, errors.Wrap(err, "get feature flag")
+	}
+	if !flag.Enabled {
+		return nil, errors.New("bscpcfg feature flag is disabled")
+	}
+
 	// 1. 检查 Metadata 是否存在
 	meta, err := m.configStore.GetMetadata(ctx, params.AppID)
 	if err != nil {
 		if errors.Is(err, model.ErrMetadataNotFound) {
-			return nil, errors.New("bscpcfg metadata not initialized, please run enable-bscpcfg CMD first")
+			return nil, errors.New("bscpcfg metadata not initialized, please run app-bscpcfg-mgr enable CMD first")
 		}
 		return nil, errors.Wrap(err, "get metadata")
 	}
@@ -140,6 +152,14 @@ func (m *Manager) CreateEnvBinding(
 	projectIDStr := params.Workspace.BkSystems.BkBSCPProjectID
 	if projectIDStr == "" {
 		return nil, errors.New("workspace missing BkBSCPProjectID, please run bind-bscp-project CMD first")
+	}
+	// 校验 meta.ProjectID 与 workspace 绑定一致，防止重绑项目后 credential/hook 跨项目错配
+	if meta.ProjectID != "" && meta.ProjectID != projectIDStr {
+		return nil, errors.Errorf(
+			"metadata projectID %s mismatch workspace BkBSCPProjectID %s, re-bind bscp project first",
+			meta.ProjectID,
+			projectIDStr,
+		)
 	}
 	projectID := cast.ToInt64(projectIDStr)
 
@@ -224,12 +244,12 @@ func (m *Manager) GetSnapshot(
 ) (*model.Snapshot, error) {
 	meta, err := m.configStore.GetMetadata(ctx, appID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "get metadata")
 	}
 
 	binding, err := m.configStore.GetEnvBinding(ctx, appID, envName)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "get env binding")
 	}
 
 	return &model.Snapshot{
