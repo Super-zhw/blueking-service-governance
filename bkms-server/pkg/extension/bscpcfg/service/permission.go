@@ -32,20 +32,19 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
 )
 
-// addBSCPPermissions 刷新 BSCP 权限范围到 workspace 的权限组合中。
-// 注意：UpdateWorkspaceAdmin、UpdateWorkspaceScopeBuiltinRoles 都是仅新增 bscp fileSvc 到 iam 侧，不会剔除已有资源。
+// addBSCPPermissions 刷新 BSCP 权限范围到 workspace 的权限组合中
 func addBSCPPermissions(
 	ctx context.Context,
 	ws *workspace.Workspace,
-	fileSvc *bscpapi.App,
+	bscpApp *bscpapi.App,
 ) error {
 	client, err := bkcc.New(auth.MustGetUser(ctx))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "initial bkcc client")
 	}
 	business, err := client.GetBusinessByID(ctx, cast.ToInt64(ws.BkSystems.BkCCBizID))
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "get business by id %s", ws.BkSystems.BkCCBizID)
 	}
 
 	workspaceData := bkiam.WorkspaceData{
@@ -56,8 +55,8 @@ func addBSCPPermissions(
 			BizName: business.BizName,
 			Services: []bkiam.BSCPService{
 				{
-					ID:   fileSvc.ID,
-					Name: fileSvc.Name,
+					ID:   bscpApp.ID,
+					Name: bscpApp.Name,
 				},
 			},
 		},

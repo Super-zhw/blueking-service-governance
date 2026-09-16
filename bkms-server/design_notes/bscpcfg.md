@@ -115,5 +115,5 @@ graph TD
 
 - **一对一绑定**：一个 app+env 只绑定一个 BSCP App，不支持一个 app 绑定多个 BSCP 服务。
 - **环境名称对齐**：bkms 环境名与 BSCP 环境名保持一致，创建绑定时按名称匹配，未命中则自动创建。
-- **激活方式**：配置管理能力由 `enable-bscpcfg` 命令按 appID 激活，写入 Metadata（credential / hook）与 FeatureFlag；前端只负责环境绑定。
+- **激活方式**：配置管理能力由 `app-bscpcfg-mgr enable` 命令按 appID 激活，写入 Metadata（credential / hook）与 FeatureFlag；前端只负责环境绑定。
 - **workspace 绑定前置**：使用前必须通过 `bind-bscp-project` 命令绑定 workspace 与 BSCP 项目（写入 `BkSystems.BkBSCPProjectID / BkBSCPProjectKey`）。

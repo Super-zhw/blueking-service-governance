@@ -195,6 +195,13 @@ func enableBscpCfgForApp(
 		return errors.Wrap(err, "create manager")
 	}
 
+	// 镜像地址已从编译期常量改为配置项，启用前校验非空，避免注入空镜像
+	if config.G.BSCP.InitImage == "" || config.G.BSCP.SidecarImage == "" {
+		return errors.New(
+			"bscpcfg initImage/sidecarImage not configured, set bscp.initImage and bscp.sidecarImage in config first",
+		)
+	}
+
 	var workloadName, workloadKind string
 	if app.Type == bkmsapp.AppTypeTRPC {
 		workloadName = app.Name

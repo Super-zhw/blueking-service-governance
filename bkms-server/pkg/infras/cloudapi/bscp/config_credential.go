@@ -148,6 +148,7 @@ func (c *ConfigApiClient) ListCredentialScopes(
 			"project_id":    cast.ToString(projectID),
 			"credential_id": cast.ToString(credentialID),
 		}),
+		bkapi.OptSetRequestQueryParam("all", "true"),
 	)
 
 	result, err := c.handleOperation(ctx, op)

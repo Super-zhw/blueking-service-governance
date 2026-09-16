@@ -126,6 +126,24 @@ func (s *FeatureFlagStoreMongo) Upsert(ctx context.Context, flag *FeatureFlag) e
 		options.UpdateOne().SetUpsert(true),
 	)
 	if err != nil {
+		// 并发 upsert 时可能因 appID 唯一索引冲突而失败，重试一次（此时文档已存在，走更新分支）
+		if mongo.IsDuplicateKeyError(err) {
+			_, retryErr := s.collection.UpdateOne(
+				ctx,
+				bson.M{"appID": flag.AppID},
+				bson.M{
+					"$set": bson.M{
+						"enabled":   flag.Enabled,
+						"operator":  flag.Operator,
+						"updatedAt": flag.UpdatedAt,
+					},
+				},
+			)
+			if retryErr != nil {
+				return errors.Wrap(retryErr, "retry upsert feature flag after duplicate key")
+			}
+			return nil
+		}
 		return errors.Wrap(err, "upsert feature flag")
 	}
 	return nil
