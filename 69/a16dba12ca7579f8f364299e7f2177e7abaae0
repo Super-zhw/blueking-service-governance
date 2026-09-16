@@ -1,0 +1,20 @@
+bkms-server/pkg/workload/instance/handler/watch.go
+  h_2321bec5d80d15 30,37,53,119-120,133-137
+bkms-server/pkg/workload/instance/watch/plugin/publish/plugin.go
+  h_2321bec5d80d15 1-81
+bkms-server/pkg/workload/instance/watch/plugin/publish/plugin_test.go
+  h_2321bec5d80d15 1-107
+bkms-server/pkg/workload/instance/watch/plugin/publish/publish_suite_test.go
+  h_2321bec5d80d15 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "69a16dba12ca7579f8f364299e7f2177e7abaae0",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
