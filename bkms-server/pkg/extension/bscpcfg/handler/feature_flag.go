@@ -39,7 +39,7 @@ import (
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential
 //	@Param		appID	path		string	true	"应用 ID"
-//	@Success	200		{object}	featureFlagOutput
+//	@Success	200		{object}	slz.FeatureFlagResponse
 //	@Failure	400		{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/bscpcfg/feature-flag [get]
 func (h *Handler) GetFeatureFlag(c *gin.Context) {
@@ -50,7 +50,7 @@ func (h *Handler) GetFeatureFlag(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	if _, err := perm.ValidateAppByID(ctx, h.registry, uri.AppID, perm.TypeEdit); err != nil {
+	if _, err := perm.ValidateAppByID(ctx, h.registry, uri.AppID, perm.TypeView); err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}

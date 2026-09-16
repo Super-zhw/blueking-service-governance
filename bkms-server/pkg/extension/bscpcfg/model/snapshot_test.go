@@ -30,17 +30,23 @@ var _ = Describe("Snapshot", func() {
 	newValidSnapshot := func() *model.Snapshot {
 		return &model.Snapshot{
 			Metadata: &model.Metadata{
-				AppID:        "test-app",
-				BscpBizID:    "12345",
-				MountPath:    "/data/bscp",
-				Token:        "test-token",
-				FeedAddr:     "bscp-feed.example.com:9500",
-				WorkloadName: "test-workload",
+				AppID:          "test-app",
+				BscpBizID:      "12345",
+				ProjectID:      "12345",
+				ProjectKey:     "BK-BSCP-12345",
+				MountPath:      "/data/bscp",
+				CredentialID:   "cred-1",
+				CredentialName: "bkms-credential",
+				Token:          "test-token",
+				FeedAddr:       "bscp-feed.example.com:9500",
+				WorkloadName:   "test-workload",
 			},
 			EnvBinding: &model.EnvBinding{
-				AppID:     "test-app",
-				EnvName:   "dev",
-				BscpAppID: "1001",
+				AppID:       "test-app",
+				EnvName:     "dev",
+				BscpEnvID:   "1",
+				BscpEnvName: "dev",
+				BscpAppID:   "1001",
 			},
 		}
 	}

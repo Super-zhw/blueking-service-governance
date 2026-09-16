@@ -32,11 +32,11 @@ type EnvBinding struct {
 	EnvName string `bson:"envName" validate:"required"`
 
 	// BscpEnvID BSCP 环境 ID
-	BscpEnvID string `bson:"bscpEnvID"`
+	BscpEnvID string `bson:"bscpEnvID" validate:"required"`
 	// BscpEnvName BSCP 环境名称
-	BscpEnvName string `bson:"bscpEnvName"`
+	BscpEnvName string `bson:"bscpEnvName" validate:"required"`
 	// BscpAppID BSCP App ID
-	BscpAppID string `bson:"bscpAppID"`
+	BscpAppID string `bson:"bscpAppID" validate:"required"`
 
 	// Operator 最近操作人
 	Operator string `bson:"operator"`

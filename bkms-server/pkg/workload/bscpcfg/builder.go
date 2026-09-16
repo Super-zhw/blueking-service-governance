@@ -26,7 +26,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	svccfg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
+	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/model"
 )
 
 const (
@@ -166,6 +168,19 @@ func BuildFromStore(
 	store bscpcfg.Store,
 	appID, envName string,
 ) (*PodFragment, error) {
+	// FeatureFlag 未启用时直接跳过
+	flag, err := store.GetFeatureFlag(ctx, appID)
+	if err != nil {
+		if errors.Is(err, model.ErrFeatureFlagNotFound) {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "get bscpcfg feature flag")
+	}
+	if !flag.Enabled {
+		log.Infof(ctx, "bscpcfg feature flag disabled for app %s, skip injection", appID)
+		return nil, nil
+	}
+
 	snapshot, err := store.GetSnapshot(ctx, appID, envName)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting bscp config snapshot")
