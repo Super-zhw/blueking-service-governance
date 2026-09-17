@@ -1,0 +1,18 @@
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 9110
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 9107
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 15537
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0500200140f21f817d181ac956b5ab82dc647e4d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

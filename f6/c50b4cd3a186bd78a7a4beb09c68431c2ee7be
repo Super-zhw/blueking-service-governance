@@ -1,0 +1,32 @@
+bkms-cli/cmd/app/publish/history.go
+  h_2321bec5d80d15 1-77
+bkms-cli/cmd/app/publish/publish.go
+  h_2321bec5d80d15 91-92
+bkms-cli/pkg/client/app.go
+  h_2321bec5d80d15 77-135
+bkms-cli/pkg/client/client.go
+  h_2321bec5d80d15 189-247
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 1955-2103
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 42-52
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 53-57,121-122,168,174-175,180-181,185-189,196-200,202-204,207-218,220-231,233-246
+bkms-cli/pkg/handler/publish/handler_test.go
+  h_2321bec5d80d15 137-154
+bkms-cli/pkg/handler/publish/history.go
+  h_2321bec5d80d15 1-79
+bkms-cli/pkg/handler/publish/history_test.go
+  h_2321bec5d80d15 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f6c50b4cd3a186bd78a7a4beb09c68431c2ee7be",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

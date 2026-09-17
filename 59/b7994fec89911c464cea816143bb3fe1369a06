@@ -1,0 +1,36 @@
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 37,213-215
+bkms-cli/pkg/handler/publish/history.go
+  h_2321bec5d80d15 26,53-54,62-63
+bkms-server/pkg/extension/component/devmode/devmode_suite_test.go
+  h_2321bec5d80d15 26-27,34-45
+bkms-server/pkg/extension/component/devmode/handler/publish_record.go
+  h_2321bec5d80d15 1-174
+bkms-server/pkg/extension/component/devmode/module.go
+  h_2321bec5d80d15 1-33
+bkms-server/pkg/extension/component/devmode/publish_record.go
+  h_2321bec5d80d15 1-66
+bkms-server/pkg/extension/component/devmode/publish_record_store.go
+  h_2321bec5d80d15 1-132
+bkms-server/pkg/extension/component/devmode/publish_record_store_test.go
+  h_2321bec5d80d15 1-127
+bkms-server/pkg/extension/component/devmode/router.go
+  h_2321bec5d80d15 26-27,34-37
+bkms-server/pkg/extension/component/devmode/serializer/publish_record.go
+  h_2321bec5d80d15 1-116
+bkms-server/pkg/misc/audit/model.go
+  h_2321bec5d80d15 66-67,81,107-108,221-222,266-267
+bkms-server/pkg/server/registry/registry.go
+  h_2321bec5d80d15 50,122-123,239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "59b7994fec89911c464cea816143bb3fe1369a06",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
