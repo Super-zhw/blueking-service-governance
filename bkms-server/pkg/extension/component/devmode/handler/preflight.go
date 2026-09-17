@@ -25,7 +25,6 @@ import (
 
 	"github.com/TencentBlueKing/gopkg/mapx"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -107,8 +106,15 @@ func (h *Handler) DevModePublishPreflight(c *gin.Context) {
 		return
 	}
 
+	// 获取 BCS 项目 Code，用于无 Token 时引导用户创建
+	bcsProjectCode, err := h.getBCSProjectCode(ctx, env.WorkspaceID)
+	if err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+
 	// 获取用户 Token
-	token, err := h.fetchActiveToken(ctx)
+	token, err := h.fetchActiveToken(ctx, bcsProjectCode)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -179,8 +185,17 @@ func (h *Handler) getEffectiveDevMode(
 	return devModeSpec, nil
 }
 
+// getBCSProjectCode 从工作空间获取 BCS 项目 Code。
+func (h *Handler) getBCSProjectCode(ctx context.Context, workspaceID string) (string, error) {
+	ws, err := h.registry.WorkspaceStore.Get(ctx, workspaceID)
+	if err != nil {
+		return "", bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "get workspace %s", workspaceID)
+	}
+	return ws.BkSystems.BkBCSProjectCode, nil
+}
+
 // fetchActiveToken 获取当前用户的有效 Token。
-func (h *Handler) fetchActiveToken(ctx context.Context) (string, error) {
+func (h *Handler) fetchActiveToken(ctx context.Context, bcsProjectCode string) (string, error) {
 	user := auth.MustGetUser(ctx)
 	bcsClient, err := bcs.New(user, bcs.ClientOption{UserMode: true})
 	if err != nil {
@@ -196,14 +211,23 @@ func (h *Handler) fetchActiveToken(ctx context.Context) (string, error) {
 		return item.Status == bcs.UserTokenStatusActive
 	})
 	if !found {
-		return "", bkerrs.Wrap(
-			errors.New("no active token found, please create one in the platform"),
+		return "", bkerrs.Errorf(
 			bkerrs.ErrCodeNotFound,
-			"no active token found, please create one in the platform",
+			"no active token found, please create a token in BCS at %s",
+			buildBCSUserTokenURL(bcsProjectCode),
 		)
 	}
 
 	return activeToken.Token, nil
+}
+
+// buildBCSUserTokenURL 构造 BCS 用户 Token 创建页地址。
+func buildBCSUserTokenURL(bcsProjectCode string) string {
+	return fmt.Sprintf(
+		"%s/bcs/projects/%s/user-token",
+		strings.TrimRight(config.G.BCS.BaseUrl, "/"),
+		bcsProjectCode,
+	)
 }
 
 // resolveInstanceIDs 根据请求参数解析目标实例 ID 列表。
