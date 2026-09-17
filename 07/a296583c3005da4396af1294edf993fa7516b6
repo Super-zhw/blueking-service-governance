@@ -1,0 +1,36 @@
+bkms-server/configs/config.yaml
+  h_2321bec5d80d15 235-245
+bkms-server/pkg/common/config/config.go
+  h_2321bec5d80d15 49-54,120-124
+bkms-server/pkg/common/config/types.go
+  h_2321bec5d80d15 368-380,473-474
+bkms-server/pkg/infras/account/auth/types.go
+  h_2321bec5d80d15 47-50
+bkms-server/pkg/infras/tenant/context.go
+  h_2321bec5d80d15 1-52
+bkms-server/pkg/infras/tenant/context_test.go
+  h_2321bec5d80d15 1-69
+bkms-server/pkg/infras/tenant/middleware.go
+  h_2321bec5d80d15 1-67
+bkms-server/pkg/infras/tenant/middleware_test.go
+  h_2321bec5d80d15 1-131
+bkms-server/pkg/infras/tenant/tenant_suite_test.go
+  h_2321bec5d80d15 1-31
+bkms-server/pkg/server/server.go
+  h_2321bec5d80d15 75,163
+bkms-server/tests/configs/config.yaml
+  h_2321bec5d80d15 176-186
+charts/bkms-server/values.yaml
+  h_2321bec5d80d15 371-381
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "07a296583c3005da4396af1294edf993fa7516b6",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
