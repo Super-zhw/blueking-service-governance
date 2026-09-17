@@ -21,9 +21,13 @@ package migration
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
@@ -42,7 +46,7 @@ func NewListBscpProjectsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list-bscp-projects",
 		Short: "List BSCP projects under a workspace",
-		Long:  "列出 workspace 对应业务下的 BSCP 项目，用于确认可绑定的目标项目。",
+		Long:  "List BSCP projects under the business of a workspace, to confirm the target project to bind.",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runListBscpProjects(cmd.Context(), srvCfg, workspaceID, operator)
 		},
@@ -109,4 +113,20 @@ func runListBscpProjects(ctx context.Context, srvCfg, workspaceID, operator stri
 	}
 
 	return nil
+}
+
+// readAccessToken 交互式读取
+func readAccessToken() (string, error) {
+	_, _ = fmt.Fprint(os.Stderr, "Enter access token: ")
+	token, err := term.ReadPassword(int(os.Stdin.Fd()))
+	_, _ = fmt.Fprintln(os.Stderr)
+	if err != nil {
+		return "", errors.Wrap(err, "read access token")
+	}
+
+	tokenStr := strings.TrimSpace(string(token))
+	if tokenStr == "" {
+		return "", errors.New("access token must not be empty")
+	}
+	return tokenStr, nil
 }

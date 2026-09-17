@@ -363,30 +363,6 @@ type Project struct {
 	CreatedAt string
 }
 
-// DefaultProject 从项目列表中找出旧数据所在的 Default 项目。
-// 优先返回 is_default 标记的项目，否则返回创建时间最早的；列表为空时返回 nil。
-func DefaultProject(projects []Project) *Project {
-	if len(projects) == 0 {
-		return nil
-	}
-
-	// 优先 is_default 标记
-	for i := range projects {
-		if projects[i].Spec.IsDefault {
-			return &projects[i]
-		}
-	}
-
-	// 否则按创建时间取最早的
-	earliest := 0
-	for i := 1; i < len(projects); i++ {
-		if projects[i].CreatedAt < projects[earliest].CreatedAt {
-			earliest = i
-		}
-	}
-	return &projects[earliest]
-}
-
 // EnvironmentSpec BSCP 环境规格
 type EnvironmentSpec struct {
 	Name string
@@ -491,4 +467,28 @@ type UpdateConfigHookReq struct {
 	AppID      int64  `json:"-" validate:"required"`
 	PreHookID  int64  `json:"pre_hook_id"`
 	PostHookID int64  `json:"post_hook_id"`
+}
+
+// DefaultProject 从项目列表中找出旧数据所在的 Default 项目。
+// 优先返回 is_default 标记的项目，否则返回创建时间最早的；列表为空时返回 nil。
+func DefaultProject(projects []Project) *Project {
+	if len(projects) == 0 {
+		return nil
+	}
+
+	// 优先 is_default 标记
+	for i := range projects {
+		if projects[i].Spec.IsDefault {
+			return &projects[i]
+		}
+	}
+
+	// 否则按创建时间取最早的
+	earliest := 0
+	for i := 1; i < len(projects); i++ {
+		if projects[i].CreatedAt < projects[earliest].CreatedAt {
+			earliest = i
+		}
+	}
+	return &projects[earliest]
 }

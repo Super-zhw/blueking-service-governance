@@ -46,7 +46,7 @@ func NewBindBscpProjectCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bind-bscp-project",
 		Short: "Bind a workspace to a BSCP project",
-		Long:  "将 workspace 绑定到 BSCP 项目（写入 BkBSCPProjectID/Key），是使用应用配置管理功能的前置条件。",
+		Long:  "Bind a workspace to a BSCP project (writes BkBSCPProjectID/Key), a prerequisite for using app config management.",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runBindBscpProject(cmd.Context(), srvCfg, workspaceID, projectKey, operator, execute)
 		},
@@ -56,8 +56,8 @@ func NewBindBscpProjectCmd() *cobra.Command {
 	_ = cmd.MarkFlagRequired("srvCfg")
 	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
 	_ = cmd.MarkFlagRequired("workspace")
-	cmd.Flags().StringVar(&projectKey, "projectKey", "", "BSCP project key")
-	_ = cmd.MarkFlagRequired("projectKey")
+	cmd.Flags().
+		StringVar(&projectKey, "projectKey", "", "BSCP project key (optional, auto-select default project if empty)")
 	cmd.Flags().StringVar(&operator, "operator", "", "operator username (bk_username)")
 	_ = cmd.MarkFlagRequired("operator")
 	cmd.Flags().BoolVar(&execute, "execute", false, "actually execute (default is dry-run)")
@@ -107,9 +107,9 @@ func runBindBscpProject(
 		return errors.Wrap(err, "create bscp config client")
 	}
 
-	project, err := client.GetProjectByKey(ctx, ws.BkSystems.BkCCBizID, projectKey)
+	project, err := resolveProject(ctx, client, ws.BkSystems.BkCCBizID, projectKey)
 	if err != nil {
-		return errors.Wrapf(err, "get bscp project by key %s", projectKey)
+		return err
 	}
 
 	projectIDStr := cast.ToString(project.ID)
@@ -127,4 +127,31 @@ func runBindBscpProject(
 
 	log.Infof(ctx, "workspace %s bound to BSCP project %s (key %s)", workspaceID, projectIDStr, project.Spec.Key)
 	return nil
+}
+
+// resolveProject 解析要绑定的 BSCP 项目：显式指定 projectKey 时按 key 查询，
+// 否则自动选择 Default 项目。
+func resolveProject(
+	ctx context.Context,
+	client bscpapi.ConfigClient,
+	bizID, projectKey string,
+) (*bscpapi.Project, error) {
+	if projectKey != "" {
+		project, err := client.GetProjectByKey(ctx, bizID, projectKey)
+		if err != nil {
+			return nil, errors.Wrapf(err, "get bscp project by key %s", projectKey)
+		}
+		return project, nil
+	}
+
+	projects, err := client.ListProjects(ctx, bizID)
+	if err != nil {
+		return nil, errors.Wrapf(err, "list bscp projects for biz %s", bizID)
+	}
+	project := bscpapi.DefaultProject(projects)
+	if project == nil {
+		return nil, errors.Errorf("no bscp project found under biz %s", bizID)
+	}
+	log.Infof(ctx, "auto-selected default project %q (key %s)", project.Spec.Name, project.Spec.Key)
+	return project, nil
 }
