@@ -173,11 +173,7 @@ func (c *SvcBasedClient) DevModePublishPreflight(
 		return nil, errors.Wrap(err, "publish preflight request failed")
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf(
-			"publish preflight failed: [%d] -> %s",
-			resp.StatusCode(),
-			truncateBody(resp.Body()),
-		)
+		return nil, formatAPIError(resp, "publish preflight")
 	}
 	if respData.Data == nil {
 		return nil, errors.New("devmode publish preflight returned empty data")
@@ -203,11 +199,7 @@ func (c *SvcBasedClient) ReportDevModePublish(
 		return errors.Wrap(err, "report devmode publish request failed")
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf(
-			"report devmode publish failed: [%d] -> %s",
-			resp.StatusCode(),
-			truncateBody(resp.Body()),
-		)
+		return formatAPIError(resp, "report devmode publish")
 	}
 
 	return nil
@@ -235,11 +227,7 @@ func (c *SvcBasedClient) ListDevModePublishRecords(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf(
-			"list devmode publish records failed: [%d] -> %s",
-			resp.StatusCode(),
-			truncateBody(resp.Body()),
-		)
+		return nil, formatAPIError(resp, "list devmode publish records")
 	}
 
 	return respData.Data.Results, nil
@@ -255,7 +243,7 @@ func (c *SvcBasedClient) ListWorkspaces(ctx context.Context, keyword string) ([]
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list workspaces failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list workspaces")
 	}
 
 	return respData.Data, nil
@@ -271,7 +259,7 @@ func (c *SvcBasedClient) GetWorkspace(ctx context.Context, id string) (*Workspac
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("get workspace failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "get workspace")
 	}
 
 	return &respData.Data, nil
@@ -287,7 +275,7 @@ func (c *SvcBasedClient) ListEnvs(ctx context.Context, workspaceID string) ([]En
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list envs failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list envs")
 	}
 
 	return respData.Data, nil
@@ -303,7 +291,7 @@ func (c *SvcBasedClient) ListAppEnvs(ctx context.Context, appID string) ([]Env, 
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list app envs failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list app envs")
 	}
 
 	return respData.Data, nil
@@ -319,7 +307,7 @@ func (c *SvcBasedClient) GetEnv(ctx context.Context, envID string) (*Env, error)
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("get env failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "get env")
 	}
 
 	return &respData.Data, nil
@@ -335,7 +323,7 @@ func (c *SvcBasedClient) CreateEnv(ctx context.Context, workspaceID string, body
 		return "", err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
-		return "", errors.Errorf("create env failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return "", formatAPIError(resp, "create env")
 	}
 
 	return respData.Data.ID, nil
@@ -350,7 +338,7 @@ func (c *SvcBasedClient) UpdateEnvBasicInfo(ctx context.Context, envID string, b
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("update env basic info failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "update env basic info")
 	}
 
 	return nil
@@ -365,7 +353,7 @@ func (c *SvcBasedClient) DeleteEnv(ctx context.Context, envID string) error {
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("delete env failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "delete env")
 	}
 
 	return nil
@@ -381,7 +369,7 @@ func (c *SvcBasedClient) CreateFeatureEnv(ctx context.Context, appID string, bod
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
-		return nil, errors.Errorf("create feature env failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "create feature env")
 	}
 
 	return &respData.Data, nil
@@ -408,7 +396,7 @@ func (c *SvcBasedClient) ResolveApp(ctx context.Context, workspaceID, input stri
 		return "", errors.Errorf("app %s not found in workspace %s", input, workspaceID)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return "", errors.Errorf("resolve app failed: [%d] -> %s", resp.StatusCode(), truncateBody(resp.Body()))
+		return "", formatAPIError(resp, "resolve app")
 	}
 
 	return respData.Data.ID, nil
@@ -424,7 +412,7 @@ func (c *SvcBasedClient) ListApps(ctx context.Context, workspaceID string) ([]Ap
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list apps failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list apps")
 	}
 
 	return respData.Data, nil
@@ -457,7 +445,7 @@ func (c *SvcBasedClient) GetApp(ctx context.Context, appID string) (*AppFull, er
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("get app failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "get app")
 	}
 
 	return &respData.Data, nil
@@ -472,7 +460,7 @@ func (c *SvcBasedClient) DeleteApp(ctx context.Context, appID string) error {
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("delete app failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "delete app")
 	}
 
 	return nil
@@ -488,7 +476,7 @@ func (c *SvcBasedClient) UpdateAppDisplayName(ctx context.Context, appID, displa
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("update app display name failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "update app display name")
 	}
 
 	return nil
@@ -503,7 +491,7 @@ func (c *SvcBasedClient) UpdateAppBuildConfig(ctx context.Context, appID string,
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("update app build config failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "update app build config")
 	}
 
 	return nil
@@ -519,7 +507,7 @@ func (c *SvcBasedClient) GetAppIDAutoSuffix(ctx context.Context) (string, error)
 		return "", err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return "", errors.Errorf("get app id auto suffix failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return "", formatAPIError(resp, "get app id auto suffix")
 	}
 
 	return respData.Suffix, nil
@@ -535,7 +523,7 @@ func (c *SvcBasedClient) CreateApp(ctx context.Context, workspaceID string, body
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
-		return nil, errors.Errorf("create app failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "create app")
 	}
 
 	return &respData.Data, nil
@@ -551,7 +539,7 @@ func (c *SvcBasedClient) CreateAppBuild(ctx context.Context, appID string, opts 
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("create app build failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "create app build")
 	}
 
 	return nil
@@ -572,7 +560,7 @@ func (c *SvcBasedClient) ListAppImages(ctx context.Context, appID, keyword strin
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list app images failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list app images")
 	}
 
 	return respData.Data.Results, nil
@@ -593,7 +581,7 @@ func (c *SvcBasedClient) ListAppConfigFiles(ctx context.Context, appID, envName 
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list app config files failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list app config files")
 	}
 
 	return respData.Items, nil
@@ -616,7 +604,7 @@ func (c *SvcBasedClient) GetAppConfigFileDetails(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("get app config file details failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "get app config file details")
 	}
 
 	return &details, nil
@@ -668,11 +656,7 @@ func (c *SvcBasedClient) ListAppConfigFileVersions(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf(
-			"list app config file versions failed: [%d] -> %s",
-			resp.StatusCode(),
-			resp.Body(),
-		)
+		return nil, formatAPIError(resp, "list app config file versions")
 	}
 
 	return &respData.Data, nil
@@ -695,11 +679,7 @@ func (c *SvcBasedClient) GetAppConfigFileVersion(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf(
-			"get app config file version failed: [%d] -> %s",
-			resp.StatusCode(),
-			resp.Body(),
-		)
+		return nil, formatAPIError(resp, "get app config file version")
 	}
 
 	return &respData.Data, nil
@@ -721,11 +701,7 @@ func (c *SvcBasedClient) DeleteAppConfigFileVersion(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf(
-			"delete app config file version failed: [%d] -> %s",
-			resp.StatusCode(),
-			resp.Body(),
-		)
+		return formatAPIError(resp, "delete app config file version")
 	}
 
 	return nil
@@ -753,11 +729,7 @@ func (c *SvcBasedClient) RollbackAppConfigFileVersion(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf(
-			"rollback app config file version failed: [%d] -> %s",
-			resp.StatusCode(),
-			resp.Body(),
-		)
+		return nil, formatAPIError(resp, "rollback app config file version")
 	}
 
 	return &respData.Data, nil
@@ -786,7 +758,7 @@ func (c *SvcBasedClient) UpdateAppConfigFileContent(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("update app config file content failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "update app config file content")
 	}
 
 	return &result, nil
@@ -815,11 +787,7 @@ func (c *SvcBasedClient) UpdateAppConfigFileOverlayContent(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf(
-			"update app config file overlay content failed: [%d] -> %s",
-			resp.StatusCode(),
-			resp.Body(),
-		)
+		return nil, formatAPIError(resp, "update app config file overlay content")
 	}
 
 	return &result, nil
@@ -840,7 +808,7 @@ func (c *SvcBasedClient) ListBuildRecords(ctx context.Context, appID, keyword st
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list build records failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list build records")
 	}
 
 	return respData.Data.Results, nil
@@ -869,7 +837,7 @@ func (c *SvcBasedClient) CreateAppHelmDeploy(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("create app helm deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "create app helm deploy")
 	}
 
 	return nil
@@ -897,7 +865,7 @@ func (c *SvcBasedClient) ListHelmDeployRecords(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list helm deploy records failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list helm deploy records")
 	}
 
 	return respData.Data.Results, nil
@@ -925,7 +893,7 @@ func (c *SvcBasedClient) CreateAppTrpcDeploy(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("create app trpc deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "create app trpc deploy")
 	}
 
 	return nil
@@ -953,7 +921,7 @@ func (c *SvcBasedClient) ListTrpcDeployRecords(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list trpc deploy records failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list trpc deploy records")
 	}
 
 	return respData.Data.Results, nil
@@ -973,7 +941,7 @@ func (c *SvcBasedClient) DeleteHelmDeploy(ctx context.Context, appID, envName, d
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("delete helm deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "delete helm deploy")
 	}
 
 	return nil
@@ -1000,7 +968,7 @@ func (c *SvcBasedClient) GrayscaleUpdateInstance(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("update trpc instance failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "update trpc instance")
 	}
 
 	return nil
@@ -1025,7 +993,7 @@ func (c *SvcBasedClient) BatchUpdateInstance(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("update trpc instance failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "update trpc instance")
 	}
 
 	return nil
@@ -1061,7 +1029,7 @@ func (c *SvcBasedClient) ListAppInstances(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list app instances failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list app instances")
 	}
 
 	return &respData.Data, nil
@@ -1082,7 +1050,7 @@ func (c *SvcBasedClient) UpdateInstancePolaris(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("update instance polaris failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "update instance polaris")
 	}
 
 	return nil
@@ -1103,7 +1071,7 @@ func (c *SvcBasedClient) BatchDeleteInstances(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("batch delete instances failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "batch delete instances")
 	}
 
 	return nil
@@ -1129,7 +1097,7 @@ func (c *SvcBasedClient) ListTrpcAdminCmds(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list trpc admin cmds failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list trpc admin cmds")
 	}
 
 	return respData.Data.Results, nil
@@ -1151,7 +1119,7 @@ func (c *SvcBasedClient) ExecuteTrpcAdminCmd(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("execute trpc admin cmd failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "execute trpc admin cmd")
 	}
 
 	return respData.Data.Results, nil
@@ -1173,7 +1141,7 @@ func (c *SvcBasedClient) ExecuteTafAdminCmd(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("execute taf admin cmd failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "execute taf admin cmd")
 	}
 
 	return respData.Data.Results, nil
@@ -1199,7 +1167,7 @@ func (c *SvcBasedClient) CreateAppTafDeploy(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("create app taf deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "create app taf deploy")
 	}
 
 	return nil
@@ -1227,7 +1195,7 @@ func (c *SvcBasedClient) ListTafDeployRecords(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list taf deploy records failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list taf deploy records")
 	}
 
 	return respData.Data.Results, nil
@@ -1246,7 +1214,7 @@ func (c *SvcBasedClient) DeleteTrpcDeploy(ctx context.Context, appID, envName st
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("delete trpc deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "delete trpc deploy")
 	}
 
 	return nil
@@ -1285,7 +1253,7 @@ func (c *SvcBasedClient) preCheckDeploy(ctx context.Context, path, op string) (*
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("%s failed: [%d] -> %s", op, resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "%s", op)
 	}
 	respData.Normalize()
 	return &respData, nil
@@ -1304,7 +1272,7 @@ func (c *SvcBasedClient) DeleteTafDeploy(ctx context.Context, appID, envName str
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("delete taf deploy failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "delete taf deploy")
 	}
 
 	return nil
@@ -1322,7 +1290,7 @@ func (c *SvcBasedClient) GetAppDetail(ctx context.Context, appID string) (*AppDe
 		return nil, errors.Wrapf(err, "get app detail %s", appID)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("get app detail %s failed: [%d] -> %s", appID, resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "get app detail %s", appID)
 	}
 	if respData.Data == nil {
 		return nil, errors.Errorf("app %s not found", appID)
@@ -1372,7 +1340,7 @@ func (c *SvcBasedClient) getAppSpecSection(ctx context.Context, path, desc strin
 		return errors.Wrap(err, desc)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("%s failed: [%d] -> %s", desc, resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "%s", desc)
 	}
 	return nil
 }
@@ -1395,7 +1363,7 @@ func (c *SvcBasedClient) SetAppSpecDefaultSection(
 		return errors.Wrapf(err, "set default %s config", section)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("set default %s config failed: [%d] -> %s", section, resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "set default %s config", section)
 	}
 
 	return nil
@@ -1420,13 +1388,7 @@ func (c *SvcBasedClient) SetAppSpecEnvSection(
 		return errors.Wrapf(err, "set %s config for env %s", section, envName)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf(
-			"set %s config for env %s failed: [%d] -> %s",
-			section,
-			envName,
-			resp.StatusCode(),
-			resp.Body(),
-		)
+		return formatAPIError(resp, "set %s config for env %s", section, envName)
 	}
 
 	return nil
@@ -1450,10 +1412,7 @@ func (c *SvcBasedClient) DeleteAppSpecEnvSection(
 		return errors.Wrapf(err, "delete %s config for env %s", section, envName)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf(
-			"delete %s config for env %s failed: [%d] -> %s",
-			section, envName, resp.StatusCode(), resp.Body(),
-		)
+		return formatAPIError(resp, "delete %s config for env %s", section, envName)
 	}
 
 	return nil
@@ -1478,12 +1437,7 @@ func (c *SvcBasedClient) UpdateAppStartCommand(ctx context.Context, appID, appTy
 		return errors.Wrapf(err, "update start command for app %s", appID)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf(
-			"update start command for app %s failed: [%d] -> %s",
-			appID,
-			resp.StatusCode(),
-			resp.Body(),
-		)
+		return formatAPIError(resp, "update start command for app %s", appID)
 	}
 
 	return nil
@@ -1499,7 +1453,7 @@ func (c *SvcBasedClient) ListAppPolarisConfigs(ctx context.Context, appID string
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list app polaris configs failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list app polaris configs")
 	}
 
 	return respData.Data, nil
@@ -1515,7 +1469,7 @@ func (c *SvcBasedClient) CreateAppPolarisConfig(ctx context.Context, appID strin
 		return "", err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
-		return "", errors.Errorf("create app polaris config failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return "", formatAPIError(resp, "create app polaris config")
 	}
 
 	return respData.Data.Name, nil
@@ -1534,7 +1488,7 @@ func (c *SvcBasedClient) DeleteAppPolarisConfig(ctx context.Context, appID, conf
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("delete app polaris config failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "delete app polaris config")
 	}
 
 	return nil
@@ -1553,7 +1507,7 @@ func (c *SvcBasedClient) ListWorkspaceComponents(
 		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, errors.Errorf("list workspace components failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return nil, formatAPIError(resp, "list workspace components")
 	}
 
 	return respData.Data, nil
@@ -1569,7 +1523,7 @@ func (c *SvcBasedClient) CreateAppComponent(ctx context.Context, appID string, b
 		return "", err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
-		return "", errors.Errorf("create app component failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return "", formatAPIError(resp, "create app component")
 	}
 
 	return respData.Data.Name, nil
@@ -1584,7 +1538,7 @@ func (c *SvcBasedClient) DeleteAppComponent(ctx context.Context, appID, compName
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("delete app component failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "delete app component")
 	}
 
 	return nil
@@ -1603,7 +1557,7 @@ func (c *SvcBasedClient) PatchAppPolarisConfig(ctx context.Context, appID, confi
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return errors.Errorf("patch app polaris config failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "patch app polaris config")
 	}
 
 	return nil
@@ -1626,7 +1580,7 @@ func (c *SvcBasedClient) UpdatePolarisConfigEnvWeight(
 		return err
 	}
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNoContent {
-		return errors.Errorf("update polaris config env weight failed: [%d] -> %s", resp.StatusCode(), resp.Body())
+		return formatAPIError(resp, "update polaris config env weight")
 	}
 
 	return nil
@@ -1639,4 +1593,16 @@ func truncateBody(body []byte) string {
 		return s
 	}
 	return s[:500] + "..."
+}
+
+// formatAPIError 将非 2xx 的 API 响应包装为错误，并附带服务端返回的 trace id，
+// 方便按 trace id 在 APM / 日志系统中定位问题。
+// format 与 args 按 fmt.Sprintf 规则构造动作描述，避免调用方手动拼接。
+func formatAPIError(resp *resty.Response, format string, args ...any) error {
+	action := fmt.Sprintf(format, args...)
+	msg := fmt.Sprintf("%s failed: [%d] -> %s", action, resp.StatusCode(), truncateBody(resp.Body()))
+	if traceID := resp.Header().Get("X-Trace-Id"); traceID != "" {
+		msg = fmt.Sprintf("%s (trace_id: %s)", msg, traceID)
+	}
+	return errors.New(msg)
 }
