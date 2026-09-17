@@ -1,0 +1,62 @@
+bkms-server/tests/utdeps/config_ci_ut.yml
+  h_2321bec5d80d15 87-90
+bkms-server/pkg/extension/bscpcfg/model/metadata.go
+  h_2321bec5d80d15 33,35,38,40,42,44
+bkms-server/pkg/extension/bscpcfg/model/env_binding.go
+  h_2321bec5d80d15 35,37,39
+bkms-server/pkg/extension/bscpcfg/service/manager_test.go
+  h_2321bec5d80d15 234-244
+bkms-server/pkg/extension/bscpcfg/model/snapshot_test.go
+  h_2321bec5d80d15 33-42,45-49
+bkms-server/cmd/migration/app_bscpcfg_mgr.go
+  h_2321bec5d80d15 198-204
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 2539-2544,4234-4235,4238,4240,4242,4689-4699,6269-6272,11199-11200,11217-11218,11230,11233-11235,11248,11256
+  h_2321bec5d80d15 4239
+bkms-server/db/migrations/000015_bscpcfg_feature_flags_idx.md
+  h_2321bec5d80d15 1-4
+bkms-server/pkg/extension/bscpcfg/handler/feature_flag.go
+  h_2321bec5d80d15 42,53
+bkms-server/pkg/workload/bscpcfg/builder.go
+  h_2321bec5d80d15 29,31,171-183
+bkms-server/pkg/infras/cloudapi/bscp/config_credential.go
+  h_2321bec5d80d15 151
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  h_2321bec5d80d15 130-141,146,156-163,247,252
+bkms-server/db/migrations/000015_bscpcfg_feature_flags_idx.up.json
+  h_2321bec5d80d15 1-14
+bkms-server/db/migrations/000015_bscpcfg_feature_flags_idx.down.json
+  h_2321bec5d80d15 1-6
+bkms-server/pkg/extension/bscpcfg/service/permission.go
+  h_2321bec5d80d15 43,47
+  h_2321bec5d80d15 35,39,58-59
+bkms-server/pkg/workload/bscpcfg/inject.go
+  h_2321bec5d80d15 51
+bkms-server/pkg/extension/bscpcfg/model/metadata_store_test.go
+  h_2321bec5d80d15 62-63,92-100,106-114,147-156,183-192,293-301,328-337,409-420
+bkms-server/pkg/extension/bscpcfg/model/feature_flag.go
+  h_2321bec5d80d15 129-146
+bkms-server/design_notes/bscpcfg.md
+  h_2321bec5d80d15 118
+bkms-server/pkg/extension/bscpcfg/model/store_test.go
+  h_2321bec5d80d15 143-153
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 2559,2575-2576,2590,22625-22632,25072-25073,25078,25081,25084,25730-25746,28131-28136
+  h_2321bec5d80d15 2557-2558,2560,2588,2593-2594,25082-25083
+bkms-server/pkg/infras/cloudapi/bscp/config_bscp.go
+  h_2321bec5d80d15 277-279
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 2562,2578-2579,2593,22628-22635,25075-25076,25081,25084,25087,25733-25749,28134-28139
+  h_2321bec5d80d15 2560-2561,2563,2591,2596-2597,25085-25086
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b38aab60496b78d5fd096525fccfbc055969ab59",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

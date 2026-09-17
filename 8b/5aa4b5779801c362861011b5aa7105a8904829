@@ -1,0 +1,20 @@
+bkms-server/cmd/migration/app_bscpcfg_mgr.go
+  h_2321bec5d80d15 50-52
+bkms-server/cmd/migration/bind_bscp_project.go
+  h_2321bec5d80d15 49,59-60,110,112,131-157
+bkms-server/cmd/migration/list_bscp_projects.go
+  h_2321bec5d80d15 24-26,30,49,117-132
+bkms-server/pkg/infras/cloudapi/bscp/types.go
+  h_2321bec5d80d15 471-494
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8b5aa4b5779801c362861011b5aa7105a8904829",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
