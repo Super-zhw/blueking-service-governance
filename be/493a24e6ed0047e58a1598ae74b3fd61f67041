@@ -1,0 +1,24 @@
+bkms-server/configs/config.yaml
+  h_2321bec5d80d15 235-236
+bkms-server/design_notes/devops_community.md
+  h_2321bec5d80d15 1-56
+bkms-server/pkg/common/config/types.go
+  h_2321bec5d80d15 368-369,466-467
+bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  h_2321bec5d80d15 370
+bkms-server/tests/configs/config.yaml
+  h_2321bec5d80d15 176-177
+charts/bkms-server/values.yaml
+  h_2321bec5d80d15 371-372
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "be493a24e6ed0047e58a1598ae74b3fd61f67041",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+bkms-server/configs/config.yaml
+  h_2321bec5d80d15 235-238
+bkms-server/design_notes/devops_community.md
+  h_2321bec5d80d15 1-52
+bkms-server/pkg/bkintegrations/bkci/manager.go
+  h_2321bec5d80d15 472-473
+bkms-server/pkg/common/config/types.go
+  h_2321bec5d80d15 368-373,466-467
+bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  h_2321bec5d80d15 215-216,251-252,365-373,376,378,703-704,735-738,740,743,746,775-776,809-810
+bkms-server/pkg/infras/cloudapi/bkci/bkci_test.go
+  h_2321bec5d80d15 174,179,184
+bkms-server/pkg/infras/cloudapi/bkci/client.go
+  h_2321bec5d80d15 45-47,49-50,96-97,99-105,109-111
+bkms-server/pkg/infras/cloudapi/bkci/stub.go
+  h_2321bec5d80d15 431-434,440
+bkms-server/pkg/infras/cloudapi/bkci/types.go
+  h_2321bec5d80d15 40-47
+bkms-server/tests/configs/config.yaml
+  h_2321bec5d80d15 176-179
+charts/bkms-server/values.yaml
+  h_2321bec5d80d15 371-374
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ad10af53558a199c2887941d991ded294f1a88f1",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
