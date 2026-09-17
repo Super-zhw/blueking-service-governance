@@ -106,8 +106,6 @@ type CreateApmAppReq struct {
 	// AppName 名称
 	AppName string `json:"app_name" validate:"required"`
 	// BkBizID 蓝鲸监控下项目的业务 ID
-	// 注意：
-	//	容器项目 ID 是负数，这个是蓝鲸监控特殊规则
 	BkBizID int64 `json:"bk_biz_id" validate:"lt=0"`
 	// Operator 操作人
 	Operator string `json:"-" validate:"required"`
@@ -157,8 +155,6 @@ type GetApmAppReq struct {
 	ApmAppID int64 `json:"application_id"`
 
 	// BkBizID 蓝鲸监控下项目的业务 ID
-	// 注意：
-	//	容器项目 ID 是负数，这个是蓝鲸监控特殊规则
 	BkBizID int64 `json:"bk_biz_id" validate:"lt=0"`
 }
 
@@ -178,15 +174,10 @@ func NewGetApmAppReq(bkBizID, apmAppID int64, appName string) *GetApmAppReq {
 // ListApmAppReq 列出 APM 应用请求
 type ListApmAppReq struct {
 	// BkBizID 蓝鲸监控下项目的业务 ID
-	// 注意：
-	//	容器项目 ID 是负数，这个是蓝鲸监控特殊规则
 	BkBizID int64 `json:"bk_biz_id" validate:"lt=0"`
 }
 
 // NewListApmAppReq 创建列出 APM 应用请求
-// 注意：
-//
-//	蓝鲸监控的 容器项目 ID 必须是负数，这个是蓝鲸监控特殊规则
 func NewListApmAppReq(bkBizID int64) *ListApmAppReq {
 	if bkBizID > 0 {
 		bkBizID = -bkBizID
@@ -194,6 +185,64 @@ func NewListApmAppReq(bkBizID int64) *ListApmAppReq {
 
 	return &ListApmAppReq{
 		BkBizID: bkBizID,
+	}
+}
+
+// ApmServiceK8sRelation APM 服务绑定的容器负载关系。
+type ApmServiceK8sRelation struct {
+	// BcsClusterID BCS 集群 ID
+	BcsClusterID string `json:"bcs_cluster_id" validate:"required"`
+	// Namespace 命名空间
+	Namespace string `json:"namespace" validate:"required"`
+	// Kind 负载类型，如 Deployment、GameDeployment
+	Kind string `json:"kind" validate:"required"`
+	// Name 负载名称
+	Name string `json:"name" validate:"required"`
+}
+
+// ApmServiceCicdRelation APM 服务增量绑定的蓝盾流水线关系。
+type ApmServiceCicdRelation struct {
+	// ProjectID 蓝盾项目 ID
+	ProjectID string `json:"project_id" validate:"required"`
+	// PipelineID 流水线 ID
+	PipelineID string `json:"pipeline_id" validate:"required"`
+	// PipelineName 流水线名称
+	PipelineName string `json:"pipeline_name" validate:"required"`
+}
+
+// UpdateApmServiceConfigReq 更新 APM 服务配置请求
+type UpdateApmServiceConfigReq struct {
+	// BkBizID 蓝鲸监控下项目的业务 ID
+	BkBizID int64 `json:"bk_biz_id" validate:"lt=0"`
+	// AppName 应用名
+	AppName string `json:"app_name" validate:"required,max=50"`
+	// ServiceName 服务名
+	ServiceName string `json:"service_name" validate:"required,max=512"`
+	// Owners 服务负责人列表
+	Owners []string `json:"owners,omitempty"`
+	// IncrementalK8sRelations 增量容器负载关系
+	IncrementalK8sRelations []ApmServiceK8sRelation `json:"incremental_k8s_relations,omitempty"`
+	// IncrementalCicdRelations 增量蓝盾流水线关系
+	IncrementalCicdRelations []ApmServiceCicdRelation `json:"incremental_cicd_relations,omitempty"`
+}
+
+// NewUpdateApmServiceConfigReq 创建更新 APM 服务配置请求
+func NewUpdateApmServiceConfigReq(
+	bkBizID int64,
+	appName, serviceName string,
+	owners []string,
+	k8sRelations []ApmServiceK8sRelation,
+) *UpdateApmServiceConfigReq {
+	if bkBizID > 0 {
+		bkBizID = -bkBizID
+	}
+
+	return &UpdateApmServiceConfigReq{
+		BkBizID:                 bkBizID,
+		AppName:                 appName,
+		ServiceName:             serviceName,
+		Owners:                  owners,
+		IncrementalK8sRelations: k8sRelations,
 	}
 }
 
@@ -856,4 +905,70 @@ type TimeSeriesUnifyQueryResp struct {
 	Series []TimeSeriesData `json:"series" mapstructure:"series"`
 	// Metrics 指标信息列表
 	Metrics []TimeSeriesMetricInfo `json:"metrics" mapstructure:"metrics"`
+}
+
+// ---- 仪表盘（Dashboard）相关类型 ----
+
+// DashboardItem 仪表盘目录树中的仪表盘项。
+type DashboardItem struct {
+	// ID 仪表盘 ID
+	ID int64 `json:"id" mapstructure:"id"`
+	// UID 仪表盘 uid（全局唯一）
+	UID string `json:"uid" mapstructure:"uid"`
+	// Title 仪表盘标题
+	Title string `json:"title" mapstructure:"title"`
+	// URI 仪表盘 URI
+	URI string `json:"uri" mapstructure:"uri"`
+	// URL 仪表盘访问 URL
+	URL string `json:"url" mapstructure:"url"`
+	// Slug 仪表盘 slug（标题的 url 友好形式）
+	Slug string `json:"slug" mapstructure:"slug"`
+	// Tags 标签
+	Tags []string `json:"tags" mapstructure:"tags"`
+	// IsStarred 是否收藏
+	IsStarred bool `json:"isStarred" mapstructure:"isStarred"`
+	// SortMeta 排序权重
+	SortMeta int64 `json:"sortMeta" mapstructure:"sortMeta"`
+	// Editable 是否可编辑
+	Editable bool `json:"editable" mapstructure:"editable"`
+	// HasPermission 是否有权限
+	HasPermission bool `json:"has_permission" mapstructure:"has_permission"`
+}
+
+// DashboardDirectoryNode 仪表盘目录树节点（目录），其下挂载若干仪表盘。
+type DashboardDirectoryNode struct {
+	// Dashboards 目录下的仪表盘列表
+	Dashboards []DashboardItem `json:"dashboards" mapstructure:"dashboards"`
+	// ID 目录 ID（根目录 General 为 0）
+	ID int64 `json:"id" mapstructure:"id"`
+	// UID 目录 uid（根目录为空）
+	UID string `json:"uid" mapstructure:"uid"`
+	// Title 目录标题
+	Title string `json:"title" mapstructure:"title"`
+	// URI 目录 URI
+	URI string `json:"uri" mapstructure:"uri"`
+	// URL 目录访问 URL
+	URL string `json:"url" mapstructure:"url"`
+	// Slug 目录 slug
+	Slug string `json:"slug" mapstructure:"slug"`
+	// Tags 标签
+	Tags []string `json:"tags" mapstructure:"tags"`
+	// IsStarred 是否收藏
+	IsStarred bool `json:"isStarred" mapstructure:"isStarred"`
+	// HasFolderPermission 是否有目录权限
+	HasFolderPermission bool `json:"has_folder_permission" mapstructure:"has_folder_permission"`
+}
+
+// DashboardDetail 仪表盘详情（get_dashboard_detail 返回）。
+type DashboardDetail struct {
+	// ID 仪表盘 ID
+	ID int64 `json:"id" mapstructure:"id"`
+	// UID 仪表盘 uid
+	UID string `json:"uid" mapstructure:"uid"`
+	// Title 仪表盘标题
+	Title string `json:"title" mapstructure:"title"`
+	// Slug 仪表盘 slug
+	Slug string `json:"slug" mapstructure:"slug"`
+	// Version 仪表盘版本
+	Version int64 `json:"version" mapstructure:"version"`
 }

@@ -32,9 +32,8 @@ func NewViewCmd() *cobra.Command {
 	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View update-strategy configuration",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View update-strategy configuration",
 		Long: `View the rolling update strategy configuration for the application.
 
 When --env is omitted, this command views the default application-level update strategy.
@@ -47,6 +46,7 @@ When --env is provided, this command views the effective update strategy for tha
 
   # Output in JSON format
   bkms-cli app appspec update-strategy view --app my-app -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return appspec.ViewHandler(
 				cmd.Context(),
@@ -58,9 +58,9 @@ When --env is provided, this command views the effective update strategy for tha
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

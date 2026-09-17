@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/workspace/component"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/workspace/dashboard"
 )
 
 // NewCmd create workspace command
@@ -44,6 +45,8 @@ Use this command to list workspaces, set or unset default workspace for your CLI
 	cmd.AddCommand(NewUnsetCmd())
 	// 工作空间组件实例
 	cmd.AddCommand(component.NewCmd())
+	// 工作空间仪表盘目录树
+	cmd.AddCommand(dashboard.NewCmd())
 
 	return cmd
 }

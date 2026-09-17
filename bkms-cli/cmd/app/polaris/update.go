@@ -27,17 +27,13 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
-// NewUpdateCmd returns a Command instance for 'app polaris update' sub command
-func NewUpdateCmd() *cobra.Command {
-	var appID, configName, specFile string
-
-	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update a polaris config for an application",
-		Long: `Update an existing polaris config from a YAML spec file (partial update).
+const (
+	// updatePolarisLong help text
+	updatePolarisLong = `Update an existing polaris config from a YAML spec file (partial update).
 
 Only fields present in the YAML file will be updated; omitted fields remain unchanged.
 This allows you to modify specific aspects of the config without affecting others.
@@ -69,8 +65,10 @@ Updatable YAML spec file fields:
   scopeEnvNames:      Replace the environments where this config takes effect ([]string).
                       An empty list clears the scope
   operator:           Owner of a platform-created polaris service (comma-separated).
-                      Omitted field is left unchanged; empty string is rejected`,
-		Example: `  # Update service port
+                      Omitted field is left unchanged; empty string is rejected
+`
+	// updatePolarisExample help text
+	updatePolarisExample = `  # Update service port
   bkms-cli app polaris update --app my-app --name polaris-xxxxx -f update.yaml
 
   # Example update.yaml (change port):
@@ -87,11 +85,24 @@ Updatable YAML spec file fields:
   #   region: shenzhen
 
   # Example update.yaml (change owner of a platform-created service):
-  # operator: zhangsan,lisi`,
+  # operator: zhangsan,lisi
+`
+)
+
+// NewUpdateCmd returns a Command instance for 'app polaris update' sub command
+func NewUpdateCmd() *cobra.Command {
+	var appID, configName, specFile string
+
+	cmd := &cobra.Command{
+		Use:     "update",
+		Short:   "Update a polaris config for an application",
+		Long:    updatePolarisLong,
+		Example: updatePolarisExample,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// 读取并解析 YAML 规格文件
-			if _, err := os.Stat(specFile); err != nil {
-				return errors.Wrapf(err, "polaris spec file %s not found", specFile)
+			if _, statErr := os.Stat(specFile); statErr != nil {
+				return errors.Wrapf(statErr, "polaris spec file %s not found", specFile)
 			}
 			fileContent, err := os.ReadFile(specFile)
 			if err != nil {
@@ -107,8 +118,7 @@ Updatable YAML spec file fields:
 			delete(body, "direct")
 
 			// 调用后端 API 更新北极星配置
-			err = client.New().PatchAppPolarisConfig(cmd.Context(), appID, configName, body)
-			if err != nil {
+			if err = client.New().PatchAppPolarisConfig(cmd.Context(), appID, configName, body); err != nil {
 				return errors.Wrap(err, "update app polaris config")
 			}
 
@@ -118,7 +128,7 @@ Updatable YAML spec file fields:
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().
 		StringVar(&configName, "name", "", "polaris config name from list (e.g. polaris-xxxxx), not polarisName")
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "polaris update spec file path (YAML)")

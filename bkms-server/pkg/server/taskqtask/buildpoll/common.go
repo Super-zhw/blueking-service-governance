@@ -236,6 +236,7 @@ func newAppModelDeployService(reg *storereg.Registry) (*appmodeldeploysvc.Servic
 		PolarisVarReader:                    reg.PolarisVarReader,
 		WorkspaceCompsStore:                 reg.WorkspaceCompsStore,
 		PolarisConfigStore:                  reg.PolarisConfigStore,
+		HostPortStore:                       reg.HostPortStore,
 		BscpCfgStore:                        reg.BscpCfgStore,
 		AppSpecStore:                        reg.AppSpecStore,
 		BuildConfigStore:                    reg.BuildConfigStore,
@@ -243,5 +244,6 @@ func newAppModelDeployService(reg *storereg.Registry) (*appmodeldeploysvc.Servic
 		AppModelDeployRecordStore:           reg.AppModelDeployRecordStore,
 		AppModelDeployResourceSnapshotStore: reg.AppModelDeployResourceSnapshotStore,
 		AppConfigFileStore:                  reg.AppConfigFileStore,
+		ClusterAddonDefStore:                reg.ClusterAddonDefStore,
 	})
 }

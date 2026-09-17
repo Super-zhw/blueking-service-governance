@@ -27,11 +27,15 @@ FROM {{ .RunnerImage }} AS runner
 
 WORKDIR /app
 
+COPY --from=builder /out/{{ .AppName }} /app/{{ .AppName }}
+
+{{ range .ExtraFileCopies -}}
+COPY {{ .Source }} {{ .Dest }}
+{{ end -}}
+
 {{ range .RuntimeEnvCommands -}}
 RUN {{ . }}
 {{ end -}}
-
-COPY --from=builder /out/{{ .AppName }} /app/{{ .AppName }}
 
 {{ if .StartCommand -}}
 ENTRYPOINT ["/bin/sh", "-ec", {{ quoteStartCommand .StartCommand }}]

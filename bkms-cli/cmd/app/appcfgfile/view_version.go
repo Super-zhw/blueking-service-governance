@@ -35,9 +35,8 @@ func NewViewVersionCmd() *cobra.Command {
 	var version int64
 
 	cmd := &cobra.Command{
-		Use:    "view-version",
-		Short:  "View one history version of an application config file",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view-version",
+		Short: "View one history version of an application config file",
 		Long: `View one history version of the application config file selected by app and environment.
 
 Use exactly one of --version or --version-id to identify the target history version.
@@ -55,6 +54,7 @@ When an application has multiple config files in the same environment, use --nam
 
   # Output in JSON format
   bkms-cli app app-cfg-file view-version --app demo --env prod --version 7 -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts, err := parseVersionRefOptions(cmd, version, versionID)
 			if err != nil {
@@ -79,7 +79,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,
@@ -88,7 +88,7 @@ When an application has multiple config files in the same environment, use --nam
 		"config file name; useful for Helm apps with multiple app-level config files",
 	)
 	registerVersionRefFlags(cmd, &version, &versionID)
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

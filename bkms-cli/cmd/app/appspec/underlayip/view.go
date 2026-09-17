@@ -32,10 +32,9 @@ func NewViewCmd() *cobra.Command {
 	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View underlay-ip configuration",
-		PreRun: cmdutil.CommonPreRun,
-		Long:   `View the underlay IP networking configuration for the application.`,
+		Use:   "view",
+		Short: "View underlay-ip configuration",
+		Long:  `View the underlay IP networking configuration for the application.`,
 		Example: `  # View default underlay-ip config
   bkms-cli app appspec underlay-ip view --app my-app
 
@@ -44,6 +43,7 @@ func NewViewCmd() *cobra.Command {
 
   # Output in JSON format
   bkms-cli app appspec underlay-ip view --app my-app -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return appspec.ViewHandler(
 				cmd.Context(),
@@ -55,9 +55,9 @@ func NewViewCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

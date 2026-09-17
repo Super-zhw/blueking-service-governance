@@ -24,6 +24,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/component"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
@@ -48,6 +49,7 @@ The change takes effect after the next deployment.`,
 
   # Reference with an explicit application-local name
   bkms-cli app component create --app my-app --ref shared-limits --name my-limits`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name, err := handler.CreateAppComponentRef(cmd.Context(), client.New(), appID, refName, compName)
 			if err != nil {
@@ -60,7 +62,7 @@ The change takes effect after the next deployment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&refName, "ref", "", "workspace component instance name")
 	cmd.Flags().StringVar(&compName, "name", "", "application-local component instance name")
 

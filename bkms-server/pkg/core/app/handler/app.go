@@ -31,6 +31,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkci"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/build"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
@@ -49,17 +50,27 @@ import (
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/customruntime"
 	workloadruntime "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/runtime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/snapshot"
 )
 
 // Handler handles Gin app API requests.
 type Handler struct {
-	registry *storereg.Registry
+	registry   *storereg.Registry
+	persistMgr *customruntime.PersistManager
 }
 
 // New creates a Handler.
 func New(registry *storereg.Registry) *Handler {
-	return &Handler{registry: registry}
+	snapshotService := snapshot.NewService(registry.SnapshotStore, registry.BuildConfigStore, registry.AppStore)
+	return &Handler{
+		registry: registry,
+		persistMgr: customruntime.NewPersistManager(
+			registry.CustomRuntimeImageStore,
+			snapshotService,
+		),
+	}
 }
 
 // CreateApp 创建应用。
@@ -86,9 +97,9 @@ func (h *Handler) CreateApp(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	// 权限校验
-	if err := perm.NewManager().HasCreateAppPerm(ctx, uriInput.WorkspaceID); err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.WrapIAMNoPermission(err, uriInput.WorkspaceID, "check app perm"))
+	// 先校验 workspace 存在，再校验创建应用权限，保证错误语义与其他 workspace 级接口一致。
+	if _, err := ginperm.ValidateWorkspaceForAppCreate(ctx, h.registry, uriInput.WorkspaceID); err != nil {
+		bkerrs.AbortWithErr(c, err)
 		return
 	}
 
@@ -153,8 +164,23 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		h.registry.RuntimeImageStore,
 		h.registry.SnapshotStore,
 	)
-	if err = build.ValidatePlatformBuildImages(ctx, imageReferenceValidator, buildConfig); err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.New(bkerrs.ErrCodeInvalidArgument, err.Error()))
+	if err = build.ValidatePlatformBuildImages(
+		ctx, imageReferenceValidator, h.persistMgr, buildConfig, app.WorkspaceID,
+	); err != nil {
+		// 镜像源鉴权失败或不可达时改镜像引用也没用，按内部错误上报；其余按参数问题
+		errCode := bkerrs.ErrCodeInvalidArgument
+		if build.IsImageRegistryFailure(err) {
+			errCode = bkerrs.ErrCodeInternalServerError
+		}
+		bkerrs.AbortWithErr(c, bkerrs.New(errCode, err.Error()))
+		return
+	}
+	if err = bkci.EnsureWorkspaceRepositories(
+		ctx,
+		uriInput.WorkspaceID,
+		collectBKCIRepositoriesForCreateApp(input.Type, app.HelmSpec, buildConfig),
+	); err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "ensure bkci repositories"))
 		return
 	}
 	if err = h.registry.BuildConfigStore.Create(ctx, buildConfig); err != nil {
@@ -167,6 +193,16 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
+
+	// 应用与构建配置都已落库后再异步 get_or_create 自定义镜像记录，尚无成功快照的镜像会触发一次刷新
+	// 放在应用创建之后，避免创建失败时仍往工作空间写入候选镜像
+	// 失败只打日志，不回滚已保存的数据；WithoutCancel 避免请求结束后 persist 被取消
+	go func() {
+		rCtx := context.WithoutCancel(ctx)
+		if persistErr := h.persistMgr.PersistAfterSave(rCtx, app.WorkspaceID, buildConfig); persistErr != nil {
+			log.Errorf(rCtx, "persist custom runtime images for workspace %s failed: %v", app.WorkspaceID, persistErr)
+		}
+	}()
 
 	// 创建应用后，异步为该应用初始化默认监控告警策略，应用部署后真正下发到监控平台
 	go func() {
@@ -250,6 +286,58 @@ func newAppIDSuffix() string {
 	val := rand.IntN(2_176_782_335) + 1              // nolint: gosec
 	s := strings.ToLower(base36.Encode(uint64(val))) // nolint
 	return "-" + s
+}
+
+// ResolveApp 通过 ID 或 Name 解析应用，返回应用 ID 和 Name。
+//
+//	@ID			ResolveApp
+//	@Summary	通过 ID 或 Name 解析应用
+//	@Tags		app
+//	@Produce	json
+//	@Security	BkUserInfo
+//	@Security	BkUserCredential
+//	@Param		workspaceID	path		string	true	"工作空间 ID"
+//	@Param		app			path		string	true	"应用 ID 或名称"
+//	@Success	200			{object}	serializer.ResolveAppOutput
+//	@Failure	404			{object}	bkerrs.GinErrorOutput
+//	@Router		/workspaces/{workspaceID}/apps/resolve/{app} [get]
+func (h *Handler) ResolveApp(c *gin.Context) {
+	var uriInput serializer.ResolveAppURIInput
+	if err := ginutils.BindURI(c, &uriInput); err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+	ctx := c.Request.Context()
+	input := uriInput.App
+
+	app, err := h.registry.AppStore.GetApp(ctx, input)
+	if err != nil && !errors.Is(err, bkmsapp.ErrAppNotFound) {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "resolve app by id"))
+		return
+	}
+	if app == nil {
+		app, err = h.registry.AppStore.GetAppByName(ctx, uriInput.WorkspaceID, input)
+		if err != nil {
+			if errors.Is(err, bkmsapp.ErrAppNotFound) {
+				bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeNotFound, "app %s not found", input))
+				return
+			}
+			bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "resolve app by name"))
+			return
+		}
+	}
+
+	if _, err = ginperm.ValidateAppByID(ctx, h.registry, app.ID, ginperm.TypeView); err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+
+	ginutils.OK(c, serializer.ResolveAppOutput{
+		Data: &serializer.ResolveAppOutputObj{
+			ID:   app.ID,
+			Name: app.Name,
+		},
+	})
 }
 
 // GetApp 查询单个应用详情。
@@ -687,14 +775,25 @@ func (h *Handler) deleteAppModelApp(ctx context.Context, app *bkmsapp.Applicatio
 		return errors.Wrapf(err, "delete app(%s) model", app.Name)
 	}
 
-	// 2. 删除所有关联的配置文件（AppConfigFile）
+	// 2. 删除所有关联的配置文件、def 及版本记录
 	if _, err := h.registry.AppConfigFileStore.DeleteByApp(ctx, app.ID); err != nil {
 		return errors.Wrapf(err, "delete app(%s) config files", app.Name)
+	}
+	if _, err := h.registry.AppConfigFileDefStore.DeleteByApp(ctx, app.ID); err != nil {
+		return errors.Wrapf(err, "delete app(%s) config file defs", app.Name)
+	}
+	if _, err := h.registry.AppConfigFileVersionStore.DeleteByApp(ctx, app.ID); err != nil {
+		return errors.Wrapf(err, "delete app(%s) config file versions", app.Name)
 	}
 
 	// 3. 删除北极星配置
 	if err := h.registry.PolarisConfigStore.DeleteByApp(ctx, app.ID); err != nil {
 		return errors.Wrapf(err, "delete app(%s) polaris configs", app.Name)
+	}
+
+	// 4. 删除 HostPort 配置
+	if err := h.registry.HostPortStore.DeleteByApp(ctx, app.ID); err != nil {
+		return errors.Wrapf(err, "delete app(%s) hostport config", app.Name)
 	}
 
 	// 删除应用规格配置

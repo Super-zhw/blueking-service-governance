@@ -60,7 +60,7 @@ func initHandler(ctx context.Context, args InitializationArgs) error {
 	if err != nil {
 		return errors.Wrapf(err, "get workspace %s", args.WorkspaceID)
 	}
-	client, err := bkmonitor.New(ws.Creator)
+	client, err := bkmonitor.NewMonitorClient(ws.Creator)
 	if err != nil {
 		return errors.Wrapf(err, "create bkmonitor client")
 	}
@@ -140,7 +140,7 @@ func activateWorkspace(
 	if err != nil {
 		return errors.Wrapf(err, "create apm store")
 	}
-	userGroupService := bkmmodel.NewUserGroupService(permMgr, envStore)
+	userGroupService := bkmmodel.NewUserGroupService(envStore)
 	apmService := bkmmodel.NewApmService(apmStore, scopedEnvVarStore)
 
 	envs, err := envStore.ListStdEnvs(ctx, ws.ID)

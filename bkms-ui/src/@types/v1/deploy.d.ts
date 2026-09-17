@@ -174,17 +174,6 @@ export interface DeleteTafDeployRequest {
   trafficLaneName?: string;
 }
 
-export interface PreCheckTafDeployEnvVarsRequest {
-  /**
-   * 应用 ID
-   */
-  appID: string;
-  /**
-   * 部署环境名称
-   */
-  envName: string;
-}
-
 export interface GetLatestTafDeployStatusRequest {
   /**
    * 应用 ID
@@ -198,6 +187,17 @@ export interface GetLatestTafDeployStatusRequest {
    * 部署的泳道名称（空字符串表示不使用泳道）
    */
   trafficLaneName?: string;
+}
+
+export interface PreCheckTafDeployRequest {
+  /**
+   * 应用 ID
+   */
+  appID: string;
+  /**
+   * 部署环境名称
+   */
+  envName: string;
 }
 
 export interface ListTafResourceSnapshotsRequest {
@@ -295,17 +295,6 @@ export interface DeleteTrpcDeployRequest {
   trafficLaneName?: string;
 }
 
-export interface PreCheckTrpcDeployEnvVarsRequest {
-  /**
-   * 应用 ID
-   */
-  appID: string;
-  /**
-   * 部署环境名称
-   */
-  envName: string;
-}
-
 export interface GetLatestTrpcDeployStatusRequest {
   /**
    * 应用 ID
@@ -319,6 +308,17 @@ export interface GetLatestTrpcDeployStatusRequest {
    * 部署的泳道名称（空字符串表示不使用泳道）
    */
   trafficLaneName?: string;
+}
+
+export interface PreCheckTrpcDeployRequest {
+  /**
+   * 应用 ID
+   */
+  appID: string;
+  /**
+   * 部署环境名称
+   */
+  envName: string;
 }
 
 export interface ListTrpcResourceSnapshotsRequest {
@@ -415,7 +415,8 @@ export interface RollbackHelmDeployInput {
   trafficLaneName?: string;
 }
 
-export interface EmptyOutput {}
+export interface EmptyOutput {
+}
 
 export interface ListAppModelDeployRecordsOutput {
   data?: PaginatedAppModelDeployRecordsOutputObjs;
@@ -436,12 +437,16 @@ export interface CreateAppModelDeployInput {
   trafficLaneName?: string;
 }
 
-export interface EnvVarPreCheckOutput {
-  undefinedVars?: UndefinedEnvVarOutput[];
-}
-
 export interface GetLatestAppModelDeployStatusOutput {
   data?: LatestDeployStatus;
+}
+
+export interface DeployPreCheckOutput {
+  /**
+   * 缺失的必选集群组件标识及展示名
+   */
+  missingRequiredClusterAddons?: ClusterAddonReferenceOutput[];
+  undefinedVars?: UndefinedEnvVarOutput[];
 }
 
 export interface ListAppModelResourceSnapshotsOutput {
@@ -467,11 +472,25 @@ export interface PaginatedAppModelResourceSnapshotsOutputObjs {
   results?: AppModelResourceSnapshot[];
 }
 
+export interface ClusterAddonReferenceOutput {
+  displayName?: string;
+  name?: string;
+}
+
+export interface UndefinedEnvVarOutput {
+  key?: string;
+  sources?: EnvVarReferenceSourceOutput[];
+}
+
+export interface EnvVarReferenceSourceOutput {
+  name?: string;
+  type?: string;
+}
+
 export interface LatestDeployStatus {
   branch?: string;
   buildID?: string;
   deployID?: string;
-  /** 部署来源：directDeploy / buildAutoDeploy */
   deploySource?: string;
   endedAt?: string;
   hasDeployRecord?: boolean;
@@ -488,29 +507,25 @@ export interface LatestDeployStatus {
   status?: string;
 }
 
-export interface UndefinedEnvVarOutput {
-  key?: string;
-  sources?: EnvVarReferenceSourceOutput[];
-}
-
-export interface EnvVarReferenceSourceOutput {
-  name?: string;
-  type?: string;
-}
-
 export interface PaginatedAppModelDeployRecordsOutputObjs {
   count?: string;
   results?: AppModelDeployRecordOutputObj[];
 }
 
 export interface AppModelDeployRecordOutputObj {
-  /** 代码分支（仅 buildAutoDeploy 场景有值） */
+  /**
+   * 代码分支（仅构建+部署记录返回）
+   */
   branch?: string;
   clusterID?: string;
-  /** Commit ID（仅 buildAutoDeploy 场景有值） */
+  /**
+   * Commit ID（仅构建+部署记录返回）
+   */
   commitID?: string;
   createdAt?: string;
-  /** 部署来源：directDeploy / buildAutoDeploy */
+  /**
+   * 部署来源
+   */
   deploySource?: string;
   id?: string;
   imageTag?: string;
@@ -524,6 +539,10 @@ export interface AppModelDeployRecordOutputObj {
   replicas?: number;
   status?: string;
   updatedAt?: string;
+  /**
+   * 本次部署的主工作负载类型（GameDeployment 或 Deployment）
+   */
+  workloadKind?: string;
 }
 
 export interface PaginatedHelmDeployRecordOutputObjs {

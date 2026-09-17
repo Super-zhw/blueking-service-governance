@@ -104,6 +104,12 @@ export interface CreateAppPolarisConfigInput {
    */
   enableHealthCheck?: boolean;
   /**
+   * 是否启用权重因子，默认 false。仅 createNewService 为 true 时写入北极星；
+   * 开启后北极星按实例机型标记权重因子，
+   * 各环境还需单独开启动态权重才会真正按机型分流
+   */
+  enableWeightFactor?: boolean;
+  /**
    * 组件实例标识，用于环境变量拼接，只能包含字母、数字、下划线
    */
   instanceKey: string;
@@ -127,6 +133,12 @@ export interface CreateAppPolarisConfigInput {
    * 北极星 Token（当 createNewService 为 false 时必填，为 true 时由平台创建后回填）
    */
   polarisToken?: string;
+  /**
+   * 注册模式，默认 on_deploy（等部署后注册）。
+   * immediate 表示绑定环境后立即下发 PolarisConfig CR 与配套 Service 完成注册，
+   * 该配置不再注入环境变量和 tRPC 框架配置。创建后不可修改
+   */
+  registerMode?: "immediate" | "on_deploy";
   /**
    * 生效的环境列表
    */
@@ -165,6 +177,10 @@ export interface PatchAppPolarisConfigInput {
    */
   enableHealthCheck?: boolean;
   /**
+   * 是否启用权重因子（可选更新）；关闭只屏蔽各环境的动态权重，不清除各环境的开关取值
+   */
+  enableWeightFactor?: boolean;
+  /**
    * 组件实例标识（可选更新）
    */
   instanceKey?: string;
@@ -172,6 +188,10 @@ export interface PatchAppPolarisConfigInput {
    * 是否保留未就绪的 Pod 在北极星（可选更新）
    */
   keepNotReadyPod?: boolean;
+  /**
+   * 操作人/负责人（可选更新；未出现表示不改；空字符串非法）
+   */
+  operator?: string;
   /**
    * 北极星 Token（可选更新）
    */
@@ -202,6 +222,11 @@ export interface GetEnvInstanceStatsOutput {
 }
 
 export interface PutEnvWeightInput {
+  /**
+   * 该环境是否开启动态权重，不传表示保持原值。
+   * 开启后上面的权重作为动态调权的基准权重
+   */
+  dynamicWeight?: boolean;
   /**
    * 单实例权重，取值范围 0-10000
    */
@@ -255,6 +280,14 @@ export interface PolarisConfigOutputObj {
    */
   enableHealthCheck?: boolean;
   /**
+   * 是否启用权重因子（开启后才能为单个环境开启动态权重）
+   */
+  enableWeightFactor?: boolean;
+  /**
+   * 各环境是否开启动态权重，key 为环境名称；未出现的环境表示未开启
+   */
+  envDynamicWeights?: Record<string, boolean>;
+  /**
    * 各环境中已经生效的关键字段、下发错误和部署状态
    */
   envStates?: Record<string, PolarisEnvStateOutput>;
@@ -290,6 +323,10 @@ export interface PolarisConfigOutputObj {
    * 北极星 Token（敏感信息，返回时脱敏）
    */
   polarisToken?: string;
+  /**
+   * 注册模式：immediate（绑定后立即注册）| on_deploy（等部署后注册）
+   */
+  registerMode?: string;
   /**
    * 生效的环境列表
    */

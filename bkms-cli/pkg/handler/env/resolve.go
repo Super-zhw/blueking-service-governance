@@ -45,6 +45,22 @@ func ResolveEnvIDByName(ctx context.Context, cli client.Client, workspaceID, env
 	return "", errors.Errorf("environment '%s' not found in workspace", envName)
 }
 
+// ResolveEnvByName 通过环境名称获取完整 Env 对象（含 ID、集群信息等）。
+func ResolveEnvByName(ctx context.Context, cli client.Client, workspaceID, envName string) (*client.Env, error) {
+	envs, err := cli.ListEnvs(ctx, workspaceID)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to list envs for workspace %s", workspaceID)
+	}
+
+	for i := range envs {
+		if envs[i].Name == envName {
+			return &envs[i], nil
+		}
+	}
+
+	return nil, errors.Errorf("environment '%s' not found in workspace", envName)
+}
+
 // ResolveScopedEnvVarID 通过 key + scopeType + scopeValue 从公共环境变量列表中查找变量 ID。
 // 用于 public 级别的 update/delete 命令，通过人类可读的标识定位变量。
 func ResolveScopedEnvVarID(

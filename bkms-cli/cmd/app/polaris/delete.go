@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
@@ -46,10 +47,9 @@ in the polaris service.
 Cluster-side instance deregistration takes effect on the next deployment.`,
 		Example: `  # Delete a polaris config by name
   bkms-cli app polaris delete --app my-app --name polaris-xxxxx`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// 调用后端 API 删除北极星配置
-			err := client.New().DeleteAppPolarisConfig(cmd.Context(), appID, configName)
-			if err != nil {
+			if err := client.New().DeleteAppPolarisConfig(cmd.Context(), appID, configName); err != nil {
 				return errors.Wrap(err, "delete app polaris config")
 			}
 
@@ -59,7 +59,7 @@ Cluster-side instance deregistration takes effect on the next deployment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().
 		StringVar(&configName, "name", "", "polaris config name from list (e.g. polaris-xxxxx), not polarisName")
 

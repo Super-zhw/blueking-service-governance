@@ -26,6 +26,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/appspec"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/clierr"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
@@ -34,18 +35,18 @@ func NewResetCmd() *cobra.Command {
 	var appID, envName string
 
 	cmd := &cobra.Command{
-		Use:    "reset",
-		Short:  "Reset annotations env override to default",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "reset",
+		Short: "Reset annotations env override to default",
 		Long: `Reset the environment-specific annotations override back to the default configuration.
 
 This command removes the environment overlay so that the environment inherits
 the default application-level annotations. The --env flag is required.`,
 		Example: `  # Reset env override to default
   bkms-cli app appspec annotations reset --app my-app --env prod`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if envName == "" {
-				return errors.New("reset requires --env to be specified")
+				return clierr.Usagef("reset requires --env to be specified")
 			}
 
 			if err := appspec.ResetHandler(cmd.Context(), appID, envName, client.AppSpecSectionAnnotations); err != nil {
@@ -57,7 +58,7 @@ the default application-level annotations. The --env flag is required.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required for reset)")
 
 	_ = cmd.MarkFlagRequired("app")

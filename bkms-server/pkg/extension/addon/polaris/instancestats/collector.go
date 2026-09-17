@@ -81,7 +81,7 @@ func (c *Collector) Collect(
 	appID string,
 	config *polaris.PolarisConfig,
 ) (*Result, error) {
-	envNames := envNames(config)
+	envNames := config.TrackedEnvNames()
 	envStats := make(map[string]Stats, len(envNames))
 
 	// 同一配置下各环境共享同一个北极星服务，实例列表只需拉取一次
@@ -136,7 +136,7 @@ func (c *Collector) Collect(
 
 // CountMatched 按 Pod IP + 服务端口匹配北极星实例并统计。
 //
-// 匹配规则（与实例列表 MergePolarisInfoToAppInstances 一致）：
+// 匹配规则（与 InstanceMatcher 一致）：
 //  1. 实例 IP 落在本环境 Pod IP 集合中
 //  2. 实例 Port 等于配置的 ServicePort
 //
@@ -151,7 +151,7 @@ func CountMatched(
 			return false
 		}
 		_, ok := podIPs[inst.IP]
-		// 与 MergePolarisInfoToAppInstances 一致：经 int64 比较端口
+		// 与 InstanceMatcher 一致：经 int64 比较端口
 		return ok && int64(inst.Port) == int64(servicePort)
 	})
 
@@ -183,11 +183,6 @@ func summarizeHealthy(instances []*polarisInfra.Instance) (count, weight int) {
 // isHealthyInstance 健康实例：isHealthy && !isIsolated && weight > 0（权重为 0 不接流量）。
 func isHealthyInstance(inst *polarisInfra.Instance) bool {
 	return inst != nil && inst.IsHealthy && !inst.IsIsolated && inst.Weight > 0
-}
-
-// envNames 返回需要统计的环境集合：scopeEnvNames ∪ EnvStates keys（与 envStates 展示范围一致）。
-func envNames(config *polaris.PolarisConfig) []string {
-	return lo.Uniq(append(config.ScopeEnvNames, lo.Keys(config.EnvStates)...))
 }
 
 // envPods 单个环境主部署 Pod 的汇总信息。

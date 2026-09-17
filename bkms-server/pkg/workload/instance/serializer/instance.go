@@ -21,16 +21,20 @@ package serializer
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/TencentBlueKing/gopkg/mapx"
+	corev1 "k8s.io/api/core/v1"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/utils/timex"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
+	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	podstatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/status/workload/pod"
-	polarisInfra "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/polaris"
 	instancelogsvc "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/instancelog"
 	_ "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/validators" // register global validators
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
 )
 
 // -----------------------------------------------------------------------------
@@ -60,14 +64,148 @@ type AppInstanceURIInput struct {
 // -----------------------------------------------------------------------------
 // 实例管理
 
+// 分页页码从 1 开始；校验走 Validate 而非 binding:"gte=1"，因为该约束只在分页模式生效
+const minListAppInstancesPage int64 = 1
+
+// 分页页码上限；能翻到多少条取决于 pageSize，按最小的 5 算保底也有 5 万条，按最大的 100 算到百万
+// 单个应用环境不会有这个量级的实例，超出只可能是脏参数
+// 除了给出明确的 400 而不是静默的空列表，这个上界也是 ProjectionRange 里
+// (page-1)*pageSize 不溢出 int64 的前提，放宽时要一并复核
+const maxListAppInstancesPage int64 = 10000
+
+// 分页 pageSize 仅允许这些固定值；取值约束只在分页模式生效，所以不写 binding:"oneof=..."
+var allowedListAppInstancesPageSizes = []int64{5, 10, 20, 50, 100}
+
 // ListAppInstancesQueryInput 查询应用实例列表的请求参数。
+// page/pageSize 不用 gin binding 做 required/gte/oneof：
+// 全量（all=true）禁止带分页参数，分页模式才必填且 pageSize 受限；
+// binding 标签无法按 all 切换必填，也无法表达 all=true 与 page/pageSize 互斥。
 type ListAppInstancesQueryInput struct {
 	// 部署的泳道名称（空字符串表示不使用泳道）
 	TrafficLaneName string `form:"trafficLaneName"`
-	// 页码，从 1 开始
-	Page int64 `form:"page" binding:"required,gte=1"`
-	// 每页数量，仅支持固定枚举值
-	PageSize int64 `form:"pageSize" binding:"required,oneof=5 10 20 50 100"`
+	// 为 true 时一次返回匹配的全部实例投影；禁止同时带 page 或 pageSize
+	All bool `form:"all"`
+	// 页码，从 1 开始；分页模式必填，all=true 时禁止出现
+	Page *int64 `form:"page"`
+	// 每页数量，仅支持固定枚举值；分页模式必填，all=true 时禁止出现
+	PageSize *int64 `form:"pageSize"`
+}
+
+// Validate 校验全量与分页参数互斥，以及分页模式下的必填与取值
+// 必须在 Bind 之后单独调用：Bind 只做解析，条件校验放这里才能让 all=true 不带分页通过
+func (q *ListAppInstancesQueryInput) Validate() error {
+	if q.All {
+		if q.Page != nil || q.PageSize != nil {
+			return bkerrs.New(
+				bkerrs.ErrCodeInvalidArgument,
+				"all=true cannot be used together with page or pageSize",
+			)
+		}
+		return nil
+	}
+	if q.Page == nil {
+		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "page is required")
+	}
+	if q.PageSize == nil {
+		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "pageSize is required")
+	}
+	if *q.Page < minListAppInstancesPage || *q.Page > maxListAppInstancesPage {
+		return bkerrs.Errorf(
+			bkerrs.ErrCodeInvalidArgument,
+			"page must be between %d and %d", minListAppInstancesPage, maxListAppInstancesPage,
+		)
+	}
+	if !slices.Contains(allowedListAppInstancesPageSizes, *q.PageSize) {
+		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "pageSize must be one of 5, 10, 20, 50, 100")
+	}
+	return nil
+}
+
+// ProjectionRange 返回需要投影的 [start, end) 下标
+// 全量模式投影全部匹配 Pod；分页模式只投影当前页，整页越过尾部时被 min 收敛成空区间
+// 分页模式必须已通过 Validate：除了 Page/PageSize 非空，page 上界还保证下面的乘法不会溢出 int64
+func (q *ListAppInstancesQueryInput) ProjectionRange(total int64) (start, end int64) {
+	if q.All {
+		return 0, total
+	}
+
+	page := *q.Page
+	pageSize := *q.PageSize
+
+	start = min((page-1)*pageSize, total)
+	end = min(start+pageSize, total)
+
+	return start, end
+}
+
+// -----------------------------------------------------------------------------
+// 实例 Watch（SSE）；领域事件类型见 instance/watch.EventType
+
+// WatchAppInstancesQueryInput 订阅应用实例投影变更的查询参数。
+// resourceVersion 不用 binding:"required"：与 List 续传字段对齐，缺省时由 Validate 给出明确错误
+type WatchAppInstancesQueryInput struct {
+	// 部署的泳道名称（空字符串表示不使用泳道）
+	TrafficLaneName string `form:"trafficLaneName"`
+	// List 成功响应带回的续传位点；缺则建不成 Watch
+	ResourceVersion string `form:"resourceVersion"`
+}
+
+// Validate 校验 Watch 续传位点必填；缺省时建不成连接，不用 binding 以免错误信息不明确
+func (q *WatchAppInstancesQueryInput) Validate() error {
+	if q.ResourceVersion == "" {
+		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "resourceVersion is required")
+	}
+
+	return nil
+}
+
+// AppInstanceWatchEvent 实例 Watch 推送的 Pod 投影事件（非原生 Pod JSON）
+// DELETED 时 Object 只保证 id；ENDED 时 Object 为空、Reason 说明流结束原因
+// Type 取值对齐 watch.EventType：ADDED / MODIFIED / DELETED / ENDED
+//
+// Pod 事件不承载附属数据：Object.PolarisInfos 恒为空数组，北极星等附属信息
+// 一律由 AppInstancePluginWatchEvent 单独推送，前端不得从本事件读取
+type AppInstanceWatchEvent struct {
+	// 事件类型
+	// Enums: ADDED, MODIFIED, DELETED, ENDED
+	Type string `json:"type" enums:"ADDED,MODIFIED,DELETED,ENDED"`
+	// 流结束原因；仅 ENDED 使用
+	Reason string `json:"reason,omitempty"`
+	// 实例投影；字段集合对齐 AppInstanceOutputObj，其中 polarisInfos 在 Watch 场景恒为空数组
+	Object *AppInstanceOutputObj `json:"object"`
+}
+
+// AppInstancePluginWatchEvent 实例 Watch 推送的附属数据事件
+//
+// 与 Pod 事件同流同信封，但语义不同：它不是实例的 ADDED / MODIFIED / DELETED，
+// 前端不得据此增删本地行，只能按 object.id 找到已有行后覆盖该 plugin 对应的附属数据；
+// 找不到对应行时忽略该事件
+type AppInstancePluginWatchEvent struct {
+	// 事件类型；恒为 PLUGIN，取值见 instance/watch/plugin.EventTypePlugin
+	// Enums: PLUGIN
+	Type string `json:"type" enums:"PLUGIN"`
+	// 附属数据来源插件名，如 polaris
+	Plugin string `json:"plugin"`
+	// 附属数据载荷
+	Object *AppInstancePluginObj `json:"object"`
+}
+
+// AppInstancePluginObj 单个实例的附属数据载荷
+type AppInstancePluginObj struct {
+	// 实例 ID（即 k8s pod 的 name），供前端关联本地行
+	ID string `json:"id"`
+	// 插件自有载荷；polaris 插件为 PolarisInstanceInfoOutputObj 列表，可为空列表
+	Data any `json:"data"`
+}
+
+// AppInstanceWatchStreamDoc 仅用于 OpenAPI 声明 SSE 两类事件形态，不是实际响应体
+// Watch 接口返回的是 text/event-stream，每条 data 为其中之一；swag 无法在单个
+// 响应码上声明两个模型，故用本类型把两者一并带进 definitions 供前端生成类型
+type AppInstanceWatchStreamDoc struct {
+	// Pod 投影事件：ADDED / MODIFIED / DELETED / ENDED
+	PodEvent *AppInstanceWatchEvent `json:"podEvent"`
+	// 附属数据事件：PLUGIN
+	PluginEvent *AppInstancePluginWatchEvent `json:"pluginEvent"`
 }
 
 // PolarisInstanceInfoOutputObj 关联到应用实例的北极星实例状态。
@@ -84,12 +222,62 @@ type PolarisInstanceInfoOutputObj struct {
 	IsHealthy bool `json:"isHealthy"`
 	// 权重
 	Weight int64 `json:"weight,string"`
+	// 静态权重；开源版恒为 0，内部版为注册时的静态权重
+	StaticWeight int64 `json:"staticWeight,string"`
 	// 隔离状态
 	IsIsolated bool `json:"isIsolated"`
 	// 是否启用健康检查
 	EnableHealthCheck bool `json:"enableHealthCheck"`
 	// 元数据
 	Metadata map[string]string `json:"metadata"`
+}
+
+// FromModel 从领域匹配结果填充 API 投影；m 为 nil 时保持接收者为零值
+func (o *PolarisInstanceInfoOutputObj) FromModel(m *polaris.MatchedInstance) *PolarisInstanceInfoOutputObj {
+	if m == nil {
+		return o
+	}
+
+	*o = PolarisInstanceInfoOutputObj{
+		ServiceNamespace:  m.ServiceNamespace,
+		ServiceName:       m.ServiceName,
+		IP:                m.IP,
+		Port:              m.Port,
+		IsHealthy:         m.IsHealthy,
+		Weight:            m.Weight,
+		StaticWeight:      m.StaticWeight,
+		IsIsolated:        m.IsIsolated,
+		EnableHealthCheck: m.EnableHealthCheck,
+		Metadata:          m.Metadata,
+	}
+
+	return o
+}
+
+// PolarisInfosFromModels 把匹配结果投影为 API 列表；空输入返回空切片而不是 nil
+func PolarisInfosFromModels(models []*polaris.MatchedInstance) []*PolarisInstanceInfoOutputObj {
+	infos := make([]*PolarisInstanceInfoOutputObj, 0, len(models))
+	for _, m := range models {
+		if m == nil {
+			continue
+		}
+
+		infos = append(infos, new(PolarisInstanceInfoOutputObj).FromModel(m))
+	}
+
+	return infos
+}
+
+// AppInstanceResourcesObj is the main-container CPU/memory quantities from the live Pod.
+type AppInstanceResourcesObj struct {
+	// CPU limits（Kubernetes quantity 字符串），可选：未配置时不返回该字段
+	CPULimits string `json:"cpuLimits,omitempty"`
+	// CPU requests，可选：未配置时不返回该字段
+	CPURequests string `json:"cpuRequests,omitempty"`
+	// Memory limits，可选：未配置时不返回该字段
+	MemoryLimits string `json:"memoryLimits,omitempty"`
+	// Memory requests，可选：未配置时不返回该字段
+	MemoryRequests string `json:"memoryRequests,omitempty"`
 }
 
 // AppInstanceOutputObj 单个应用实例（即一个 Pod）。
@@ -114,8 +302,12 @@ type AppInstanceOutputObj struct {
 	Age string `json:"age"`
 	// 节点 IP，Pod 所在节点的 IP 地址
 	NodeIP string `json:"nodeIP"`
+	// 主容器资源规格（集群 Pod 实际值）
+	Resources AppInstanceResourcesObj `json:"resources"`
 	// 北极星实例状态列表（一个 Pod 可能注册到多个北极星服务）
 	PolarisInfos []*PolarisInstanceInfoOutputObj `json:"polarisInfos"`
+	// 最近一次开发模式发布状态
+	LatestPublish *PublishStatusOutputObj `json:"latestPublish,omitempty"`
 }
 
 // FromPodManifest 从 Kubernetes Pod manifest 填充实例输出字段。
@@ -137,6 +329,8 @@ func (o *AppInstanceOutputObj) FromPodManifest(
 	if cMap, ok := containers[0].(map[string]any); ok {
 		image = mapx.GetStr(cMap, "image")
 	}
+
+	resources := extractMainContainerResources(containers)
 
 	var restartCount int64
 	for _, cs := range mapx.GetList(manifest, "status.containerStatuses") {
@@ -165,56 +359,100 @@ func (o *AppInstanceOutputObj) FromPodManifest(
 		Message:      message,
 		IsHealthy:    isHealthy,
 		Age:          timex.CalcAge(mapx.GetStr(manifest, "metadata.creationTimestamp")),
+		Resources:    resources,
 	}
 	return o, nil
 }
 
-// MergePolarisInfoToAppInstances 将北极星实例信息合并到应用实例输出对象中。
+// extractMainContainerResources 从 Pod containers 中读取主容器的 CPU/内存。
+// 找不到主容器时返回零值，不阻断实例列表。
+func extractMainContainerResources(containers []any) AppInstanceResourcesObj {
+	for _, c := range containers {
+		cMap, ok := c.(map[string]any)
+		if !ok {
+			continue
+		}
+		if mapx.GetStr(cMap, "name") != defaults.WorkloadMainContainerName {
+			continue
+		}
+		limits := mapx.GetMap(cMap, "resources.limits")
+		requests := mapx.GetMap(cMap, "resources.requests")
+		return AppInstanceResourcesObj{
+			CPULimits:      mapx.GetStr(limits, string(corev1.ResourceCPU)),
+			CPURequests:    mapx.GetStr(requests, string(corev1.ResourceCPU)),
+			MemoryLimits:   mapx.GetStr(limits, string(corev1.ResourceMemory)),
+			MemoryRequests: mapx.GetStr(requests, string(corev1.ResourceMemory)),
+		}
+	}
+	return AppInstanceResourcesObj{}
+}
+
+// MergePolarisInfoToAppInstances 将北极星匹配结果投影并挂到实例输出上
+// 匹配与定序由 addon/polaris.InstanceMatcher 完成，这里只做 FromModel
 func MergePolarisInfoToAppInstances(
 	appInstances []*AppInstanceOutputObj,
 	svcInstances []*polaris.PolarisServiceInstances,
 ) {
-	type polarisMatch struct {
-		svc  *polaris.PolarisServiceInstances
-		inst *polarisInfra.Instance
-	}
-	ipIndex := make(map[string][]polarisMatch)
-	for _, svc := range svcInstances {
-		for _, inst := range svc.Instances {
-			ipIndex[inst.IP] = append(ipIndex[inst.IP], polarisMatch{svc: svc, inst: inst})
-		}
-	}
+	// 索引只建一次，再按实例 IP 取匹配结果
+	matcher := polaris.NewInstanceMatcher(svcInstances)
 
 	for _, instance := range appInstances {
-		matches, ok := ipIndex[instance.IP]
-		if !ok {
-			continue
-		}
-		for _, m := range matches {
-			if int64(m.inst.Port) != int64(m.svc.ServicePort) {
-				continue
-			}
-			instance.PolarisInfos = append(instance.PolarisInfos, &PolarisInstanceInfoOutputObj{
-				ServiceNamespace:  m.svc.ServiceNamespace,
-				ServiceName:       m.svc.ServiceName,
-				IP:                m.inst.IP,
-				Port:              m.inst.Port,
-				IsHealthy:         m.inst.IsHealthy,
-				Weight:            int64(m.inst.Weight),
-				IsIsolated:        m.inst.IsIsolated,
-				EnableHealthCheck: m.inst.EnableHealthCheck,
-				Metadata:          m.inst.Metadata,
-			})
-		}
+		instance.PolarisInfos = PolarisInfosFromModels(matcher.ForIP(instance.IP))
 	}
 }
 
-// PaginatedAppInstancesOutputObj 分页查询应用实例列表的输出载荷。
+// PublishStatusOutputObj 实例最近一次开发模式发布状态
+type PublishStatusOutputObj struct {
+	// 发布的二进制名称
+	BinaryName string `json:"binaryName"`
+	// 文件 MD5
+	MD5 string `json:"md5"`
+	// 发布状态：success / failed
+	Status string `json:"status"`
+	// 失败原因等附加信息
+	Message string `json:"message"`
+	// 操作人
+	Operator string `json:"operator"`
+	// 更新时间
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// FromModel 从发布记录填充实例最近一次发布状态
+func (o *PublishStatusOutputObj) FromModel(record *devmode.PublishRecord) *PublishStatusOutputObj {
+	if record == nil {
+		return o
+	}
+	*o = PublishStatusOutputObj{
+		BinaryName: record.BinaryName,
+		MD5:        record.MD5,
+		Status:     string(record.Status),
+		Message:    record.Message,
+		Operator:   record.Operator,
+		UpdatedAt:  record.UpdatedAt,
+	}
+	return o
+}
+
+// SkippedAppInstanceObj 无法投影为 AppInstanceOutputObj 而被跳过的实例。
+type SkippedAppInstanceObj struct {
+	// 实例 ID（即 k8s pod 的 name）；解析前无 name 时为空字符串
+	ID string `json:"id"`
+	// 跳过原因
+	Reason string `json:"reason"`
+}
+
+// PaginatedAppInstancesOutputObj 分页或全量查询应用实例列表的输出载荷。
 type PaginatedAppInstancesOutputObj struct {
-	// 结果数量
+	// 结果数量；全量为成功投影条数，分页为 LabelSelector 匹配的 Pod 总数
 	Count int64 `json:"count,string"`
-	// 查询结果
+	// 查询结果，只含成功投影
 	Results []*AppInstanceOutputObj `json:"results"`
+	// 本次响应中跳过的实例数（仅全量模式可能非 0）
+	SkippedCount int64 `json:"skippedCount,string"`
+	// 无法投影的实例列表；分页模式为空数组，无跳过项时亦为空数组
+	Skipped []*SkippedAppInstanceObj `json:"skipped"`
+	// 集群 List 首次响应的 resourceVersion，供 Watch 续传；空列表时也可能有值
+	ResourceVersion string `json:"resourceVersion"`
 }
 
 // ListAppInstancesOutput 查询应用实例列表的响应。

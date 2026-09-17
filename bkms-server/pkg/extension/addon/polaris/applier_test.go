@@ -26,6 +26,7 @@ import (
 	"github.com/bytedance/mockey"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/samber/lo"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxtest"
 	corev1 "k8s.io/api/core/v1"
@@ -37,28 +38,34 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
+	polarisenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris/envvars"
+	depenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/depservice/envvars"
 	depsvcmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/depservice/model"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/discovery"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/envvars"
 )
 
 var _ = Describe("Polaris CR applier", func() {
 	var (
-		ctx             context.Context
-		diApp           *fxtest.App
-		appStore        bkmsapp.ApplicationStore
-		envStore        bkmsenv.EnvironmentStore
-		envService      *env.EnvService
-		store           polaris.PolarisConfigStore
-		appModelStore   appmodel.AppModelStore
-		depSvcStore     depsvcmodel.ServiceStore
-		depSvcInstStore depsvcmodel.ServiceInstanceStore
-		envStateManager *polaris.PolarisEnvStateManager
-		service         *polaris.PolarisConfigService
-		app             *bkmsapp.Application
-		environment     *bkmsenv.Environment
+		ctx               context.Context
+		diApp             *fxtest.App
+		appStore          bkmsapp.ApplicationStore
+		envStore          bkmsenv.EnvironmentStore
+		envService        *env.EnvService
+		store             polaris.PolarisConfigStore
+		appModelStore     appmodel.AppModelStore
+		scopedEnvVarStore envvars.ScopedEnvVarStore
+		appDepsVarReader  *depenvvars.Reader
+		polarisVarReader  *polarisenvvars.Reader
+		depSvcStore       depsvcmodel.ServiceStore
+		depSvcInstStore   depsvcmodel.ServiceInstanceStore
+		envStateManager   *polaris.PolarisEnvStateManager
+		service           *polaris.PolarisConfigService
+		app               *bkmsapp.Application
+		environment       *bkmsenv.Environment
 	)
 
 	BeforeEach(func() {
@@ -68,14 +75,20 @@ var _ = Describe("Polaris CR applier", func() {
 			bkmsapp.FxModule,
 			env.FxModule,
 			appmodel.FxModule,
+			envvars.FxModule,
 			depsvcmodel.FxModule,
+			depenvvars.FxModule,
 			polaris.FxModule,
+			polarisenvvars.FxModule,
 			fx.Populate(
 				&appStore,
 				&envStore,
 				&envService,
 				&store,
 				&appModelStore,
+				&scopedEnvVarStore,
+				&appDepsVarReader,
+				&polarisVarReader,
 				&depSvcStore,
 				&depSvcInstStore,
 				&envStateManager,
@@ -88,6 +101,8 @@ var _ = Describe("Polaris CR applier", func() {
 			polaris.NewPolarisPlatformManager(depSvcStore, depSvcInstStore, store),
 			envStateManager,
 			envStore,
+			appModelStore,
+			envvars.NewUnifiedEnvVarsReader(scopedEnvVarStore, appDepsVarReader, polarisVarReader),
 			nil,
 		)
 		app = dbfactory.Application(ctx, appStore)
@@ -115,7 +130,7 @@ var _ = Describe("Polaris CR applier", func() {
 		mockey.PatchConvey("cluster discovery fails", GinkgoT(), func() {
 			mockPolarisDiscoveryFailure()
 
-			updated, err := service.UpdateEnvWeight(ctx, app, config, environment.Name, 20)
+			updated, err := service.UpdateEnvWeight(ctx, app, config, environment.Name, 20, nil)
 			Expect(err).To(MatchError(ContainSubstring("patch env weight")))
 			Expect(updated).To(BeNil())
 			stored, getErr := store.Get(ctx, app.ID, config.Name)
@@ -188,7 +203,7 @@ var _ = Describe("Polaris CR applier", func() {
 			})).To(Succeed())
 
 			buildResult, err := polaris.NewWorkloadBuilder(store).Build(
-				ctx, app, clusterEnv, nil, corev1.PodSpec{}, "", nil,
+				ctx, app, clusterEnv, nil, corev1.PodSpec{}, nil,
 			)
 			Expect(err).NotTo(HaveOccurred())
 			manifest = nil
@@ -222,7 +237,7 @@ var _ = Describe("Polaris CR applier", func() {
 			mockey.PatchConvey("use the configured test cluster", GinkgoT(), func() {
 				mockey.Mock(cluster.NewConfig).Return(clusterCfg).Build()
 
-				updated, updateErr := service.UpdateEnvWeight(ctx, app, config, clusterEnv.Name, 20)
+				updated, updateErr := service.UpdateEnvWeight(ctx, app, config, clusterEnv.Name, 20, nil)
 				Expect(updateErr).To(MatchError(ContainSubstring("patch env weight")))
 				Expect(updated).To(BeNil())
 
@@ -244,7 +259,7 @@ var _ = Describe("Polaris CR applier", func() {
 			mockey.PatchConvey("use the configured test cluster", GinkgoT(), func() {
 				mockey.Mock(cluster.NewConfig).Return(clusterCfg).Build()
 
-				updated, updateErr := service.UpdateEnvWeight(ctx, app, config, clusterEnv.Name, 0)
+				updated, updateErr := service.UpdateEnvWeight(ctx, app, config, clusterEnv.Name, 0, nil)
 				Expect(updateErr).NotTo(HaveOccurred())
 				Expect(updated.EnvWeights[clusterEnv.Name]).To(BeZero())
 
@@ -266,13 +281,153 @@ var _ = Describe("Polaris CR applier", func() {
 			})
 		})
 
+		It("should patch the dynamic weight switch together with the weight", func() {
+			enabled := true
+			Expect(store.Update(ctx, app.ID, config.Name, &polaris.ConfigUpdateData{
+				EnableWeightFactor: &enabled,
+			})).To(Succeed())
+			stored, err := store.Get(ctx, app.ID, config.Name)
+			Expect(err).NotTo(HaveOccurred())
+
+			mockey.PatchConvey("use the configured test cluster", GinkgoT(), func() {
+				mockey.Mock(cluster.NewConfig).Return(clusterCfg).Build()
+
+				updated, updateErr := service.UpdateEnvWeight(
+					ctx, app, stored, clusterEnv.Name, 100, lo.ToPtr(true),
+				)
+				Expect(updateErr).NotTo(HaveOccurred())
+				Expect(updated.EnvWeights[clusterEnv.Name]).To(Equal(int32(100)))
+				Expect(updated.EnvDynamicWeights[clusterEnv.Name]).To(BeTrue())
+
+				obj, getErr := client.Get(ctx, "default", crName, metav1.GetOptions{})
+				Expect(getErr).NotTo(HaveOccurred())
+				currentService := mapx.GetList(obj.Object, "spec.services")[0].(map[string]any)
+				Expect(mapx.GetInt64(currentService, "weight")).To(BeEquivalentTo(100))
+				Expect(mapx.GetBool(obj.Object, "spec.polaris.dynamicWeight.enable")).To(BeTrue())
+				Expect(mapx.GetBool(obj.Object, "spec.polaris.dynamicWeight.preserveServiceConfig")).To(BeTrue())
+
+				// 关闭开关时同样是整对象替换，preserveServiceConfig 保持下发
+				updated, updateErr = service.UpdateEnvWeight(
+					ctx, app, updated, clusterEnv.Name, 100, lo.ToPtr(false),
+				)
+				Expect(updateErr).NotTo(HaveOccurred())
+				Expect(updated.EnvDynamicWeights[clusterEnv.Name]).To(BeFalse())
+
+				obj, getErr = client.Get(ctx, "default", crName, metav1.GetOptions{})
+				Expect(getErr).NotTo(HaveOccurred())
+				Expect(mapx.GetBool(obj.Object, "spec.polaris.dynamicWeight.enable")).To(BeFalse())
+				Expect(mapx.GetBool(obj.Object, "spec.polaris.dynamicWeight.preserveServiceConfig")).To(BeTrue())
+			})
+		})
+
+		It("should keep the patched dynamic weight untouched when the request omits it", func() {
+			enabled := true
+			Expect(store.Update(ctx, app.ID, config.Name, &polaris.ConfigUpdateData{
+				EnableWeightFactor: &enabled,
+			})).To(Succeed())
+			stored, err := store.Get(ctx, app.ID, config.Name)
+			Expect(err).NotTo(HaveOccurred())
+
+			mockey.PatchConvey("use the configured test cluster", GinkgoT(), func() {
+				mockey.Mock(cluster.NewConfig).Return(clusterCfg).Build()
+
+				updated, updateErr := service.UpdateEnvWeight(
+					ctx, app, stored, clusterEnv.Name, 100, lo.ToPtr(true),
+				)
+				Expect(updateErr).NotTo(HaveOccurred())
+
+				// 只调权重的请求不得把 CR 上已开启的开关顺手关掉
+				updated, updateErr = service.UpdateEnvWeight(
+					ctx, app, updated, clusterEnv.Name, 50, nil,
+				)
+				Expect(updateErr).NotTo(HaveOccurred())
+				Expect(updated.EnvDynamicWeights[clusterEnv.Name]).To(BeTrue())
+
+				obj, getErr := client.Get(ctx, "default", crName, metav1.GetOptions{})
+				Expect(getErr).NotTo(HaveOccurred())
+				currentService := mapx.GetList(obj.Object, "spec.services")[0].(map[string]any)
+				Expect(mapx.GetInt64(currentService, "weight")).To(BeEquivalentTo(50))
+				Expect(mapx.GetBool(obj.Object, "spec.polaris.dynamicWeight.enable")).To(BeTrue())
+			})
+		})
+
+		It("should patch the dynamic weight even when the weight factor is off", func() {
+			mockey.PatchConvey("use the configured test cluster", GinkgoT(), func() {
+				mockey.Mock(cluster.NewConfig).Return(clusterCfg).Build()
+
+				// 配置级开关不参与 CR 组装，环境开关照常落库并下发
+				updated, updateErr := service.UpdateEnvWeight(
+					ctx, app, config, clusterEnv.Name, 40, lo.ToPtr(true),
+				)
+				Expect(updateErr).NotTo(HaveOccurred())
+				Expect(updated.EnvDynamicWeights[clusterEnv.Name]).To(BeTrue())
+
+				obj, getErr := client.Get(ctx, "default", crName, metav1.GetOptions{})
+				Expect(getErr).NotTo(HaveOccurred())
+				Expect(mapx.GetBool(obj.Object, "spec.polaris.dynamicWeight.enable")).To(BeTrue())
+			})
+		})
+
+		It("should register an immediate config without a deployment and clean up on unbind", func() {
+			serviceClient, err := k8sServiceClient(clusterCfg)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(client.Delete(ctx, "default", crName, metav1.DeleteOptions{})).To(Succeed())
+
+			immediate := &polaris.PolarisConfig{
+				AppID: app.ID,
+				Name:  "cfg-immediate-apply",
+				Properties: polaris.Properties{
+					InstanceKey: "immediatekey", PolarisName: "immediate-polaris-service",
+					PolarisNamespace: "Test", PolarisToken: "immediate-token",
+					ServicePort: 9090, RegisterMode: polaris.RegisterModeImmediate,
+				},
+				ScopeEnvNames: []string{clusterEnv.Name},
+			}
+			immediateCRName, immediateServiceName := polaris.PolarisResourceNames(app.Name, immediate.Name)
+			DeferCleanup(func() {
+				_ = client.Delete(ctx, "default", immediateCRName, metav1.DeleteOptions{})
+				_ = serviceClient.Delete(ctx, "default", immediateServiceName, metav1.DeleteOptions{})
+			})
+
+			mockey.PatchConvey("use the configured test cluster", GinkgoT(), func() {
+				mockey.Mock(cluster.NewConfig).Return(clusterCfg).Build()
+
+				Expect(service.Create(ctx, app, immediate, false)).To(Succeed())
+
+				// 未经部署，CR 与配套 Service 都应已存在于集群中
+				cr, getErr := client.Get(ctx, "default", immediateCRName, metav1.GetOptions{})
+				Expect(getErr).NotTo(HaveOccurred())
+				Expect(mapx.GetStr(cr.Object, "spec.polaris.token")).To(Equal("immediate-token"))
+				_, getErr = serviceClient.Get(ctx, "default", immediateServiceName, metav1.GetOptions{})
+				Expect(getErr).NotTo(HaveOccurred())
+
+				stored, storeErr := store.Get(ctx, app.ID, immediate.Name)
+				Expect(storeErr).NotTo(HaveOccurred())
+				state := stored.GetEnvState(clusterEnv.Name)
+				Expect(state.LastError).To(BeEmpty())
+				Expect(polaris.PolarisEnvStatus(stored, clusterEnv.Name, state)).
+					To(Equal(polaris.PolarisEnvStatusDeployed))
+
+				updated, updateErr := service.Update(ctx, app, stored, &polaris.ConfigUpdateData{
+					ScopeEnvNames: []string{},
+				})
+				Expect(updateErr).NotTo(HaveOccurred())
+				Expect(updated.EnvStates).NotTo(HaveKey(clusterEnv.Name))
+
+				_, getErr = client.Get(ctx, "default", immediateCRName, metav1.GetOptions{})
+				Expect(getErr).To(HaveOccurred())
+				_, getErr = serviceClient.Get(ctx, "default", immediateServiceName, metav1.GetOptions{})
+				Expect(getErr).To(HaveOccurred())
+			})
+		})
+
 		It("should not persist weight when the PolarisConfig resource is missing", func() {
 			Expect(client.Delete(ctx, "default", crName, metav1.DeleteOptions{})).To(Succeed())
 
 			mockey.PatchConvey("use the configured test cluster", GinkgoT(), func() {
 				mockey.Mock(cluster.NewConfig).Return(clusterCfg).Build()
 
-				updated, updateErr := service.UpdateEnvWeight(ctx, app, config, clusterEnv.Name, 25)
+				updated, updateErr := service.UpdateEnvWeight(ctx, app, config, clusterEnv.Name, 25, nil)
 				Expect(updateErr).To(MatchError(ContainSubstring("patch env weight")))
 				Expect(updated).To(BeNil())
 				stored, getErr := store.Get(ctx, app.ID, config.Name)

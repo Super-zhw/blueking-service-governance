@@ -185,10 +185,11 @@ func FeatEnv(
 		OwnerAppID:  app.ID,
 		SourceEnvID: sourceEnv.ID,
 		Cluster: envmodel.BizCluster{
-			ProjectCode: sourceEnv.Cluster.ProjectCode,
-			ClusterID:   sourceEnv.Cluster.ClusterID,
-			ClusterType: sourceEnv.Cluster.ClusterType,
-			Namespace:   name,
+			ProjectCode:  sourceEnv.Cluster.ProjectCode,
+			ClusterID:    sourceEnv.Cluster.ClusterID,
+			ClusterType:  sourceEnv.Cluster.ClusterType,
+			Namespace:    name,
+			IsFederation: sourceEnv.Cluster.IsFederation,
 		},
 		Creator: "dbfactory",
 	}
@@ -249,6 +250,7 @@ type TrpcApplicationStores struct {
 	AppStore                  bkmsapp.ApplicationStore
 	AppModelStore             appmodel.AppModelStore
 	AppConfigFileStore        appcfg.AppConfigFileStore
+	AppConfigFileDefStore     appcfg.AppConfigFileDefStore
 	AppConfigFileVersionStore appcfg.AppConfigFileVersionStore
 	BuildConfigStore          build.ConfigStore
 }

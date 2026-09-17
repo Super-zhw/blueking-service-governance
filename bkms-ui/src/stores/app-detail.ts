@@ -74,6 +74,12 @@ export const useAppDetail = defineStore('appDetail', () => {
           appID: targetAppId,
         });
 
+        // 快速切换应用 A→B 时，过期请求（A）晚返回会覆盖 B 的详情导致串台；
+        // 返回时若当前 appID 已指向更新的应用，则丢弃本次结果，不写回 store
+        if (appID.value !== targetAppId) {
+          return null;
+        }
+
         if (res) {
           appDetail.value = res;
           updateAppName(res.name || '');

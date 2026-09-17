@@ -21,6 +21,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/autodeploy"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/autodeploy/serializer"
@@ -33,19 +34,30 @@ import (
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/taskqtask/buildpoll"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/customruntime"
 	workloadruntime "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/runtime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/snapshot"
 )
 
 var _ autodeploy.Handler = (*Handler)(nil)
 
 // Handler handles Gin build auto deploy requests.
 type Handler struct {
-	registry *storereg.Registry
+	registry           *storereg.Registry
+	customImageChecker *customruntime.ExistenceChecker
 }
 
 // New creates a Handler.
 func New(registry *storereg.Registry) *Handler {
-	return &Handler{registry: registry}
+	snapshotService := snapshot.NewService(
+		registry.SnapshotStore,
+		registry.BuildConfigStore,
+		registry.AppStore,
+	)
+	return &Handler{
+		registry:           registry,
+		customImageChecker: customruntime.NewExistenceChecker(snapshotService),
+	}
 }
 
 // newBuildService 装配构建服务，并注入平台构建镜像引用校验器
@@ -54,7 +66,12 @@ func (h *Handler) newBuildService() (*build.Service, error) {
 		h.registry.RuntimeImageStore,
 		h.registry.SnapshotStore,
 	)
-	return build.NewService(h.registry.BuildConfigStore, h.registry.BuildRecordStore, imageReferenceValidator)
+	return build.NewService(
+		h.registry.BuildConfigStore,
+		h.registry.BuildRecordStore,
+		imageReferenceValidator,
+		h.customImageChecker,
+	)
 }
 
 // CreateTrpcBuildDeploy 触发 TRPC 应用构建，并在构建成功后自动部署到指定环境。
@@ -162,7 +179,13 @@ func (h *Handler) createAppModelBuildDeploy(c *gin.Context, expectedAppType stri
 		},
 	)
 	if err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "start build auto deploy"))
+		// StartAndScheduleBuild 内部会跑构建前置校验，镜像引用填错或缺凭证属参数问题，
+		// 与保存构建配置时的错误码保持一致；其余失败仍按内部错误上报
+		errCode := bkerrs.ErrCodeInternalServerError
+		if build.IsImageReferenceInvalid(err) || errors.Is(err, build.ErrWorkspaceImageCredentialMissing) {
+			errCode = bkerrs.ErrCodeInvalidArgument
+		}
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, errCode, "start build auto deploy"))
 		return
 	}
 

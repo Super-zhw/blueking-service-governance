@@ -34,6 +34,14 @@ Use this command to list and manage envs in your BKMS workspaces.`,
 
 	// 工作空间下的环境（env）列表
 	cmd.AddCommand(NewListCmd())
+	// 创建环境
+	cmd.AddCommand(NewCreateCmd())
+	// 查看环境详情
+	cmd.AddCommand(NewGetCmd())
+	// 更新环境基本信息
+	cmd.AddCommand(NewUpdateCmd())
+	// 删除环境
+	cmd.AddCommand(NewDeleteCmd())
 
 	return cmd
 }

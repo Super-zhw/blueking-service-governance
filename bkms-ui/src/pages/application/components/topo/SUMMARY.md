@@ -339,7 +339,7 @@ class AuxiliaryEdge extends CubicHorizontal {
       ...super.getKeyStyle(attributes),
       stroke: '#ABB5CC',
       lineWidth: 2,
-      lineDash: [4, 4], // 虚线效果
+      lineDash: [3, 3], // 虚线效果
     };
   }
 
@@ -435,7 +435,7 @@ protected getKeyStyle(attributes) {
   return {
     stroke: isActive ? '#7E8EAD' : '#ABB5CC',
     lineWidth: 2,
-    lineDash: isActive ? undefined : [4, 4],  // hover 时变实线
+    lineDash: isActive ? undefined : [3, 3],  // hover 时变实线
   };
 }
 ```

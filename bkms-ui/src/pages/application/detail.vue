@@ -21,19 +21,28 @@
     v-model:active-key="activeKey"
     :list="menuList"
   >
-    <RouterView
-      :key="routerViewKey"
-      :class="routerViewClass"
+    <div
+      v-bkloading="{ loading: detailLoading }"
+      class="h-full min-h-full"
     >
-    </RouterView>
+      <RouterView
+        v-if="!detailLoading"
+        :key="routerViewKey"
+        :class="routerViewClass"
+      >
+      </RouterView>
+    </div>
     <template #side-header>
       <Select
         v-model="currentApplicationName"
         class="w-full h-full"
         :clearable="false"
+        :custom-content="applicationListLoading"
         filterable
-        placeholder="请选择应用"
-        search-placeholder="请输入应用名称"
+        :min-height="204"
+        :placeholder="$t('请选择应用')"
+        :popover-min-width="244"
+        :search-placeholder="$t('请输入应用名称')"
         @toggle="isSpacePopoverShow = !isSpacePopoverShow"
       >
         <template #trigger>
@@ -66,8 +75,16 @@
             <span>{{ $t('创建应用') }}</span>
           </Button>
         </template>
+        <Loading
+          v-if="applicationListLoading"
+          class="block"
+          :loading="true"
+        >
+          <div class="h-[196px]"></div>
+        </Loading>
         <Select.Option
           v-for="item in applicationList"
+          v-else
           :id="item.name"
           :key="item.name"
           :name="item.name"
@@ -89,11 +106,10 @@
 <script setup lang="ts">
   import { computed, onMounted, ref, watch } from 'vue';
 
-  import { Select } from 'bkui-vue';
-  import { Button } from 'bkui-vue';
+  import { Button, Loading, Select } from 'bkui-vue';
   import { AngleDownFill, Plus } from 'bkui-vue/lib/icon';
   import { useRoute, useRouter } from 'vue-router';
-  import { ApiServerService } from '~/api/modules/bkmsserver';
+  import { AppService } from '~/api/modules/v1/app';
   import { isHelmLikeAppType } from '~/composables/app-type';
   import { getMenuList } from '~/composables/use-router-menu';
   import { useAppDetail } from '~/stores/app-detail';
@@ -101,7 +117,7 @@
 
   import TypeIcon from './components/type-icon.vue';
 
-  import type { AppInfoOutputObj } from '~/@types/app';
+  import type { AppInfoOutputObj } from '~/@types/v1/app';
   import type { AppNavigationType } from '~/config/navigation/app';
 
   const appDetailStore = useAppDetail();
@@ -109,22 +125,24 @@
   const router = useRouter();
   const spaceStore = useSpaceStore();
 
-  const currentApplicationName = ref(
-    (Array.isArray(route.params.name) ? route.params.name[0] : route.params.name) || '',
-  );
+  /** 将路由 params 单值/数组统一为 string，缺省回退 fallback */
+  function getRouteParam(value: string | string[] | undefined, fallback = ''): string {
+    return (Array.isArray(value) ? value[0] : value) || fallback;
+  }
+
+  const currentApplicationName = ref(getRouteParam(route.params.name));
   const applicationList = ref<AppInfoOutputObj[]>([]);
-  // 'overview' | 'build' | 'repo' | 'deploy' | 'info' | 'orchestrate' | 'history' | 'module';
+  const applicationListLoading = ref(false);
+  // 'overview' | 'build' | 'repo' | 'deploy' | 'info' | 'orchestrate' | 'history' | 'module'
   // trpc没有的子菜单
-  const TrpcSpecNotHas = ['orchestrate', 'network'];
+  const TrpcSpecNotHas = ['orchestrate'];
   // helm没有的子菜单
   const HelmSpecNotHas = ['module', 'observation', 'polaris', 'appConfig'];
 
-  const activeKey = ref<string>(
-    (Array.isArray(router.currentRoute.value.params.menuName)
-      ? router.currentRoute.value.params.menuName[0]
-      : router.currentRoute.value.params.menuName) || 'info',
-  );
+  const activeKey = ref<string>(getRouteParam(router.currentRoute.value.params.menuName, 'info'));
   const isSpacePopoverShow = ref(false);
+  // 应用列表与应用详情加载完成前，不挂载子页面，避免子页面读取到空 appID/appDetail
+  const detailLoading = ref(true);
 
   const currentApplication = computed(() =>
     applicationList.value.find(item => item.name === currentApplicationName.value),
@@ -175,18 +193,34 @@
   // 获取应用列表
   async function handleGetAppList() {
     if (!spaceStore.currentSpace) return;
-    applicationList.value = await ApiServerService.ListApps({
-      workspaceID: spaceStore.currentSpace,
-    }).catch(() => []);
-    if (!applicationList.value.some(item => item.name === currentApplicationName.value)) {
-      currentApplicationName.value = applicationList.value[0]?.name || '';
+    applicationListLoading.value = true;
+    try {
+      applicationList.value = await AppService.listApps({
+        workspaceID: spaceStore.currentSpace,
+      }).catch(() => []);
+      if (!applicationList.value.some(item => item.name === currentApplicationName.value)) {
+        currentApplicationName.value = applicationList.value[0]?.name || '';
+      }
+    } finally {
+      applicationListLoading.value = false;
     }
   }
 
   watch(
     () => router.currentRoute.value.params.menuName,
     newValue => {
-      activeKey.value = (Array.isArray(newValue) ? newValue[0] : newValue) || 'info';
+      activeKey.value = getRouteParam(newValue, 'info');
+    },
+  );
+
+  // 浏览器后退/前进或外链直达时，将 URL 中的应用名同步回 Select，避免 UI 与地址栏不一致
+  watch(
+    () => router.currentRoute.value.params.name,
+    newValue => {
+      const name = getRouteParam(newValue);
+      if (name && name !== currentApplicationName.value) {
+        currentApplicationName.value = name;
+      }
     },
   );
 
@@ -203,6 +237,18 @@
     },
   );
 
+  /**
+   * 切应用 / 切菜单时的路由同步 Promise。
+   * 子页会先因 detailLoading 卸载（避免 routerViewKey 变化导致先挂一次再卸），
+   * 再 await 本 Promise，保证 URL 更新完成后再拉详情并重新挂载。
+   */
+  let pendingRouteSync: null | Promise<unknown> = null;
+  /**
+   * 应用切换世代号：每次 currentApplication 变化递增。
+   * 快速连切时旧 async 回调在 await 后对照本值，过期则直接退出，避免抢写 appID。
+   */
+  let appSwitchGeneration = 0;
+
   watch(
     [activeKey, type, currentApplicationName],
     ([key, type, name], [oldKey]) => {
@@ -216,20 +262,32 @@
       } else if (isHelmLikeAppType(type) && HelmSpecNotHas.includes(key as string)) {
         activeKey.value = 'info';
       } else if (key && type && name) {
+        const current = router.currentRoute.value;
+        // URL 已是目标（如浏览器后退触发的反向同步）时跳过 push，避免污染历史栈
+        const alreadyOnTarget =
+          current.name === 'detail' &&
+          getRouteParam(current.params.name) === name &&
+          getRouteParam(current.params.type) === type &&
+          getRouteParam(current.params.menuName) === key;
+        if (alreadyOnTarget) {
+          return;
+        }
         // 同菜单内切换应用沿用 query：让新应用继承当前 Tab 等页面状态；跨菜单切换则重置为默认
         const isMenuSwitch = oldKey && oldKey !== key;
         // 快照当前 query 供新页 hook（useUrlQuerySync）接管：watch 同步阶段已固化进导航参数（快照），
         // 旧页卸载时 hook 会清理自身字段，新页挂载时按该快照写回恢复，保证状态正确继承且不残留旧页字段
         const snapshotQuery = router.currentRoute.value.query;
-        router.push({
-          name: 'detail',
-          params: {
-            type,
-            name,
-            menuName: key as string,
-          },
-          query: isMenuSwitch ? undefined : snapshotQuery,
-        });
+        pendingRouteSync = router
+          .push({
+            name: 'detail',
+            params: {
+              type,
+              name,
+              menuName: key as string,
+            },
+            query: isMenuSwitch ? undefined : snapshotQuery,
+          })
+          .catch(() => undefined);
       }
     },
     {
@@ -237,14 +295,44 @@
     },
   );
 
-  // 监听应用变化，更新应用详情
+  // 监听应用变化，更新应用详情；加载完成前不挂载子页面，避免竞态
   watch(currentApplication, async app => {
-    appDetailStore.updateAppID(app?.id || '');
-    await appDetailStore.fetchAppDetail(app?.id);
+    const currentAppId = app?.id || '';
+    // 本轮世代号：后续 await 后若已被更新的切换取代，则不再写 store / 解锁
+    const generation = ++appSwitchGeneration;
+    // 先置 loading 卸载子页：若等 push 完成后再 loading，routerViewKey 会先变并挂载一次，
+    // 随后 loading 再卸/挂，网络访问等页接口会打两次。
+    detailLoading.value = true;
+    // 捕获本轮看到的 sync Promise；不清空他人的最新 pending，避免快速连切时抢清空
+    const routeSync = pendingRouteSync;
+    if (routeSync) {
+      await routeSync;
+      // 仅当全局 pending 仍是我们 await 的那一个时才清空
+      if (pendingRouteSync === routeSync) {
+        pendingRouteSync = null;
+      }
+    }
+    // 快速连切 A→B→C：过期回调在此退出，避免 updateAppID 把已切到 C 的 store 写回 B
+    if (generation !== appSwitchGeneration) {
+      return;
+    }
+    appDetailStore.updateAppID(currentAppId);
+    try {
+      await appDetailStore.fetchAppDetail(currentAppId);
+    } finally {
+      // 仅最新一轮且 appID 仍匹配时解锁；过期请求的覆盖由 store 层 appID 校验丢弃
+      if (generation === appSwitchGeneration && appDetailStore.appID === currentAppId) {
+        detailLoading.value = false;
+      }
+    }
   });
 
   onMounted(async () => {
     await handleGetAppList();
+    // 列表已加载但未匹配到应用（如空列表），无需再等待详情
+    if (!currentApplication.value) {
+      detailLoading.value = false;
+    }
   });
 </script>
 

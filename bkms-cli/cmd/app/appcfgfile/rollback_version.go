@@ -34,9 +34,8 @@ func NewRollbackVersionCmd() *cobra.Command {
 	var version int64
 
 	cmd := &cobra.Command{
-		Use:    "rollback-version",
-		Short:  "Rollback an application config file to one history version",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "rollback-version",
+		Short: "Rollback an application config file to one history version",
 		Long: `Rollback the application config file selected by app and environment to one history version.
 
 Use exactly one of --version or --version-id to identify the target history version.
@@ -54,6 +53,7 @@ When an application has multiple config files in the same environment, use --nam
 
   # Roll back and record a description
   bkms-cli app app-cfg-file rollback-version --app demo --env prod --version 7 --description "rollback prod values"`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			versionRef, err := parseVersionRefOptions(cmd, version, versionID)
 			if err != nil {
@@ -85,7 +85,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

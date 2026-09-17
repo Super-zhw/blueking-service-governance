@@ -75,4 +75,50 @@ export const DOC_LINKS = {
   APM_GUIDE_TAF: '/p/4013675229',
   // 扩缩容稳定性
   SCALE_STABILITY: '/p/1015455438#%E6%89%A9%E7%BC%A9%E5%AE%B9%E7%A8%B3%E5%AE%9A%E6%80%A7',
+  // 北极星心跳上报
+  POLARIS_HEARTBEAT: '/p/342857543#%E4%B8%8A%E6%8A%A5%E5%BF%83%E8%B7%B3',
+  // 北极星动态权重
+  POLARIS_DYNAMIC_WEIGHT: '/p/4037433105',
+  // 北极星实例注册生命周期
+  POLARIS_INSTANCE_LIFECYCLE: '/p/4034655971',
+  // HostPort 详细文档
+  HOST_PORT: '/p/4036088770',
+  // 应用仪表盘配置指引
+  DASHBOARD_GUIDE: '/p/4037840772',
 };
+
+/**
+ * iframe 内部观测参数（route-change 同步到 URL 的 apmQuery 字段内容）
+ */
+export interface ApmQueryParams {
+  dashboardId?: string;
+  'filter-app_name'?: string;
+  'filter-service_name'?: string;
+  from?: string;
+  interval?: string;
+  isGroupByLimit?: boolean;
+  method?: string;
+  preciseFilter?: boolean;
+  queryString?: string;
+  refreshInterval?: number;
+  sceneType?: string;
+  timezone?: string;
+  to?: string;
+}
+
+/**
+ * 监控平台 APM 观测页默认参数（iframe 初始化 & route-change 回写共用）
+ * 注意：dashboardId / filter-app_name / filter-service_name 等业务差异字段不在此处，由页面各自提供
+ */
+export const DEFAULT_APM_CONFIG = {
+  method: 'AVG',
+  interval: 'auto',
+  from: 'now-1h',
+  to: 'now',
+  timezone: 'Asia/Shanghai',
+  refreshInterval: -1,
+  sceneType: 'overview',
+  queryString: '',
+  preciseFilter: false,
+  isGroupByLimit: false,
+} as const;

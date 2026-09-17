@@ -39,10 +39,9 @@ var _ = Describe("Config", func() {
 		tmpDir, err = os.MkdirTemp("", "bkms-cli-config-test-*")
 		Expect(err).ToNot(HaveOccurred())
 
-		// 使用测试专属配置文件名，避免覆盖已有配置
+		// Use a test-only config path to avoid clobbering a real local config.
 		cfgFile = filepath.Join(tmpDir, ".bkms", "test-config.yaml")
 		cfgFilePath = cfgFile
-		bkmsBaseURL = "http://test-bkms.example.com"
 
 		origConfig = G
 		G = &Config{}
@@ -54,7 +53,7 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("Load", func() {
-		It("配置文件存在时，应正确读取并去除尾斜杠", func() {
+		It("loads an existing file and trims trailing slashes", func() {
 			Expect(os.MkdirAll(filepath.Dir(cfgFile), 0o755)).To(Succeed())
 
 			cfg := &Config{
@@ -76,22 +75,17 @@ var _ = Describe("Config", func() {
 			Expect(G).To(Equal(conf))
 		})
 
-		It("配置文件不存在时，应自动创建目录、文件并使用默认 bkmsBaseUrl", func() {
+		It("creates an empty config when the file is missing", func() {
 			conf, err := G.Load()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(conf.BkmsBaseURL).To(Equal("http://test-bkms.example.com"))
+			Expect(conf.BkmsBaseURL).To(Equal(""))
 			Expect(G).To(Equal(conf))
 
-			// 验证文件已创建且可被再次读取
 			_, statErr := os.Stat(cfgFile)
 			Expect(statErr).ToNot(HaveOccurred())
-
-			conf2, err := G.Load()
-			Expect(err).ToNot(HaveOccurred())
-			Expect(conf2.BkmsBaseURL).To(Equal("http://test-bkms.example.com"))
 		})
 
-		It("配置文件内容无效时，应返回错误", func() {
+		It("returns an error for invalid YAML", func() {
 			Expect(os.MkdirAll(filepath.Dir(cfgFile), 0o755)).To(Succeed())
 			Expect(os.WriteFile(cfgFile, []byte("invalid: [yaml: content"), 0o600)).To(Succeed())
 
@@ -101,7 +95,7 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("Dump", func() {
-		It("Dump 后 Load 应读取到一致的配置", func() {
+		It("round-trips config through Dump and Load", func() {
 			Expect(os.MkdirAll(filepath.Dir(cfgFile), 0o755)).To(Succeed())
 
 			G = &Config{
@@ -122,7 +116,7 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("String", func() {
-		It("应展示普通字段并隐藏敏感字段", func() {
+		It("shows normal fields and redacts secrets", func() {
 			G = &Config{
 				BkmsBaseURL: "http://string-test.example.com",
 				Username:    "stringuser",
@@ -134,6 +128,54 @@ var _ = Describe("Config", func() {
 			Expect(s).To(ContainSubstring("stringuser"))
 			Expect(s).ToNot(ContainSubstring("secret-token"))
 			Expect(s).To(ContainSubstring("[REDACTED]"))
+		})
+	})
+
+	Describe("SetBkmsBaseURL", func() {
+		BeforeEach(func() {
+			Expect(os.MkdirAll(filepath.Dir(cfgFile), 0o755)).To(Succeed())
+			G = &Config{}
+		})
+
+		It("writes the URL and persists it", func() {
+			updated, err := G.SetBkmsBaseURL("http://bkms.example.com/", false)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(updated).To(BeTrue())
+			Expect(G.BkmsBaseURL).To(Equal("http://bkms.example.com"))
+
+			conf, err := (&Config{}).Load()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(conf.BkmsBaseURL).To(Equal("http://bkms.example.com"))
+		})
+
+		It("does not overwrite an existing value with ifUnset", func() {
+			G.BkmsBaseURL = "http://existing.example.com"
+			Expect(G.Dump()).To(Succeed())
+
+			updated, err := G.SetBkmsBaseURL("http://new.example.com", true)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(updated).To(BeFalse())
+			Expect(G.BkmsBaseURL).To(Equal("http://existing.example.com"))
+		})
+
+		It("rejects an empty URL", func() {
+			_, err := G.SetBkmsBaseURL("  ", false)
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
+	Describe("RequireBkmsBaseURL", func() {
+		It("returns setup guidance when unset", func() {
+			G = &Config{}
+			err := G.RequireBkmsBaseURL()
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("bkms-cli config set"))
+		})
+
+		It("passes when the URL is configured", func() {
+			G = &Config{BkmsBaseURL: "https://bkms.example.com"}
+			Expect(G.RequireBkmsBaseURL()).To(Succeed())
+			Expect(G.HasBkmsBaseURL()).To(BeTrue())
 		})
 	})
 })

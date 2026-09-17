@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewCreateCmd returns a Command instance for 'app build create' sub command
@@ -41,6 +42,7 @@ This command triggers a new build process for the specified application using
 the provided branch and image tag.`,
 		Example: `  # Create a build for an application
   bkms-cli app build create --app demo --branch main --image-tag v1.0.0`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts := client.BuildOptions{
 				Branch:   branch,
@@ -56,7 +58,7 @@ the provided branch and image tag.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&branch, "branch", "", "code branch to build")
 	cmd.Flags().StringVar(&imageTag, "image-tag", "", "image tag to build")
 

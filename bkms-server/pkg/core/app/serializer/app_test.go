@@ -27,9 +27,10 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
 
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
+	build "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/serializer"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/overview"
 	deploystatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/status"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 )
@@ -57,6 +58,46 @@ var _ = Describe("App deploy status serializers", func() {
 			DeployStatus:    "success",
 			ImageTag:        "v1.2.3",
 		}))
+	})
+
+	It("maps deploy overview rows including imageTag and cluster", func() {
+		startedAt := time.Date(2026, 8, 20, 12, 0, 0, 0, time.UTC)
+		output := new(serializer.AppDeployOverviewEnvObj).FromModel(overview.EnvRow{
+			EnvID:          "env-id",
+			EnvName:        "prod",
+			EnvDisplayName: "Production",
+			EnvType:        "production",
+			EnvKind:        "standard",
+			DeployStatus:   "Deployed",
+			ImageTag:       "v1.9.0",
+			Cluster: overview.ClusterInfo{
+				ProjectCode: "bkms",
+				ClusterID:   "BCS-K8S-40316",
+				ClusterType: "single",
+				Namespace:   "prod-ns",
+				ClusterName: "深圳-预发布集群",
+			},
+			LastDeployStartedAt: lo.ToPtr(startedAt),
+			Resources: overview.ResourceSpec{
+				CPULimits:      "2",
+				CPURequests:    "1",
+				MemoryLimits:   "4Gi",
+				MemoryRequests: "2Gi",
+			},
+			Instances: &overview.InstanceCounts{Running: 1, Expected: 2, Abnormal: 0},
+		})
+
+		Expect(output.ImageTag).To(Equal("v1.9.0"))
+		Expect(output.Cluster).To(Equal(&serializer.DeployOverviewClusterObj{
+			ProjectCode: "bkms",
+			ClusterID:   "BCS-K8S-40316",
+			ClusterType: "single",
+			Namespace:   "prod-ns",
+			ClusterName: "深圳-预发布集群",
+		}))
+		Expect(output.Resources.CPURequests).To(Equal("1"))
+		Expect(output.Instances.Expected).To(Equal(int32(2)))
+		Expect(output.LastDeployStartedAt).To(HaveValue(Equal(startedAt)))
 	})
 
 	It("includes application timestamps in list output", func() {
@@ -266,6 +307,7 @@ var _ = Describe("App serializers", func() {
 						RuntimeEnv: []string{"apt-get update"},
 						Start:      "./app",
 					},
+					ExtraFiles: []string{"data/key.pem", "certs"},
 				},
 			},
 		})
@@ -280,6 +322,7 @@ var _ = Describe("App serializers", func() {
 				RuntimeEnv: []string{"apt-get update"},
 				Start:      "./app",
 			},
+			ExtraFiles: []string{"data/key.pem", "certs"},
 		}))
 	})
 
@@ -707,6 +750,7 @@ var _ = Describe("App serializers", func() {
 						RuntimeEnv: []string{"apt-get update"},
 						Start:      "./app",
 					},
+					ExtraFiles: []string{" data/key.pem ", "certs"},
 				},
 			},
 		}).ToModel("app-id")
@@ -722,6 +766,7 @@ var _ = Describe("App serializers", func() {
 				RuntimeEnv: []string{"apt-get update"},
 				Start:      "./app",
 			},
+			ExtraFiles: []string{"data/key.pem", "certs"},
 		}))
 	})
 
@@ -911,6 +956,18 @@ var _ = Describe("Platform build serializer edge cases", func() {
 			Expect(err).To(MatchError(ContainSubstring(
 				"buildConfig.repoBuildConfig.platformBuildConfig" +
 					".commands.build[0] must not contain newline characters",
+			)))
+		})
+	})
+
+	Context("extra files validation", func() {
+		It("rejects parent path segments", func() {
+			_, err := buildRepoInput(func(r *serializer.RepoBuildConfigInput) {
+				r.PlatformBuildConfig.ExtraFiles = []string{"foo/../bar"}
+			}).ToModel("app-id")
+
+			Expect(err).To(MatchError(ContainSubstring(
+				"buildConfig.repoBuildConfig.platformBuildConfig.extraFiles[0] must not contain '..'",
 			)))
 		})
 	})

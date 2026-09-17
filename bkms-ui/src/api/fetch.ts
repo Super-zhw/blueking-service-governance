@@ -23,12 +23,22 @@ import { objectToQueryParams } from '~/common/util';
 import { type Config, fetch, interceptors } from './interceptors';
 import { appendTraceId, appendTraceIdToDetails, attachTraceId, getTraceId } from './trace-id';
 
+// 后端错误明细中的 extras 会携带权限申请所需的角色用户组 ID。
+type ErrorDetail = {
+  code?: string;
+  extras?: Record<string, string>;
+  message?: string;
+  module?: string;
+  system?: string;
+};
 type HttpMethods = 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT';
 type RequestParams = Record<string, unknown>;
 type ResponseData = Record<string, unknown> & {
   code?: number;
   data?: unknown;
   error?: {
+    code?: string;
+    details?: ErrorDetail[];
     message?: string;
     traceId?: string;
   };
@@ -66,18 +76,29 @@ interceptors.response.use(
 
     // 无权限
     if (response.status === 403) {
-      // TODO: 权限弹窗
-      Message({
-        theme: 'error',
-        message: traceId
+      // 默认请求仍提示“无权限”；权限检查页可关闭统一提示，避免和页面内容重复。
+      config.interceptorErr &&
+        Message({
+          theme: 'error',
+          message: traceId
+            ? {
+                overview: appendTraceId('无权限', traceId),
+                details: appendTraceIdToDetails({}, traceId),
+                type: 'json',
+              }
+            : '无权限',
+        });
+      // 保留后端错误体和 Trace ID，供关闭默认提示的页面识别具体权限错误。
+      attachTraceId(res, traceId);
+      return Promise.reject(
+        config?.needStatus
           ? {
-              overview: appendTraceId('无权限', traceId),
-              details: appendTraceIdToDetails({}, traceId),
-              type: 'json',
+              ...res,
+              status: response.status,
+              statusText: response.statusText,
             }
-          : '无权限',
-      });
-      return Promise.reject(attachTraceId(new Error('Forbidden'), traceId));
+          : res,
+      );
     }
 
     // 默认使用 Message 弹窗，特殊错误使用 UI 展示异常

@@ -301,6 +301,27 @@ func normalizeComponentOutputs(components []ComponentOutputObj) []ComponentOutpu
 }
 
 // -----------------------------------------------------------------------------
+// ResolveApp
+// -----------------------------------------------------------------------------
+
+// ResolveAppURIInput is the path input for resolving an app by ID or name.
+type ResolveAppURIInput struct {
+	WorkspaceID string `uri:"workspaceID" binding:"required,uri_slug"`
+	App         string `uri:"app" binding:"required"`
+}
+
+// ResolveAppOutput is the response for resolving an app.
+type ResolveAppOutput struct {
+	Data *ResolveAppOutputObj `json:"data"`
+}
+
+// ResolveAppOutputObj is the resolved app info.
+type ResolveAppOutputObj struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// -----------------------------------------------------------------------------
 // ListApps
 // -----------------------------------------------------------------------------
 
@@ -565,6 +586,33 @@ func (o *DeployOverviewAutoscalingObj) FromModel(info *overview.AutoscalingInfo)
 	return o
 }
 
+// DeployOverviewClusterObj is the env-bound BCS cluster shown in deploy overview.
+// Base fields match env EnvClusterOutput; ClusterName is filled from BCS ListClustersByProject.
+type DeployOverviewClusterObj struct {
+	// 集群 ID
+	ClusterID string `json:"clusterID"`
+	// 集群类型
+	ClusterType string `json:"clusterType"`
+	// 集群命名空间
+	Namespace string `json:"namespace"`
+	// 项目 code
+	ProjectCode string `json:"projectCode"`
+	// 集群展示名（来自 BCS）；拉取失败时为空字符串
+	ClusterName string `json:"clusterName"`
+}
+
+// FromModel fills output fields from overview cluster info.
+func (o *DeployOverviewClusterObj) FromModel(cluster overview.ClusterInfo) *DeployOverviewClusterObj {
+	*o = DeployOverviewClusterObj{
+		ClusterID:   cluster.ClusterID,
+		ClusterType: cluster.ClusterType,
+		Namespace:   cluster.Namespace,
+		ProjectCode: cluster.ProjectCode,
+		ClusterName: cluster.ClusterName,
+	}
+	return o
+}
+
 // AppDeployOverviewEnvObj is one environment row in the deploy overview table.
 type AppDeployOverviewEnvObj struct {
 	// 环境 ID
@@ -579,6 +627,10 @@ type AppDeployOverviewEnvObj struct {
 	EnvKind string `json:"envKind"`
 	// 部署状态（原始枚举）
 	DeployStatus string `json:"deployStatus"`
+	// 部署的镜像 Tag；无部署记录时为空字符串
+	ImageTag string `json:"imageTag"`
+	// 环境绑定的业务集群信息
+	Cluster *DeployOverviewClusterObj `json:"cluster"`
 	// 实例数，可选：集群查询失败或缺少 workload 时为 null
 	Instances *DeployOverviewInstancesObj `json:"instances"`
 	// 自动扩缩容配置摘要，可选：无 GPA 配置时为 null
@@ -598,6 +650,8 @@ func (o *AppDeployOverviewEnvObj) FromModel(row overview.EnvRow) *AppDeployOverv
 		EnvType:             row.EnvType,
 		EnvKind:             row.EnvKind,
 		DeployStatus:        row.DeployStatus,
+		ImageTag:            row.ImageTag,
+		Cluster:             new(DeployOverviewClusterObj).FromModel(row.Cluster),
 		Instances:           new(DeployOverviewInstancesObj).FromModel(row.Instances),
 		Autoscaling:         new(DeployOverviewAutoscalingObj).FromModel(row.Autoscaling),
 		Resources:           *new(DeployOverviewResourcesObj).FromModel(row.Resources),

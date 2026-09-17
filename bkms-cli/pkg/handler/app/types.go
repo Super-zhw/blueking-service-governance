@@ -81,10 +81,36 @@ type RepoBuildConfigSpec struct {
 	DefaultBranch string `yaml:"defaultBranch" json:"defaultBranch" validate:"required"`
 	// SourceDir 源码目录（可选）
 	SourceDir string `yaml:"sourceDir,omitempty" json:"sourceDir,omitempty"`
-	// Dockerfile Dockerfile 路径（可选）
+	// Dockerfile Dockerfile 路径（可选，仅 imageBuildMode=repositoryDockerfile 时有效）
 	Dockerfile string `yaml:"dockerfile,omitempty" json:"dockerfile,omitempty"`
 	// DockerBuildArgs Docker 构建参数（可选）
 	DockerBuildArgs map[string]string `yaml:"dockerBuildArgs,omitempty" json:"dockerBuildArgs,omitempty"`
+	// ImageBuildMode 镜像构建方式：repositoryDockerfile | platform（可选）
+	ImageBuildMode string `yaml:"imageBuildMode,omitempty" json:"imageBuildMode,omitempty"`
+	// PlatformBuildConfig 平台通用构建配置，仅 imageBuildMode=platform 时填写（可选）
+	PlatformBuildConfig *PlatformBuildConfigSpec `yaml:"platformBuildConfig,omitempty" json:"platformBuildConfig,omitempty"`
+}
+
+// PlatformBuildConfigSpec 平台通用构建配置
+type PlatformBuildConfigSpec struct {
+	// BuilderImage 构建阶段基础镜像
+	BuilderImage string `yaml:"builderImage" json:"builderImage"`
+	// RunnerImage 运行阶段基础镜像
+	RunnerImage string `yaml:"runnerImage" json:"runnerImage"`
+	// Commands 命令配置（可选）
+	Commands *BuildCommandsSpec `yaml:"commands,omitempty" json:"commands,omitempty"`
+}
+
+// BuildCommandsSpec 平台构建命令配置
+type BuildCommandsSpec struct {
+	// PreBuild 编译前置命令列表
+	PreBuild []string `yaml:"preBuild,omitempty" json:"preBuild,omitempty"`
+	// Build 编译命令列表
+	Build []string `yaml:"build,omitempty" json:"build,omitempty"`
+	// RuntimeEnv 运行环境命令列表
+	RuntimeEnv []string `yaml:"runtimeEnv,omitempty" json:"runtimeEnv,omitempty"`
+	// Start 启动命令
+	Start string `yaml:"start,omitempty" json:"start,omitempty"`
 }
 
 // PipelineBuildConfigSpec 流水线构建配置

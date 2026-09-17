@@ -57,8 +57,8 @@ is optional. Otherwise, you must specify it explicitly.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	return cmd
 }

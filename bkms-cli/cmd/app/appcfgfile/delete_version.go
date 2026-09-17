@@ -34,9 +34,8 @@ func NewDeleteVersionCmd() *cobra.Command {
 	var version int64
 
 	cmd := &cobra.Command{
-		Use:    "delete-version",
-		Short:  "Delete one history version of an application config file",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "delete-version",
+		Short: "Delete one history version of an application config file",
 		Long: `Delete one history version of the application config file selected by app and environment.
 
 Use exactly one of --version or --version-id to identify the target history version.
@@ -51,6 +50,7 @@ When an application has multiple config files in the same environment, use --nam
 
   # Delete one Helm config file version by name
   bkms-cli app app-cfg-file delete-version --app demo --name values --version 3`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts, err := parseVersionRefOptions(cmd, version, versionID)
 			if err != nil {
@@ -67,7 +67,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

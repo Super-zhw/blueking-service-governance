@@ -56,6 +56,7 @@ tests {
     expect(config.envStates).to.be.an('object');
     expect(Object.keys(config.envStates)).to.have.length(0);
     expect(config.envWeights).to.deep.equal({});
+    expect(config.envDynamicWeights).to.deep.equal({});
   });
 }
 

@@ -127,6 +127,443 @@ const docTemplate = `{
                 }
             }
         },
+        "/apps/{appID}/app-config-file-defs": {
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "创建配置文件定义及默认文件",
+                "operationId": "CreateAppConfigFileDef",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "创建配置文件定义请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.CreateDefInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.CreateDefOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/app-config-file-defs/defaults": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "列出应用下所有配置文件定义及其默认文件信息",
+                "operationId": "ListDefaultFilesWithDef",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.ListDefsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/app-config-file-defs/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "获取配置文件定义详情",
+                "operationId": "GetAppConfigFileDefDetail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "配置文件定义 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称，为空返回默认文件",
+                        "name": "envName",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.GetDefDetailOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "更新配置文件定义信息",
+                "operationId": "UpdateAppConfigFileDef",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "配置文件定义 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新配置文件定义请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.UpdateDefInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.UpdateDefOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "删除配置文件定义及关联数据",
+                "operationId": "DeleteAppConfigFileDef",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "配置文件定义 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.DeleteDefOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/app-config-file-defs/{id}/content": {
+            "put": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "更新配置文件内容",
+                "operationId": "UpdateAppConfigFileDefContent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "配置文件定义 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称，为空更新默认文件",
+                        "name": "envName",
+                        "in": "query"
+                    },
+                    {
+                        "description": "更新配置内容请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.UpdateContentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.UpdateContentOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/app-config-file-defs/{id}/env-instances": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "列出配置文件定义的环境实例",
+                "operationId": "ListAppConfigFileDefEnvInstances",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "配置文件定义 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.ListEnvInstancesOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/app-config-file-defs/{id}/envs/{envName}": {
+            "delete": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "恢复环境配置为默认值",
+                "operationId": "ResetAppConfigFileDefEnvToDefault",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "配置文件定义 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.ResetEnvOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/{appID}/app-config-file/versions": {
             "get": {
                 "security": [
@@ -1677,6 +2114,230 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/serializer.GetAppSpecOverviewOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/bkmonitor/dashboards": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkmonitor-dashboard"
+                ],
+                "summary": "获取应用绑定的仪表盘列表",
+                "operationId": "ListAppDashboards",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.ListDashboardsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkmonitor-dashboard"
+                ],
+                "summary": "创建应用仪表盘绑定",
+                "operationId": "CreateAppDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "绑定请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.AppDashboardCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/bkmonitor/dashboards/{uid}": {
+            "put": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkmonitor-dashboard"
+                ],
+                "summary": "更新应用仪表盘绑定",
+                "operationId": "UpdateAppDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "仪表盘 uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.AppDashboardUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkmonitor-dashboard"
+                ],
+                "summary": "删除应用仪表盘绑定",
+                "operationId": "DeleteAppDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "仪表盘 uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput"
                         }
                     },
                     "400": {
@@ -4027,12 +4688,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
                     }
                 }
             }
@@ -4099,12 +4754,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
@@ -7954,6 +8603,7 @@ const docTemplate = `{
                         "BkUserCredential": []
                     }
                 ],
+                "description": "北极星拉取失败不阻塞 Pod 输出：polarisInfos 为空数组，与未注册北极星同形，其余字段照常返回。",
                 "produces": [
                     "application/json"
                 ],
@@ -7984,18 +8634,22 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "页码，从 1 开始",
-                        "name": "page",
-                        "in": "query",
-                        "required": true
+                        "type": "boolean",
+                        "description": "为 true 时一次返回全量实例；禁止同时带 page 或 pageSize",
+                        "name": "all",
+                        "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "每页数量",
+                        "description": "页码，取值 1-10000；分页模式必填，all=true 时禁止出现",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量；分页模式必填，all=true 时禁止出现",
                         "name": "pageSize",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -8436,6 +9090,76 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/instances/watch": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "description": "SSE 同一条流上推送两类事件，信封不同：\n1) Pod 事件 ADDED/MODIFIED/DELETED/ENDED，object 为实例投影；\nDELETED 只保证 id，ENDED 时 object 为 null；Pod 事件不承载附属数据，polarisInfos 恒为空数组。\n2) 附属数据事件 PLUGIN，带 plugin 标识来源（如 polaris、devmodePublish），object 为 {id, data}；\n约 15s 一轮，仅该实例的附属数据有变化时推送。它不是实例的增删改，前端按 id 覆盖对应行的插件数据即可。\n3）附属数据首包取自 List 响应内嵌的 polarisInfos，增量只看 PLUGIN 事件。\n4）插件拉取失败时跳过本轮、不推事件也不拆流，页面保留上次已知状态。",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "instance"
+                ],
+                "summary": "订阅应用实例投影变更",
+                "operationId": "WatchAppInstances",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署的泳道名称（空字符串表示不使用泳道）",
+                        "name": "trafficLaneName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "List 成功响应带回的续传位点",
+                        "name": "resourceVersion",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SSE 事件流；每条 data 为 podEvent 或",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.AppInstanceWatchStreamDoc"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
@@ -9264,62 +9988,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/apps/{appID}/envs/{envName}/taf-deploys/env-var-precheck": {
-            "get": {
-                "security": [
-                    {
-                        "BkUserInfo": []
-                    },
-                    {
-                        "BkUserCredential": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "deploy"
-                ],
-                "summary": "TAF 部署前环境变量校验",
-                "operationId": "PreCheckTafDeployEnvVars",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "应用 ID",
-                        "name": "appID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "部署环境名称",
-                        "name": "envName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/serializer.EnvVarPreCheckOutput"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
-                    }
-                }
-            }
-        },
         "/apps/{appID}/envs/{envName}/taf-deploys/latest-status": {
             "get": {
                 "security": [
@@ -9369,6 +10037,62 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/taf-deploys/precheck": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "TAF 部署前检查",
+                "operationId": "PreCheckTafDeploy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.DeployPreCheckOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
@@ -9775,62 +10499,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/apps/{appID}/envs/{envName}/trpc-deploys/env-var-precheck": {
-            "get": {
-                "security": [
-                    {
-                        "BkUserInfo": []
-                    },
-                    {
-                        "BkUserCredential": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "deploy"
-                ],
-                "summary": "Trpc 部署前环境变量校验",
-                "operationId": "PreCheckTrpcDeployEnvVars",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "应用 ID",
-                        "name": "appID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "部署环境名称",
-                        "name": "envName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/serializer.EnvVarPreCheckOutput"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
-                    }
-                }
-            }
-        },
         "/apps/{appID}/envs/{envName}/trpc-deploys/latest-status": {
             "get": {
                 "security": [
@@ -9880,6 +10548,62 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/trpc-deploys/precheck": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "Trpc 部署前检查",
+                "operationId": "PreCheckTrpcDeploy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.DeployPreCheckOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
@@ -10175,6 +10899,102 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_core_app_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/hostports": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hostport"
+                ],
+                "summary": "获取应用 HostPort 列表及联邦环境待部署状态",
+                "operationId": "ListHostPorts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.HostPortsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hostport"
+                ],
+                "summary": "全量保存应用 HostPort 端口列表",
+                "operationId": "PutHostPorts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "请求体",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.PutHostPortsInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.HostPortsOutput"
                         }
                     },
                     "400": {
@@ -10576,6 +11396,55 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/mount-preview": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app-config-file-defs"
+                ],
+                "summary": "获取配置文件挂载预览",
+                "operationId": "GetMountPreview",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称",
+                        "name": "envName",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appcfgfiledef.MountPreviewOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
@@ -12006,6 +12875,216 @@ const docTemplate = `{
                 }
             }
         },
+        "/devmode/{appID}/envs/{envName}/preflight": {
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "devmode"
+                ],
+                "summary": "开发模式 Publish 预检",
+                "operationId": "DevModePublishPreflight",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "预检请求体",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.PreflightBodyInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.PreflightOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/devmode/{appID}/envs/{envName}/publish-records": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "devmode"
+                ],
+                "summary": "获取开发模式发布记录列表",
+                "operationId": "ListDevModePublishRecords",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键字",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页页码（从 1 开始）",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ListPublishRecordsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "devmode"
+                ],
+                "summary": "上报开发模式发布结果",
+                "operationId": "CreateDevModePublishRecords",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "发布结果上报请求体",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.CreatePublishRecordsInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.CreatePublishRecordsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/env-var-templates/app": {
             "get": {
                 "security": [
@@ -12561,7 +13640,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "命名空间",
+                        "description": "命名空间，默认为插件定义中的 defaultNamespace",
                         "name": "namespace",
                         "in": "query"
                     }
@@ -12674,7 +13753,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "命名空间",
+                        "description": "命名空间，默认为插件定义中的 defaultNamespace",
                         "name": "namespace",
                         "in": "query"
                     }
@@ -14750,6 +15829,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspaces/{workspaceID}/apps/resolve/{app}": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "通过 ID 或 Name 解析应用",
+                "operationId": "ResolveApp",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "应用 ID 或名称",
+                        "name": "app",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ResolveAppOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/workspaces/{workspaceID}/apps/{appID}/bkmonitor/alert-strategies": {
             "get": {
                 "security": [
@@ -15970,6 +17099,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspaces/{workspaceID}/bkmonitor/dashboards": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bkintegrations-bkmonitor"
+                ],
+                "summary": "获取蓝鲸监控仪表盘数据",
+                "operationId": "ListDashboardDirectoryTree",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.ListDashboardsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/workspaces/{workspaceID}/bkmonitor/user-groups": {
             "get": {
                 "security": [
@@ -16419,6 +17591,190 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_core_workspace_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspaces/{workspaceID}/custom-build-images": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "description": "候选仅以工作空间已落库的自定义镜像记录为准，不过滤快照同步状态，也不校验镜像在仓库中是否仍然存在；候选数量预期在百条以内，因此不分页",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "获取工作空间自定义构建镜像候选列表",
+                "operationId": "ListCustomBuildImages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "镜像类型：builder / runner",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键字",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ListCustomRuntimeImagesOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspaces/{workspaceID}/custom-build-images/tags": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "description": "镜像以完整名称传入而非记录 ID，因为用户手动输入、尚未落库的镜像没有记录 ID。\n已落库镜像读本地快照、手动输入镜像用工作空间凭证实时拉取，两条来源的出入参、\n分页与总数口径完全一致，调用方无需按来源分支处理，也不传递来源标识",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "获取工作空间自定义构建镜像可用 TAG 列表",
+                "operationId": "ListCustomBuildImageTags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "镜像完整仓库名称，含仓库前缀且不带 tag",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键字",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页参数：页码，从 1 开始",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页参数：每页数量，支持 5/10/20/50/100",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ListCustomRuntimeImageTagsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspaces/{workspaceID}/custom-build-images/tags/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "description": "同步等待上限为 10 秒。刷新中与刷新失败均为正常响应，通过 data.status 的 refreshing / failed 表达，不作为错误抛出",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "手动刷新工作空间自定义构建镜像的 TAG 快照",
+                "operationId": "RefreshCustomBuildImageTags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "刷新参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.RefreshCustomRuntimeImageTagsInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.RefreshCustomRuntimeImageTagsOutput"
                         }
                     },
                     "400": {
@@ -17585,6 +18941,391 @@ const docTemplate = `{
                 "RoleCodeAdmin"
             ]
         },
+        "appcfgfiledef.BSCPConfigInput": {
+            "type": "object",
+            "required": [
+                "bizID",
+                "id",
+                "serviceID"
+            ],
+            "properties": {
+                "bizID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "serviceID": {
+                    "type": "string"
+                }
+            }
+        },
+        "appcfgfiledef.BaseContentInfoObj": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "holderContentSourceType": {
+                    "type": "string"
+                },
+                "holderId": {
+                    "type": "string"
+                },
+                "holderName": {
+                    "type": "string"
+                },
+                "isFromAnotherFile": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "appcfgfiledef.CreateDefInput": {
+            "type": "object",
+            "required": [
+                "configKind",
+                "contentSourceType",
+                "fileFormat",
+                "fileType",
+                "name"
+            ],
+            "properties": {
+                "baseAppConfigFileId": {
+                    "description": "overlay 文件引用的基础文件 ID（fileType=overlay 时必填）",
+                    "type": "string"
+                },
+                "bscpConfig": {
+                    "description": "BSCP 来源配置（contentSourceType=bscp 时必填）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/appcfgfiledef.BSCPConfigInput"
+                        }
+                    ]
+                },
+                "configKind": {
+                    "description": "配置种类：framework / plain",
+                    "type": "string",
+                    "enum": [
+                        "framework",
+                        "plain"
+                    ]
+                },
+                "content": {
+                    "description": "初始内容（可选，仅 local 来源）",
+                    "type": "string"
+                },
+                "contentSourceType": {
+                    "description": "内容来源：local / bscp",
+                    "type": "string",
+                    "enum": [
+                        "local",
+                        "bscp"
+                    ]
+                },
+                "description": {
+                    "description": "版本描述",
+                    "type": "string"
+                },
+                "fileFormat": {
+                    "description": "文件格式",
+                    "type": "string",
+                    "enum": [
+                        "yaml",
+                        "taf"
+                    ]
+                },
+                "fileType": {
+                    "description": "文件类型：normal / overlay",
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "overlay"
+                    ]
+                },
+                "mountDir": {
+                    "description": "容器内挂载目录（plain 必填）",
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "name": {
+                    "description": "文件名称",
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                }
+            }
+        },
+        "appcfgfiledef.CreateDefOutput": {
+            "type": "object",
+            "properties": {
+                "item": {
+                    "$ref": "#/definitions/appcfgfiledef.DefDetailObj"
+                }
+            }
+        },
+        "appcfgfiledef.DefDetailObj": {
+            "type": "object",
+            "properties": {
+                "baseAppConfigFileId": {
+                    "type": "string"
+                },
+                "baseContentInfo": {
+                    "$ref": "#/definitions/appcfgfiledef.BaseContentInfoObj"
+                },
+                "configKind": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "contentSourceType": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "string"
+                },
+                "currentVersion": {
+                    "type": "integer"
+                },
+                "editableContentField": {
+                    "description": "EditableContentField 前端可编辑的字段（\"content\" / \"overlayContent\" / \"none\"）。",
+                    "type": "string"
+                },
+                "fileFormat": {
+                    "type": "string"
+                },
+                "fileId": {
+                    "type": "string"
+                },
+                "fileType": {
+                    "type": "string"
+                },
+                "hasEnvInstance": {
+                    "description": "HasEnvInstance 指定环境是否有独立实例（仅按环境查询时有意义）。",
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isUnifiedConfig": {
+                    "type": "boolean"
+                },
+                "mountDir": {
+                    "type": "string"
+                },
+                "mountedEnvNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "overlayContent": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updater": {
+                    "type": "string"
+                }
+            }
+        },
+        "appcfgfiledef.DefSummaryObj": {
+            "type": "object",
+            "properties": {
+                "configKind": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isUnifiedConfig": {
+                    "type": "boolean"
+                },
+                "mountDir": {
+                    "type": "string"
+                },
+                "mountedEnvNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "appcfgfiledef.DeleteDefOutput": {
+            "type": "object"
+        },
+        "appcfgfiledef.EnvInstanceObj": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "currentVersion": {
+                    "type": "integer"
+                },
+                "envName": {
+                    "type": "string"
+                },
+                "fileId": {
+                    "type": "string"
+                },
+                "overlayContent": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updater": {
+                    "type": "string"
+                }
+            }
+        },
+        "appcfgfiledef.GetDefDetailOutput": {
+            "type": "object",
+            "properties": {
+                "item": {
+                    "$ref": "#/definitions/appcfgfiledef.DefDetailObj"
+                }
+            }
+        },
+        "appcfgfiledef.ListDefsOutput": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/appcfgfiledef.DefDetailObj"
+                    }
+                }
+            }
+        },
+        "appcfgfiledef.ListEnvInstancesOutput": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/appcfgfiledef.EnvInstanceObj"
+                    }
+                }
+            }
+        },
+        "appcfgfiledef.MountPreviewItemObj": {
+            "type": "object",
+            "properties": {
+                "configKind": {
+                    "type": "string"
+                },
+                "contentSource": {
+                    "type": "string"
+                },
+                "defId": {
+                    "type": "string"
+                },
+                "hasEnvFile": {
+                    "type": "boolean"
+                },
+                "mountDir": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "appcfgfiledef.MountPreviewOutput": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/appcfgfiledef.MountPreviewItemObj"
+                    }
+                }
+            }
+        },
+        "appcfgfiledef.ResetEnvOutput": {
+            "type": "object"
+        },
+        "appcfgfiledef.UpdateContentInput": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "currentVersion": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                }
+            }
+        },
+        "appcfgfiledef.UpdateContentOutput": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "currentVersion": {
+                    "type": "integer"
+                },
+                "fileId": {
+                    "type": "string"
+                }
+            }
+        },
+        "appcfgfiledef.UpdateDefInput": {
+            "type": "object",
+            "properties": {
+                "isUnifiedConfig": {
+                    "type": "boolean"
+                },
+                "mountDir": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "mountedEnvNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                }
+            }
+        },
+        "appcfgfiledef.UpdateDefOutput": {
+            "type": "object",
+            "properties": {
+                "item": {
+                    "$ref": "#/definitions/appcfgfiledef.DefSummaryObj"
+                }
+            }
+        },
         "bkerrs.ErrCode": {
             "type": "string",
             "enum": [
@@ -18093,8 +19834,39 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.EmptyOutput": {
             "type": "object"
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.ListDashboardsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.DashboardDirectoryOutput"
+                    }
+                }
+            }
         },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_autodeploy_serializer.BuildRecordOutputObj": {
             "type": "object",
@@ -18439,6 +20211,13 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "extraFiles": {
+                    "description": "打包额外文件路径，相对构建目录；空列表表示不额外拷贝",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "runnerImage": {
                     "description": "运行阶段基础镜像",
                     "type": "string"
@@ -18459,6 +20238,13 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_build_serializer.BuildCommandsOutputObj"
                         }
                     ]
+                },
+                "extraFiles": {
+                    "description": "打包额外文件路径，相对构建目录",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "runnerImage": {
                     "description": "运行阶段基础镜像",
@@ -18697,6 +20483,13 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "extraFiles": {
+                    "description": "打包额外文件路径，相对构建目录",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "runnerImage": {
                     "description": "运行阶段基础镜像",
                     "type": "string"
@@ -18801,6 +20594,38 @@ const docTemplate = `{
         },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_extension_depservice_serializer.EmptyOutput": {
             "type": "object"
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardOutput": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "description": "Title 仪表盘标题",
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "UID 仪表盘 uid",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL 仪表盘访问 URL",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput": {
+            "type": "object"
+        },
+        "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.ListDashboardsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data 应用绑定的仪表盘列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardOutput"
+                    }
+                }
+            }
         },
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_usergroup_serializer.EmptyOutput": {
             "type": "object"
@@ -19199,6 +21024,29 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.AppDashboardCreateInput": {
+            "type": "object",
+            "required": [
+                "uid"
+            ],
+            "properties": {
+                "uid": {
+                    "description": "UID 仪表盘 uid",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "serializer.AppDashboardUpdateInput": {
+            "type": "object",
+            "properties": {
+                "uid": {
+                    "description": "UID 新的仪表盘 uid（仅支持变更绑定的仪表盘）",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
         "serializer.AppDefinedEnvVarOutputObj": {
             "type": "object",
             "properties": {
@@ -19239,6 +21087,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "cluster": {
+                    "description": "环境绑定的业务集群信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.DeployOverviewClusterObj"
+                        }
+                    ]
+                },
                 "deployStatus": {
                     "description": "部署状态（原始枚举）",
                     "type": "string"
@@ -19261,6 +21117,10 @@ const docTemplate = `{
                 },
                 "envType": {
                     "description": "环境类型（development / test / staging / production）",
+                    "type": "string"
+                },
+                "imageTag": {
+                    "description": "部署的镜像 Tag；无部署记录时为空字符串",
                     "type": "string"
                 },
                 "instances": {
@@ -19455,6 +21315,14 @@ const docTemplate = `{
                     "description": "健康状态，即 k8s 探针检查结果",
                     "type": "boolean"
                 },
+                "latestPublish": {
+                    "description": "最近一次开发模式发布状态",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.PublishStatusOutputObj"
+                        }
+                    ]
+                },
                 "message": {
                     "description": "状态详情，一般为 pod.status.reason",
                     "type": "string"
@@ -19470,6 +21338,14 @@ const docTemplate = `{
                         "$ref": "#/definitions/serializer.PolarisInstanceInfoOutputObj"
                     }
                 },
+                "resources": {
+                    "description": "主容器资源规格（集群 Pod 实际值）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.AppInstanceResourcesObj"
+                        }
+                    ]
+                },
                 "restartCount": {
                     "description": "重启次数",
                     "type": "string",
@@ -19478,6 +21354,111 @@ const docTemplate = `{
                 "status": {
                     "description": "状态，由 pod.status.phase 等解析获得",
                     "type": "string"
+                }
+            }
+        },
+        "serializer.AppInstancePluginObj": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "插件自有载荷；polaris 插件为 PolarisInstanceInfoOutputObj 列表，可为空列表"
+                },
+                "id": {
+                    "description": "实例 ID（即 k8s pod 的 name），供前端关联本地行",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.AppInstancePluginWatchEvent": {
+            "type": "object",
+            "properties": {
+                "object": {
+                    "description": "附属数据载荷",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.AppInstancePluginObj"
+                        }
+                    ]
+                },
+                "plugin": {
+                    "description": "附属数据来源插件名，如 polaris",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "事件类型；恒为 PLUGIN，取值见 instance/watch/plugin.EventTypePlugin\nEnums: PLUGIN",
+                    "type": "string",
+                    "enum": [
+                        "PLUGIN"
+                    ]
+                }
+            }
+        },
+        "serializer.AppInstanceResourcesObj": {
+            "type": "object",
+            "properties": {
+                "cpuLimits": {
+                    "description": "CPU limits（Kubernetes quantity 字符串），可选：未配置时不返回该字段",
+                    "type": "string"
+                },
+                "cpuRequests": {
+                    "description": "CPU requests，可选：未配置时不返回该字段",
+                    "type": "string"
+                },
+                "memoryLimits": {
+                    "description": "Memory limits，可选：未配置时不返回该字段",
+                    "type": "string"
+                },
+                "memoryRequests": {
+                    "description": "Memory requests，可选：未配置时不返回该字段",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.AppInstanceWatchEvent": {
+            "type": "object",
+            "properties": {
+                "object": {
+                    "description": "实例投影；字段集合对齐 AppInstanceOutputObj，其中 polarisInfos 在 Watch 场景恒为空数组",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.AppInstanceOutputObj"
+                        }
+                    ]
+                },
+                "reason": {
+                    "description": "流结束原因；仅 ENDED 使用",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "事件类型\nEnums: ADDED, MODIFIED, DELETED, ENDED",
+                    "type": "string",
+                    "enum": [
+                        "ADDED",
+                        "MODIFIED",
+                        "DELETED",
+                        "ENDED"
+                    ]
+                }
+            }
+        },
+        "serializer.AppInstanceWatchStreamDoc": {
+            "type": "object",
+            "properties": {
+                "pluginEvent": {
+                    "description": "附属数据事件：PLUGIN",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.AppInstancePluginWatchEvent"
+                        }
+                    ]
+                },
+                "podEvent": {
+                    "description": "Pod 投影事件：ADDED / MODIFIED / DELETED / ENDED",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.AppInstanceWatchEvent"
+                        }
+                    ]
                 }
             }
         },
@@ -19528,6 +21509,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                },
+                "workloadKind": {
+                    "description": "本次部署的主工作负载类型（GameDeployment 或 Deployment）",
                     "type": "string"
                 }
             }
@@ -20982,6 +22967,17 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.ClusterAddonReferenceOutput": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "serializer.ClusterInfoOutput": {
             "type": "object",
             "properties": {
@@ -21459,9 +23455,9 @@ const docTemplate = `{
                     ]
                 },
                 "name": {
-                    "description": "应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-20 之间",
+                    "description": "应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-64 之间。\ntodo 兼容前端用特性环境内部名（feat-{appID}-{n}）创建 overlay。",
                     "type": "string",
-                    "maxLength": 20,
+                    "maxLength": 64,
                     "minLength": 1
                 },
                 "type": {
@@ -21672,6 +23668,10 @@ const docTemplate = `{
                     "description": "是否启用健康检查，默认 false",
                     "type": "boolean"
                 },
+                "enableWeightFactor": {
+                    "description": "是否启用权重因子，默认 false。仅 createNewService 为 true 时写入北极星；\n开启后北极星按实例机型标记权重因子，\n各环境还需单独开启动态权重才会真正按机型分流",
+                    "type": "boolean"
+                },
                 "instanceKey": {
                     "description": "组件实例标识，用于环境变量拼接，只能包含字母、数字、下划线",
                     "type": "string"
@@ -21702,6 +23702,14 @@ const docTemplate = `{
                 "polarisToken": {
                     "description": "北极星 Token（当 createNewService 为 false 时必填，为 true 时由平台创建后回填）",
                     "type": "string"
+                },
+                "registerMode": {
+                    "description": "注册模式，默认 on_deploy（等部署后注册）。\nimmediate 表示绑定环境后立即下发 PolarisConfig CR 与配套 Service 完成注册，\n该配置不再注入环境变量和 tRPC 框架配置。创建后不可修改",
+                    "type": "string",
+                    "enum": [
+                        "immediate",
+                        "on_deploy"
+                    ]
                 },
                 "scopeEnvNames": {
                     "description": "生效的环境列表",
@@ -22098,6 +24106,57 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.CreatePublishRecordsData": {
+            "type": "object",
+            "properties": {
+                "recordIDs": {
+                    "description": "RecordIDs 新建的发布记录 ID 列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "serializer.CreatePublishRecordsInput": {
+            "type": "object",
+            "required": [
+                "binaryName",
+                "md5",
+                "results"
+            ],
+            "properties": {
+                "binaryName": {
+                    "description": "BinaryName 发布的二进制名称",
+                    "type": "string"
+                },
+                "fileSize": {
+                    "description": "FileSize 文件大小（字节）",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "md5": {
+                    "description": "MD5 文件 MD5 值",
+                    "type": "string"
+                },
+                "results": {
+                    "description": "Results 逐实例发布结果",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/serializer.PublishInstanceResult"
+                    }
+                }
+            }
+        },
+        "serializer.CreatePublishRecordsOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.CreatePublishRecordsData"
+                }
+            }
+        },
         "serializer.CreateRedisInstanceInput": {
             "type": "object",
             "required": [
@@ -22373,6 +24432,64 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.CustomRuntimeImageOutputObj": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "记录 ID",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "镜像仓库名称，含仓库前缀，不包含 tag",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "镜像类型",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.CustomRuntimeImageTagOutputObj": {
+            "type": "object",
+            "properties": {
+                "builtAt": {
+                    "description": "镜像构建时间",
+                    "type": "string"
+                },
+                "digest": {
+                    "description": "摘要",
+                    "type": "string"
+                },
+                "size": {
+                    "description": "镜像大小",
+                    "type": "string",
+                    "example": "0"
+                },
+                "tag": {
+                    "description": "镜像标签名",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.CustomRuntimeImagesOutputObjs": {
+            "type": "object",
+            "properties": {
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.CustomRuntimeImageOutputObj"
+                    }
+                }
+            }
+        },
         "serializer.CustomTagOptsInput": {
             "type": "object",
             "properties": {
@@ -22422,6 +24539,32 @@ const docTemplate = `{
                 "withRevision": {
                     "description": "是否包含分支/Tag 名称",
                     "type": "boolean"
+                }
+            }
+        },
+        "serializer.DashboardDirectoryOutput": {
+            "type": "object",
+            "properties": {
+                "dashboards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardOutput"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -22512,6 +24655,31 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.DeployOverviewClusterObj": {
+            "type": "object",
+            "properties": {
+                "clusterID": {
+                    "description": "集群 ID",
+                    "type": "string"
+                },
+                "clusterName": {
+                    "description": "集群展示名（来自 BCS）；拉取失败时为空字符串",
+                    "type": "string"
+                },
+                "clusterType": {
+                    "description": "集群类型",
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "集群命名空间",
+                    "type": "string"
+                },
+                "projectCode": {
+                    "description": "项目 code",
+                    "type": "string"
+                }
+            }
+        },
         "serializer.DeployOverviewInstancesObj": {
             "type": "object",
             "properties": {
@@ -22547,6 +24715,24 @@ const docTemplate = `{
                 "memoryRequests": {
                     "description": "Memory requests，可选：未配置时不返回该字段",
                     "type": "string"
+                }
+            }
+        },
+        "serializer.DeployPreCheckOutput": {
+            "type": "object",
+            "properties": {
+                "missingRequiredClusterAddons": {
+                    "description": "缺失的必选集群组件标识及展示名",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.ClusterAddonReferenceOutput"
+                    }
+                },
+                "undefinedVars": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.UndefinedEnvVarOutput"
+                    }
                 }
             }
         },
@@ -22958,6 +25144,10 @@ const docTemplate = `{
                     "description": "集群类型",
                     "type": "string"
                 },
+                "isFederation": {
+                    "description": "是否为 BCS 联邦 Host 集群",
+                    "type": "boolean"
+                },
                 "namespace": {
                     "description": "集群命名空间",
                     "type": "string"
@@ -23275,17 +25465,6 @@ const docTemplate = `{
                 "value": {
                     "description": "环境变量值",
                     "type": "string"
-                }
-            }
-        },
-        "serializer.EnvVarPreCheckOutput": {
-            "type": "object",
-            "properties": {
-                "undefinedVars": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/serializer.UndefinedEnvVarOutput"
-                    }
                 }
             }
         },
@@ -24611,6 +26790,46 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.HostPortEnvStateOutput": {
+            "type": "object",
+            "properties": {
+                "appliedPorts": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "pendingAddPorts": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "pendingRemovePorts": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "serializer.HostPortsOutput": {
+            "type": "object",
+            "properties": {
+                "envStates": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/serializer.HostPortEnvStateOutput"
+                    }
+                },
+                "ports": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "serializer.ImageEmptyOutput": {
             "type": "object"
         },
@@ -25409,6 +27628,22 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.ListCustomRuntimeImageTagsOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.PaginatedCustomRuntimeImageTagOutputObjs"
+                }
+            }
+        },
+        "serializer.ListCustomRuntimeImagesOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.CustomRuntimeImagesOutputObjs"
+                }
+            }
+        },
         "serializer.ListDeployableImageTagsOutput": {
             "type": "object",
             "properties": {
@@ -25628,6 +27863,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/serializer.ScopedEnvVarOutputObj"
                     }
+                }
+            }
+        },
+        "serializer.ListPublishRecordsOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.PaginatedPublishRecords"
                 }
             }
         },
@@ -26153,16 +28396,32 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "count": {
-                    "description": "结果数量",
+                    "description": "结果数量；全量为成功投影条数，分页为 LabelSelector 匹配的 Pod 总数",
                     "type": "string",
                     "example": "0"
                 },
+                "resourceVersion": {
+                    "description": "集群 List 首次响应的 resourceVersion，供 Watch 续传；空列表时也可能有值",
+                    "type": "string"
+                },
                 "results": {
-                    "description": "查询结果",
+                    "description": "查询结果，只含成功投影",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/serializer.AppInstanceOutputObj"
                     }
+                },
+                "skipped": {
+                    "description": "无法投影的实例列表；分页模式为空数组，无跳过项时亦为空数组",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.SkippedAppInstanceObj"
+                    }
+                },
+                "skippedCount": {
+                    "description": "本次响应中跳过的实例数（仅全量模式可能非 0）",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -26225,6 +28484,31 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_build_serializer.BuildRecordOutputObj"
                     }
+                }
+            }
+        },
+        "serializer.PaginatedCustomRuntimeImageTagOutputObjs": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "满足条件的总记录数",
+                    "type": "string",
+                    "example": "0"
+                },
+                "results": {
+                    "description": "当前页的镜像 TAG 列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.CustomRuntimeImageTagOutputObj"
+                    }
+                },
+                "snapshotStatus": {
+                    "description": "快照状态信息，手动输入且尚无快照记录时 refreshStatus 为 idle",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.SnapshotStatusInfoOutputObj"
+                        }
+                    ]
                 }
             }
         },
@@ -26325,6 +28609,21 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/serializer.OperationRecordOutputObj"
+                    }
+                }
+            }
+        },
+        "serializer.PaginatedPublishRecords": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.PublishRecordOutputObj"
                     }
                 }
             }
@@ -26444,6 +28743,10 @@ const docTemplate = `{
                 },
                 "enableHealthCheck": {
                     "description": "是否启用健康检查（可选更新）",
+                    "type": "boolean"
+                },
+                "enableWeightFactor": {
+                    "description": "是否启用权重因子（可选更新）；关闭只屏蔽各环境的动态权重，不清除各环境的开关取值",
                     "type": "boolean"
                 },
                 "instanceKey": {
@@ -26678,6 +28981,17 @@ const docTemplate = `{
                     "description": "是否启用健康检查",
                     "type": "boolean"
                 },
+                "enableWeightFactor": {
+                    "description": "是否启用权重因子（开启后才能为单个环境开启动态权重）",
+                    "type": "boolean"
+                },
+                "envDynamicWeights": {
+                    "description": "各环境是否开启动态权重，key 为环境名称；未出现的环境表示未开启",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                },
                 "envStates": {
                     "description": "各环境中已经生效的关键字段、下发错误和部署状态",
                     "type": "object",
@@ -26719,6 +29033,10 @@ const docTemplate = `{
                 },
                 "polarisToken": {
                     "description": "北极星 Token（敏感信息，返回时脱敏）",
+                    "type": "string"
+                },
+                "registerMode": {
+                    "description": "注册模式：immediate（绑定后立即注册）| on_deploy（等部署后注册）",
                     "type": "string"
                 },
                 "scopeEnvNames": {
@@ -26831,6 +29149,11 @@ const docTemplate = `{
                 "serviceNamespace": {
                     "description": "北极星命名空间",
                     "type": "string"
+                },
+                "staticWeight": {
+                    "description": "静态权重；开源版恒为 0，内部版为注册时的静态权重",
+                    "type": "string",
+                    "example": "0"
                 },
                 "weight": {
                     "description": "权重",
@@ -27106,6 +29429,75 @@ const docTemplate = `{
                 "startPort": {
                     "description": "起始端口",
                     "type": "integer"
+                }
+            }
+        },
+        "serializer.PreflightBodyInput": {
+            "type": "object",
+            "properties": {
+                "instanceIDs": {
+                    "description": "InstanceIDs 指定的实例 ID 列表（与 PublishAll 二选一）",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "publishAll": {
+                    "description": "PublishAll 是否发布到所有 Running 状态的实例（与 InstanceIDs 二选一）",
+                    "type": "boolean"
+                }
+            }
+        },
+        "serializer.PreflightData": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Address 已组装好的集群完整地址；如 {baseUrl}/clusters/{clusterID}/",
+                    "type": "string"
+                },
+                "devMode": {
+                    "description": "DevMode 开发模式相关路径配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.PreflightDevMode"
+                        }
+                    ]
+                },
+                "instanceIDs": {
+                    "description": "InstanceIDs 校验通过的实例 ID 列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "namespace": {
+                    "description": "Namespace 目标命名空间",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "Token 用户 Token，用于访问集群 API",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.PreflightDevMode": {
+            "type": "object",
+            "properties": {
+                "mountPath": {
+                    "description": "MountPath 脚本挂载路径",
+                    "type": "string"
+                },
+                "workPath": {
+                    "description": "WorkPath 开发模式根目录",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.PreflightOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.PreflightData"
                 }
             }
         },
@@ -27511,12 +29903,105 @@ const docTemplate = `{
                 }
             }
         },
+        "serializer.PublishInstanceResult": {
+            "type": "object",
+            "required": [
+                "instance",
+                "status"
+            ],
+            "properties": {
+                "instance": {
+                    "description": "Instance 目标实例（pod）名称",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Message 失败原因等附加信息",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status 发布状态：success / failed",
+                    "type": "string",
+                    "enum": [
+                        "success",
+                        "failed"
+                    ]
+                }
+            }
+        },
+        "serializer.PublishRecordOutputObj": {
+            "type": "object",
+            "properties": {
+                "binaryName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "fileSize": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "instance": {
+                    "type": "string"
+                },
+                "md5": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "operator": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.PublishStatusOutputObj": {
+            "type": "object",
+            "properties": {
+                "binaryName": {
+                    "description": "发布的二进制名称",
+                    "type": "string"
+                },
+                "md5": {
+                    "description": "文件 MD5",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "失败原因等附加信息",
+                    "type": "string"
+                },
+                "operator": {
+                    "description": "操作人",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "发布状态：success / failed",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
         "serializer.PutEnvWeightInput": {
             "type": "object",
             "required": [
                 "weight"
             ],
             "properties": {
+                "dynamicWeight": {
+                    "description": "该环境是否开启动态权重，不传表示保持原值。\n开启后上面的权重作为动态调权的基准权重",
+                    "type": "boolean"
+                },
                 "weight": {
                     "description": "单实例权重，取值范围 0-10000",
                     "type": "integer",
@@ -27535,6 +30020,17 @@ const docTemplate = `{
                             "$ref": "#/definitions/serializer.PolarisConfigOutputObj"
                         }
                     ]
+                }
+            }
+        },
+        "serializer.PutHostPortsInput": {
+            "type": "object",
+            "properties": {
+                "ports": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -27659,6 +30155,26 @@ const docTemplate = `{
             }
         },
         "serializer.RefreshAppImagesOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.RefreshResultInfoOutputObj"
+                }
+            }
+        },
+        "serializer.RefreshCustomRuntimeImageTagsInput": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "description": "镜像完整仓库名称，含仓库前缀且不包含 tag 或 digest",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.RefreshCustomRuntimeImageTagsOutput": {
             "type": "object",
             "properties": {
                 "data": {
@@ -27962,6 +30478,25 @@ const docTemplate = `{
                 },
                 "type": {
                     "description": "代码仓库类型",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.ResolveAppOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.ResolveAppOutputObj"
+                }
+            }
+        },
+        "serializer.ResolveAppOutputObj": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -28679,6 +31214,19 @@ const docTemplate = `{
                         "Ready",
                         "Disabled"
                     ]
+                }
+            }
+        },
+        "serializer.SkippedAppInstanceObj": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "实例 ID（即 k8s pod 的 name）；解析前无 name 时为空字符串",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "跳过原因",
+                    "type": "string"
                 }
             }
         },
@@ -29481,9 +32029,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-20 之间",
+                    "description": "应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-64 之间",
                     "type": "string",
-                    "maxLength": 20,
+                    "maxLength": 64,
                     "minLength": 1
                 }
             }

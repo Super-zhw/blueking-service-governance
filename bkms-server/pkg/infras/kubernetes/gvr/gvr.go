@@ -50,6 +50,15 @@ var GameDeploy = schema.GroupVersionResource{
 	Resource: "gamedeployments",
 }
 
+// Deploy represents Kubernetes Deployment resource.
+// NOTE: 较早的 k8s 版本使用的 deploy 版本可能是 externsion/v1beta1、apps/v1beta1
+// 如果引入需要确认版本是否兼容
+var Deploy = schema.GroupVersionResource{
+	Group:    "apps",
+	Version:  "v1",
+	Resource: "deployments",
+}
+
 // --- Network ---
 
 // SVC represents Kubernetes Service resource.

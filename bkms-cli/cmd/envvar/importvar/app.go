@@ -60,12 +60,12 @@ Use --preview to see what would be imported without making any changes.`,
   # APP_TIMEOUT=30s
   # ─────────────────────────────────────────
   # Note: app import does NOT allow scope metadata (scopeType/scopeValue).`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if preview {
-				previewResult, err := client.New().PreviewAppEnvVars(cmd.Context(), appID, filePath)
-				if err != nil {
-					return errors.Wrap(err, "preview app env vars")
+				previewResult, previewErr := client.New().PreviewAppEnvVars(cmd.Context(), appID, filePath)
+				if previewErr != nil {
+					return errors.Wrap(previewErr, "preview app env vars")
 				}
 				return formatPreviewOutput(cmd.Context(), previewResult, outputFormat)
 			}
@@ -81,10 +81,10 @@ Use --preview to see what would be imported without making any changes.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&filePath, "file", "f", "", "path to the .env file to import")
 	cmd.Flags().BoolVar(&preview, "preview", false, "preview import without making changes")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 	_ = cmd.MarkFlagRequired("file")

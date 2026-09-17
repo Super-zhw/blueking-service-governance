@@ -34,15 +34,15 @@ func NewDisableCmd() *cobra.Command {
 	var appID, envName string
 
 	cmd := &cobra.Command{
-		Use:    "disable",
-		Short:  "Disable underlay IP networking",
-		PreRun: cmdutil.CommonPreRun,
-		Long:   `Disable the underlay IP networking mode for the application.`,
+		Use:   "disable",
+		Short: "Disable underlay IP networking",
+		Long:  `Disable the underlay IP networking mode for the application.`,
 		Example: `  # Disable underlay IP in the default config
   bkms-cli app appspec underlay-ip disable --app my-app
 
   # Disable underlay IP for a specific environment
   bkms-cli app appspec underlay-ip disable --app my-app --env prod`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := appspec.SetEnabledHandler(
 				cmd.Context(), appID, envName, client.AppSpecSectionTkeRouteEni, false,
@@ -59,7 +59,7 @@ func NewDisableCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
 
 	_ = cmd.MarkFlagRequired("app")

@@ -25,7 +25,7 @@
     placement="bottom-start"
     theme="light"
     trigger="click"
-    :width="800"
+    :width="panelWidth"
     @after-hidden="handlePopoverHidden"
     @after-show="handlePopoverShow"
   >
@@ -35,6 +35,7 @@
         'flex items-center min-w-[280px] max-w-[626px] border border-[#c4c6cc] rounded-[2px] bg-[#FFF] cursor-pointer overflow-hidden transition-border-color duration-200 hover:border-[#979BA5]',
         { '!border-[#3a84ff] shadow-[0_0_3px_0_#a3c5fd]': isPopoverVisible },
         mode === 'multi' ? 'h-auto min-h-[32px] !w-[626px]' : 'h-[32px]',
+        { '!max-w-none': !showEnvPrefix },
       ]"
     >
       <!-- 模式切换区域 -->
@@ -57,7 +58,7 @@
         />
       </Select>
       <div
-        v-else
+        v-else-if="showEnvPrefix"
         class="flex items-center h-[32px] px-[10px] border-r-[1px] border-[#c4c6cc] shrink-0"
       >
         {{ $t('环境') }}
@@ -165,6 +166,7 @@
             </template>
           </Input>
           <div
+            v-if="showOnlyDeployedFilter"
             class="h-[40px] flex items-center border-l-[1px] border-b-[1px] border-[#DCDEE5] ml-[-1px] pl-[8px] pb-[2px]"
           >
             <Checkbox
@@ -185,7 +187,8 @@
         <!-- 分组列表 -->
         <div
           v-else
-          class="flex gap-[8px]"
+          class="gap-[8px]"
+          :class="columns === 2 ? 'grid grid-cols-2' : 'flex'"
         >
           <div
             v-for="group in filteredGroups"
@@ -213,16 +216,16 @@
                 v-for="env in group.envs"
                 :key="env.name"
                 v-bk-tooltips="{
-                  content: $t('环境未配置集群资源，无法部署应用'),
-                  disabled: env.status !== 'NotReady',
+                  content: getEnvUnavailableReason(env),
+                  disabled: !isEnvDisabled(env),
                   placement: 'bottom',
                 }"
                 :class="[
                   'flex items-center h-[32px] px-[8px] cursor-pointer text-[12px] text-[#4D4F56] transition-bg-color duration-150',
                   { 'feature-env-child': env.isFeatureChild },
                   { '!bg-[#e1ecff] !text-[#3a84ff]': isSelected(env) },
-                  { 'cursor-not-allowed opacity-60': env.status === 'NotReady' },
-                  { 'hover:bg-[#F5F7FA]': !isSelected(env) && env.status !== 'NotReady' },
+                  { 'cursor-not-allowed opacity-60': isEnvDisabled(env) },
+                  { 'hover:bg-[#F5F7FA]': !isSelected(env) && !isEnvDisabled(env) },
                 ]"
                 @click="handleSelectEnv(env)"
               >
@@ -273,6 +276,7 @@
   import { Done } from 'bkui-vue/lib/icon';
   import { AngleDownLine, Search } from 'bkui-vue/lib/icon';
   import { isEqual } from 'lodash-es';
+  import { useI18n } from 'vue-i18n';
   import { AppService } from '~/api/modules/v1/app';
   import { EnvService } from '~/api/modules/v1/env';
   import OverflowTags from '~/components/overflow-tags.vue';
@@ -318,8 +322,12 @@
   };
 
   interface IProps {
+    /** 下拉面板列数，实例列表为 4 列，表单内收成 2 列 */
+    columns?: 2 | 4;
     /** 当无选中值时是否自动选中第一个可用环境 */
     initFirstEnvWhenEmpty?: boolean;
+    /** 只展示这些 kind 的环境，不传则全部展示 */
+    kinds?: string[];
     /** 选择模式 */
     mode?: 'multi' | 'single';
     /** 单选模式当前选中环境名 */
@@ -328,19 +336,35 @@
     modelValues?: string[];
     /** 是否允许切换单选/多选模式 */
     multiSelectable?: boolean;
+    /** 下拉面板宽度，默认 4 列为 800、2 列为 560 */
+    popoverWidth?: number;
     /** 单选值暂未出现在环境列表时，是否保留外部传入值 */
     preserveMissingModelValue?: boolean;
+    /** 是否展示触发器左侧的“环境”前缀 */
+    showEnvPrefix?: boolean;
+    /** 是否展示“仅显示已部署环境”筛选 */
+    showOnlyDeployedFilter?: boolean;
+    /** 选中环境时是否同步部署页当前环境 */
+    syncEnvStore?: boolean;
     /** 业务类型标识 */
     type?: string;
+    /** 返回环境的业务禁用原因；有返回值时环境不可新增选择并展示提示 */
+    getEnvDisabledReason?: (env: EnvOutput) => string | undefined;
   }
 
   defineOptions({ inheritAttrs: false });
 
-  const props = defineProps<IProps>();
+  const props = withDefaults(defineProps<IProps>(), {
+    columns: 4,
+    showEnvPrefix: true,
+    showOnlyDeployedFilter: true,
+    syncEnvStore: true,
+  });
   const emits = defineEmits<Emits>();
 
   const envStore = useDeployEnvStore();
   const appDetailStore = useAppDetail();
+  const { t } = useI18n();
   const { getDeployStatusInfo } = useDeployStatusMap();
 
   const popoverRef = ref<InstanceType<typeof Popover> | null>(null);
@@ -350,8 +374,10 @@
   const isPopoverVisible = ref(false);
   /** 全部环境列表 */
   const envList = ref<EnvOutput[]>([]);
-  /** 环境名称到部署状态的映射 */
-  const appDeployStatusMap = ref<Map<string, AppDeployedEnvOutputObj>>(new Map());
+  /** 部署状态分别按环境 ID 和名称索引，ID 未命中时按名称兜底。 */
+  const appDeployStatusByID = ref<Map<string, AppDeployedEnvOutputObj>>(new Map());
+  const appDeployStatusByName = ref<Map<string, AppDeployedEnvOutputObj>>(new Map());
+  let deployStatusesRequest = 0;
   /** 搜索关键词 */
   const searchKeyword = ref('');
   /** 是否仅显示已部署环境 */
@@ -362,21 +388,26 @@
   /** 环境类型分组顺序：开发 -> 测试 -> 预发布 -> 生产 */
   const envTypeOrder = ['development', 'test', 'staging', 'production'];
   const FEATURE_ENV_KIND = 'feature';
+  const panelWidth = computed(() => props.popoverWidth || (props.columns === 2 ? 560 : 800));
+  const selectableEnvList = computed(() => {
+    if (!props.kinds?.length) return envList.value;
+    return envList.value.filter(env => props.kinds?.includes(env.kind || 'standard'));
+  });
 
   /** 单选模式下当前选中的环境对象 */
-  const selectedEnvItem = computed(() => envList.value.find(item => item.name === props.modelValue));
+  const selectedEnvItem = computed(() => selectableEnvList.value.find(item => item.name === props.modelValue));
   /** 多选模式下当前选中的所有环境对象 */
   const selectedMultiEnvItems = computed(() => {
     if (mode.value !== 'multi') return [];
     return (props.modelValues || [])
-      .map(name => envList.value.find(item => item.name === name))
+      .map(name => selectableEnvList.value.find(item => item.name === name))
       .filter((item): item is EnvOutput => !!item);
   });
   /** 多选模式的 Tag 名称列表，供 OverflowTags 进行宽度估算 */
   const multiEnvDisplayNames = computed(() => selectedMultiEnvItems.value.map(item => item.displayName ?? ''));
   const normalizedSearchKeyword = computed(() => searchKeyword.value.trim().toLowerCase());
   /** 父子关系仅随环境列表变化，避免搜索或部署过滤变化时重复构建映射 */
-  const envFeatureRelations = computed(() => buildEnvFeatureRelations(envList.value));
+  const envFeatureRelations = computed(() => buildEnvFeatureRelations(selectableEnvList.value));
 
   /** 将特性环境关联到来源环境，无法关联的特性环境按独立环境处理 */
   function buildEnvFeatureRelations(list: EnvOutput[]): EnvFeatureRelations {
@@ -414,6 +445,13 @@
         ...getVisibleOrphanFeatureEnvs(type, relations, keyword),
       ],
     };
+  }
+
+  function getEnvDeployStatus(env: EnvOutput) {
+    return (
+      (env.id ? appDeployStatusByID.value.get(env.id) : undefined) ||
+      (env.name ? appDeployStatusByName.value.get(env.name) : undefined)
+    );
   }
 
   /** 获取环境类型对应的展示配置 */
@@ -465,7 +503,7 @@
   /** 判断环境是否满足仅已部署过滤条件 */
   function isEnvDeployedVisible(env: EnvOutput) {
     if (!onlyDeployed.value) return true;
-    return !!env.name && appDeployStatusMap.value.get(env.name)?.deployStatus === 'deployed';
+    return getEnvDeployStatus(env)?.deployStatus === 'deployed';
   }
 
   /** 判断环境是否同时满足部署状态和关键词过滤 */
@@ -515,39 +553,50 @@
 
   /**
    * 多选模式值变更的统一出口
-   * 自动过滤 NotReady 环境，并同步选中项与 modelValues
+   * 自动过滤状态或业务禁用环境，并同步选中项与 modelValues
    */
   function emitMultiEnvChange(values: string[], options: { fallbackWhenEmpty?: boolean } = {}) {
-    let validValues = values.filter(v => envList.value.some(item => item.name === v && item.status !== 'NotReady'));
+    let validValues = values.filter(v => selectableEnvList.value.some(item => item.name === v && !isEnvDisabled(item)));
     if (options.fallbackWhenEmpty && values.length && validValues.length === 0 && props.initFirstEnvWhenEmpty) {
-      const firstEnv = envList.value.find(item => item.status !== 'NotReady');
+      const firstEnv = selectableEnvList.value.find(item => !isEnvDisabled(item));
       validValues = firstEnv?.name ? [firstEnv.name] : [];
     }
     if (!isEqual(validValues, props.modelValues || [])) {
       emits('update:modelValues', validValues);
     }
     const selectedItems = validValues
-      .map(name => envList.value.find(item => item.name === name))
+      .map(name => selectableEnvList.value.find(item => item.name === name))
       .filter((item): item is EnvOutput => !!item);
     emits('update:items', selectedItems);
   }
 
   /** 获取当前应用在各环境的部署状态 */
   async function getDeployStatuses() {
-    if (!appDetailStore.appID) {
-      appDeployStatusMap.value = new Map();
+    const requestToken = ++deployStatusesRequest;
+    const appID = appDetailStore.appID;
+    if (!appID) {
+      appDeployStatusByID.value = new Map();
+      appDeployStatusByName.value = new Map();
       emits('update:deployStatusList', []);
       return;
     }
-    const res = await AppService.getAppDeployStatuses({ appID: appDetailStore.appID }).catch(() => []);
+    const res = await AppService.getAppDeployStatuses({ appID }).catch(() => []);
+    if (requestToken !== deployStatusesRequest || appID !== appDetailStore.appID) return;
     const list = (res || []) as AppDeployedEnvOutputObj[];
-    appDeployStatusMap.value = new Map(list.filter(item => item.name).map(item => [item.name!, item]));
+    const byID = new Map<string, AppDeployedEnvOutputObj>();
+    const byName = new Map<string, AppDeployedEnvOutputObj>();
+    list.forEach(status => {
+      if (status.id) byID.set(status.id, status);
+      if (status.name) byName.set(status.name, status);
+    });
+    appDeployStatusByID.value = byID;
+    appDeployStatusByName.value = byName;
     emits('update:deployStatusList', list);
   }
 
   /** 根据环境获取部署状态对应的状态图标名 */
   function getEnvDeployIcon(env: EnvOutput): string {
-    const deployStatus = env.name ? appDeployStatusMap.value.get(env.name)?.deployStatus : undefined;
+    const deployStatus = getEnvDeployStatus(env)?.deployStatus;
     if (!deployStatus) return 'status-unknown';
     return getDeployStatusInfo(appDetailStore.appType || null, deployStatus).icon || 'status-unknown';
   }
@@ -568,8 +617,10 @@
 
   /** 单选模式的选中值变更处理 */
   function handleEnvChange(env: string) {
-    const envItem = envList.value.find(item => item.name === env && item.status !== 'NotReady');
-    envStore.updateCurrentEnv(envItem?.name || '');
+    const envItem = selectableEnvList.value.find(item => item.name === env && !isEnvDisabled(item));
+    if (props.syncEnvStore) {
+      envStore.updateCurrentEnv(envItem?.name || '');
+    }
     emits('update:item', envItem);
     emits('update:modelValue', envItem?.name || '');
   }
@@ -578,34 +629,46 @@
   async function handleGetEnvList() {
     isLoading.value = true;
     emits('update:loading', true);
-    await getEnvList();
-    if (mode.value === 'multi') {
-      // 多选模式初始化
-      if (props.modelValues?.length) {
-        emitMultiEnvChange(props.modelValues, { fallbackWhenEmpty: true });
-      } else if (props.initFirstEnvWhenEmpty) {
-        const firstEnv = envList.value.find(item => item.status !== 'NotReady');
-        if (firstEnv?.name) {
-          emitMultiEnvChange([firstEnv.name]);
+    try {
+      await getEnvList();
+      if (mode.value === 'multi') {
+        // 多选模式初始化
+        if (props.modelValues?.length) {
+          emitMultiEnvChange(props.modelValues, { fallbackWhenEmpty: true });
+        } else if (props.initFirstEnvWhenEmpty) {
+          const firstEnv = selectableEnvList.value.find(item => !isEnvDisabled(item));
+          if (firstEnv?.name) {
+            emitMultiEnvChange([firstEnv.name]);
+          }
+        }
+      } else {
+        // 单选模式初始化
+        if (props.modelValue) {
+          const selectedEnv = selectableEnvList.value.find(item => item.name === props.modelValue);
+          if (!selectedEnv && props.preserveMissingModelValue) {
+            emits('update:modelValue', props.modelValue);
+          } else {
+            handleEnvChange(props.modelValue);
+          }
+        } else if (props.initFirstEnvWhenEmpty) {
+          const currentEnvExists =
+            envStore.currentEnv &&
+            selectableEnvList.value.some(item => item.name === envStore.currentEnv && !isEnvDisabled(item));
+          const env = currentEnvExists
+            ? envStore.currentEnv
+            : selectableEnvList.value.find(item => !isEnvDisabled(item))?.name || '';
+          if (env) handleEnvChange(env);
         }
       }
-    } else {
-      // 单选模式初始化
-      if (props.modelValue) {
-        const selectedEnv = envList.value.find(item => item.name === props.modelValue);
-        if (!selectedEnv && props.preserveMissingModelValue) {
-          emits('update:modelValue', props.modelValue);
-        } else {
-          handleEnvChange(props.modelValue);
-        }
-      } else if (props.initFirstEnvWhenEmpty) {
-        const currentEnvExists = envStore.currentEnv && envList.value.some(item => item.name === envStore.currentEnv);
-        const env = currentEnvExists ? envStore.currentEnv : envList.value[0]?.name || '';
-        if (env) handleEnvChange(env);
-      }
+    } finally {
+      isLoading.value = false;
+      emits('update:loading', false);
     }
-    isLoading.value = false;
-    emits('update:loading', false);
+  }
+
+  /** 主动刷新环境列表和部署状态，用于侧栏打开、页面刷新等需要最新数据的交互。 */
+  async function refresh() {
+    await Promise.all([getDeployStatuses(), handleGetEnvList()]);
   }
 
   /** 监听 appID 变化，重新拉取该应用在各环境的部署状态 */
@@ -615,7 +678,9 @@
       if (appID) {
         await Promise.all([getDeployStatuses(), handleGetEnvList()]);
       } else {
-        appDeployStatusMap.value = new Map();
+        deployStatusesRequest += 1;
+        appDeployStatusByID.value = new Map();
+        appDeployStatusByName.value = new Map();
         envList.value = [];
         isLoading.value = false;
         emits('update:deployStatusList', []);
@@ -626,10 +691,17 @@
     { immediate: true },
   );
 
-  /** 获取分组内可选环境名称列表（排除 NotReady 状态） */
+  /** 获取环境不可选原因，业务限制优先于未配置集群状态。 */
+  function getEnvUnavailableReason(env: EnvOutput) {
+    return (
+      props.getEnvDisabledReason?.(env) || (env.status === 'NotReady' ? t('环境未配置集群资源，无法部署应用') : '')
+    );
+  }
+
+  /** 获取分组内可选环境名称列表（排除状态和业务禁用项） */
   function getSelectableGroupEnvNames(envs: EnvOutput[]) {
     return envs
-      .filter(env => env.status !== 'NotReady')
+      .filter(env => !isEnvDisabled(env))
       .map(env => env.name)
       .filter((name): name is string => !!name);
   }
@@ -668,9 +740,10 @@
     searchKeyword.value = '';
   }
 
-  /** 下拉面板打开时标记可见状态 */
+  /** 下拉面板打开时刷新部署状态，避免状态图标和仅已部署过滤使用旧缓存。 */
   function handlePopoverShow() {
     isPopoverVisible.value = true;
+    void getDeployStatuses();
   }
 
   /** 多选模式下通过 Tag 删除已选环境 */
@@ -686,7 +759,7 @@
 
   /** 点击环境项：单选直接选中并关闭面板；多选 toggle 选中/取消 */
   function handleSelectEnv(env: EnvOutput) {
-    if (env.status === 'NotReady' || !env.name) return;
+    if (!env.name || (isEnvDisabled(env) && !isSelected(env))) return;
     if (mode.value === 'multi') {
       // 多选模式：toggle 选中/取消，不关闭 popover
       const currentValues = [...(props.modelValues || [])];
@@ -699,11 +772,18 @@
       emitMultiEnvChange(currentValues);
     } else {
       // 单选模式：保持原有逻辑
-      envStore.updateCurrentEnv(env.name);
+      if (props.syncEnvStore) {
+        envStore.updateCurrentEnv(env.name);
+      }
       emits('update:item', env);
       emits('update:modelValue', env.name);
       popoverRef.value?.hide();
     }
+  }
+
+  /** 环境是否不可新增选择。 */
+  function isEnvDisabled(env: EnvOutput) {
+    return !!getEnvUnavailableReason(env);
   }
 
   /** 判断分组内所有可选环境是否全部选中 */
@@ -765,6 +845,8 @@
   );
 
   defineExpose({
+    refresh,
+    refreshEnvList: handleGetEnvList,
     refreshDeployStatuses: getDeployStatuses,
   });
 </script>

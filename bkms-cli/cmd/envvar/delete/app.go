@@ -38,7 +38,7 @@ func NewAppCmd() *cobra.Command {
 		Long:  `Delete an existing app-defined environment variable by its key.`,
 		Example: `  # Delete an app env var
   bkms-cli envvar delete app --app <appID> --key MY_VAR`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := client.New().DeleteAppDefinedEnvVar(cmd.Context(), appID, key); err != nil {
 				return errors.Wrap(err, "delete app env var")
@@ -49,7 +49,7 @@ func NewAppCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&key, "key", "", "environment variable key (required)")
 
 	_ = cmd.MarkFlagRequired("app")

@@ -34,9 +34,8 @@ func NewViewCmd() *cobra.Command {
 	var appID, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View application start command configuration",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View application start command configuration",
 		Long: `View the application start command and arguments configuration.
 
 Displays the current container entrypoint command and arguments for the application.`,
@@ -45,6 +44,7 @@ Displays the current container entrypoint command and arguments for the applicat
 
   # Output in JSON format
   bkms-cli app appspec start-command view --app my-app -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			result, err := appspec.ViewStartCommandHandler(cmd.Context(), appID)
 			if err != nil {
@@ -66,8 +66,8 @@ Displays the current container entrypoint command and arguments for the applicat
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	cmdutil.AddAppFlags(cmd, &appID)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

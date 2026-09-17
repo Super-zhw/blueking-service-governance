@@ -23,15 +23,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/itchyny/gojq"
-	tw "github.com/olekukonko/tablewriter"
-	twtypes "github.com/olekukonko/tablewriter/tw"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
+
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/clierr"
 )
 
 // Format 定义支持的数据序列化输出格式
@@ -52,7 +51,7 @@ const (
 )
 
 const (
-	// FlagUsage 通用 --output 参数说明
+	// FlagUsage 通用输出格式参数说明。
 	FlagUsage = "output format: json, yaml, table, jq=<expr>"
 )
 
@@ -75,11 +74,34 @@ type formatter interface {
 	Format(ctx context.Context, data any) (string, error)
 }
 
+// ValidateFormat 在执行有副作用的操作前校验输出格式及 JQ 表达式。
+// 只进行静态解析和编译，不执行表达式；依赖实际数据的运行时错误由 FormatData 返回。
+func ValidateFormat(format string) error {
+	parsed, err := parseFormat(format)
+	if err != nil {
+		return clierr.Usage(err)
+	}
+	if parsed.formatType != FormatJq {
+		return nil
+	}
+	if strings.TrimSpace(parsed.value) == "" {
+		return clierr.Usagef("jq expression cannot be empty")
+	}
+	query, err := gojq.Parse(parsed.value)
+	if err != nil {
+		return clierr.Usage(errors.Wrap(err, "parse jq expression"))
+	}
+	if _, err = gojq.Compile(query); err != nil {
+		return clierr.Usage(errors.Wrap(err, "compile jq expression"))
+	}
+	return nil
+}
+
 // FormatData 智能格式化数据，格式缺省时，将根据数据类型自动选择表格或 JSON 格式。
 func FormatData(ctx context.Context, data any, format string) (string, error) {
 	parsed, err := parseFormat(format)
 	if err != nil {
-		return "", err
+		return "", clierr.Usage(err)
 	}
 
 	selectedFormatter, err := resolveFormatter(data, parsed)
@@ -184,137 +206,6 @@ func (f yamlFormatter) Format(_ context.Context, data any) (string, error) {
 	return string(yamlBytes), nil
 }
 
-// tableFormatter 将数据输出为表格字符串。
-type tableFormatter struct{}
-
-// tableField 表格列的元信息
-type tableField struct {
-	// 结构体字段索引
-	index int
-	// 表头名称
-	header string
-}
-
-func (f tableFormatter) Format(_ context.Context, data any) (string, error) {
-	if data == nil {
-		return "null", nil
-	}
-
-	v := reflect.ValueOf(data)
-	if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
-		if v.Len() == 0 {
-			return "null", nil
-		}
-		items := make([]any, v.Len())
-		for i := 0; i < v.Len(); i++ {
-			items[i] = v.Index(i).Interface()
-		}
-		return f.asTable(items), nil
-	}
-	return f.asTable([]any{data}), nil
-}
-
-// asTable 将任意列表序列化为表格字符串
-// 带有 `table:"-"` tag 的字段会被跳过，不在表格中展示
-func (f tableFormatter) asTable(items []any) string {
-	if len(items) == 0 {
-		return "null"
-	}
-
-	// 解析字段元信息（基于第一个元素的类型）
-	fields := f.parseTableFields(reflect.TypeOf(items[0]))
-	if len(fields) == 0 {
-		return "null"
-	}
-
-	// 提取表头
-	headers := make([]string, len(fields))
-	for i, field := range fields {
-		headers[i] = field.header
-	}
-
-	// 提取行数据
-	rows := make([][]string, 0, len(items))
-	for _, item := range items {
-		v := reflect.ValueOf(item)
-		for v.Kind() == reflect.Ptr {
-			v = v.Elem()
-		}
-		row := make([]string, len(fields))
-		for i, field := range fields {
-			fieldVal := v.Field(field.index)
-			row[i] = f.formatFieldValue(fieldVal)
-		}
-		rows = append(rows, row)
-	}
-
-	builder := new(strings.Builder)
-	table := tw.NewTable(builder, tw.WithRendition(twtypes.Rendition{
-		Settings: twtypes.Settings{
-			Separators: twtypes.Separators{
-				BetweenRows: twtypes.On,
-			},
-		},
-	}))
-	table.Header(headers)
-	_ = table.Bulk(rows)
-	_ = table.Render()
-	return builder.String()
-}
-
-// parseTableFields 解析结构体类型，返回需要在表格中展示的字段列表
-func (f tableFormatter) parseTableFields(t reflect.Type) []tableField {
-	// 解引用指针类型
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	if t.Kind() != reflect.Struct {
-		return nil
-	}
-
-	fields := make([]tableField, 0, t.NumField())
-	for i := 0; i < t.NumField(); i++ {
-		sf := t.Field(i)
-		if sf.Tag.Get("table") == "-" {
-			continue
-		}
-		// 优先使用 json tag 作为表头（更贴近 API 语义），fallback 到字段名
-		header := sf.Name
-		if jsonTag := sf.Tag.Get("json"); jsonTag != "" && jsonTag != "-" {
-			if name, _, _ := strings.Cut(jsonTag, ","); name != "" {
-				header = name
-			}
-		}
-		fields = append(fields, tableField{index: i, header: header})
-	}
-	return fields
-}
-
-// formatFieldValue 格式化字段值用于表格展示
-// 对 slice/array 类型的字段，将每个元素用换行符分隔，使表格中多行展示
-func (f tableFormatter) formatFieldValue(v reflect.Value) string {
-	// 解引用指针
-	for v.Kind() == reflect.Ptr {
-		if v.IsNil() {
-			return ""
-		}
-		v = v.Elem()
-	}
-
-	if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
-		if v.Len() == 0 {
-			return ""
-		}
-		lines := make([]string, v.Len())
-		for i := 0; i < v.Len(); i++ {
-			lines[i] = fmt.Sprintf("%v", v.Index(i).Interface())
-		}
-		return strings.Join(lines, "\n")
-	}
-
-	return fmt.Sprintf("%v", v.Interface())
-}
-
 // jqFormatter 使用 jq 表达式从数据中提取并格式化输出。
 type jqFormatter struct {
 	expr string
@@ -322,7 +213,7 @@ type jqFormatter struct {
 
 func (f jqFormatter) Format(ctx context.Context, data any) (string, error) {
 	if strings.TrimSpace(f.expr) == "" {
-		return "", errors.Errorf("jq expression cannot be empty")
+		return "", clierr.Usagef("jq expression cannot be empty")
 	}
 	input, err := f.toInput(data)
 	if err != nil {
@@ -331,7 +222,7 @@ func (f jqFormatter) Format(ctx context.Context, data any) (string, error) {
 
 	query, err := gojq.Parse(f.expr)
 	if err != nil {
-		return "", errors.Wrap(err, "parse jq expression")
+		return "", clierr.Usage(errors.Wrap(err, "parse jq expression"))
 	}
 
 	iter := query.RunWithContext(ctx, input)

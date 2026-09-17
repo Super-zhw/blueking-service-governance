@@ -100,6 +100,7 @@ var _ = Describe("FeatureEnvService", func() {
 	It("creates feature environments from a standard source environment", func() {
 		app := dbfactory.Application(ctx, appStore)
 		sourceEnv := dbfactory.Env(ctx, envSvc, app.WorkspaceID)
+		sourceEnv.Cluster.IsFederation = true
 		firstNamespace := fmt.Sprintf("feat-%s-1", app.ID)
 		nsInitializer.EXPECT().Initialize(
 			ctx, sourceEnv.Cluster.ClusterID, firstNamespace, expectedOwnerLabels(app, firstNamespace),
@@ -169,6 +170,42 @@ var _ = Describe("FeatureEnvService", func() {
 		storedEnv, err := envStore.GetByName(ctx, app.WorkspaceID, app.ID, namespace)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(storedEnv.ID).To(Equal(featEnv.ID))
+	})
+
+	It("returns domain conflict error when creating a feature env with an occupied cluster namespace", func() {
+		app := dbfactory.Application(ctx, appStore)
+		sourceEnv := dbfactory.Env(ctx, envSvc, app.WorkspaceID)
+		occupiedNamespace := fmt.Sprintf("feat-%s-1", app.ID)
+		occupiedEnvName := "occupied-" + occupiedNamespace
+		occupiedWorkspaceID := "other-workspace-" + app.ID
+		_, err := envStore.Create(ctx, &model.Environment{
+			Name:        occupiedEnvName,
+			DisplayName: occupiedEnvName,
+			Type:        sourceEnv.Type,
+			WorkspaceID: occupiedWorkspaceID,
+			Cluster: model.BizCluster{
+				ProjectCode: sourceEnv.Cluster.ProjectCode,
+				ClusterID:   sourceEnv.Cluster.ClusterID,
+				ClusterType: sourceEnv.Cluster.ClusterType,
+				Namespace:   occupiedNamespace,
+			},
+		})
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = service.Create(ctx, bkmsenv.CreateFeatureEnvInput{
+			App:         app,
+			SourceEnv:   sourceEnv,
+			DisplayName: "联调",
+			Creator:     "alice",
+		})
+		Expect(bkmsenv.IsErrEnvClusterNamespaceOccupied(err)).To(BeTrue())
+
+		occupiedErr, ok := bkmsenv.GetEnvClusterNamespaceConflictInfo(err)
+		Expect(ok).To(BeTrue())
+		Expect(occupiedErr.ClusterID).To(Equal(sourceEnv.Cluster.ClusterID))
+		Expect(occupiedErr.Namespace).To(Equal(occupiedNamespace))
+		Expect(occupiedErr.OccupiedByEnvName).To(Equal(occupiedEnvName))
+		Expect(occupiedErr.OccupiedByWorkspaceID).To(Equal(occupiedWorkspaceID))
 	})
 
 	It("rejects feature environments as source environments", func() {

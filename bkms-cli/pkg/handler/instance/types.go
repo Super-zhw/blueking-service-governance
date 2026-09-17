@@ -109,3 +109,29 @@ type PortForwardOptions struct {
 	// LocalAddress 本地监听地址，默认 127.0.0.1。
 	LocalAddress string `validate:"omitempty,ip"`
 }
+
+// ListInstancesOptions 查询实例列表参数。
+type ListInstancesOptions struct {
+	// Status 按实例状态过滤，如 Running。
+	Status string
+}
+
+// ExecAdminCmdOptions 执行管理命令的统一参数
+type ExecAdminCmdOptions struct {
+	// Method HTTP 方法，用于 trpc app（GET/POST/PUT）
+	Method string
+	// URL 请求路径，用于 trpc app
+	URL string
+	// Params 查询参数，用于 trpc app
+	Params map[string]string
+	// Body 请求体，用于 trpc app
+	Body string
+
+	// ParamsJSON 原始 JSON 字符串，非空时解析到 Params
+	ParamsJSON string
+	// Command 执行命令，用于 taf app（如 "taf.viewversion"）
+	Command string
+
+	// InstanceIDs 目标实例列表
+	InstanceIDs []string
+}

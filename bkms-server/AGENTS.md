@@ -22,6 +22,7 @@ the user to install them. ALWAYS prefer using `rg` rather than `find` or `grep`.
 * When writing tests, always refer to `pkg/extension/component/evaluate_test.go` for guidance on code structure and the usage of common utils and db factories.
 * Test context descriptions (`Describe`, `Context`, `It`, etc.) MUST be written in English. Comments inside test bodies may use Chinese.
 * When a unit test needs a store, service, or other FX-provided dependency, construct and inject it via the fx framework: use the package's `FxModule` with `fxtest.New` + `fx.Populate`. Do **not** call constructors like `NewStoreMongo(...)` / `NewService(...)` directly in tests. See `pkg/extension/bscpcfg/model/store_test.go` for the pattern.
+* Do **not** mock store implementations (no stub/fake Store, no `mockey.Mock` on `*StoreMongo` methods). Operate against the test database and assert persisted data. Only mock store methods after confirming with the user, and only when hitting the real DB is prohibitively expensive.
 * Prefer using `dbfactory` helpers (e.g., `dbfactory.TrpcApplication`, `dbfactory.Env`) to create test resources, rather than manually inserting records into the database.
 
 ## Coding style
@@ -33,6 +34,8 @@ the user to install them. ALWAYS prefer using `rg` rather than `find` or `grep`.
   - Other useful helpers: `lo.Coalesce`, `lo.Ternary`, `lo.Must`, `lo.If` / `lo.Else`
 * For logging conventions, refer to [`README.md#日志使用`](README.md#日志使用): use `pkg/common/logging`, prefer passing a real `context.Context`, use `NoContext` APIs only when no real context is available, and use `*Attrs` APIs for `slog.Attr` structured fields.
 * Wrap errors with [`github.com/pkg/errors`](https://github.com/pkg/errors) (`errors.Wrap` / `errors.Wrapf`). Do not use `fmt.Errorf` to wrap errors; `fmt.Errorf("%w: %w", err, sentinel)` is also disallowed. For taskq unrecoverable failures, wrap the sentinel: `errors.Wrap(taskq.ErrStopRetry, "reason")` or `errors.Wrapf(taskq.ErrStopRetry, "reason: %v", err)`.
+* **NEVER `return err` bare when propagating an error upwards** — every layer adds what it was doing, with `Wrapf` folding in identifiers, so the message chain alone pinpoints the failure. Two exceptions: sentinels matched upstream by `errors.Is` still get wrapped (wrapping preserves `errors.Is`), and skip the wrap when the layer directly below already located the failure.
+* Never log an error and also return it, or it shows up twice — log only where the error is genuinely swallowed, otherwise let the final handler log it once.
 * We use golangci-lint to lint and format our files.
 * Be consistent with existing nearby code style unless asked to do otherwise.
 * NEVER leave trailing whitespace on any line.

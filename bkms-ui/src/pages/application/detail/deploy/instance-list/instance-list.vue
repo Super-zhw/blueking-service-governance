@@ -19,7 +19,7 @@
 <template>
   <Skeleton
     :full-height="false"
-    :loading="isLoading"
+    :loading="isLoading || !isFederationResolved"
   >
     <template #loading>
       <div class="flex items-center justify-between mb-[12px]">
@@ -37,6 +37,8 @@
         :can-gray-deploy="canGrayDeploy"
         :disable-admin-command="isCrossPageSelection"
         :disable-delete="isCrossPageSelection"
+        :disable-gray="isFederationEnv"
+        :gray-disabled-tip="isFederationEnv ? $t('联邦集群不支持灰度操作') : ''"
         :is-all-instances-selected="isAllInstancesSelected"
         :selected-count="selectedCount"
         show-remove-deploy-shortcut
@@ -67,12 +69,10 @@
       :enable-max-height="false"
       :env-name="trpcDeployStore.curEnvItem?.name || ''"
       :filter-options="filterOptions"
+      :is-federation="isFederationEnv"
       mode="single"
       show-filter
-      :total-count="total"
       @filter-change="handleFilterChange"
-      @page-change="handlePageChange"
-      @page-size-change="handlePageSizeChange"
       @row-action="handleRowAction"
     >
       <template #empty>
@@ -89,13 +89,13 @@
   <InstanceActionsHost ref="actionsHostRef" />
 </template>
 <script lang="ts" setup>
-  import { computed, onBeforeUnmount, ref, watch } from 'vue';
+  import { computed, ref, watch } from 'vue';
 
   import { SearchSelect } from 'bkui-vue';
   import { useI18n } from 'vue-i18n';
   import { AppInstanceOutputObj } from '~/@types/v1/instance';
-  import { InstanceService } from '~/api/modules/v1';
   import Layout from '~/components/skeleton/skeleton-layout';
+  import useIsFederationEnv from '~/composables/use-is-federation-env';
   import useSearchFilter from '~/composables/use-search-filter';
   import { useSearchPlaceholder } from '~/composables/use-search-placeholder';
   import useTableEmpty from '~/composables/use-table-empty';
@@ -105,9 +105,12 @@
   import InstanceActionsHost from './components/instance-actions-host.vue';
   import InstanceBatchToolbar from './components/instance-batch-toolbar.vue';
   import InstanceTable from './components/instance-table.vue';
+  import { resolveInstanceSourceMode } from './composables/instance-watch-utils';
   import { useInstanceListController } from './composables/use-instance-list-controller';
+  import { useInstanceListWatch } from './composables/use-instance-list-watch';
   import { isPolarisHealthy } from './instance-utils';
 
+  import type { InstanceListSourceMode } from './types';
   import type { ISearchValue } from 'bkui-vue/lib/search-select/utils';
 
   const props = defineProps<{
@@ -125,11 +128,31 @@
 
   // 部署列表
   const instanceTableRef = ref<InstanceType<typeof InstanceTable> | null>(null);
-  const isLoading = ref(false);
-  const instanceList = ref<AppInstanceOutputObj[]>([]);
-  const total = ref(0);
-  const paginationCurrent = ref(1);
-  const paginationLimit = ref(10);
+  const isFederationEnv = useIsFederationEnv(() => trpcDeployStore.curEnvItem);
+  // 联邦标识由环境信息异步补齐；未确定前不把环境误判为普通集群而建立 Watch。
+  const isFederationResolved = computed(() => typeof trpcDeployStore.curEnvItem?.cluster?.isFederation === 'boolean');
+
+  /** 单环境联邦回退轮询，其它环境继续使用 Watch。 */
+  function getInstanceListSourceMode(): InstanceListSourceMode {
+    return resolveInstanceSourceMode(isFederationEnv.value);
+  }
+
+  const {
+    clear: clearInstanceList,
+    instances: instanceList,
+    isInitialLoading: isLoading,
+    lastError: instanceListError,
+    refresh: handleListReleaseInstances,
+    stop: stopInstanceWatch,
+  } = useInstanceListWatch({
+    // 环境集群信息就绪后才按联邦/普通模式建立数据源，避免联邦环境首屏误发 Watch。
+    enabled: () => Boolean(props.hasDeployRecord) && isFederationResolved.value,
+    getMode: getInstanceListSourceMode,
+    getScope: () => ({
+      appID: appDetailStore.appID,
+      envName: trpcDeployStore.curEnvItem?.name || '',
+    }),
+  });
 
   const isCrossPageSelection = computed(() => instanceTableRef.value?.isCrossPageSelection ?? false);
 
@@ -147,77 +170,38 @@
     return instanceTableRef.value?.getSelections?.() ?? [];
   }
 
-  const { canGrayDeploy, handleRowAction, instanceActions, startPolling, stopPolling, timer } =
-    useInstanceListController({
-      actionsHostRef,
-      beforeRowAction: payload => {
-        if (payload.action === 'gray') {
-          instanceTableRef.value?.clearSelections?.();
-        }
-      },
-      pollInterval: 5000,
-      getEnvName: () => trpcDeployStore.curEnvItem?.name || '',
-      getSelectedInstances,
-      selectedCount,
-      isAllInstancesSelected,
-      clearSelections,
-      refreshData: handleListReleaseInstances,
-      grayEnvDisplayName: () => trpcDeployStore.curEnvItem?.displayName || '',
-      commandEnvDisplayName: () => trpcDeployStore.curEnvItem?.displayName || '',
-      resolveGrayInstanceIds: () => {
-        const table = instanceTableRef.value;
-        if (!table) return undefined;
-        const isReallySelectAll = table.isCrossPageSelection && table.selectedCount === table.getTotal();
-        return isReallySelectAll ? [] : undefined;
-      },
-    });
+  /** 是否存在生效的筛选条件（SearchSelect 与列筛选均同步到 searchValue） */
+  const isFiltered = computed(() => searchValue.value.some(filter => filter.values?.length));
 
-  // 加载实例列表数据
-  async function handleListReleaseInstances() {
-    try {
-      isLoading.value = true;
-
-      if (!appDetailStore.app || !trpcDeployStore.curEnvItem?.name) return;
-      const res = await InstanceService.listAppInstances({
-        appID: appDetailStore.appID,
-        envName: trpcDeployStore.curEnvItem?.name,
-        page: paginationCurrent.value,
-        pageSize: paginationLimit.value,
-      }).catch(() => {
-        clearSelections();
-        setTypeToError();
-        return { count: 0, results: [] };
-      });
-
-      clearErrorType();
-      total.value = Number(res.count);
-      instanceList.value = (res.results || []) as AppInstanceOutputObj[];
-
-      // 动态更新筛选项（镜像 Tag、健康状态、北极星状态）
-      updateDynamicFilterChildren(instanceList.value);
-    } catch (err) {
-      console.error(err);
-      setTypeToError();
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // 分页事件处理
-  function handlePageChange(current: number) {
-    paginationCurrent.value = current;
-    handleListReleaseInstances();
-  }
-
-  // 处理每页条数切换并重置到第一页。
-  function handlePageSizeChange(limit: number) {
-    paginationCurrent.value = 1;
-    paginationLimit.value = limit;
-    handleListReleaseInstances();
-  }
+  const { canGrayDeploy, handleRowAction, instanceActions } = useInstanceListController({
+    actionsHostRef,
+    beforeRowAction: payload => {
+      if (payload.action === 'gray') {
+        instanceTableRef.value?.clearSelections?.();
+      }
+    },
+    getEnvName: () => trpcDeployStore.curEnvItem?.name || '',
+    getSelectedInstances,
+    selectedCount,
+    isAllInstancesSelected,
+    clearSelections,
+    refreshData: handleListReleaseInstances,
+    grayEnvDisplayName: () => trpcDeployStore.curEnvItem?.displayName || '',
+    commandEnvDisplayName: () => trpcDeployStore.curEnvItem?.displayName || '',
+    resolveGrayInstanceIds: () => {
+      const table = instanceTableRef.value;
+      if (!table) return undefined;
+      const isReallySelectAll = table.isCrossPageSelection && table.selectedCount === table.getTotal();
+      // 仅未筛选时整环境全选用 [] 表示后端全量灰度；筛选后 getTotal() 为筛选长度，
+      // 用 [] 会误伤未筛中的实例，故回退 undefined（上层按实际选中 id 下发）。
+      if (isReallySelectAll && !isFiltered.value) return [];
+      return undefined;
+    },
+  });
 
   // 灰度：需要处理跨页全选的特殊逻辑
   function handleShowGrayUpgrade(row?: AppInstanceOutputObj) {
+    if (isFederationEnv.value) return;
     if (row) {
       instanceTableRef.value?.clearSelections?.();
     }
@@ -381,6 +365,23 @@
     filters: searchValue,
   });
 
+  watch(
+    instanceList,
+    instances => {
+      updateDynamicFilterChildren(instances);
+    },
+    { deep: true, immediate: true },
+  );
+
+  watch(instanceListError, error => {
+    if (error && instanceList.value.length === 0) {
+      clearSelections();
+      setTypeToError();
+    } else if (!error) {
+      clearErrorType();
+    }
+  });
+
   // 清除所有筛选条件
   // 清空搜索组件和表格列筛选状态。
   function handleClearFilters() {
@@ -395,14 +396,12 @@
   }
   // 重置实例列表
   function resetInstanceList() {
-    stopPolling();
+    stopInstanceWatch();
     clearSelections();
-    total.value = 0;
-    instanceList.value = [];
+    clearInstanceList();
     updateDynamicFilterChildren([]);
   }
   function resetPagination() {
-    paginationCurrent.value = 1;
     instanceTableRef.value?.resetPage?.();
   }
 
@@ -420,24 +419,15 @@
   );
 
   watch(
-    [() => appDetailStore.appID, () => trpcDeployStore.curEnvItem?.name, () => props?.hasDeployRecord],
-    async () => {
-      // 如果当前环境没有部署记录，则清空旧数据并停止轮询，避免移除部署后继续展示上一次实例列表。
+    () => props?.hasDeployRecord,
+    () => {
+      // 如果当前环境没有部署记录，则清空旧数据并停止 Watch，避免继续展示上一次实例列表。
       if (!props?.hasDeployRecord) {
         resetInstanceList();
-        return;
-      }
-      await handleListReleaseInstances();
-      if (!timer.value) {
-        startPolling();
       }
     },
     { immediate: true },
   );
-
-  onBeforeUnmount(() => {
-    stopPolling();
-  });
 
   defineExpose({
     handleListReleaseInstances,

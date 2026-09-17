@@ -76,8 +76,8 @@ type gpaStatusRaw struct {
 }
 
 // buildGPAManifest 将 GPAConfig 转换为 GeneralPodAutoscaler CR 的 k8s manifest。
-// scaleTargetName 为该应用在对应环境部署生成的工作负载名（固定 kind=GameDeployment）。
-// 指标模式（spec.metric）与定时模式（spec.time）按是否配置分别输出。
+// scaleTargetName 为该应用在对应环境部署生成的工作负载名。
+// scaleTargetRef 固定指向 GameDeployment；联邦环境本期不支持 GPA，不会走到此函数。
 func buildGPAManifest(config *GPAConfig, workspaceID, envName, scaleTargetName string) map[string]any {
 	spec := map[string]any{
 		"minReplicas": config.MinReplicas,

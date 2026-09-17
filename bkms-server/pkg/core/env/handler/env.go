@@ -100,23 +100,28 @@ func (h *Handler) CreateEnv(c *gin.Context) {
 	// 创建环境(包括内置环境变量)
 	creator := auth.MustGetUser(ctx).ID
 	svc := bkmsenv.NewEnvService(h.registry.EnvStore)
-
-	envID, err := svc.Create(ctx, &envmodel.Environment{
+	envData := &envmodel.Environment{
 		Name:        input.Name,
 		WorkspaceID: ws.ID,
 		Type:        input.Type,
 		DisplayName: input.DisplayName,
 		Description: input.Description,
 		Cluster: envmodel.BizCluster{
-			ProjectCode: ws.BkSystems.BkBCSProjectCode,
-			ClusterID:   input.Cluster.ClusterID,
-			ClusterType: input.Cluster.ClusterType,
-			Namespace:   input.Cluster.Namespace,
+			ProjectCode:  ws.BkSystems.BkBCSProjectCode,
+			ClusterID:    input.Cluster.ClusterID,
+			ClusterType:  input.Cluster.ClusterType,
+			Namespace:    input.Cluster.Namespace,
+			IsFederation: bkmsenv.IsFederationCluster(input.Cluster.ClusterID),
 		},
 		Creator: creator,
-	})
+	}
+
+	envID, err := svc.Create(ctx, envData)
 	if err != nil {
 		metrics.CreateEnvFailed(ws.ID, input.Name)
+		if abortIfEnvClusterNamespaceOccupied(c, err) {
+			return
+		}
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInvalidRequest, "create env %s", input.Name))
 		return
 	}
@@ -142,7 +147,7 @@ func (h *Handler) CreateEnv(c *gin.Context) {
 				return
 			}
 			// APM 创建成功后，异步将 workspace 下 admin/sre 人员同步到新告警组（内部自带重试与延迟）
-			go bkmonitor.NewUserGroupService(perm.NewManager(), h.registry.EnvStore).SyncMembersForEnvWithRetry(
+			go bkmonitor.NewUserGroupService(h.registry.EnvStore).SyncMembersForEnvWithRetry(
 				ctx, ws, input.Name, creator,
 			)
 		} else {
@@ -227,6 +232,9 @@ func (h *Handler) CreateFeatureEnv(c *gin.Context) {
 		Creator:     auth.MustGetUser(ctx).ID,
 	})
 	if err != nil {
+		if abortIfEnvClusterNamespaceOccupied(c, err) {
+			return
+		}
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "create feature environment"))
 		return
 	}
@@ -507,8 +515,10 @@ func (h *Handler) UpdateEnvCluster(c *gin.Context) {
 
 	updateData := &envmodel.EnvironmentUpdateData{}
 	if input.ClusterID != "" {
+		isFederation := bkmsenv.IsFederationCluster(input.ClusterID)
 		updateData.ClusterID = &input.ClusterID
 		updateData.ClusterType = &input.ClusterType
+		updateData.IsFederation = &isFederation
 	}
 	if input.Namespace != "" {
 		updateData.Namespace = &input.Namespace
@@ -516,6 +526,9 @@ func (h *Handler) UpdateEnvCluster(c *gin.Context) {
 
 	svc := bkmsenv.NewEnvService(h.registry.EnvStore)
 	if err = svc.Update(ctx, env.ID, updateData); err != nil {
+		if abortIfEnvClusterNamespaceOccupied(c, err) {
+			return
+		}
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "update env cluster"))
 		return
 	}
@@ -626,4 +639,15 @@ func (h *Handler) ListEnvTrafficLanes(c *gin.Context) {
 		}),
 	},
 	)
+}
+
+func abortIfEnvClusterNamespaceOccupied(c *gin.Context, err error) bool {
+	info, ok := bkmsenv.GetEnvClusterNamespaceConflictInfo(err)
+	if !ok {
+		return false
+	}
+	bkerrs.AbortWithErr(c, bkerrs.WrapEnvClusterNamespaceOccupied(
+		info.ClusterID, info.Namespace, info.OccupiedByEnvName, info.OccupiedByWorkspaceID,
+	))
+	return true
 }

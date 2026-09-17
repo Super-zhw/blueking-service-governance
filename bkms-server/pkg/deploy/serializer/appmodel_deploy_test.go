@@ -27,6 +27,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/autodeploy"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/clusteraddon"
 	deploypkg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/serializer"
@@ -34,9 +35,9 @@ import (
 )
 
 var _ = Describe("AppModel deploy serializers", func() {
-	Describe("EnvVarPreCheckOutput", func() {
+	Describe("DeployPreCheckOutput", func() {
 		It("converts undefined vars and their sources", func() {
-			output := new(serializer.EnvVarPreCheckOutput).FromModel(&deploypkg.EnvVarPreCheckResult{
+			output := new(serializer.DeployPreCheckOutput).FromModel(&deploypkg.DeployPreCheckResult{
 				UndefinedVars: []envvarrefs.UndefinedEnvVar{
 					{
 						Key: "DB_HOST",
@@ -48,7 +49,7 @@ var _ = Describe("AppModel deploy serializers", func() {
 				},
 			})
 
-			Expect(output).To(Equal(&serializer.EnvVarPreCheckOutput{
+			Expect(output).To(Equal(&serializer.DeployPreCheckOutput{
 				UndefinedVars: []serializer.UndefinedEnvVarOutput{
 					{
 						Key: "DB_HOST",
@@ -58,17 +59,33 @@ var _ = Describe("AppModel deploy serializers", func() {
 						},
 					},
 				},
+				MissingRequiredClusterAddons: []serializer.ClusterAddonReferenceOutput{},
 			}))
 		})
 
-		It("serializes empty undefined vars as an empty array", func() {
-			output := new(serializer.EnvVarPreCheckOutput).FromModel(&deploypkg.EnvVarPreCheckResult{})
-
-			Expect(output.UndefinedVars).To(BeEmpty())
-			Expect(output.UndefinedVars).NotTo(BeNil())
+		It("converts missing required cluster addon names", func() {
+			output := new(serializer.DeployPreCheckOutput).FromModel(&deploypkg.DeployPreCheckResult{
+				MissingRequiredClusterAddons: []clusteraddon.AddonReference{
+					{Name: "game", DisplayName: "Gamedeploy"},
+					{Name: "hook", DisplayName: "Hook-operator"},
+					{Name: "other"},
+				},
+			})
 			payload, err := json.Marshal(output)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(payload).To(MatchJSON(`{"undefinedVars":[]}`))
+			Expect(payload).To(MatchJSON(`{"undefinedVars":[],"missingRequiredClusterAddons":[
+				{"name":"game","displayName":"Gamedeploy"},
+				{"name":"hook","displayName":"Hook-operator"},
+				{"name":"other","displayName":""}
+			]}`))
+		})
+
+		It("serializes empty undefined vars as an empty array", func() {
+			output := new(serializer.DeployPreCheckOutput).FromModel(&deploypkg.DeployPreCheckResult{})
+
+			payload, err := json.Marshal(output)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(payload).To(MatchJSON(`{"undefinedVars":[],"missingRequiredClusterAddons":[]}`))
 		})
 	})
 
@@ -119,14 +136,15 @@ var _ = Describe("AppModel deploy serializers", func() {
 	Describe("AppModelDeployRecordOutputObj", func() {
 		It("reads build info directly from deploy record extras", func() {
 			output := new(serializer.AppModelDeployRecordOutputObj).FromModel(appmodeldeploy.Record{
-				ID:        bson.NewObjectID(),
-				ClusterID: "cls-1",
-				Namespace: "default",
-				ImageTag:  "v1.0.0",
-				Replicas:  3,
-				Message:   "deploying",
-				Status:    appmodeldeploy.StatusDeploying,
-				Updater:   "tester",
+				ID:           bson.NewObjectID(),
+				ClusterID:    "cls-1",
+				Namespace:    "default",
+				ImageTag:     "v1.0.0",
+				Replicas:     3,
+				WorkloadKind: "Deployment",
+				Message:      "deploying",
+				Status:       appmodeldeploy.StatusDeploying,
+				Updater:      "tester",
 				Extras: map[string]string{
 					appmodeldeploy.ExtraKeyDeploySource:  appmodeldeploy.DeploySourceBuildAutoDeploy,
 					appmodeldeploy.ExtraKeyBuildBranch:   "release",
@@ -137,7 +155,22 @@ var _ = Describe("AppModel deploy serializers", func() {
 			Expect(output.IsBuildAutoDeploy).To(BeTrue())
 			Expect(output.DeploySource).To(Equal(appmodeldeploy.DeploySourceBuildAutoDeploy))
 			Expect(output.Branch).To(Equal("release"))
+			Expect(output.Replicas).To(Equal(int32(3)))
+			Expect(output.WorkloadKind).To(Equal("Deployment"))
 			Expect(output.CommitID).To(Equal("commit-123"))
+		})
+
+		It("infers WorkloadKind from ResourceKeys when the field is empty", func() {
+			output := new(serializer.AppModelDeployRecordOutputObj).FromModel(appmodeldeploy.Record{
+				ID:        bson.NewObjectID(),
+				ClusterID: "cls-1",
+				Namespace: "default",
+				ResourceKeys: appmodeldeploy.ResourceKeys{
+					{Kind: "Service", Name: "demo"},
+					{Kind: "GameDeployment", Name: "demo"},
+				},
+			})
+			Expect(output.WorkloadKind).To(Equal("GameDeployment"))
 		})
 	})
 

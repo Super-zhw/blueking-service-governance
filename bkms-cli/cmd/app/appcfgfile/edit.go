@@ -36,9 +36,8 @@ func NewEditCmd() *cobra.Command {
 	var viewCompiledContent bool
 
 	cmd := &cobra.Command{
-		Use:    "edit",
-		Short:  "Edit application config file content",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "edit",
+		Short: "Edit application config file content",
 		Long: `Edit the application config file content selected by app and environment.
 
 When --env is omitted, this command edits the default application-level config.
@@ -58,6 +57,7 @@ When an application has multiple config files in the same environment, use --nam
 
   # Show compiled content after updating
   bkms-cli app app-cfg-file edit --app demo --env prod -f values-prod.yaml --view-compiled-content`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			content, err := resolveEditContent(cmd, filePath, fileContent)
 			if err != nil {
@@ -88,7 +88,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,

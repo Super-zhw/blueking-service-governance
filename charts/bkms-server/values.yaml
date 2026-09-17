@@ -35,18 +35,6 @@ externalRedis:
     readTimeout: 2
     writeTimeout: 2
 
-## RabbitMQ 相关配置，主要用于消息队列
-externalRabbitMQ:
-  ## 主 RabbitMQ
-  default:
-    host: localhost
-    port: 5672
-    username: guest
-    password: masked
-    vhost: bkms-server
-    queue: bkms-server.worker.async-task
-    prefetch: 25
-
 ## ------------------------------ 部署配置 ------------------------------
 
 ## Web 服务
@@ -251,6 +239,8 @@ svcConf:
   bcs:
     baseUrl: https://bcs-api.example.com
     token: masked
+    # 联邦 Host 集群 ID 列表。创建/更新环境时 clusterID 命中则视为联邦集群，部署使用原生 Deployment
+    federationClusterIDs: []
   # 蓝盾配置，用于项目初始化 & 流水线模板加载
   bkci:
     # 流水线模板存放目录
@@ -280,10 +270,8 @@ svcConf:
         endpointTmpl: "http://helm.bkrepo.example.com/api/%s/%s/charts"
   # 蓝鲸监控 APM 配置，供 Gin/HTTP APM 上报以及绑定 APM 时向业务应用下发环境变量使用
   bkMonitor:
-    # 旧版 bkmonitorv3 网关地址，供存量接口使用
-    endpoint: ""
-    # 新版 bk-monitor 网关地址，供新增接口（如 user group）使用
-    newGatewayEndpoint: ""
+    # bk-monitor 统一网关地址
+    gatewayEndpoint: ""
     # bkms-server 自身上报 trace 使用的 APM Endpoint：值带 http/https scheme 时按 HTTP OTLP 处理，
     # 否则按 gRPC OTLP 处理
     apmEndpoint: 127.0.0.1:11800

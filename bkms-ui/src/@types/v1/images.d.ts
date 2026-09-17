@@ -134,6 +134,51 @@ export interface ListPlatformBuildImageTagsRequest {
   pageSize: number;
 }
 
+export interface ListCustomBuildImagesRequest {
+  /**
+   * 工作空间 ID
+   */
+  workspaceID: string;
+  /**
+   * 镜像类型：builder / runner
+   */
+  type: string;
+  /**
+   * 搜索关键字
+   */
+  keyword?: string;
+}
+
+export interface ListCustomBuildImageTagsRequest {
+  /**
+   * 工作空间 ID
+   */
+  workspaceID: string;
+  /**
+   * 镜像完整仓库名称，含仓库前缀且不带 tag
+   */
+  name: string;
+  /**
+   * 搜索关键字
+   */
+  keyword?: string;
+  /**
+   * 分页参数：页码，从 1 开始
+   */
+  page: number;
+  /**
+   * 分页参数：每页数量，支持 5/10/20/50/100
+   */
+  pageSize: number;
+}
+
+export type RefreshCustomBuildImageTagsRequest = RefreshCustomRuntimeImageTagsInput & {
+  /**
+   * 工作空间 ID
+   */
+  workspaceID: string;
+};
+
 export interface ListDeployableImageTagsOutput {
   data?: PaginatedDeployableImageTagOutputObjs;
 }
@@ -165,7 +210,45 @@ export interface ListRuntimeImageTagsOutput {
   data?: PaginatedRuntimeImageTagOutputObjs;
 }
 
-export interface PaginatedRuntimeImageTagOutputObjs {
+export interface ListCustomRuntimeImagesOutput {
+  data?: CustomRuntimeImagesOutputObjs;
+}
+
+export interface ListCustomRuntimeImageTagsOutput {
+  data?: PaginatedCustomRuntimeImageTagOutputObjs;
+}
+
+export interface RefreshCustomRuntimeImageTagsInput {
+  /**
+   * 镜像完整仓库名称，含仓库前缀且不包含 tag 或 digest
+   */
+  name: string;
+}
+
+export interface RefreshCustomRuntimeImageTagsOutput {
+  data?: RefreshResultInfoOutputObj;
+}
+
+export interface RefreshResultInfoOutputObj {
+  /**
+   * 本次新增标签数量
+   */
+  addedTagCnt?: string;
+  /**
+   * 提示信息
+   */
+  message?: string;
+  /**
+   * 本次删除标签数量
+   */
+  removedTagCnt?: string;
+  /**
+   * 刷新状态：success / refreshing（已有刷新在进行中）/ failed
+   */
+  status?: string;
+}
+
+export interface PaginatedCustomRuntimeImageTagOutputObjs {
   /**
    * 满足条件的总记录数
    */
@@ -173,14 +256,14 @@ export interface PaginatedRuntimeImageTagOutputObjs {
   /**
    * 当前页的镜像 TAG 列表
    */
-  results?: RuntimeImageTagOutputObj[];
+  results?: CustomRuntimeImageTagOutputObj[];
   /**
-   * 快照状态信息
+   * 快照状态信息，手动输入且尚无快照记录时 refreshStatus 为 idle
    */
   snapshotStatus?: SnapshotStatusInfoOutputObj;
 }
 
-export interface RuntimeImageTagOutputObj {
+export interface CustomRuntimeImageTagOutputObj {
   /**
    * 镜像构建时间
    */
@@ -220,6 +303,67 @@ export interface SnapshotStatusInfoOutputObj {
    * 仓库实例唯一标识，便于排查问题
    */
   repoKey?: string;
+}
+
+export interface CustomRuntimeImagesOutputObjs {
+  results?: CustomRuntimeImageOutputObj[];
+}
+
+export interface CustomRuntimeImageOutputObj {
+  /**
+   * 创建时间
+   */
+  createdAt?: string;
+  /**
+   * 记录 ID
+   */
+  id?: string;
+  /**
+   * 镜像仓库名称，含仓库前缀，不包含 tag
+   */
+  name?: string;
+  /**
+   * 镜像类型
+   */
+  type?: string;
+  /**
+   * 更新时间
+   */
+  updatedAt?: string;
+}
+
+export interface PaginatedRuntimeImageTagOutputObjs {
+  /**
+   * 满足条件的总记录数
+   */
+  count?: string;
+  /**
+   * 当前页的镜像 TAG 列表
+   */
+  results?: RuntimeImageTagOutputObj[];
+  /**
+   * 快照状态信息
+   */
+  snapshotStatus?: SnapshotStatusInfoOutputObj;
+}
+
+export interface RuntimeImageTagOutputObj {
+  /**
+   * 镜像构建时间
+   */
+  builtAt?: string;
+  /**
+   * 摘要
+   */
+  digest?: string;
+  /**
+   * 镜像大小
+   */
+  size?: string;
+  /**
+   * 镜像标签名
+   */
+  tag?: string;
 }
 
 export interface RuntimeImagesOutputObjs {
@@ -306,25 +450,6 @@ export interface ImageTagDeployRecordOutputObj {
   operator?: string;
   /**
    * 部署状态
-   */
-  status?: string;
-}
-
-export interface RefreshResultInfoOutputObj {
-  /**
-   * 本次新增标签数量
-   */
-  addedTagCnt?: string;
-  /**
-   * 提示信息
-   */
-  message?: string;
-  /**
-   * 本次删除标签数量
-   */
-  removedTagCnt?: string;
-  /**
-   * 刷新状态：success / refreshing（已有刷新在进行中）/ failed
    */
   status?: string;
 }

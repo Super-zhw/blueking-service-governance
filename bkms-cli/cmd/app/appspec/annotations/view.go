@@ -32,9 +32,8 @@ func NewViewCmd() *cobra.Command {
 	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View annotations configuration",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View annotations configuration",
 		Long: `View the Kubernetes annotations configuration for the application.
 
 When --env is omitted, this command views the default application-level annotations.
@@ -47,14 +46,15 @@ When --env is provided, this command views the effective annotations for that en
 
   # Output in JSON format
   bkms-cli app appspec annotations view --app my-app -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return appspec.ViewHandler(cmd.Context(), appID, envName, client.AppSpecSectionAnnotations, outputFormat)
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

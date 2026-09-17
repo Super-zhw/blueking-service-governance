@@ -63,7 +63,7 @@ Use -f to write it to a file.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 	cmd.Flags().StringVarP(&filePath, "file", "f", "", "output file path (default: stdout)")
 

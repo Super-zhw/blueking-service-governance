@@ -168,6 +168,20 @@ func (s *StubClient) ListApmApp(ctx context.Context, bkBizID int64) ([]*ApmApp, 
 	return s.allApps(), nil
 }
 
+// UpdateApmServiceConfig 模拟更新 APM 服务配置
+func (s *StubClient) UpdateApmServiceConfig(ctx context.Context, req *UpdateApmServiceConfigReq) error {
+	log.Infof(
+		ctx,
+		"Stub: UpdateApmServiceConfig request: bkBizID=%d, appName=%s, serviceName=%s, owners=%v, k8sRelations=%v",
+		req.BkBizID,
+		req.AppName,
+		req.ServiceName,
+		req.Owners,
+		req.IncrementalK8sRelations,
+	)
+	return nil
+}
+
 // allApps 返回固定列表 + 动态创建列表的合集
 func (s *StubClient) allApps() []*ApmApp {
 	stubDynamicAppsMu.Lock()
@@ -265,23 +279,6 @@ func cloneStubUserGroupDetail(detail *UserGroupDetail) *UserGroupDetail {
 		copy(result.DutyRules, detail.DutyRules)
 	}
 	return &result
-}
-
-// ListMetadataSpaceByUID 模拟根据 space_uid 获取空间
-func (s *StubClient) ListMetadataSpaceByUID(ctx context.Context, uid string) (*Space, error) {
-	log.Infof(ctx, "Stub: ListMetadataSpaceByUID request: uid=%s", uid)
-	return &Space{
-		ID:          -100001,
-		SpaceTypeID: "bkci",
-		SpaceID:     "stub-project-a",
-		SpaceCode:   "stub0001stub0001stub0001stub0001",
-		SpaceName:   "Stub 项目 A",
-		SpaceUid:    uid,
-		IsBcsValid:  true,
-		Status:      "normal",
-		Creator:     "stub-user",
-		CreatedAt:   "2026-01-01 00:00:00",
-	}, nil
 }
 
 // GetMetadataSpaceDetail 模拟获取空间详情
@@ -511,4 +508,72 @@ func (s *StubClient) GetAlertDetail(ctx context.Context, req *AlertDetailReq) (m
 		"dimensions":    []map[string]any{{"key": "pod", "value": "stub-pod-1"}},
 		"related_info":  map[string]any{"cluster": "stub-cluster"},
 	}, nil
+}
+
+// GetDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
+func (s *StubClient) GetDashboardDirectoryTree(ctx context.Context, bkBizID int64) ([]*DashboardDirectoryNode, error) {
+	log.Infof(ctx, "Stub: GetDashboardDirectoryTree request: bkBizID=%d", bkBizID)
+	return []*DashboardDirectoryNode{
+		{
+			ID:    0,
+			UID:   "",
+			Title: "General",
+			Dashboards: []DashboardItem{
+				{
+					ID:            1001,
+					UID:           "test-dashboard-uid-1",
+					Title:         "test dashboard",
+					URI:           "db/test-dashboard",
+					URL:           "/grafana/d/test-dashboard-uid-1/test-dashboard",
+					Slug:          "test-dashboard",
+					Tags:          []string{"test"},
+					Editable:      true,
+					HasPermission: true,
+				},
+			},
+		},
+		{
+			ID:    2001,
+			UID:   "test-folder-uid-1",
+			Title: "test folder",
+			URI:   "db/test-folder",
+			URL:   "/grafana/dashboards/f/test-folder-uid-1/test-folder",
+			Dashboards: []DashboardItem{
+				{
+					ID:            2002,
+					UID:           "test-dashboard-uid-2",
+					Title:         "example-dashboard",
+					URI:           "db/example-dashboard",
+					URL:           "/grafana/d/test-dashboard-uid-2/example-dashboard",
+					Slug:          "example-dashboard",
+					Tags:          []string{"example"},
+					Editable:      true,
+					HasPermission: true,
+				},
+			},
+			HasFolderPermission: true,
+		},
+	}, nil
+}
+
+// GetDashboardDetail 模拟获取仪表盘详情，未知 uid 返回 (nil, nil)。
+func (s *StubClient) GetDashboardDetail(
+	ctx context.Context,
+	bkBizID int64,
+	dashboardUID string,
+) (*DashboardDetail, error) {
+	log.Infof(ctx, "Stub: GetDashboardDetail request: bkBizID=%d, uid=%s", bkBizID, dashboardUID)
+	switch dashboardUID {
+	case "test-dashboard-uid-1":
+		return &DashboardDetail{ID: 1001, UID: dashboardUID, Title: "test dashboard", Slug: "test-dashboard"}, nil
+	case "test-dashboard-uid-2":
+		return &DashboardDetail{
+			ID:    2002,
+			UID:   dashboardUID,
+			Title: "example-dashboard",
+			Slug:  "example-dashboard",
+		}, nil
+	default:
+		return nil, nil
+	}
 }

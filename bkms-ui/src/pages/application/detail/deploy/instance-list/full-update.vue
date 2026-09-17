@@ -45,6 +45,26 @@
         :model="formModel"
       >
         <Form.FormItem
+          :label="$t('实例数')"
+          property="replicas"
+          required
+          :rules="replicasRules"
+        >
+          <Input
+            v-model.number="formModel.replicas"
+            :min="1"
+            :precision="0"
+            type="number"
+          />
+          <div
+            v-if="hasInvalidEffectiveReplicas"
+            class="mt-[4px] text-[12px] leading-[20px] text-[#979BA5]"
+          >
+            {{ $t('实例删除后副本数已变为 0，请填写期望实例数后重新部署') }}
+          </div>
+        </Form.FormItem>
+
+        <Form.FormItem
           :label="$t('更新内容')"
           required
         >
@@ -90,7 +110,13 @@
             property="branch"
             required
           >
-            <Input v-model.trim="formModel.branch" />
+            <RepoRefSelect
+              ref="branchSelectRef"
+              v-model="formModel.branch"
+              :repository-id="repoAlias"
+              :workspace-id="workspaceId"
+              @branch-commit="handleBranchSelect"
+            />
           </Form.FormItem>
           <Form.FormItem
             :label="$t('镜像 Tag')"
@@ -183,6 +209,7 @@
   import { Alert, Button, Form, Input, Message, Radio, Sideslider } from 'bkui-vue';
   import { useI18n } from 'vue-i18n';
   import { InstanceService } from '~/api/modules/v1';
+  import { useAppRepoRefSelect } from '~/composables/use-app-repo-ref-select';
   import useLeaveConfirm from '~/composables/use-leave-confirm';
   import { useRecommendTag } from '~/composables/use-recommend-tag';
   import ImageSelect from '~/pages/application/components/image-select.vue';
@@ -211,6 +238,11 @@
   const { t } = useI18n();
   const trpcDeployStore = useTrpcDeployStore();
   const appDetailStore = useAppDetail();
+
+  const { workspaceId, repoAlias, branchSelectRef, prepareBranchAfterMount } = useAppRepoRefSelect(
+    () => appDetailStore.appDetail?.buildConfig?.repoBuildConfig?.repoAlias || '',
+  );
+
   const imageSource = ref<ImageSourceType>('image');
   const formRef = ref();
   const imageSelectRef = ref();
@@ -218,6 +250,7 @@
     branch: string;
     deployType: 'InplaceUpdate' | 'RollingUpdate';
     imageTag: string;
+    replicas?: number;
     updateContent: 'both' | 'config' | 'image';
   }>({
     branch: '',
@@ -228,13 +261,34 @@
   // 切换为“仅配置”时会保留之前的镜像来源，因此只有“镜像+配置”选择源码时才触发构建。
   const shouldBuildFromSource = computed(() => formModel.updateContent === 'both' && imageSource.value === 'code');
   const { getDefaultBranch, fetchRecommendTag } = useRecommendTag(() => formModel.branch, {
+    manualFetchOnly: computed(() => !repoAlias.value),
     onRecommend: tag => {
       if (shouldBuildFromSource.value) {
         formModel.imageTag = tag;
       }
     },
   });
+
+  /** 分支确认后拉取推荐镜像 Tag */
+  function handleBranchSelect(branch: string) {
+    if (branch) fetchRecommendTag(branch);
+  }
   const { confirmBox, forceCleanDirtyTag, withPausedWatch } = useLeaveConfirm(formModel);
+
+  function isValidReplicas(value: number | string | undefined) {
+    return Number.isInteger(Number(value)) && Number(value) >= 1;
+  }
+
+  const replicasRules = [
+    {
+      validator: isValidReplicas,
+      message: t('请输入大于或等于 1 的整数'),
+      trigger: 'blur',
+    },
+  ];
+
+  // 仅在明确取到 0（实例被删光）时提示；undefined 表示规格未知，不能断言为 0。
+  const hasInvalidEffectiveReplicas = computed(() => props.effectiveReplicas === 0);
 
   const alertContent = computed(() => {
     if (formModel.updateContent === 'config') {
@@ -275,12 +329,12 @@
     return confirmBox();
   }
 
-  function handleChangeImageSource(source: ImageSourceType) {
+  /** 切换镜像来源；源码模式 prepare 默认分支并预拉列表 */
+  async function handleChangeImageSource(source: ImageSourceType) {
     imageSource.value = source;
     if (source === 'code') {
-      const branch = getDefaultBranch();
-      formModel.branch = branch;
-      fetchRecommendTag(branch);
+      // 推荐 Tag 由 useRecommendTag 监听 formModel.branch 变化自动触发
+      await prepareBranchAfterMount(getDefaultBranch());
     } else {
       formModel.branch = '';
       formModel.imageTag = '';
@@ -308,7 +362,7 @@
         appID: appDetailStore.appID,
         envName: trpcDeployStore.curEnvItem!.name ?? '',
         imageTag: formModel.imageTag,
-        replicas: props.effectiveReplicas ?? trpcDeployStore.deploySpec?.replicas ?? 0,
+        replicas: Number(formModel.replicas),
       };
       if (shouldBuildFromSource.value) {
         params.branch = formModel.branch;
@@ -413,11 +467,16 @@
         formModel.deployType = 'RollingUpdate';
         formModel.updateContent = 'both';
         formModel.imageTag = '';
+        formModel.replicas = undefined;
       });
       imageSource.value = 'image';
       showBuildLog.value = false;
       formRef.value?.clearValidate();
     } else {
+      // 打开弹窗时回填当前生效实例数；withPausedWatch 避免初始化赋值被标记为未保存修改。
+      withPausedWatch(() => {
+        formModel.replicas = isValidReplicas(props.effectiveReplicas) ? props.effectiveReplicas : undefined;
+      });
       // 打开弹窗时获取当前镜像 Tag
       await fetchCurrentImageTag();
     }

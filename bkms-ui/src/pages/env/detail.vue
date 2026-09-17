@@ -128,26 +128,9 @@
           />
           <MonitorIframe
             v-if="currentApm"
-            :base-query-params="{
-              apm_submenu: 0,
-              needMenu: false,
-            }"
             class="flex-1 min-h-0"
-            :observability-query="{
-              'filter-app_name': apmAppName ?? '',
-              method: 'AVG',
-              interval: 'auto',
-              dashboardId: 'overview',
-              from: 'now-1h',
-              to: 'now',
-              timezone: 'Asia/Shanghai',
-              refreshInterval: -1,
-              sceneType: 'overview',
-              queryString: '',
-              preciseFilter: false,
-              isGroupByLimit: false,
-            }"
-            type="application"
+            :url="iframeUrl"
+            @route-change="handleRouteChange"
           />
         </div>
       </Tab.TabPanel>
@@ -163,9 +146,11 @@
   import { GetEnvApmOutput } from '~/@types/v1/bkintegrations-bkmonitor';
   import { EnvOutput } from '~/@types/v1/env';
   import { BkintegrationsBkmonitorService } from '~/api/modules/v1';
+  import { type ApmQueryParams, DEFAULT_APM_CONFIG } from '~/common/const';
   import MonitorIframe from '~/components/monitor-iframe.vue';
   import SlideDetail from '~/components/slide-detail.vue';
   import { envTypeMap, envTypeTagClassMap } from '~/composables/use-env-manager';
+  import { useMonitorIframe } from '~/composables/use-monitor-iframe';
   import { useUrlQuerySync } from '~/composables/use-url-query-sync';
 
   import ApmInstance from './apm-instance.vue';
@@ -197,9 +182,15 @@
   const emits = defineEmits(['update', 'delete']);
 
   const route = useRoute();
-  const slideDetailRef = ref<InstanceType<typeof SlideDetail>>();
 
-  // 侧滑状态与 URL query 双向同步锚定：activeTab 记忆 Tab，active 定位当前环境（供刷新后恢复）
+  // monitor-iframe 公共能力：URL 构建（type=application，前缀含 apm_submenu，内部自取 bizId）
+  const { buildIframeUrl } = useMonitorIframe('application', { apm_submenu: 0, needMenu: false });
+
+  const slideDetailRef = ref<InstanceType<typeof SlideDetail>>();
+  // iframe URL：初始化窗口期（observabilityQuery 就绪）构建一次；环境/APM 切换时重建（页面切换语义，整体 reload）
+  const iframeUrl = ref('');
+
+  // 侧滑状态与 URL query 双向同步锚定：activeTab 记忆 Tab；active 由列表页 env.vue 行点击统一写回（避免两处争写）
   const { fields } = useUrlQuerySync({
     activeTab: {
       queryKey: 'activeTab',
@@ -208,24 +199,14 @@
         default: props.activeTab || 'basicInfo',
       },
     },
-    active: {
-      queryKey: 'active',
+    apmQuery: {
+      queryKey: 'apmQuery',
       data: {
-        default: props.data?.name || '',
+        default: '',
       },
     },
   });
   const activeTabName = fields.activeTab;
-
-  // 切换环境时同步 URL 的 active（default 为静态值，环境变化需主动写回）
-  watch(
-    () => props.data?.name,
-    name => {
-      if (name && name !== route.query.active) {
-        fields.active.value = name;
-      }
-    },
-  );
 
   const tabKey = computed(() => props.data?.createdAt?.toString() || Date.now().toString());
 
@@ -263,10 +244,41 @@
     return currentApm.value?.name || props.data.name;
   });
 
+  // 解析 URL 中的 iframe 观测参数（route-change 同步回写），异常/非对象/数组（如 JSON.parse('[1,2]')）返回空
+  const parsedApmQuery = computed<ApmQueryParams>(() => {
+    const raw = fields.apmQuery.value;
+    if (!raw) return {};
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as ApmQueryParams) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // 观测参数：其余字段（含 filter-service_name，iframe 内联动回写后经初始化 URL 恢复）由 URL 恢复，
+  // filter-app_name 恒用当前环境派生值（避免 URL 残留旧环境的 app_name 覆盖）
+  const observabilityQuery = computed(() => {
+    const { 'filter-app_name': _queryAppName, ...restApmQuery } = parsedApmQuery.value;
+    return {
+      ...DEFAULT_APM_CONFIG,
+      dashboardId: 'overview',
+      ...restApmQuery,
+      'filter-app_name': apmAppName.value ?? '',
+    };
+  });
+
   // 删除环境
   function handleDeleteEnv() {
     emits('delete', props.data);
     dropdownRef.value?.popoverRef?.hide();
+  }
+
+  /** iframe 内部状态变化：同步完整观测参数到 URL apmQuery 字段（供刷新/分享恢复） */
+  function handleRouteChange(payload: { hash: string; href: string; query: Record<string, unknown> }) {
+    const { query } = payload;
+    if (!query || Object.keys(query).length === 0) return;
+    fields.apmQuery.value = JSON.stringify(query);
   }
 
   function handleUpdate(row: EnvOutput) {
@@ -279,6 +291,35 @@
   }
 
   watch([activeTabName, () => props.data?.id], getEnvApm, { immediate: true });
+
+  // 派生参数（当前 APM 应用）变化：合并回写 apmQuery（跨环境不残留旧应用），并置空 iframeUrl 触发整体 reload
+  // 仅当 appName 确实发生切换（prev 有值且不同）时才置空；首次由空变有效时 iframeUrl 本就为空，置空为 no-op，显式跳过语义更清晰
+  watch(apmAppName, (appName, prevAppName) => {
+    if (!appName) return;
+    if (fields.apmQuery.value) {
+      fields.apmQuery.value = JSON.stringify({ ...parsedApmQuery.value, 'filter-app_name': appName });
+    }
+    if (prevAppName && prevAppName !== appName) {
+      iframeUrl.value = '';
+    }
+  });
+
+  // 构建 iframe URL：filter-app_name 非空（currentApm 就绪）后构建一次；iframeUrl 被置空（环境/APM 切换）后再次构建
+  // buildUrlSeq 序号：快速连续切换时丢弃过期构建结果，防止旧环境 URL 覆盖新状态
+  let buildUrlSeq = 0;
+  watch(
+    () => observabilityQuery.value['filter-app_name'],
+    appName => {
+      if (iframeUrl.value || !appName) return;
+      const seq = ++buildUrlSeq;
+      buildIframeUrl(observabilityQuery.value).then(url => {
+        if (seq === buildUrlSeq) {
+          iframeUrl.value = url;
+        }
+      });
+    },
+    { immediate: true },
+  );
 
   defineExpose({
     show,

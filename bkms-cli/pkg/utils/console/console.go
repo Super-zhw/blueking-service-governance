@@ -39,3 +39,8 @@ func Tips(format string, args ...any) {
 func Info(format string, args ...any) {
 	fmt.Println(fmt.Sprintf(format, args...))
 }
+
+// Warn 向终端输出警告类信息
+func Warn(format string, args ...any) {
+	color.Yellow(format, args...)
+}

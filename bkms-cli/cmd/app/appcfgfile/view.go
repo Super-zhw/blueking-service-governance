@@ -35,9 +35,8 @@ func NewViewCmd() *cobra.Command {
 	var appID, envName, cfgFileName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View application config file content",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View application config file content",
 		Long: `View the latest application config file content selected by app and environment.
 
 When --env is omitted, this command views the default application-level config.
@@ -54,6 +53,7 @@ When an application has multiple config files in the same environment, use --nam
 
   # Output in JSON format, including the selected config content
   bkms-cli app app-cfg-file view --app demo --env prod -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			result, err := handler.View(cmd.Context(), client.New(), appID, envName, cfgFileName)
 			if err != nil {
@@ -73,7 +73,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,
@@ -81,7 +81,7 @@ When an application has multiple config files in the same environment, use --nam
 		"",
 		"config file name; useful for Helm apps with multiple app-level config files",
 	)
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

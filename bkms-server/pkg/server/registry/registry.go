@@ -34,6 +34,7 @@ import (
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	appcfghooks "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg/hooks"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/clusteraddon"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
@@ -41,10 +42,12 @@ import (
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	helmdeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/helm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/gpa"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/hostport"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
 	polarisenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris/envvars"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	helmcomp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/helm"
 	depenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/depservice/envvars"
 	depsvcmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/depservice/model"
@@ -54,6 +57,7 @@ import (
 	bkmmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor"
 	alertstrategy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/strategy"
 	alertstrategyhooks "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/strategy/hooks"
+	bkmdashboard "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/platmgt/admin"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/platmgt/portforward"
 	workspaceadmin "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/platmgt/workspace/admin"
@@ -64,6 +68,7 @@ import (
 	scopedenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/envvars"
 	envvarhooks "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/envvars/hooks"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/helmcore/credential"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/customruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/promotion"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/registry"
 	workloadruntime "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/runtime"
@@ -94,9 +99,11 @@ type Registry struct {
 	AppSpecStore              appspec.AppSpecStore
 	AppDefaultRuleStore       appdefaults.RuleStore
 	AppConfigFileStore        appcfg.AppConfigFileStore
+	AppConfigFileDefStore     appcfg.AppConfigFileDefStore
 	AppConfigFileVersionStore appcfg.AppConfigFileVersionStore
 	AppServiceStore           appnetworking.ServiceStore
 	PolarisConfigStore        polaris.PolarisConfigStore
+	HostPortStore             hostport.HostPortStore
 	GPAConfigStore            gpa.GPAConfigStore
 	BscpCfgStore              bscpcfg.Store
 	HelmAppComponentStore     helmcomp.HelmAppComponentStore
@@ -112,6 +119,8 @@ type Registry struct {
 	HelmDeployRecordStore               helmdeploy.RecordStore
 	AppModelDeployRecordStore           appmodeldeploy.RecordStore
 	AppModelDeployResourceSnapshotStore appmodeldeploy.ResourceSnapshotStore
+	// 开发模式类
+	PublishRecordStore devmode.PublishRecordStore
 	// Helm Chart 构建类
 	HelmChartBuildRecordStore   helmchartbuild.RecordStore
 	HelmChartSemverCounterStore semver.CounterStore
@@ -130,13 +139,15 @@ type Registry struct {
 	PolarisVarReader *polarisenvvars.Reader
 	// 蓝鲸监控类
 	ApmInstConfigStore bkmmodel.ApmInstConfigStore
+	AppDashboardStore  bkmdashboard.AppDashboardStore
 	AlertStrategyStore alertstrategy.Store
 	// 操作审计类
 	OperationRecordStore audit.OperationRecordStore
 	// 镜像快照类
-	RuntimeImageStore workloadruntime.Store
-	SnapshotStore     snapshot.SnapshotStore
-	PromotionStore    promotion.PromotionStore
+	RuntimeImageStore       workloadruntime.Store
+	CustomRuntimeImageStore customruntime.Store
+	SnapshotStore           snapshot.SnapshotStore
+	PromotionStore          promotion.PromotionStore
 	// 拓扑类
 	ResourceSnapshotStore topology.ResourceSnapshotStore
 	// 平台管理员类
@@ -206,8 +217,10 @@ func (r *Registry) initStores(mongoClient *mongo.Client, dbName string) {
 	r.AppSpecStore = mustInit(appspec.NewAppSpecStoreMongo(mongoClient, dbName))
 	r.AppDefaultRuleStore = mustInit(appdefaults.NewRuleStoreMongo(mongoClient, dbName))
 	r.AppConfigFileStore = mustInit(appcfg.NewAppConfigFileStoreMongo(mongoClient, dbName))
+	r.AppConfigFileDefStore = mustInit(appcfg.NewAppConfigFileDefStoreMongo(mongoClient, dbName))
 	r.AppConfigFileVersionStore = mustInit(appcfg.NewAppConfigFileVersionStoreMongo(mongoClient, dbName))
 	r.PolarisConfigStore = mustInit(polaris.NewPolarisConfigStoreMongo(mongoClient, dbName))
+	r.HostPortStore = mustInit(hostport.NewHostPortStoreMongo(mongoClient, dbName))
 	r.GPAConfigStore = mustInit(gpa.NewGPAConfigStoreMongo(mongoClient, dbName))
 	r.BscpCfgStore = mustInit(bscpcfg.NewStoreMongo(mongoClient, dbName))
 	r.AppServiceStore = mustInit(appnetworking.NewServiceStoreMongo(mongoClient, dbName))
@@ -223,6 +236,7 @@ func (r *Registry) initStores(mongoClient *mongo.Client, dbName string) {
 	r.BuildAutoDeployRecordStore = mustInit(autodeploy.NewRecordStoreMongo(mongoClient, dbName))
 	r.AppModelDeployRecordStore = mustInit(appmodeldeploy.NewRecordStoreMongo(mongoClient, dbName))
 	r.AppModelDeployResourceSnapshotStore = mustInit(appmodeldeploy.NewResourceSnapshotStoreMongo(mongoClient, dbName))
+	r.PublishRecordStore = mustInit(devmode.NewPublishRecordStoreMongo(mongoClient, dbName))
 	r.HelmDeployRecordStore = mustInit(helmdeploy.NewRecordStoreMongo(mongoClient, dbName))
 	r.HelmChartBuildRecordStore = mustInit(helmchartbuild.NewRecordStoreMongo(mongoClient, dbName))
 	r.HelmChartSemverCounterStore = mustInit(semver.NewCounterStoreMongo(mongoClient, dbName))
@@ -237,11 +251,13 @@ func (r *Registry) initStores(mongoClient *mongo.Client, dbName string) {
 	r.PolarisVarReader = polarisenvvars.NewReader(r.PolarisConfigStore)
 	// 蓝鲸监控类
 	r.ApmInstConfigStore = mustInit(bkmmodel.NewApmInstConfigStoreMongo(mongoClient, dbName))
+	r.AppDashboardStore = mustInit(bkmdashboard.NewStoreMongo(mongoClient, dbName))
 	r.AlertStrategyStore = mustInit(alertstrategy.NewStoreMongo(mongoClient, dbName))
 	// 操作审计类
 	r.OperationRecordStore = mustInit(audit.NewOperationRecordStoreMongo(mongoClient, dbName))
 	// 镜像快照类
 	r.RuntimeImageStore = mustInit(workloadruntime.NewStoreMongo(mongoClient, dbName))
+	r.CustomRuntimeImageStore = mustInit(customruntime.NewStoreMongo(mongoClient, dbName))
 	r.SnapshotStore = mustInit(snapshot.NewSnapshotStoreMongo(mongoClient, dbName))
 	r.PromotionStore = mustInit(promotion.NewPromotionStoreMongo(mongoClient, dbName))
 	// 拓扑类
@@ -260,6 +276,12 @@ func (r *Registry) registerStoreHooks() {
 	r.WorkspaceCompsStore.SetComponentHooks(workspace.NewComponentRefCountHooks(r.ComponentDefStore))
 	r.AppModelStore.SetComponentHooks(appmodel.NewComponentRefCountHooks(r.ComponentDefStore))
 	envvarhooks.RegisterDeleteHooks(r.ScopedEnvVarStore)
+	appcfghooks.RegisterDeleteHooks(
+		r.AppStore,
+		r.AppConfigFileStore,
+		r.AppConfigFileDefStore,
+		r.AppConfigFileVersionStore,
+	)
 	alertstrategyhooks.RegisterUpdateHooks(
 		r.WorkspaceStore,
 		r.AlertStrategyStore,

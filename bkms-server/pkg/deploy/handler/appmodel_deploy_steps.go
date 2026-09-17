@@ -27,24 +27,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
+	"github.com/samber/lo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/autodeploy"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/clusteraddon"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	deploypkg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	appmodeldeploysvc "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel/service"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/serializer"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/hostport"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/taskq"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
-	alertstrategy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/strategy"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/taskqtask/alertstrategysync"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/taskqtask/appmodeldeploypoll"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/snapshot"
@@ -89,8 +92,8 @@ func (h *Handler) listAppModelDeployRecords(c *gin.Context) {
 	})
 }
 
-// preCheckDeployEnvVars 检查 AppModel 部署中引用但未定义的环境变量
-func (h *Handler) preCheckDeployEnvVars(c *gin.Context, expectedAppType string) {
+// preCheckDeploy runs tRPC / TAF deployment pre-checks (undefined env vars and required cluster addons).
+func (h *Handler) preCheckDeploy(c *gin.Context, expectedAppType string) {
 	var uriInput serializer.AppEnvURIInput
 	if err := ginutils.BindURI(c, &uriInput); err != nil {
 		bkerrs.AbortWithErr(c, err)
@@ -113,30 +116,32 @@ func (h *Handler) preCheckDeployEnvVars(c *gin.Context, expectedAppType string) 
 		return
 	}
 
-	checker := h.newEnvVarPreChecker()
+	checker := h.newDeployPreChecker()
 	result, err := checker.Check(ctx, app, environment)
 	if err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "pre-check deployment env vars"))
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "pre-check deployment"))
 		return
 	}
-	ginutils.OK(c, new(serializer.EnvVarPreCheckOutput).FromModel(result))
+	ginutils.OK(c, new(serializer.DeployPreCheckOutput).FromModel(result))
 }
 
-func (h *Handler) newEnvVarPreChecker() *deploypkg.EnvVarPreChecker {
+func (h *Handler) newDeployPreChecker() *deploypkg.DeployPreChecker {
 	builderService := workload.NewBuilderService(
 		h.registry.ScopedEnvVarStore,
 		h.registry.AppDepsVarReader,
 		h.registry.PolarisVarReader,
 		h.registry.WorkspaceCompsStore,
 		h.registry.PolarisConfigStore,
+		h.registry.HostPortStore,
 		h.registry.BscpCfgStore,
 		h.registry.AppModelStore,
 		h.registry.AppSpecStore,
 		h.registry.BuildConfigStore,
 	)
-	return deploypkg.NewEnvVarPreChecker(
+	return deploypkg.NewDeployPreChecker(
 		h.registry.AppModelStore,
 		builderService,
+		h.registry.ClusterAddonDefStore,
 	)
 }
 
@@ -151,7 +156,7 @@ func (h *Handler) createAppModelDeploy(c *gin.Context) {
 
 	// 参数 & 权限校验
 	ctx := c.Request.Context()
-	app, _, err := h.validateAppModelDeployAppEnv(ctx, uriInput.AppID, uriInput.EnvName, perm.TypeEdit, true)
+	app, environment, err := h.validateAppModelDeployAppEnv(ctx, uriInput.AppID, uriInput.EnvName, perm.TypeEdit, true)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -170,10 +175,19 @@ func (h *Handler) createAppModelDeploy(c *gin.Context) {
 		Replicas:        input.Replicas,
 	})
 	if err != nil {
+		var checkErr *clusteraddon.RequiredAddonsNotInstalledError
+		if errors.As(err, &checkErr) {
+			components := lo.Map(checkErr.Missing, func(addon clusteraddon.AddonReference, _ int) string {
+				return addon.Name
+			})
+			bkerrs.AbortWithErr(c, bkerrs.WrapComponentsNotInstalled(err, components, environment.Cluster.ClusterID))
+			return
+		}
 		deployInfo := genDeployInfo(app.WorkspaceID, app.ID, uriInput.EnvName, input.TrafficLaneName)
-		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
-			err, bkerrs.ErrCodeInternalServerError, "deploy app model app: %s", deployInfo,
-		))
+		bkerrs.AbortWithErr(
+			c,
+			bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "deploy app model app: %s", deployInfo),
+		)
 		return
 	}
 	// 轮询部署状态 & 更新部署记录
@@ -223,7 +237,7 @@ func (h *Handler) deleteAppModelDeploy(c *gin.Context) {
 
 	// 执行部署操作
 	deployer := h.newDeployer(app)
-	if err = deployer.Uninstall(ctx, uriInput.EnvName, input.TrafficLaneName); err != nil {
+	if err = deployer.Uninstall(ctx, env, input.TrafficLaneName); err != nil {
 		metricStatus = metrics.StatusErr
 		deployInfo := genDeployInfo(app.WorkspaceID, app.ID, uriInput.EnvName, input.TrafficLaneName)
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
@@ -263,21 +277,14 @@ func (h *Handler) handleAppModelDeployUninstalled(
 			trafficLaneName,
 			operator,
 		)
-		// TODO(alertstrategy): 用 go 裸起 goroutine 无法保证跨 Pod 串行，
-		// 后续迁移到 asynq 任务队列以解决多 Pod 并发风险。
-		go alertstrategy.NewService(
-			h.registry.AlertStrategyStore,
-			h.registry.EnvStore,
-			h.registry.AppStore,
-			h.registry.ResourceSnapshotStore,
-		).CleanupStrategiesForAppInEnv(
-			context.WithoutCancel(ctx),
-			ws,
-			app.ID,
-			env.ID,
-			trafficLaneName,
-			operator,
-		)
+		if err := taskq.Enqueue(ctx, alertstrategysync.CleanupTask.NewTask(alertstrategysync.Args{
+			WorkspaceID:     app.WorkspaceID,
+			AppID:           app.ID,
+			EnvName:         env.Name,
+			TrafficLaneName: trafficLaneName,
+		})); err != nil {
+			log.Errorf(ctx, "enqueue alert strategy cleanup task failed: %v", err)
+		}
 	}
 
 	// 清理资源拓扑快照（失败不阻塞主流程）
@@ -457,6 +464,7 @@ func (h *Handler) newAppModelDeployService() (*appmodeldeploysvc.Service, error)
 		PolarisVarReader:                    reg.PolarisVarReader,
 		WorkspaceCompsStore:                 reg.WorkspaceCompsStore,
 		PolarisConfigStore:                  reg.PolarisConfigStore,
+		HostPortStore:                       reg.HostPortStore,
 		BscpCfgStore:                        reg.BscpCfgStore,
 		AppSpecStore:                        reg.AppSpecStore,
 		BuildConfigStore:                    reg.BuildConfigStore,
@@ -464,6 +472,7 @@ func (h *Handler) newAppModelDeployService() (*appmodeldeploysvc.Service, error)
 		AppModelDeployRecordStore:           reg.AppModelDeployRecordStore,
 		AppModelDeployResourceSnapshotStore: reg.AppModelDeployResourceSnapshotStore,
 		AppConfigFileStore:                  reg.AppConfigFileStore,
+		ClusterAddonDefStore:                reg.ClusterAddonDefStore,
 	})
 }
 
@@ -480,6 +489,7 @@ func (h *Handler) newDeployer(app *bkmsapp.Application) *appmodeldeploy.Deployer
 			h.registry.PolarisVarReader,
 			h.registry.WorkspaceCompsStore,
 			h.registry.PolarisConfigStore,
+			h.registry.HostPortStore,
 			h.registry.BscpCfgStore,
 			h.registry.AppModelStore,
 			h.registry.AppSpecStore,
@@ -489,6 +499,7 @@ func (h *Handler) newDeployer(app *bkmsapp.Application) *appmodeldeploy.Deployer
 		h.registry.BuildConfigStore,
 		h.registry.AppConfigFileStore,
 		polaris.NewPolarisEnvStateManager(h.registry.PolarisConfigStore),
+		hostport.NewEnvStateManager(h.registry.HostPortStore),
 		app,
 	)
 }

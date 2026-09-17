@@ -32,9 +32,8 @@ func NewViewCmd() *cobra.Command {
 	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View dev-mode configuration for an environment",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View dev-mode configuration for an environment",
 		Long: `View the effective development mode configuration for an application environment.
 
 The workPath and mountPath fields are derived from the application type by the server
@@ -44,6 +43,7 @@ and are read-only.`,
 
   # Output in JSON format
   bkms-cli app appspec dev-mode view --app my-app --env prod -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return appspec.ViewHandler(
 				cmd.Context(),
@@ -55,9 +55,9 @@ and are read-only.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 	_ = cmd.MarkFlagRequired("env")

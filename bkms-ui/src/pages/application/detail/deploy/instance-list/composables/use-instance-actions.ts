@@ -58,7 +58,6 @@ export function useInstanceActions(
     getSelectedInstances: options.getSelectedInstances,
     clearSelections: options.clearSelections,
     refreshData: options.refreshData,
-    timer: options.timer,
   });
 
   function openGray(instance?: AppInstanceOutputObj, envName?: string) {
@@ -189,10 +188,9 @@ function useDeleteInstances(context: InstanceActionContext) {
             theme: 'success',
             message: t('操作成功'),
           });
-          context.timer?.stop();
           context.clearSelections();
-          await context.refreshData();
-          context.timer?.start();
+          // 列表刷新会重建 SSE Watch，不能阻塞确认框关闭。
+          void Promise.resolve(context.refreshData()).catch(error => console.warn(error));
         }
       },
     });

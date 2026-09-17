@@ -34,6 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
+	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
 )
 
 var _ = Describe("WorkloadBuilder", func() {
@@ -89,7 +90,7 @@ var _ = Describe("WorkloadBuilder", func() {
 		return config
 	}
 
-	It("builds Polaris resources and injects the matching service port", func() {
+	It("builds Polaris resources without touching the pod spec", func() {
 		config := createConfig("primary", []string{environment.Name}, 8080, map[string]string{
 			"environment": "${{env.ENV_NAME}}",
 			"team":        "platform",
@@ -102,25 +103,18 @@ var _ = Describe("WorkloadBuilder", func() {
 		result, err := builder.Build(ctx, app, environment,
 			map[string]string{"ENV_NAME": environment.Name, "POLARIS_NAME": "rendered-name"},
 			podSpec,
-			"main",
 			nil,
 		)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result.ExtraObjects).To(HaveLen(2))
-		Expect(podSpec.Containers[1].Ports).To(BeEmpty())
-		Expect(result.PodSpec.Containers[0].Ports).To(BeEmpty())
-		Expect(result.PodSpec.Containers[1].Ports).To(ConsistOf(corev1.ContainerPort{
-			Name:          "polaris-8080",
-			ContainerPort: 8080,
-			Protocol:      corev1.ProtocolTCP,
-		}))
+		Expect(result.PodSpec).To(Equal(podSpec))
 
 		objectsByKind := make(map[string]unstructured.Unstructured, len(result.ExtraObjects))
 		for _, object := range result.ExtraObjects {
 			objectsByKind[object.GetKind()] = object
 		}
 		Expect(objectsByKind).To(HaveKey("PolarisConfig"))
-		Expect(objectsByKind).To(HaveKey("Service"))
+		Expect(objectsByKind).To(HaveKey(k8skind.SVC))
 
 		expectedBaseName := strings.ToLower(app.Name + "-" + config.Name)
 		cr := objectsByKind["PolarisConfig"]
@@ -149,7 +143,7 @@ var _ = Describe("WorkloadBuilder", func() {
 			"team":        "platform",
 		}))
 
-		service := objectsByKind["Service"]
+		service := objectsByKind[k8skind.SVC]
 		Expect(service.GetName()).To(Equal(expectedBaseName + "-polaris-service"))
 		Expect(nestedString(service.Object, "spec", "selector", "app.kubernetes.io/name")).To(Equal(app.Name))
 		ports, found, err := unstructured.NestedSlice(service.Object, "spec", "ports")
@@ -161,7 +155,7 @@ var _ = Describe("WorkloadBuilder", func() {
 
 	It("uses the environment weight in the PolarisConfig resource", func() {
 		config := createConfig("env-weight", []string{environment.Name}, 8080, nil)
-		Expect(store.UpsertEnvWeight(ctx, app.ID, config.Name, environment.Name, 35)).To(Succeed())
+		Expect(store.UpsertEnvWeight(ctx, app.ID, config.Name, environment.Name, 35, nil)).To(Succeed())
 
 		result, err := builder.Build(
 			ctx,
@@ -169,7 +163,6 @@ var _ = Describe("WorkloadBuilder", func() {
 			environment,
 			nil,
 			corev1.PodSpec{Containers: []corev1.Container{{Name: "main"}}},
-			"main",
 			nil,
 		)
 		Expect(err).NotTo(HaveOccurred())
@@ -188,29 +181,120 @@ var _ = Describe("WorkloadBuilder", func() {
 		Expect(services[0].(map[string]any)["weight"]).To(BeEquivalentTo(int32(35)))
 	})
 
-	It("filters configs by environment and replaces a conflicting container port", func() {
-		createConfig("matching", []string{environment.Name}, 8080, nil)
-		createConfig("other", []string{"another-env"}, 9090, nil)
-		result, err := builder.Build(ctx, app, environment,
-			map[string]string{},
-			corev1.PodSpec{Containers: []corev1.Container{{
-				Name: "main",
-				Ports: []corev1.ContainerPort{{
-					Name:          "existing",
-					ContainerPort: 8080,
-					Protocol:      corev1.ProtocolUDP,
-				}},
-			}}},
-			"main",
+	It("writes dynamicWeight with enable false when no environment has opted in", func() {
+		createConfig("no-weight-factor", []string{environment.Name}, 8080, nil)
+
+		result, err := builder.Build(
+			ctx, app, environment, nil,
+			corev1.PodSpec{Containers: []corev1.Container{{Name: "main"}}},
 			nil,
 		)
 		Expect(err).NotTo(HaveOccurred())
+
+		dynamicWeight, found, err := unstructured.NestedMap(
+			polarisConfigCR(result.ExtraObjects).Object, "spec", "polaris", "dynamicWeight",
+		)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(found).To(BeTrue())
+		Expect(dynamicWeight).To(Equal(map[string]any{
+			"enable":                false,
+			"preserveServiceConfig": true,
+		}))
+	})
+
+	// dynamicWeight 片段始终下发，enable 由总开关与环境开关共同决定
+	buildWeightFactorCR := func(weightFactorOn, envOptedIn bool) map[string]any {
+		var envDynamicWeights map[string]bool
+		if envOptedIn {
+			envDynamicWeights = map[string]bool{environment.Name: true}
+		}
+		Expect(store.Create(ctx, &polaris.PolarisConfig{
+			Name:  "weight-factor",
+			AppID: app.ID,
+			Properties: polaris.Properties{
+				InstanceKey:        "wf",
+				PolarisName:        "weight-factor-service",
+				ServicePort:        8080,
+				EnableWeightFactor: weightFactorOn,
+			},
+			ScopeEnvNames:     []string{environment.Name},
+			EnvDynamicWeights: envDynamicWeights,
+		})).To(Succeed())
+
+		result, err := builder.Build(
+			ctx, app, environment, nil,
+			corev1.PodSpec{Containers: []corev1.Container{{Name: "main"}}},
+			nil,
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		dynamicWeight, found, err := unstructured.NestedMap(
+			polarisConfigCR(result.ExtraObjects).Object, "spec", "polaris", "dynamicWeight",
+		)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(found).To(BeTrue())
+		return dynamicWeight
+	}
+
+	It("writes dynamicWeight with enable true once the environment opts in", func() {
+		// 公式参数交由北极星侧维护，preserveServiceConfig=true 时 CRD 要求它们留空
+		Expect(buildWeightFactorCR(true, true)).To(Equal(map[string]any{
+			"enable":                true,
+			"preserveServiceConfig": true,
+		}))
+	})
+
+	It("writes dynamicWeight with enable false while the environment has not opted in", func() {
+		Expect(buildWeightFactorCR(true, false)).To(Equal(map[string]any{
+			"enable":                false,
+			"preserveServiceConfig": true,
+		}))
+	})
+
+	// enable 只反映环境级开关：配置级 enableWeightFactor 决定用户能否开启，不参与 CR 组装
+	It("writes the environment switch regardless of the weight factor", func() {
+		Expect(buildWeightFactorCR(false, true)).To(Equal(map[string]any{
+			"enable":                true,
+			"preserveServiceConfig": true,
+		}))
+	})
+
+	It("filters configs by environment and leaves existing container ports unchanged", func() {
+		createConfig("matching", []string{environment.Name}, 8080, nil)
+		createConfig("other", []string{"another-env"}, 9090, nil)
+		podSpec := corev1.PodSpec{Containers: []corev1.Container{{
+			Name: "main",
+			Ports: []corev1.ContainerPort{{
+				Name:          "existing",
+				ContainerPort: 8080,
+				Protocol:      corev1.ProtocolUDP,
+			}},
+		}}}
+		result, err := builder.Build(ctx, app, environment, map[string]string{}, podSpec, nil)
+		Expect(err).NotTo(HaveOccurred())
 		Expect(result.ExtraObjects).To(HaveLen(2))
-		Expect(result.PodSpec.Containers[0].Ports).To(Equal([]corev1.ContainerPort{{
-			Name:          "polaris-8080",
-			ContainerPort: 8080,
-			Protocol:      corev1.ProtocolTCP,
-		}}))
+		Expect(result.PodSpec).To(Equal(podSpec))
+	})
+
+	It("keeps an immediate-register config out of the pod spec while still building its resources", func() {
+		Expect(store.Create(ctx, &polaris.PolarisConfig{
+			Name:  "immediate",
+			AppID: app.ID,
+			Properties: polaris.Properties{
+				InstanceKey:  "immediate",
+				PolarisName:  "immediate-service",
+				ServicePort:  8080,
+				RegisterMode: polaris.RegisterModeImmediate,
+			},
+			ScopeEnvNames: []string{environment.Name},
+		})).To(Succeed())
+
+		podSpec := corev1.PodSpec{Containers: []corev1.Container{{Name: "main"}}}
+		result, err := builder.Build(ctx, app, environment, map[string]string{}, podSpec, nil)
+		Expect(err).NotTo(HaveOccurred())
+		// 部署流程仍然下发 CR 与 Service，保证与平台侧主动下发的结果收敛
+		Expect(result.ExtraObjects).To(HaveLen(2))
+		Expect(result.PodSpec).To(Equal(podSpec))
 	})
 
 	It("returns the workload unchanged when no config matches the environment", func() {
@@ -220,7 +304,7 @@ var _ = Describe("WorkloadBuilder", func() {
 			Ports: []corev1.ContainerPort{{Name: "http", ContainerPort: 80}},
 		}}}
 
-		result, err := builder.Build(ctx, app, environment, nil, podSpec, "main", nil)
+		result, err := builder.Build(ctx, app, environment, nil, podSpec, nil)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result.ExtraObjects).To(BeEmpty())
 		Expect(result.PodSpec).To(Equal(podSpec))
@@ -234,12 +318,21 @@ var _ = Describe("WorkloadBuilder", func() {
 		_, err := builder.Build(
 			ctx, app, environment, nil,
 			corev1.PodSpec{Containers: []corev1.Container{{Name: "main"}}},
-			"main",
 			nil,
 		)
 		Expect(err).To(MatchError(ContainSubstring("render service label invalid")))
 	})
 })
+
+func polarisConfigCR(objects []unstructured.Unstructured) unstructured.Unstructured {
+	for _, object := range objects {
+		if object.GetKind() == "PolarisConfig" {
+			return object
+		}
+	}
+	Fail("no PolarisConfig CR in built resources")
+	return unstructured.Unstructured{}
+}
 
 func nestedString(object map[string]any, fields ...string) string {
 	value, found, err := unstructured.NestedString(object, fields...)

@@ -19,7 +19,6 @@
 package instance
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -32,6 +31,11 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/params"
 )
+
+// adminCmdItem 用于将 []string 格式化为表格输出
+type adminCmdItem struct {
+	Command string `json:"command"`
+}
 
 // NewListAdminCmdsCmd returns a Command instance for 'app instance list-admin-cmds' sub command
 func NewListAdminCmdsCmd() *cobra.Command {
@@ -46,7 +50,7 @@ This command queries the admin command list from application instances
 via the admin port. Only Trpc type applications are supported.`,
 		Example: `  # List admin commands
   bkms-cli app instance list-admin-cmds --app myapp --env test --instance-ids pod1,pod2`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
 			instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
@@ -81,11 +85,11 @@ via the admin port. Only Trpc type applications are supported.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "instance IDs, comma separated")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 	_ = cmd.MarkFlagRequired("env")
@@ -119,50 +123,25 @@ application type:
 
   # Execute Taf admin command (auto-detected by app type)
   bkms-cli app instance exec-admin-cmd --app myapp --env test --instance-ids pod1 --command "taf.viewversion"`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
 			instanceIDs, err := params.MustGetSplitString(instanceIDsStr, ",")
 			if err != nil {
 				return errors.Wrap(err, "get instance IDs")
-			}
-
-			// 先获取 appType 来校验必填参数
-			app, err := client.New().GetAppMinimal(cmd.Context(), workspaceID, appID)
-			if err != nil {
-				return errors.Wrap(err, "get app info")
 			}
 
 			opts := handler.ExecAdminCmdOptions{
 				InstanceIDs: instanceIDs,
 				Method:      method,
 				URL:         urlPath,
+				ParamsJSON:  paramsJSON,
 				Body:        body,
 				Command:     command,
 			}
 
-			switch app.Type {
-			case constant.AppTypeTrpc:
-				if method == "" {
-					return errors.New("--method is required for Trpc app")
-				}
-				if urlPath == "" {
-					return errors.New("--url is required for Trpc app")
-				}
-				if paramsJSON != "" {
-					if parseErr := json.Unmarshal([]byte(paramsJSON), &opts.Params); parseErr != nil {
-						return errors.Wrap(parseErr, "parse --params")
-					}
-				}
-			case constant.AppTypeTaf:
-				if command == "" {
-					return errors.New("--command is required for Taf app")
-				}
-			default:
-				return errors.Errorf("unsupported app type for admin cmd: %s", app.Type)
-			}
-
-			results, err := handler.ExecAdminCmd(cmd.Context(), workspaceID, appID, envName, opts)
+			results, err := handler.ExecAdminCmd(
+				cmd.Context(), cmdutil.GetWorkspaceID(workspaceID), appID, envName, opts,
+			)
 			if err != nil {
 				return errors.Wrap(err, "exec admin cmd")
 			}
@@ -176,8 +155,8 @@ application type:
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
+	cmd.Flags().StringVar(&appID, "app", "", "application ID or name")
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(&instanceIDsStr, "instance-ids", "", "instance IDs, comma separated")
 	cmd.Flags().StringVar(&method, "method", "", "HTTP method for Trpc admin cmd (GET/POST/PUT)")
@@ -185,16 +164,11 @@ application type:
 	cmd.Flags().StringVar(&paramsJSON, "params", "", "query params for Trpc admin cmd, JSON string")
 	cmd.Flags().StringVar(&body, "body", "", "request body for Trpc admin cmd")
 	cmd.Flags().StringVar(&command, "command", "", "command for Taf admin cmd (e.g. taf.viewversion)")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 	_ = cmd.MarkFlagRequired("env")
 	_ = cmd.MarkFlagRequired("instance-ids")
 
 	return cmd
-}
-
-// adminCmdItem 用于将 []string 格式化为表格输出
-type adminCmdItem struct {
-	Command string `json:"command"`
 }

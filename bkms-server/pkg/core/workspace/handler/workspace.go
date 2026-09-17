@@ -551,6 +551,9 @@ func (h *Handler) CreateWorkspace(c *gin.Context) {
 	defaultEnvs := workspace.BuildDefaultEnvs(auth.MustGetUser(ctx).ID, ws.ID, bkSystem.BkBCSProjectCode)
 	for _, env := range defaultEnvs {
 		if _, envErr := envSvc.Create(ctx, &env); envErr != nil {
+			if abortIfEnvClusterNamespaceOccupied(c, envErr) {
+				return
+			}
 			bkerrs.AbortWithErr(
 				c,
 				bkerrs.Wrapf(envErr, bkerrs.ErrCodeInternalServerError, "create default env %s", env.Name),
@@ -685,7 +688,7 @@ func (h *Handler) AddWorkspaceUser(c *gin.Context) {
 
 	// 对于 admin/sre 角色的新增，交由 UserGroupService 基于 workspace 统一处理
 	if uriInput.RoleCode == perm.RoleCodeAdmin || uriInput.RoleCode == perm.RoleCodeSre {
-		go bkmonitor.NewUserGroupService(perm.NewManager(), h.registry.EnvStore).SyncMembersForWorkspace(
+		go bkmonitor.NewUserGroupService(h.registry.EnvStore).SyncMembersForWorkspace(
 			ctx, ws, auth.MustGetUser(ctx).ID,
 		)
 	}
@@ -764,7 +767,7 @@ func (h *Handler) RemoveWorkspaceUser(c *gin.Context) {
 
 	// 从各环境的蓝鲸监控告警组中移除该用户（仅处理 type=user）
 	if userRoleCode == perm.RoleCodeAdmin || userRoleCode == perm.RoleCodeSre {
-		go bkmonitor.NewUserGroupService(perm.NewManager(), h.registry.EnvStore).RemoveMemberForWorkspace(
+		go bkmonitor.NewUserGroupService(h.registry.EnvStore).RemoveMemberForWorkspace(
 			ctx, ws, uriInput.UserID, auth.MustGetUser(ctx).ID,
 		)
 	}
@@ -947,4 +950,15 @@ func (h *Handler) hasActiveDeploymentsInWorkspace(ctx context.Context, workspace
 		}
 	}
 	return false, nil
+}
+
+func abortIfEnvClusterNamespaceOccupied(c *gin.Context, err error) bool {
+	info, ok := bkmsenv.GetEnvClusterNamespaceConflictInfo(err)
+	if !ok {
+		return false
+	}
+	bkerrs.AbortWithErr(c, bkerrs.WrapEnvClusterNamespaceOccupied(
+		info.ClusterID, info.Namespace, info.OccupiedByEnvName, info.OccupiedByWorkspaceID,
+	))
+	return true
 }

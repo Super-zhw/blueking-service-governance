@@ -19,9 +19,10 @@
 import { computed, ref, watch } from 'vue';
 import type { Ref } from 'vue';
 
+import { Message } from 'bkui-vue';
 import { useI18n } from 'vue-i18n';
 import { AppService } from '~/api/modules/v1';
-import { APP_DEPLOY_STATUS, DEPLOY_FAILED_STATUSES } from '~/common/enums/deploy';
+import { APP_DEPLOY_STATUS, DEPLOY_FAILED_STATUSES, HELM_DEPLOY_STATUS } from '~/common/enums/deploy';
 import { useDeployStatusMap } from '~/composables/use-deploy-status';
 import { envTypeMap } from '~/composables/use-env-manager';
 import { useResourceSpecDisplay } from '~/composables/use-resource-spec-display';
@@ -36,6 +37,16 @@ import type { GPAConfigOutputObj, GPAStatusOutput } from '~/@types/v1/gpa';
 
 const ENV_TYPE_ORDER = ['production', 'staging', 'test', 'development'];
 const TYPE_FILTER_ALL = '__all__';
+const FAST_POLLING_INTERVAL = 5_000;
+const SLOW_POLLING_INTERVAL = 60_000;
+const FAST_POLLING_STATUSES = new Set<string>([
+  APP_DEPLOY_STATUS.DEPLOYING,
+  APP_DEPLOY_STATUS.UNINSTALLING,
+  HELM_DEPLOY_STATUS.PENDING_INSTALL,
+  HELM_DEPLOY_STATUS.PENDING_UPGRADE,
+  HELM_DEPLOY_STATUS.PENDING_ROLLBACK,
+  HELM_DEPLOY_STATUS.UNINSTALLING,
+]);
 // GPA 未返回 phase 不代表异常；只有已启用且明确处于正常集合之外时，才展示异常状态。
 const NORMAL_AUTOSCALING_PHASES = new Set(['active', 'limited', 'initializing']);
 // 状态筛选按业务关注度排序，接口中出现但未列出的状态会追加到末尾。
@@ -75,12 +86,16 @@ export interface DeployOverviewDeployTarget {
 export interface DeployOverviewRow {
   abnormalCount: null | number;
   autoScale: DeployOverviewAutoScale;
+  clusterID: string;
+  clusterName: string;
   cpuLimits: string;
   cpuRequests: string;
   deployedAt: string;
   deployStatus: string;
   desiredCount: null | number;
   displayName: string;
+  envID: string;
+  imageTag: string;
   isFeature: boolean;
   memoryLimits: string;
   memoryRequests: string;
@@ -101,6 +116,12 @@ export interface DeployOverviewStat {
 }
 
 export type DeployOverviewStatKey = 'abnormalInstance' | 'deploying' | 'failed' | 'total';
+
+export type LoadMode = 'automatic' | 'initial' | 'manual';
+
+export interface LoadOptions {
+  queueWhenLoading?: boolean;
+}
 
 /** 补充接口字段的 null 语义，并复用现有 GPA 类型描述完整 autoscaling 数据。 */
 type DeployOverviewApiRow = Omit<AppDeployOverviewEnvObj, 'autoscalingEnabled' | 'instances'> & {
@@ -134,6 +155,9 @@ export function useDeployOverview(envList: Ref<EnvOutput[]>) {
   const filterKeys = ['deployStatus'] as const;
   // 每次请求递增；应用快速切换时，仅最后一次请求可以更新页面状态。
   let loadToken = 0;
+  let currentLoad: Promise<void> | undefined;
+  let queuedAutomaticLoad: Promise<void> | undefined;
+  let shouldQueueAutomaticLoad = false;
 
   const deployStatusMaps = computed(() => getDeployStatusMaps(appDetailStore.appType || null));
 
@@ -157,6 +181,11 @@ export function useDeployOverview(envList: Ref<EnvOutput[]>) {
     globalTypeFilter.value === TYPE_FILTER_ALL
       ? rows.value
       : rows.value.filter(row => row.type === globalTypeFilter.value),
+  );
+
+  // 有部署中或卸载中环境时加快刷新，其余终态或空数据降频，减轻 API 和集群压力。
+  const pollingIntervalMs = computed(() =>
+    rows.value.some(row => FAST_POLLING_STATUSES.has(row.deployStatus)) ? FAST_POLLING_INTERVAL : SLOW_POLLING_INTERVAL,
   );
 
   /**
@@ -214,12 +243,12 @@ export function useDeployOverview(envList: Ref<EnvOutput[]>) {
 
   /**
    * 新增部署不能直接使用总览行：总览接口不保证返回部署表单所需的完整环境信息。
-   * 因此以 EnvSelect 的标准环境列表为准，再用总览行补充默认副本数。
+   * 因此以 EnvSelect 的可用环境列表为准，再用总览行补充默认副本数。
    */
   const deployTargets = computed<DeployOverviewDeployTarget[]>(() => {
     const expectedByEnv = new Map(rows.value.map(row => [row.name, row.desiredCount ?? undefined]));
     return envList.value
-      .filter(env => !!env.name && env.status !== 'NotReady' && (env.kind || 'standard') === 'standard')
+      .filter(env => !!env.name && env.status !== 'NotReady')
       .map(env => ({ env, effectiveReplicas: expectedByEnv.get(env.name || '') }));
   });
 
@@ -365,17 +394,57 @@ export function useDeployOverview(envList: Ref<EnvOutput[]>) {
     return keywords.some(keyword => candidates.some(candidate => candidate.toLowerCase().includes(keyword)));
   }
 
-  /** 请求总览唯一数据源，并用 token 丢弃应用切换前发出的过期响应。 */
-  async function load() {
-    const appID = appDetailStore.appID;
+  /**
+   * 请求总览唯一数据源，并用 token 丢弃应用切换前发出的过期响应。
+   * 自动刷新不显示 loading，失败时保留上一轮快照；首次和手动刷新保留各自的错误反馈。
+   */
+  async function load(mode: LoadMode = 'manual', options: LoadOptions = {}): Promise<void> {
+    if (mode === 'automatic' && currentLoad) {
+      if (!options.queueWhenLoading) return currentLoad;
+      shouldQueueAutomaticLoad = true;
+      if (!queuedAutomaticLoad) {
+        queuedAutomaticLoad = (async () => {
+          try {
+            while (shouldQueueAutomaticLoad) {
+              shouldQueueAutomaticLoad = false;
+              // 手动或初始加载可能替换 currentLoad；等待最新请求结束后再补刷新。
+              while (currentLoad !== undefined) await currentLoad.catch(() => undefined);
+              await load('automatic');
+            }
+          } finally {
+            queuedAutomaticLoad = undefined;
+          }
+        })();
+      }
+      return queuedAutomaticLoad;
+    }
+    if (mode !== 'automatic') {
+      isLoading.value = true;
+      if (mode === 'initial') isError.value = false;
+    }
+
+    const appID = appDetailStore.appID || '';
     const token = (loadToken += 1);
+    const request = requestOverview(appID, token, mode);
+    currentLoad = request;
+    try {
+      await request;
+    } finally {
+      if (currentLoad === request) {
+        currentLoad = undefined;
+        if (mode !== 'automatic') isLoading.value = false;
+      }
+    }
+  }
+
+  async function requestOverview(appID: string, token: number, mode: LoadMode) {
     if (!appID) {
-      rows.value = [];
-      isError.value = false;
+      if (token === loadToken) {
+        rows.value = [];
+        isError.value = false;
+      }
       return;
     }
-    isLoading.value = true;
-    isError.value = false;
     try {
       const list = await AppService.getAppDeployOverview<GetAppDeployOverviewRequest, DeployOverviewApiRow[]>(
         { appID },
@@ -383,13 +452,16 @@ export function useDeployOverview(envList: Ref<EnvOutput[]>) {
       );
       if (token !== loadToken) return;
       rows.value = (list || []).map(buildRow);
+      isError.value = false;
     } catch (error) {
       if (token !== loadToken) return;
       console.error(error);
-      rows.value = [];
-      isError.value = true;
-    } finally {
-      if (token === loadToken) isLoading.value = false;
+      if (mode === 'initial') {
+        rows.value = [];
+        isError.value = true;
+      } else if (mode === 'manual') {
+        Message.error(t('刷新失败，请稍后重试'));
+      }
     }
   }
 
@@ -400,12 +472,16 @@ export function useDeployOverview(envList: Ref<EnvOutput[]>) {
       // instances=null 表示后台无法提供实例数据，三个数量必须统一显示“--”。
       abnormalCount: item.instances ? (item.instances.abnormal ?? 0) : null,
       autoScale: createAutoScale(item.autoscaling),
+      clusterID: item.cluster?.clusterID || '',
+      clusterName: item.cluster?.clusterName || '',
       cpuLimits: resources.cpuLimits || '',
       cpuRequests: resources.cpuRequests || '',
       deployedAt: item.lastDeployStartedAt || '',
       deployStatus: item.deployStatus || APP_DEPLOY_STATUS.UNKNOWN,
       desiredCount: item.instances ? (item.instances.expected ?? 0) : null,
       displayName: item.envDisplayName || item.envName || '--',
+      envID: item.envID || '',
+      imageTag: item.imageTag || '',
       isFeature: item.envKind === 'feature',
       memoryLimits: resources.memoryLimits || '',
       memoryRequests: resources.memoryRequests || '',
@@ -500,6 +576,8 @@ export function useDeployOverview(envList: Ref<EnvOutput[]>) {
     isLoading,
     load,
     pagination,
+    pollingIntervalMs,
+    rows,
     searchData,
     searchValue,
     sortConfig,

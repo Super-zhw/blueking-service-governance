@@ -141,3 +141,48 @@ type AppModelDeployRecordsResp struct {
 	// Data 返回数据
 	Data AppModelDeployRecordsRespData `json:"data"`
 }
+
+// --- Precheck types ---
+
+// DeployPrecheckResult 部署前检查结果
+type DeployPrecheckResult struct {
+	// Passed 是否通过，由 UndefinedVars 与 MissingRequiredClusterAddons 是否为空推导
+	Passed bool `json:"-" yaml:"passed"`
+	// UndefinedVars 未定义的环境变量列表
+	UndefinedVars []UndefinedEnvVar `json:"undefinedVars" yaml:"undefinedVars"`
+	// MissingRequiredClusterAddons 缺失的必选集群组件标识及展示名
+	MissingRequiredClusterAddons []ClusterAddonReference `json:"missingRequiredClusterAddons" yaml:"missingRequiredClusterAddons"`
+}
+
+// ClusterAddonReference 包含用于关联组件的稳定标识和展示名。
+type ClusterAddonReference struct {
+	Name        string `json:"name" yaml:"name"`
+	DisplayName string `json:"displayName" yaml:"displayName"`
+}
+
+// Normalize 统一空列表的输出格式，并根据检查结果更新 Passed。
+func (r *DeployPrecheckResult) Normalize() {
+	if r.UndefinedVars == nil {
+		r.UndefinedVars = []UndefinedEnvVar{}
+	}
+	if r.MissingRequiredClusterAddons == nil {
+		r.MissingRequiredClusterAddons = []ClusterAddonReference{}
+	}
+	r.Passed = len(r.UndefinedVars) == 0 && len(r.MissingRequiredClusterAddons) == 0
+}
+
+// UndefinedEnvVar 未定义的环境变量
+type UndefinedEnvVar struct {
+	// Key 变量名
+	Key string `json:"key" yaml:"key"`
+	// Sources 引用来源列表
+	Sources []EnvVarSource `json:"sources" yaml:"sources"`
+}
+
+// EnvVarSource 环境变量引用来源
+type EnvVarSource struct {
+	// Type 来源类型（configFile / startCommand 等）
+	Type string `json:"type" yaml:"type"`
+	// Name 来源名称（配置文件名等）
+	Name string `json:"name" yaml:"name"`
+}

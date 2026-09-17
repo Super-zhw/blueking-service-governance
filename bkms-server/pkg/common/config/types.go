@@ -94,6 +94,9 @@ type BkIAMSystemIDsConfig struct {
 type BCSConfig struct {
 	BaseUrl string
 	Token   string
+	// FederationClusterIDs 联邦 Host 集群 ID 列表。
+	// 创建/更新环境时，用户提交的 clusterID 命中此列表则视为联邦集群。
+	FederationClusterIDs []string
 }
 
 // BKCIProjInitConfig 蓝盾项目初始化默认配置
@@ -148,9 +151,7 @@ func (c *BKRepoConfig) GenRepoEndpoint(projectID, repoType string) (string, erro
 
 // BkMonitorConfig 蓝鲸监控配置
 type BkMonitorConfig struct {
-	// Endpoint 网关地址
-	Endpoint string
-	// GatewayEndpoint 新版 bk-monitor 网关地址，供新增接口（如 user group）使用
+	// GatewayEndpoint bk-monitor 统一网关地址
 	GatewayEndpoint string
 
 	// APMEndpoint 蓝鲸监控 APM gRPC 上报地址，APMHttpEndpoint 为空时作为兼容配置使用
@@ -225,22 +226,6 @@ type RedisConfig struct {
 	PoolSize        int
 	MinIdleConns    int
 	ConnMaxIdleTime int
-}
-
-// RabbitMQConfig RabbitMQ 配置
-type RabbitMQConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Vhost    string
-	Queue    string
-	Prefetch int
-}
-
-// GetURI 返回 RabbitMQ URI
-func (c RabbitMQConfig) GetURI() string {
-	return fmt.Sprintf("amqp://%s:%s@%s:%s/%s", c.Username, url.QueryEscape(c.Password), c.Host, c.Port, c.Vhost)
 }
 
 // AsynqConfig 通用异步任务框架(taskq)的完整配置
@@ -450,8 +435,6 @@ type Config struct {
 	Mongo MongoConfig
 	// Redis 配置
 	Redis RedisConfig
-	// RabbitMQ 配置
-	RabbitMQ RabbitMQConfig
 	// Asynq 通用异步任务框架（taskq）配置
 	Asynq AsynqConfig
 

@@ -2,7 +2,7 @@
 
 `bkms-cli app create` 用于从 YAML spec 文件创建应用。支持的应用类型：trpc、taf、helm、agones。
 
-YAML spec 文件结构与后端 API 请求体一致。
+YAML spec 文件结构与后端 API 请求体一致。顶层 `id` 字段可选（不填时由 `name` + 随机后缀自动生成）。
 
 ## 常用场景
 
@@ -28,7 +28,6 @@ bkms-cli app create -f app.yaml --workspace ws-demo
 ### trpc + imageRegistry
 
 ```yaml
-# tRPC 应用，使用已有镜像
 name: my-trpc-app
 type: trpc
 
@@ -36,6 +35,10 @@ buildConfig:
   sourceType: imageRegistry
   imageBuildConfig:
     name: example.com/my-team/my-trpc-app:latest
+    # 可选，私有仓库用户名；密码写入后加密存储
+    username: myuser
+    # 可选，私有仓库密码（加密存储）
+    # password: secret
 
 appModelSpec:
   trpcSpec:
@@ -66,6 +69,8 @@ appModelSpec:
   envVars:
     - key: ENV
       value: prod
+      # description 为可选字段
+      description: "Runtime environment"
   trpcSpec:
     language: go
     fileName: trpc_go.yaml
@@ -76,6 +81,28 @@ appModelSpec:
           - name: trpc.app.server.service
             ip: 0.0.0.0
             port: 8080
+```
+
+### trpc + pipeline（蓝盾流水线构建）
+
+```yaml
+# tRPC 应用，由蓝盾流水线负责构建
+name: my-trpc-app
+type: trpc
+
+buildConfig:
+  sourceType: pipeline
+  pipelineBuildConfig:
+    pipelineID: p-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    params:
+      BKMS_IMAGE_NAME: my-trpc-app
+      BKMS_IMAGE_TAG: latest
+
+appModelSpec:
+  trpcSpec:
+    language: go
+    fileName: trpc_go.yaml
+    filePath: /app/conf
 ```
 
 ### helm + GitRepo
@@ -121,5 +148,26 @@ helmSpec:
     repoType: HelmRepo
     helmRepoConfig:
       repoURL: https://charts.example.com/stable
+      chartName: my-chart
+```
+
+### helm + BCSRepo
+
+```yaml
+# Helm 应用，使用 BCS 仓库中的 Chart
+name: my-helm-app
+type: helm
+
+buildConfig:
+  sourceType: imageRegistry
+  imageBuildConfig:
+    name: example.com/my-team/my-helm-app:v1.0.0
+
+helmSpec:
+  helmSource:
+    repoType: BCSRepo
+    bcsRepoConfig:
+      projectCode: my-project
+      repoName: my-bcs-repo
       chartName: my-chart
 ```

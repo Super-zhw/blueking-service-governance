@@ -23,6 +23,7 @@ import artifact from '~/pages/application/detail/artifact/index.vue';
 import orchestrate from '~/pages/application/detail/base-info/helm/app-orchestrate.vue';
 import helmInfo from '~/pages/application/detail/base-info/helm/helm-info.vue';
 import trpcInfo from '~/pages/application/detail/base-info/trpc/index.vue';
+import dashboard from '~/pages/application/detail/dashboard.vue';
 import trpcDeploy from '~/pages/application/detail/deploy/deploy.vue';
 import helmDeploy from '~/pages/application/detail/helm-deploy/index.vue';
 import modulesConfig from '~/pages/application/detail/modules-config.vue';
@@ -107,6 +108,15 @@ export const TRPC_NAVIGATION: NavigationItem[] = [
         component: observation,
       },
       {
+        key: 'dashboard',
+        name: i18n.global.t('仪表盘'),
+        icon: 'dashboard-2-shape',
+        component: dashboard,
+        meta: {
+          layout: 'empty',
+        },
+      },
+      {
         key: 'alert',
         name: i18n.global.t('监控告警'),
         icon: 'alert-records',
@@ -127,6 +137,16 @@ export const TRPC_NAVIGATION: NavigationItem[] = [
         name: i18n.global.t('北极星'),
         icon: 'polaris',
         component: polaris,
+      },
+      {
+        // tRPC / TAF：网络访问页仅含 HostPort 端口映射
+        key: 'network',
+        name: i18n.global.t('网络访问'),
+        icon: 'wangye',
+        component: networkAccess,
+        meta: {
+          layout: 'empty',
+        },
       },
       {
         key: 'module',
@@ -230,6 +250,7 @@ export const HELM_NAVIGATION: NavigationItem[] = [
         },
       },
       {
+        // Helm：网络访问页仅含 Service
         key: 'network',
         name: i18n.global.t('网络访问'),
         icon: 'wangye',

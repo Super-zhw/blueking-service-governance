@@ -40,6 +40,10 @@ Use this command to view and manage running instances for your applications.`,
 	cmd.AddCommand(NewExecAdminCmdCmd())
 	// 将本地 TCP 端口转发到单个应用实例 Pod
 	cmd.AddCommand(NewPortForwardCmd())
+	// 更新实例北极星权重/隔离状态
+	cmd.AddCommand(NewPolarisCmd())
+	// 删除实例
+	cmd.AddCommand(NewInstanceDeleteCmd())
 
 	return cmd
 }

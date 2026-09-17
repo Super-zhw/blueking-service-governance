@@ -42,6 +42,7 @@ import (
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg/appcfgfiledef"
 	appcfghandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg/handler"
 	apphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
@@ -54,11 +55,15 @@ import (
 	deployhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/gpa"
 	gpahandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/gpa/handler"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/hostport"
+	hostporthandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/hostport/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
 	polarishandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg"
 	bscpcfghandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component"
+	devmodeapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
+	devmodehandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode/handler"
 	componenthandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/portpool"
 	portpoolhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/portpool/handler"
@@ -72,6 +77,8 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/apm"
 	bkmalert "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert"
 	bkmalerthandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/alert/handler"
+	bkmdashboard "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard"
+	bkmdashboardhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/dashboard/handler"
 	bkmusergroup "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/usergroup"
 	bkmusergrouphandler "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor/usergroup/handler"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/instancelog"
@@ -163,6 +170,7 @@ func RegisterRouter(ctx context.Context, cfg config.Config, serverRole string) *
 	buildtrigger.Register(v1, buildTriggerHandler)
 	imageapi.Register(v1, imagehandler.New(storereg.G()))
 	appcfg.Register(v1, appcfghandler.New(storereg.G()))
+	appcfgfiledef.RegisterRoutes(v1, appcfgfiledef.NewHandler(storereg.G()))
 	helmchart.Register(v1, helmcharthandler.New(storereg.G()))
 	instancelog.Register(v1, instanceloghandler.New(storereg.G()))
 	appdefaults.Register(v1, appdefaultshandler.New(storereg.G()))
@@ -176,11 +184,20 @@ func RegisterRouter(ctx context.Context, cfg config.Config, serverRole string) *
 	bkintegrations.Register(v1, bkintegrationshandler.New(storereg.G()))
 	bkmusergroup.Register(v1, bkmusergrouphandler.New(storereg.G(), bkmusergroup.New()))
 	bkmalert.Register(v1, bkmalerthandler.New(storereg.G()))
+	bkmdashboard.Register(
+		v1,
+		bkmdashboardhandler.New(
+			storereg.G(),
+			bkmdashboard.NewService(storereg.G().AppDashboardStore),
+		),
+	)
 	clusteraddon.Register(v1, clusteraddonhandler.New(storereg.G()))
 	polaris.Register(v1, polarishandler.New(storereg.G()))
+	hostport.Register(v1, hostporthandler.New(storereg.G()))
 	depservice.Register(v1, depservicehandler.New(storereg.G()))
 	gpa.Register(v1, gpahandler.New(storereg.G()))
 	portpool.Register(v1, portpoolhandler.New(storereg.G()))
+	devmodeapi.RegisterRoutes(v1, devmodehandler.New(storereg.G()))
 	bscpcfg.Register(v1, bscpcfghandler.New(storereg.G()))
 	user.Register(v1, user.New(storereg.G()))
 	admin.Register(

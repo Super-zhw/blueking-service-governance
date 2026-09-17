@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -33,9 +34,14 @@ import (
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/discovery"
+	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
 )
 
-// CRApplier 负责构建并向单个目标环境下发或更新 PolarisConfig CR。
+// CRApplier 负责构建并向单个目标环境下发或更新 Polaris 资源。
+//
+// on_deploy 模式下仅用于 patch 后的动态下发，其他情况通过正常部署流程下发及删除；
+// immediate 模式下还负责下发配套的 Service，以及配置离域或删除时清理集群资源，
+// 因为这类配置不依赖部署流程，无法借助部署时的资源差异清理。
 type CRApplier struct{}
 
 // NewCRApplier 创建 PolarisConfig CR 下发器。
@@ -43,7 +49,9 @@ func NewCRApplier() *CRApplier {
 	return &CRApplier{}
 }
 
-// Apply 向指定环境下发 CR，仅返回资源构建或集群操作错误。
+// Apply 向指定环境下发 Polaris 资源。
+// on_deploy 只 upsert PolarisConfig CR（配套 Service 由部署流程管理）；
+// immediate 同时 upsert 配套 Service，因为该模式不走部署流程。
 func (a *CRApplier) Apply(
 	ctx context.Context,
 	app *bkmsapp.Application,
@@ -51,50 +59,72 @@ func (a *CRApplier) Apply(
 	config *PolarisConfig,
 	envVars map[string]string,
 ) error {
-	manifest, err := a.buildCRManifest(app, env, config, envVars)
+	resources, err := buildExtraResources(app, env, config, envVars, nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "build polaris resources")
 	}
-	if err = a.upsertCR(ctx, env, manifest); err != nil {
-		return errors.Wrapf(err, "apply polaris CR in env %s", env.Name)
+
+	wanted := applyKinds(config)
+	clusterCfg := cluster.NewConfig(env.Cluster.ClusterID)
+	for idx := range resources {
+		obj := resources[idx]
+		if _, ok := wanted[obj.GetKind()]; !ok {
+			continue
+		}
+		k8sClient, clientErr := newK8sClientForObject(clusterCfg, obj.GetAPIVersion(), obj.GetKind())
+		if clientErr != nil {
+			return clientErr
+		}
+		if _, err = k8sClient.Upsert(
+			ctx, env.Cluster.Namespace, obj.Object, metav1.PatchOptions{},
+		); err != nil {
+			return errors.Wrapf(err, "apply polaris %s %s in env %s", obj.GetKind(), obj.GetName(), env.Name)
+		}
 	}
 	return nil
 }
 
-// buildCRManifest 复用 workload 构建逻辑并提取 PolarisConfig CR。
-func (a *CRApplier) buildCRManifest(
+// applyKinds 返回本次应 upsert 的资源类型。
+//
+//   - on_deploy：只下发 PolarisConfig CR， 对应的 Service 会在部署流程中下发
+//   - immediate：同时下发 PolarisConfig CR 与配套 Service，因为该模式不走部署流程。
+func applyKinds(config *PolarisConfig) map[string]struct{} {
+	wanted := map[string]struct{}{polarisConfigCRKind: {}}
+	if config.IsImmediateRegister() {
+		wanted[k8skind.SVC] = struct{}{}
+	}
+	return wanted
+}
+
+// DeleteResources 从指定环境删除该配置的 PolarisConfig CR 与配套 Service。
+// 资源不存在时视为成功，因此重复删除是安全的。
+func (a *CRApplier) DeleteResources(
+	ctx context.Context,
 	app *bkmsapp.Application,
 	env *bkmsenv.Environment,
 	config *PolarisConfig,
-	envVars map[string]string,
-) (map[string]any, error) {
-	resources, err := buildExtraResources(app, env, config, envVars, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "build polaris resources")
-	}
-	for i := range resources {
-		if resources[i].GetKind() == polarisConfigCRKind {
-			return resources[i].Object, nil
-		}
-	}
-	return nil, errors.Errorf(
-		"PolarisConfig CR not found in built resources for app %s config %s",
-		app.ID,
-		config.Name,
-	)
-}
-
-func (a *CRApplier) upsertCR(
-	ctx context.Context,
-	env *bkmsenv.Environment,
-	manifest map[string]any,
 ) error {
-	k8sClient, err := a.newK8sClient(env.Cluster.ClusterID)
-	if err != nil {
-		return errors.Wrap(err, "create k8s client for polaris CR")
+	crName, serviceName := PolarisResourceNames(app.Name, config.Name)
+	targets := []struct {
+		apiVersion string
+		kind       string
+		name       string
+	}{
+		{polarisConfigCRAPIVersion, polarisConfigCRKind, crName},
+		{corev1.SchemeGroupVersion.String(), k8skind.SVC, serviceName},
 	}
-	if _, err = k8sClient.Upsert(ctx, env.Cluster.Namespace, manifest, metav1.PatchOptions{}); err != nil {
-		return errors.Wrap(err, "upsert polaris CR to k8s")
+
+	clusterCfg := cluster.NewConfig(env.Cluster.ClusterID)
+	for _, target := range targets {
+		k8sClient, err := newK8sClientForObject(clusterCfg, target.apiVersion, target.kind)
+		if err != nil {
+			return err
+		}
+		if err = k8sClient.Delete(
+			ctx, env.Cluster.Namespace, target.name, metav1.DeleteOptions{},
+		); err != nil {
+			return errors.Wrapf(err, "delete polaris %s %s in env %s", target.kind, target.name, env.Name)
+		}
 	}
 	return nil
 }
@@ -105,28 +135,39 @@ type jsonPatchOperation struct {
 	Value any    `json:"value"`
 }
 
-func buildWeightPatch(serviceName string, weight int32) ([]byte, error) {
+// buildWeightPatch 构建环境权重与动态权重开关的 JSON Patch。
+//
+// 整个 dynamicWeight 对象一次替换，而不是 patch 其 enable 子路径：
+// 存量 CR 可能没有 dynamicWeight 父节点，子路径 add 会失败。
+func buildWeightPatch(serviceName string, weight int32, dynamicWeight bool) ([]byte, error) {
 	return json.Marshal([]jsonPatchOperation{
 		{Op: "test", Path: "/spec/services/0/name", Value: serviceName},
 		{Op: "add", Path: "/spec/services/0/weight", Value: int64(weight)},
+		{Op: "add", Path: "/spec/polaris/dynamicWeight", Value: map[string]any{
+			"enable":                dynamicWeight,
+			"preserveServiceConfig": true,
+		}},
 	})
 }
 
-// PatchWeight 仅更新现有 PolarisConfig CR 的服务权重，不修改其他配置字段。
+// PatchWeight 仅更新现有 PolarisConfig CR 的服务权重与动态权重开关，不修改其他配置字段。
 func (a *CRApplier) PatchWeight(
 	ctx context.Context,
 	app *bkmsapp.Application,
 	env *bkmsenv.Environment,
 	config *PolarisConfig,
 	weight int32,
+	dynamicWeight bool,
 ) error {
-	crName, serviceName := polarisResourceNames(app.Name, config.Name)
-	patch, err := buildWeightPatch(serviceName, weight)
+	crName, serviceName := PolarisResourceNames(app.Name, config.Name)
+	patch, err := buildWeightPatch(serviceName, weight, dynamicWeight)
 	if err != nil {
 		return errors.Wrap(err, "build polaris CR weight patch")
 	}
 
-	k8sClient, err := a.newK8sClient(env.Cluster.ClusterID)
+	k8sClient, err := newK8sClientForObject(
+		cluster.NewConfig(env.Cluster.ClusterID), polarisConfigCRAPIVersion, polarisConfigCRKind,
+	)
 	if err != nil {
 		return errors.Wrap(err, "create k8s client for polaris CR")
 	}
@@ -143,11 +184,13 @@ func (a *CRApplier) PatchWeight(
 	return nil
 }
 
-func (a *CRApplier) newK8sClient(clusterID string) (*k8sclient.Client, error) {
-	clusterCfg := cluster.NewConfig(clusterID)
-	resGVR, err := discovery.GetGroupVersionResource(clusterCfg, polarisConfigCRKind, polarisConfigCRAPIVersion)
+func newK8sClientForObject(clusterCfg *cluster.Config, apiVersion, kind string) (*k8sclient.Client, error) {
+	if apiVersion == "" || kind == "" {
+		return nil, errors.Errorf("invalid polaris resource: apiVersion %q kind %q", apiVersion, kind)
+	}
+	resGVR, err := discovery.GetGroupVersionResource(clusterCfg, kind, apiVersion)
 	if err != nil {
-		return nil, errors.Wrapf(err, "get GVR for PolarisConfig in cluster %s", clusterID)
+		return nil, errors.Wrapf(err, "get GVR for %s in cluster %s", kind, clusterCfg.ClusterID)
 	}
 	return k8sclient.NewWithGVR(clusterCfg, *resGVR), nil
 }

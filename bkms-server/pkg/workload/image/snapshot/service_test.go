@@ -22,12 +22,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync/atomic"
 	"time"
 
 	"github.com/TencentBlueKing/gopkg/stringx"
 	"github.com/bytedance/mockey"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/samber/lo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
@@ -159,6 +161,52 @@ var _ = Describe("Service", func() {
 			Expect(info.Username).To(BeEmpty())
 			Expect(info.Password).To(BeEmpty())
 			Expect(info.RepoKey).To(Equal(GenerateRepoKey("registry.example.com/team/runtime", "", "")))
+		})
+	})
+
+	Describe("ResolveRepoKeyForWorkspace", func() {
+		const imageName = "docker.bkrepo.example.com/demo/repo/my-golang"
+
+		It("should reject blank workspaceID or image name", func() {
+			_, err := service.ResolveRepoKeyForWorkspace(ctx, "  ", imageName)
+			Expect(err).To(MatchError("workspaceID is required"))
+
+			_, err = service.ResolveRepoKeyForWorkspace(ctx, testWorkspaceID1, "  ")
+			Expect(err).To(MatchError("image name is required"))
+		})
+
+		It("should resolve workspace registry credentials with the given image name", func() {
+			mockey.PatchConvey("mock workspace image registry", GinkgoT(), func() {
+				mockey.Mock(workspace.GetWorkspaceImageRegistry).To(
+					func(_ context.Context, wsID string) (*bkmsreg.ImageRegistry, error) {
+						Expect(wsID).To(Equal(testWorkspaceID1))
+						return &bkmsreg.ImageRegistry{
+							Registry: "docker.bkrepo.example.com/demo",
+							Username: "ws-user",
+							Password: "ws-pass",
+						}, nil
+					},
+				).Build()
+
+				info, err := service.ResolveRepoKeyForWorkspace(ctx, " "+testWorkspaceID1+" ", " "+imageName+" ")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(info.RepoName).To(Equal(imageName))
+				Expect(info.Username).To(Equal("ws-user"))
+				Expect(info.Password).To(Equal("ws-pass"))
+				Expect(info.RepoKey).To(Equal(GenerateRepoKey(imageName, "ws-user", "ws-pass")))
+			})
+		})
+
+		It("should wrap workspace registry lookup errors", func() {
+			mockey.PatchConvey("mock workspace image registry failure", GinkgoT(), func() {
+				mockey.Mock(workspace.GetWorkspaceImageRegistry).Return(
+					nil, errors.New("registry missing"),
+				).Build()
+
+				_, err := service.ResolveRepoKeyForWorkspace(ctx, testWorkspaceID1, imageName)
+				Expect(err).To(MatchError(ContainSubstring("get workspace image registry")))
+				Expect(err).To(MatchError(ContainSubstring("registry missing")))
+			})
 		})
 	})
 
@@ -385,6 +433,147 @@ var _ = Describe("Service", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("enqueue image detail sync task"))
 				Expect(err.Error()).To(ContainSubstring("asynq unavailable"))
+			})
+		})
+
+		It("should reset the refresh status even when the context deadline has already passed", func() {
+			mockey.PatchConvey("test", GinkgoT(), func() {
+				mockey.Mock(registry.New).Return(&registry.Client{}).Build()
+				// 让远程调用一直等到 ctx 超时，复现「失败原因就是超时」这一场景
+				mockey.Mock((*registry.Client).ListAllTags).To(
+					func(_ *registry.Client, rCtx context.Context, _ string) ([]string, error) {
+						<-rCtx.Done()
+						return nil, rCtx.Err()
+					},
+				).Build()
+
+				expiring, cancel := context.WithTimeout(ctx, 50*time.Millisecond)
+				defer cancel()
+
+				_, err := service.RefreshAppSnapshots(expiring, testAppID1)
+				Expect(err).To(HaveOccurred())
+
+				// 回置若复用已超时的 ctx 就会写不进去，状态将永久停在 refreshing 挡住后续刷新
+				repoKey := GenerateRepoKey("library/busybox", "alice", "secret")
+				status, getErr := store.GetStatus(ctx, repoKey)
+				Expect(getErr).NotTo(HaveOccurred())
+				Expect(status.RefreshStatus).To(Equal(RefreshStatusIdle))
+				Expect(status.LastError).NotTo(BeEmpty())
+			})
+		})
+	})
+
+	DescribeTable("shouldTriggerRefresh",
+		func(total int64, status *RepoSnapshotStatus, keyword string, staleTTL time.Duration, want bool) {
+			Expect(service.shouldTriggerRefresh(total, status, keyword, staleTTL)).To(Equal(want))
+		},
+		Entry("empty snapshot still initializes when TTL is off",
+			int64(0), nil, "", staleTTLDisabled, true),
+		Entry("missing status is treated as stale",
+			int64(1), nil, "", customImageStaleTTL, true),
+		Entry("never-refreshed status is treated as stale",
+			int64(1), &RepoSnapshotStatus{}, "", customImageStaleTTL, true),
+		Entry("stale snapshot triggers refresh",
+			int64(1), &RepoSnapshotStatus{LastRefreshedAt: lo.ToPtr(time.Now().Add(-6 * time.Minute))},
+			"", customImageStaleTTL, true),
+		Entry("fresh snapshot skips refresh",
+			int64(1), &RepoSnapshotStatus{LastRefreshedAt: lo.ToPtr(time.Now().Add(-time.Minute))},
+			"", customImageStaleTTL, false),
+		Entry("TTL off skips stale refresh",
+			int64(1), &RepoSnapshotStatus{LastRefreshedAt: lo.ToPtr(time.Now().Add(-6 * time.Minute))},
+			"", staleTTLDisabled, false),
+		Entry("keyword miss on a fresh snapshot is not an empty snapshot",
+			int64(0), &RepoSnapshotStatus{LastRefreshedAt: lo.ToPtr(time.Now().Add(-time.Minute))},
+			"no-such-tag", customImageStaleTTL, false),
+		Entry("keyword miss on a stale snapshot still refreshes",
+			int64(0), &RepoSnapshotStatus{LastRefreshedAt: lo.ToPtr(time.Now().Add(-6 * time.Minute))},
+			"no-such-tag", customImageStaleTTL, true),
+		Entry("refreshing status does not start another goroutine",
+			int64(0), &RepoSnapshotStatus{RefreshStatus: RefreshStatusRefreshing},
+			"", customImageStaleTTL, false),
+	)
+
+	Describe("ListWorkspaceSnapshots", func() {
+		const imageName = "docker.bkrepo.example.com/demo/repo/my-golang"
+
+		var (
+			repoKey      string
+			listAllCalls int32
+		)
+
+		// mockWorkspaceRegistry 让工作空间口径的 repoKey 与预置快照对上，并统计远程调用次数
+		mockWorkspaceRegistry := func() {
+			mockey.Mock(workspace.GetWorkspaceImageRegistry).Return(&bkmsreg.ImageRegistry{
+				Registry: "docker.bkrepo.example.com/demo/repo",
+				Username: "ws-user",
+				Password: "ws-pass",
+			}, nil).Build()
+			mockey.Mock(registry.New).Return(&registry.Client{}).Build()
+			mockey.Mock((*registry.Client).ListAllTags).To(
+				func(_ *registry.Client, _ context.Context, _ string) ([]string, error) {
+					atomic.AddInt32(&listAllCalls, 1)
+					return []string{"v1", "v2"}, nil
+				},
+			).Build()
+			mockey.Mock(taskq.Enqueue).Return(nil).Build()
+		}
+
+		// seedRepo 预置一条快照与其最后刷新时间
+		seedRepo := func(key, name string, lastRefreshedAt time.Time) {
+			Expect(store.UpsertSnapshots(ctx, key, []Image{{Tag: "v1"}})).To(Succeed())
+			Expect(store.UpsertStatus(ctx, &RepoSnapshotStatus{
+				RepoKey:         key,
+				RepoName:        name,
+				RefreshStatus:   RefreshStatusIdle,
+				LastRefreshedAt: &lastRefreshedAt,
+			})).To(Succeed())
+		}
+
+		BeforeEach(func() {
+			repoKey = GenerateRepoKey(imageName, "ws-user", "ws-pass")
+			atomic.StoreInt32(&listAllCalls, 0)
+		})
+
+		It("should refresh only the custom image path when every snapshot is stale", func() {
+			mockey.PatchConvey("test", GinkgoT(), func() {
+				mockWorkspaceRegistry()
+
+				staleAt := time.Now().Add(-time.Hour)
+				officialRepo := "registry.example.com/team/runtime"
+				seedRepo(repoKey, imageName, staleAt)
+				seedRepo(GenerateRepoKey(officialRepo, "", ""), officialRepo, staleAt)
+				seedRepo(GenerateRepoKey("library/busybox", "alice", "secret"), "library/busybox", staleAt)
+
+				// 本次请求不等后台刷新，因此还看不到远程新增的 v2
+				tags, total, status, err := service.ListWorkspaceSnapshots(
+					ctx, testWorkspaceID1, imageName, "", 1, 10,
+				)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(total).To(BeEquivalentTo(1))
+				Expect(tags).To(HaveLen(1))
+				Expect(status).NotTo(BeNil())
+				Eventually(func() int64 {
+					_, refreshed, lErr := store.ListByRepoKey(ctx, repoKey, "", 1, 10)
+					Expect(lErr).NotTo(HaveOccurred())
+					return refreshed
+				}, "5s", "50ms").Should(BeEquivalentTo(2))
+
+				// 官方与产物镜像同样陈旧，但未启用 TTL，远端调用数应始终停在自定义镜像那一次
+				_, _, _, err = service.ListRepositorySnapshots(ctx, officialRepo, "", 1, 10)
+				Expect(err).NotTo(HaveOccurred())
+				_, _, _, err = service.ListAppSnapshots(ctx, testAppID1, "", 1, 10)
+				Expect(err).NotTo(HaveOccurred())
+				Consistently(func() int32 { return atomic.LoadInt32(&listAllCalls) }, "300ms", "50ms").
+					Should(BeEquivalentTo(1))
+
+				// 刷新完成后快照已新鲜，关键字未命中不得再当成空快照去拉远端
+				_, total, _, err = service.ListWorkspaceSnapshots(
+					ctx, testWorkspaceID1, imageName, "no-such-tag", 1, 10,
+				)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(total).To(BeZero())
+				Consistently(func() int32 { return atomic.LoadInt32(&listAllCalls) }, "300ms", "50ms").
+					Should(BeEquivalentTo(1))
 			})
 		})
 	})

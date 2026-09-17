@@ -38,6 +38,8 @@ var (
 	ErrCRNotFound = errors.New("gpa CR not found in cluster")
 	// ErrComponentNotInstalled 环境所在集群未安装 GPA 组件
 	ErrComponentNotInstalled = errors.New("gpa component is not installed in cluster")
+	// ErrFederationNotSupported 联邦环境本期不支持 GPA
+	ErrFederationNotSupported = errors.New("gpa is not supported in federation environment")
 )
 
 // GPAService 负责将 GPA 配置下发为 GeneralPodAutoscaler CR 并管理其生命周期。
@@ -55,6 +57,10 @@ func NewGPAService(appModelStore appmodel.AppModelStore) *GPAService {
 
 // Apply 将 GPA 配置下发到目标集群（幂等 Upsert）。
 func (s *GPAService) Apply(ctx context.Context, env *bkmsenv.Environment, config *GPAConfig) error {
+	if env != nil && env.Cluster.IsFederation {
+		return ErrFederationNotSupported
+	}
+
 	scaleTargetName, err := s.resolveScaleTargetName(ctx, config.AppID)
 	if err != nil {
 		return err
@@ -167,8 +173,7 @@ func (c *ClusterClient) GetStatus(ctx context.Context, namespace, name string) (
 	return parseGPAStatusFromUnstructured(obj)
 }
 
-// resolveScaleTargetName 解析 scaleTargetRef 指向的工作负载名。
-// 工作负载固定为 GameDeployment，name 与应用工作负载名一致（见 workload builder）。
+// resolveScaleTargetName 解析 scaleTargetRef 指向的工作负载名（与应用工作负载名一致，见 workload builder）。
 func (s *GPAService) resolveScaleTargetName(ctx context.Context, appID string) (string, error) {
 	appModel, err := s.appModelStore.GetAppModel(ctx, appID)
 	if err != nil {

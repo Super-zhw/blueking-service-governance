@@ -48,7 +48,6 @@
             />
             {{ $t('新建环境') }}
           </Button>
-          <!-- TODO: 公共环境变量 -->
           <Button
             outline
             theme="primary"
@@ -119,6 +118,7 @@
         :row-height="56"
         :sort-config="sortConfig"
         @filter-change="filterChangeEvent"
+        @row-click="handleRowClick"
       >
         <template #empty>
           <TableException
@@ -139,7 +139,7 @@
               <Button
                 text
                 theme="primary"
-                @click="handleShowEnvDetail(row)"
+                @click.stop="handleShowEnvDetail(row)"
                 >{{ row.displayName }}</Button
               >
               <div class="text-[#979BA5]">{{ row.name }}</div>
@@ -288,7 +288,7 @@
   import { Button, Message, SearchSelect, Select } from 'bkui-vue';
   import { Done, Plus } from 'bkui-vue/lib/icon';
   import { useI18n } from 'vue-i18n';
-  import { useRouter } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import { EnvAppDeployStatusOutput, EnvOutput } from '~/@types/v1/env';
   import { EnvService } from '~/api/modules/v1';
   import Layout from '~/components/skeleton/skeleton-layout';
@@ -321,6 +321,7 @@
   );
 
   const router = useRouter();
+  const route = useRoute();
   const spaceStore = useSpaceStore();
   const { createPlaceholder } = useSearchPlaceholder();
 
@@ -456,7 +457,7 @@
   const ENV_TYPE_ORDER: Record<string, number> = { development: 1, test: 2, staging: 3, production: 4 };
 
   function getRowActiveClass({ row }: { row: EnvOutput }) {
-    return router.currentRoute.value.query?.active === row.name ? 'row--current' : '';
+    return router.currentRoute.value.query?.active === row.name ? 'row--current cursor-pointer' : 'cursor-pointer';
   }
 
   // 获取环境列表
@@ -492,8 +493,18 @@
     });
   }
 
-  // env详情（URL 的 active 由环境详情组件的 hook 统一写回，避免与组件挂载写回产生竞态）
-  function handleShowEnvDetail(row: EnvOutput) {
+  // 点击环境行时切换当前环境；操作列按钮通过 .stop 保持各自的行为。
+  function handleRowClick(_event: Event, row: EnvOutput) {
+    handleShowEnvDetail(row);
+  }
+
+  // env详情：行点击同步 URL（active 定位当前环境，供刷新/直达恢复）
+  // apmQuery 为上一环境的观测参数快照，切换环境必须一并清除，避免刷新后误用旧环境观测状态
+  // 必须先 await router.replace 完成再更新 curRow：EnvDetail 挂载时 useUrlQuerySync 的 onMounted 会无条件 replace，
+  // 若 active 尚未写入 URL，会以旧 query 快照覆盖导致 active 丢失（切行后 URL 无 active 参数）
+  async function handleShowEnvDetail(row: EnvOutput) {
+    const { apmQuery: _apmQuery, ...restQuery } = route.query;
+    await router.replace({ query: { ...restQuery, active: row.name } });
     curRow.value = row;
     nextTick(() => {
       envDetailRef.value?.show();

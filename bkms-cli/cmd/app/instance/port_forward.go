@@ -24,6 +24,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/instance"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
 // NewPortForwardCmd returns a Command instance for 'app instance port-forward' sub command.
@@ -50,7 +51,8 @@ Port argument format:
 
   # Forward with custom local address
   bkms-cli app instance port-forward --app myapp --env test --instance pod-1 18080:8080 --local-address 0.0.0.0`,
-		Args: cobra.ExactArgs(1),
+		Args:    cobra.ExactArgs(1),
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			localPort, remotePort, err := handler.ParsePortArg(args[0])
 			if err != nil {
@@ -62,7 +64,7 @@ Port argument format:
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.AppID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &opts.AppID)
 	cmd.Flags().StringVar(&opts.EnvName, "env", "", "environment name (required)")
 	cmd.Flags().StringVar(&opts.InstanceID, "instance", "", "target Pod instance ID (required)")
 	cmd.Flags().StringVar(&opts.LocalAddress, "local-address", "127.0.0.1", "local listening address")

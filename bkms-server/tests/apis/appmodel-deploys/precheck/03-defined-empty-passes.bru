@@ -1,0 +1,28 @@
+meta {
+  name: 03-defined-empty-passes
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{serviceURL}}/apps/{{envVarPrecheckDefinedAppID}}/envs/{{envVarPrecheckEnvName}}/trpc-deploys/precheck
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should treat an empty defined value as present", () => {
+    expect(res.body.undefinedVars).to.deep.equal([]);
+    expect(res.body.missingRequiredClusterAddons).to.be.an("array");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

@@ -286,6 +286,7 @@ var _ = Describe("Build Functions", func() {
 				pipelineparam.DockerfileBuildCommands:      "",
 				pipelineparam.DockerfileRuntimeEnvCommands: "",
 				pipelineparam.DockerfileStartCommand:       "",
+				pipelineparam.DockerfileExtraFiles:         "",
 			}))
 		})
 
@@ -300,6 +301,7 @@ var _ = Describe("Build Functions", func() {
 					RuntimeEnv: []string{"apt-get update", "apt-get install -y ca-certificates"},
 					Start:      "./app",
 				},
+				ExtraFiles: []string{"data/key.pem", "certs", "data/*.pem"},
 			}
 
 			params, err := genPlatformBuildParams(testCfg.CodeRepo, testApp)
@@ -320,6 +322,9 @@ var _ = Describe("Build Functions", func() {
 				[]string{"apt-get update", "apt-get install -y ca-certificates"},
 			))
 			Expect(params[pipelineparam.DockerfileStartCommand]).To(Equal("./app"))
+			Expect(decodeDockerfileCommandsParam(params[pipelineparam.DockerfileExtraFiles])).To(Equal(
+				[]string{"data/key.pem", "certs", "data/*.pem"},
+			))
 		})
 
 		It("should encode platform commands with special characters", func() {
@@ -406,6 +411,7 @@ var _ = Describe("Build Functions", func() {
 			// 验证镜像信息
 			Expect(params[pipelineparam.ImageCredential]).To(Equal("cred-123"))
 			Expect(params[pipelineparam.ImageRegistry]).To(Equal("hub.example.com"))
+			Expect(params[pipelineparam.ImageRegistryHost]).To(BeEmpty())
 			Expect(params[pipelineparam.ImageName]).To(Equal(testApp.Name))
 			Expect(params[pipelineparam.ImageTag]).To(Equal(imageTag))
 			// 验证 platform 构建相关参数：repositoryDockerfile 模式下参数集固定，除 sourceType 和 ToolchainBaseURL 外其余为空字符串
@@ -418,6 +424,23 @@ var _ = Describe("Build Functions", func() {
 			Expect(params[pipelineparam.DockerfileBuildCommands]).To(Equal(""))
 			Expect(params[pipelineparam.DockerfileRuntimeEnvCommands]).To(Equal(""))
 			Expect(params[pipelineparam.DockerfileStartCommand]).To(Equal(""))
+			Expect(params[pipelineparam.DockerfileExtraFiles]).To(Equal(""))
+		})
+
+		It("should fill registry host for repository Dockerfile mode", func() {
+			// 仓库自带 Dockerfile 也可能引用镜像源里的私有基础镜像，凭证配对不能因构建方式被跳过
+			mockey.Mock(workspace.GetWorkspaceImageRegistry).Return(&registry.ImageRegistry{
+				Registry:         "mirrors.tencent.com/example",
+				Username:         "robot",
+				BkCICredentialID: "cred-123",
+			}, nil).Build()
+
+			params, err := genPipelineBuildParams(ctx, testApp, testCfg, branch, imageTag)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(params[pipelineparam.DockerfileSourceType]).To(Equal(bkciDockerfileSourceRepository))
+			Expect(params[pipelineparam.ImageRegistryHost]).To(Equal("mirrors.tencent.com"))
+			Expect(params[pipelineparam.ImageCredential]).To(Equal("cred-123"))
 		})
 
 		It("should populate platform build params when image build mode is platform", func() {
@@ -459,6 +482,7 @@ var _ = Describe("Build Functions", func() {
 				[]string{"apt-get update"},
 			))
 			Expect(params[pipelineparam.DockerfileStartCommand]).To(Equal("./app"))
+			Expect(params[pipelineparam.DockerfileExtraFiles]).To(Equal(""))
 			// SourceDir 仍作为 build context 保留
 			Expect(params[pipelineparam.DockerBuildDir]).To(Equal("src"))
 			Expect(params[pipelineparam.DockerfilePath]).To(Equal("src/.bkms/Dockerfile.generated"))
@@ -576,9 +600,49 @@ var _ = Describe("Build Functions", func() {
 			Expect(params[pipelineparam.RepoRevision]).To(Equal(branch))
 			// 验证镜像仓库信息
 			Expect(params[pipelineparam.ImageRegistry]).To(Equal("hub.example.com"))
+			Expect(params[pipelineparam.ImageRegistryHost]).To(BeEmpty())
 			Expect(params[pipelineparam.ImageName]).To(Equal(testApp.Name))
 			Expect(params[pipelineparam.ImageTag]).To(Equal(imageTag))
 			Expect(params[pipelineparam.ImageCredential]).To(Equal("cred-123"))
+		})
+
+		It("should fill registry host when registry has username and credential", func() {
+			mockey.Mock(workspace.GetWorkspaceImageRegistry).Return(&registry.ImageRegistry{
+				Registry:         "https://mirrors.tencent.com/example",
+				Username:         "robot",
+				BkCICredentialID: "cred-123",
+			}, nil).Build()
+
+			params, err := genPipelineBuildRepoAndImageParams(ctx, testApp, branch, imageTag)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(params[pipelineparam.ImageRegistryHost]).To(Equal("mirrors.tencent.com"))
+			Expect(params[pipelineparam.ImageCredential]).To(Equal("cred-123"))
+		})
+
+		It("should leave registry host empty for public registry", func() {
+			mockey.Mock(workspace.GetWorkspaceImageRegistry).Return(&registry.ImageRegistry{
+				Registry:         "mirrors.tencent.com/example",
+				BkCICredentialID: "cred-123",
+			}, nil).Build()
+
+			params, err := genPipelineBuildRepoAndImageParams(ctx, testApp, branch, imageTag)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(params[pipelineparam.ImageRegistryHost]).To(BeEmpty())
+			Expect(params[pipelineparam.ImageCredential]).To(Equal("cred-123"))
+		})
+
+		It("should leave registry host empty when bkci credential is missing", func() {
+			mockey.Mock(workspace.GetWorkspaceImageRegistry).Return(&registry.ImageRegistry{
+				Registry: "mirrors.tencent.com/example",
+				Username: "robot",
+			}, nil).Build()
+
+			params, err := genPipelineBuildRepoAndImageParams(ctx, testApp, branch, imageTag)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(params[pipelineparam.ImageRegistryHost]).To(BeEmpty())
 		})
 
 		It("should return error when getting workspace registry fails", func() {
@@ -596,6 +660,19 @@ var _ = Describe("Build Functions", func() {
 			Expect(params).To(BeNil())
 		})
 	})
+
+	DescribeTable("sourceImageRegistryHost clips registry to host",
+		func(addr, want string) {
+			Expect(sourceImageRegistryHost(&registry.ImageRegistry{
+				Registry:         addr,
+				Username:         "robot",
+				BkCICredentialID: "cred-123",
+			})).To(Equal(want))
+		},
+		Entry("path only", "mirrors.tencent.com/example", "mirrors.tencent.com"),
+		Entry("https scheme", "https://mirrors.tencent.com/example", "mirrors.tencent.com"),
+		Entry("host with port", "mirrors.tencent.com:5000/example", "mirrors.tencent.com:5000"),
+	)
 })
 
 func decodeDockerfileCommandsParam(param string) []string {

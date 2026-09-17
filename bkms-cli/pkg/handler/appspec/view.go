@@ -86,6 +86,8 @@ func ViewStartCommandHandler(ctx context.Context, appID string) (*StartCommandOu
 	if app.AppModelSpec != nil {
 		out.Command = app.AppModelSpec.Command
 		out.Args = app.AppModelSpec.Args
+		out.TrpcSpec = app.AppModelSpec.TrpcSpec
+		out.TafSpec = app.AppModelSpec.TafSpec
 	}
 	return out, nil
 }

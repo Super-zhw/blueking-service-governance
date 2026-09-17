@@ -29,14 +29,9 @@ import (
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 )
 
-// NewCreateCmd returns a Command instance for 'app create' sub command
-func NewCreateCmd() *cobra.Command {
-	var specFile, workspaceID string
-
-	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a new application",
-		Long: `Create a new application in a workspace from a YAML spec file.
+const (
+	// createAppLong help text
+	createAppLong = `Create a new application in a workspace from a YAML spec file.
 
 Supported application types: trpc, taf, helm, agones.
 
@@ -113,13 +108,27 @@ YAML spec file fields:
     helmSpec.helmSource.gitRepoConfig.repoAlias:    Git repo alias (required)
     helmSpec.helmSource.gitRepoConfig.repoURL:      Git repo URL (required)
     helmSpec.helmSource.gitRepoConfig.revision:     Git revision/branch (required)
-    helmSpec.helmSource.gitRepoConfig.sourceDir:    Helm chart directory (required)`,
-		Example: `  # Create an application from a YAML spec file:
+    helmSpec.helmSource.gitRepoConfig.sourceDir:    Helm chart directory (required)
+`
+	// createAppExample help text
+	createAppExample = `  # Create an application from a YAML spec file:
   bkms-cli app create -f app.yaml
 
   # Specify workspace explicitly:
-  bkms-cli app create -f app.yaml --workspace ws-demo`,
-		PreRun: cmdutil.CommonPreRun,
+  bkms-cli app create -f app.yaml --workspace ws-demo
+`
+)
+
+// NewCreateCmd returns a Command instance for 'app create' sub command
+func NewCreateCmd() *cobra.Command {
+	var specFile, workspaceID string
+
+	cmd := &cobra.Command{
+		Use:     "create",
+		Short:   "Create a new application",
+		Long:    createAppLong,
+		Example: createAppExample,
+		PreRun:  cmdutil.CommonPreRun,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
 			app, err := apphandler.CreateApp(cmd.Context(), workspaceID, specFile)
@@ -135,7 +144,7 @@ YAML spec file fields:
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "app spec file path (YAML)")
 
 	_ = cmd.MarkFlagRequired("file")

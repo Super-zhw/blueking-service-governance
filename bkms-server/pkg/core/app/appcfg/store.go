@@ -37,12 +37,16 @@ const collectionName = "app_config_files"
 type ListOrderByField string
 
 const (
-	// ListOrderByName orders the results by the "name" field in ascending order.
+	// ListOrderByName 保留给上层兼容使用；
+	// 由于 name 已迁移到 def 表，需在补齐 def 后于上层按原 name 排序语义处理。
 	ListOrderByName ListOrderByField = "name"
 )
 
 // ErrAppConfigFileVersionConflict indicates the file was modified concurrently.
 var ErrAppConfigFileVersionConflict = errors.New("app config file version conflict")
+
+// ErrAppConfigFileNotFound indicates a specific app config file record could not be found.
+var ErrAppConfigFileNotFound = errors.New("app config file not found")
 
 // AppConfigFileStore defines the interface for storing app config files.
 type AppConfigFileStore interface {
@@ -74,6 +78,17 @@ type AppConfigFileStore interface {
 
 	// IsReferencedByOther checks if the given app config file ID is referenced by other overlay files.
 	IsReferencedByOther(ctx context.Context, id bson.ObjectID) (bool, error)
+
+	// --- Def 关联查询 ---
+
+	// GetByDefIDAndEnv 按 defID + envName 组合查询文件记录。
+	GetByDefIDAndEnv(ctx context.Context, defID bson.ObjectID, envName string) (*AppConfigFile, error)
+
+	// ListByDefID 返回指定 def 下的所有文件记录。
+	ListByDefID(ctx context.Context, defID bson.ObjectID) ([]AppConfigFile, error)
+
+	// DeleteByDefID 删除指定 def 下的所有文件记录。
+	DeleteByDefID(ctx context.Context, defID bson.ObjectID) (int64, error)
 }
 
 // AppValuesConfigStore defines the interface for storing app values configurations.
@@ -143,8 +158,7 @@ func (s *AppConfigFileStoreMongo) GetByID(ctx context.Context, id bson.ObjectID)
 	err := s.collection.FindOne(ctx, filter).Decode(&obj)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			// When no record can be found, return a new error
-			return nil, errors.Errorf("app config file %s not found", id.Hex())
+			return nil, errors.Wrapf(ErrAppConfigFileNotFound, "app config file %s", id.Hex())
 		}
 		return nil, err
 	}
@@ -182,13 +196,15 @@ type AcfListOption interface {
 
 // ListOptions holds the options for listing app config files.
 type ListOptions struct {
-	// The field to order the results by, default to "name"
+	// The field to order the results by. Store 层当前仅支持空值（按 createdAt）。
 	orderBy ListOrderByField
 	// The type of app config file to filter, default to no filtering
 	filterType AppConfigFileType
 	// The environment name to filter, default to no filtering
 	// Use EnvNameFilterAppLevel to filter only app-level config files
 	filterEnvName *string
+	// filterDefIDs 按 defID 集合过滤，为空则不过滤。
+	filterDefIDs []bson.ObjectID
 }
 
 // AcfFilterType usage: .List(..., AcfFilterType("normal"))
@@ -208,6 +224,14 @@ func (e AcfFilterEnvName) ApplyToOptions(opts *ListOptions) {
 	opts.filterEnvName = &s
 }
 
+// AcfFilterDefIDs 按 defID 集合过滤文件记录。
+type AcfFilterDefIDs []bson.ObjectID
+
+// ApplyToOptions applies the option to the given options.
+func (ids AcfFilterDefIDs) ApplyToOptions(opts *ListOptions) {
+	opts.filterDefIDs = ids
+}
+
 // AcfOrderBy usage: .List(..., AcfOrderBy(ListOrderByName))
 type AcfOrderBy string
 
@@ -219,7 +243,7 @@ func (o AcfOrderBy) ApplyToOptions(opts *ListOptions) {
 // List lists the app config files of the given app.
 //
 // - appID: The ID of the application
-// - orderBy: The field to order the results by, if empty, defaults to "name"
+// - orderBy: 排序字段；为空时按 createdAt 升序。
 //
 // Return a slice of app config files and an error if any.
 func (s *AppConfigFileStoreMongo) List(
@@ -240,13 +264,18 @@ func (s *AppConfigFileStoreMongo) List(
 	if listOptsObj.filterEnvName != nil {
 		filter["envName"] = *listOptsObj.filterEnvName
 	}
+	// Apply defID set filter if specified
+	if len(listOptsObj.filterDefIDs) > 0 {
+		filter["defID"] = bson.M{"$in": listOptsObj.filterDefIDs}
+	}
 
-	// Set sort options
+	// name 已迁移到 def 表。为避免把“按 name 排序”错误降级成其他排序，
+	// store 层仅保留默认 createdAt 排序；兼容原 name 排序语义由上层补齐 def 后完成。
 	opts := options.Find()
-	if listOptsObj.orderBy == "" || listOptsObj.orderBy == ListOrderByName {
-		opts.SetSort(bson.D{{Key: "name", Value: 1}})
+	if listOptsObj.orderBy == "" {
+		opts.SetSort(bson.D{{Key: "createdAt", Value: 1}})
 	} else {
-		return nil, errors.New("unsupported orderBy field, only 'name' is supported")
+		return nil, errors.New("unsupported orderBy field")
 	}
 
 	cursor, err := s.collection.Find(ctx, filter, opts)
@@ -348,7 +377,7 @@ func (s *AppConfigFileStoreMongo) DeleteByID(
 		return 0, errors.Wrap(err, "checking if app config file is referenced")
 	}
 	if isRefed {
-		return 0, errors.New("file is referenced by other files")
+		return 0, ErrAppConfigFileReferenced
 	}
 
 	result, err := s.collection.DeleteOne(ctx, bson.M{"_id": id, "appID": appID})
@@ -369,6 +398,45 @@ func (s *AppConfigFileStoreMongo) DeleteByApp(ctx context.Context, appID string)
 	result, err := s.collection.DeleteMany(ctx, filter)
 	if err != nil {
 		return 0, errors.Wrapf(err, "delete app config files for app [%s]", appID)
+	}
+	return result.DeletedCount, nil
+}
+
+// GetByDefIDAndEnv 按 defID + envName 组合查询文件记录。
+func (s *AppConfigFileStoreMongo) GetByDefIDAndEnv(
+	ctx context.Context, defID bson.ObjectID, envName string,
+) (*AppConfigFile, error) {
+	var obj AppConfigFile
+	filter := bson.M{"defID": defID, "envName": envName}
+	if err := s.collection.FindOne(ctx, filter).Decode(&obj); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errors.Wrapf(ErrAppConfigFileNotFound, "def %s env %q", defID.Hex(), envName)
+		}
+		return nil, err
+	}
+	return &obj, nil
+}
+
+// ListByDefID 返回指定 def 下的所有文件记录。
+func (s *AppConfigFileStoreMongo) ListByDefID(ctx context.Context, defID bson.ObjectID) ([]AppConfigFile, error) {
+	cursor, err := s.collection.Find(ctx, bson.M{"defID": defID})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var result []AppConfigFile
+	if err = cursor.All(ctx, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// DeleteByDefID 删除指定 def 下的所有文件记录。
+func (s *AppConfigFileStoreMongo) DeleteByDefID(ctx context.Context, defID bson.ObjectID) (int64, error) {
+	result, err := s.collection.DeleteMany(ctx, bson.M{"defID": defID})
+	if err != nil {
+		return 0, err
 	}
 	return result.DeletedCount, nil
 }

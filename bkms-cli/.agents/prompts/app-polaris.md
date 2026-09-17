@@ -44,6 +44,7 @@
 | `warnings` | 校验警告信息 |
 | `envStates` | 各环境部署状态与关键字段快照 |
 | `envWeights` | 各环境的单实例权重 |
+| `depSvcInstID` | 依赖服务实例 ID（`-o table` 不显示，`-o json/yaml` 时返回）|
 
 ### 常用场景
 
@@ -259,3 +260,39 @@ operator: zhangsan,lisi
 | `--app` | 是 | 应用 ID |
 | `--name` | 是 | 要更新的北极星配置名称（可通过 `list` 命令获取） |
 | `-f, --file` | 是 | YAML spec 文件路径 |
+
+## weight
+
+设置北极星配置在指定环境下的**全局默认权重**，对该环境中所有注册实例统一生效。适用于需要整体摘流或恢复流量的场景。
+
+与 `app instance polaris --weight` 的区别：
+
+| 命令 | 作用范围 | 适用场景 |
+|------|----------|----------|
+| `app polaris weight` | 环境内全部实例（全局默认权重） | 整体灰度、整体摘流 |
+| `app instance polaris --weight` | 指定 Pod 实例 | 针对单个实例的精细控制 |
+
+权重范围：0-10000（0 = 完全摘流，100 = 正常权重）。
+
+### 常用场景
+
+```bash
+# 将 test 环境 myconfig 配置的全局权重设为 0（全量摘流）
+bkms-cli app polaris weight --app myapp --config myconfig --env test --weight 0
+
+# 恢复正常权重
+bkms-cli app polaris weight --app myapp --config myconfig --env test --weight 100
+
+# 灰度降权（设为 50%，分担部分流量）
+bkms-cli app polaris weight --app myapp --config myconfig --env prod --weight 50
+```
+
+### 参数说明
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `--app` | 是 | 应用 ID |
+| `--config` | 是 | 北极星配置名称（从 `app polaris list --app myapp` 获取 `name` 字段） |
+| `--env` | 是 | 环境名称 |
+| `--weight` | 是 | 目标权重（0-10000） |
+

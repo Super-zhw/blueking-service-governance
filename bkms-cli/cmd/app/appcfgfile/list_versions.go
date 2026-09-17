@@ -34,9 +34,8 @@ func NewListVersionsCmd() *cobra.Command {
 	var appID, envName, cfgFileName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "list-versions",
-		Short:  "List all history versions of an application config file",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "list-versions",
+		Short: "List all history versions of an application config file",
 		Long: `List all history versions of the application config file selected by app and environment.
 
 When --env is omitted, this command lists versions of the default application-level config.
@@ -53,6 +52,7 @@ When an application has multiple config files in the same environment, use --nam
 
   # Output in JSON format
   bkms-cli app app-cfg-file list-versions --app demo --env prod -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			result, err := handler.ListVersions(cmd.Context(), client.New(), appID, envName, cfgFileName)
 			if err != nil {
@@ -72,7 +72,7 @@ When an application has multiple config files in the same environment, use --nam
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name")
 	cmd.Flags().StringVar(
 		&cfgFileName,
@@ -80,7 +80,7 @@ When an application has multiple config files in the same environment, use --nam
 		"",
 		"config file name; useful for Helm apps with multiple app-level config files",
 	)
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

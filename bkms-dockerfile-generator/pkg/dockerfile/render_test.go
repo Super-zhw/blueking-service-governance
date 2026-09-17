@@ -81,8 +81,15 @@ var _ = Describe("Dockerfile render", func() {
 		Expect(content).To(ContainSubstring("FROM golang:1.25 AS builder"))
 		Expect(content).To(ContainSubstring("WORKDIR /workspace"))
 		Expect(content).To(ContainSubstring("RUN mkdir -p /out"))
-		Expect(content).To(ContainSubstring("RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git"))
-		Expect(content).NotTo(ContainSubstring("RUN apk add --no-cache ca-certificates git"))
+		Expect(content).To(ContainSubstring("command -v git"))
+		Expect(content).To(ContainSubstring("apk add --no-cache ca-certificates git"))
+		Expect(content).To(ContainSubstring("apt-get update && apt-get install -y --no-install-recommends ca-certificates git"))
+		Expect(content).To(ContainSubstring("yum install -y ca-certificates git"))
+		Expect(content).To(ContainSubstring("dnf install -y ca-certificates git"))
+		Expect(content).NotTo(ContainSubstring("microdnf"))
+		Expect(indexOf(content, "dnf install -y ca-certificates git")).To(BeNumerically(
+			"<", indexOf(content, "yum install -y ca-certificates git"),
+		))
 		Expect(content).To(ContainSubstring("COPY go.mod ./"))
 		Expect(content).To(ContainSubstring("COPY go.sum ./"))
 		Expect(content).NotTo(ContainSubstring("COPY go.mod go.sum ./"))
@@ -97,8 +104,8 @@ var _ = Describe("Dockerfile render", func() {
 		Expect(content).To(ContainSubstring("COPY --from=builder /out/demo-api /app/demo-api"))
 		Expect(content).To(ContainSubstring("ENTRYPOINT [\"/app/demo-api\"]"))
 
-		Expect(indexOf(content, "RUN mkdir -p /out")).To(BeNumerically("<", indexOf(content, "RUN apt-get update")))
-		Expect(indexOf(content, "RUN apt-get update")).To(BeNumerically("<", indexOf(content, "COPY go.mod ./")))
+		Expect(indexOf(content, "RUN mkdir -p /out")).To(BeNumerically("<", indexOf(content, "command -v git")))
+		Expect(indexOf(content, "command -v git")).To(BeNumerically("<", indexOf(content, "COPY go.mod ./")))
 		Expect(indexOf(content, "COPY go.mod ./")).To(BeNumerically("<", indexOf(content, "COPY go.sum ./")))
 		Expect(indexOf(content, "COPY go.sum ./")).To(BeNumerically("<", indexOf(content, "RUN go mod download")))
 		Expect(indexOf(content, "RUN go mod download")).To(BeNumerically("<", indexOf(content, "COPY . .")))
@@ -107,6 +114,122 @@ var _ = Describe("Dockerfile render", func() {
 			"<", indexOf(content, "RUN test -f /out/demo-api"),
 		))
 	})
+
+	DescribeTable("renders artifact and extra files before runtime env commands",
+		func(language string) {
+			input := defaultInput(language)
+			input.ExtraFiles = encodeCommandsParam([]string{
+				"data/privatekey.pem",
+				"certs",
+				"data/*.pem",
+				"*.json",
+			})
+			input.RuntimeEnvCommands = encodeCommandsParam([]string{
+				"test -f /app/data/privatekey.pem",
+				"mv /app/data/privatekey.pem /app/privatekey.pem",
+			})
+
+			content, err := Render(input)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(content).To(ContainSubstring("COPY data/privatekey.pem /app/data/privatekey.pem\n"))
+			Expect(content).To(ContainSubstring("COPY certs /app/certs\n"))
+			Expect(content).To(ContainSubstring("COPY data/*.pem /app/data/\n"))
+			Expect(content).To(ContainSubstring("COPY *.json /app/\n"))
+			Expect(content).NotTo(ContainSubstring(`COPY "data/*.pem"`))
+			Expect(indexOf(content, "COPY --from=builder /out/demo-api /app/demo-api")).To(BeNumerically(
+				"<", indexOf(content, "COPY data/privatekey.pem /app/data/privatekey.pem"),
+			))
+			Expect(indexOf(content, "COPY data/privatekey.pem /app/data/privatekey.pem")).To(BeNumerically(
+				"<", indexOf(content, "COPY certs /app/certs"),
+			))
+			Expect(indexOf(content, "COPY certs /app/certs")).To(BeNumerically(
+				"<", indexOf(content, "COPY data/*.pem /app/data/"),
+			))
+			Expect(indexOf(content, "COPY data/*.pem /app/data/")).To(BeNumerically(
+				"<", indexOf(content, "COPY *.json /app/"),
+			))
+			Expect(indexOf(content, "COPY *.json /app/")).To(BeNumerically(
+				"<", indexOf(content, "RUN test -f /app/data/privatekey.pem"),
+			))
+			Expect(indexOf(content, "RUN test -f /app/data/privatekey.pem")).To(BeNumerically(
+				"<", indexOf(content, "RUN mv /app/data/privatekey.pem /app/privatekey.pem"),
+			))
+			Expect(indexOf(content, "RUN mv /app/data/privatekey.pem /app/privatekey.pem")).To(BeNumerically(
+				"<", indexOf(content, `ENTRYPOINT ["/app/demo-api"]`),
+			))
+		},
+		Entry("Go", LanguageGo),
+		Entry("C++", LanguageCpp),
+	)
+
+	DescribeTable("extraFileDest",
+		func(src string, dest string) {
+			got, err := extraFileDest(src)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(got).To(Equal(dest))
+		},
+		Entry(nil, "data/key.pem", "/app/data/key.pem"),
+		Entry(nil, "certs/", "/app/certs"),
+		Entry(nil, "foo/./bar", "/app/foo/bar"),
+		Entry(nil, "foo/../bar", "/app/bar"),
+		Entry(nil, "foo..bar", "/app/foo..bar"),
+		Entry(nil, ".", "/app"),
+		Entry(nil, "/etc/passwd", "/app/etc/passwd"),
+		Entry(nil, "*.json", "/app/"),
+		Entry(nil, "file?.txt", "/app/"),
+		Entry(nil, "[abc]/file", "/app/"),
+		Entry(nil, "data/*.pem", "/app/data/"),
+		Entry(nil, "configs/*/settings.yaml", "/app/configs/"),
+		Entry(nil, "data/**/*.pem", "/app/data/"),
+		Entry(nil, "a/*/b/*/c", "/app/a/"),
+		Entry(nil, "./data/*.pem", "/app/data/"),
+	)
+
+	DescribeTable("extraFileDest errors",
+		func(src string, message string) {
+			dest, err := extraFileDest(src)
+			Expect(dest).To(Equal(""))
+			Expect(err.Error()).To(ContainSubstring(message))
+		},
+		Entry(nil, "", "extra file path is required"),
+		Entry(nil, "--from=builder", "must not start with '-'"),
+		Entry(nil, "../secret", "escapes /app"),
+	)
+
+	DescribeTable("parseExtraFileCopies",
+		func(payload string, want []ExtraFileCopy) {
+			copies, err := parseExtraFileCopies(payload)
+			Expect(err).NotTo(HaveOccurred())
+			if want == nil {
+				Expect(copies).To(BeEmpty())
+				return
+			}
+			Expect(copies).To(Equal(want))
+		},
+		Entry("blank", "", nil),
+		Entry("empty array", "[]", nil),
+		Entry("whitespace items", `["", "  "]`, nil),
+		Entry("trim and map", `  ["  data/key.pem  ", "certs/", "certs", "data/*.pem"]  `, []ExtraFileCopy{
+			{Source: "data/key.pem", Dest: "/app/data/key.pem"},
+			{Source: "certs/", Dest: "/app/certs"},
+			{Source: "certs", Dest: "/app/certs"},
+			{Source: "data/*.pem", Dest: "/app/data/"},
+		}),
+	)
+
+	DescribeTable("parseExtraFileCopies errors",
+		func(payload string, message string) {
+			copies, err := parseExtraFileCopies(payload)
+			Expect(copies).To(BeNil())
+			Expect(err.Error()).To(ContainSubstring(message))
+		},
+		Entry(nil, "data/key.pem", "must be JSON string array"),
+		Entry(nil, `["certs"`, "unmarshal Dockerfile extra files"),
+		Entry(nil, `{"path":"certs"}`, "must be JSON string array"),
+		Entry(nil, `["certs",123]`, "unmarshal Dockerfile extra files"),
+		Entry(nil, `["certs","../secret"]`, `resolve extra file destination for "../secret"`),
+	)
 
 	It("does not check Go module files for C++ templates", func() {
 		input := defaultInput(LanguageCpp)
@@ -118,55 +241,6 @@ var _ = Describe("Dockerfile render", func() {
 		Expect(content).To(ContainSubstring("FROM ubuntu:24.04 AS builder"))
 		Expect(content).NotTo(ContainSubstring("go.mod"))
 		Expect(content).NotTo(ContainSubstring("go.sum"))
-	})
-
-	It("renders Go builder dependency installation for Debian based images", func() {
-		input := defaultInput(LanguageGo)
-		input.BuilderImage = "golang:1.25.3"
-
-		content, err := Render(input)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(content).To(ContainSubstring("FROM golang:1.25.3 AS builder"))
-		Expect(content).To(ContainSubstring("RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git"))
-		Expect(content).To(ContainSubstring("rm -rf /var/lib/apt/lists/*"))
-		Expect(content).NotTo(ContainSubstring("RUN apk add --no-cache ca-certificates git"))
-	})
-
-	It("renders Go builder dependency installation for Alpine tag images", func() {
-		input := defaultInput(LanguageGo)
-		input.BuilderImage = "golang:1.25.3-alpine3.22"
-
-		content, err := Render(input)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(content).To(ContainSubstring("FROM golang:1.25.3-alpine3.22 AS builder"))
-		Expect(content).To(ContainSubstring("RUN apk add --no-cache ca-certificates git"))
-		Expect(content).NotTo(ContainSubstring("RUN apt-get update"))
-	})
-
-	It("renders Go builder dependency installation for Alpine tag images with digest", func() {
-		input := defaultInput(LanguageGo)
-		input.BuilderImage = "golang:1.25.3-alpine3.22@sha256:abcd"
-
-		content, err := Render(input)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(content).To(ContainSubstring("FROM golang:1.25.3-alpine3.22@sha256:abcd AS builder"))
-		Expect(content).To(ContainSubstring("RUN apk add --no-cache ca-certificates git"))
-		Expect(content).NotTo(ContainSubstring("RUN apt-get update"))
-	})
-
-	It("uses image tag only when checking Alpine builder images", func() {
-		input := defaultInput(LanguageGo)
-		input.BuilderImage = "registry.example.com/alpine/golang:1.25"
-
-		content, err := Render(input)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(content).To(ContainSubstring("FROM registry.example.com/alpine/golang:1.25 AS builder"))
-		Expect(content).To(ContainSubstring("RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git"))
-		Expect(content).NotTo(ContainSubstring("RUN apk add --no-cache ca-certificates git"))
 	})
 
 	It("renders advanced Go commands at expected positions", func() {
@@ -208,10 +282,13 @@ var _ = Describe("Dockerfile render", func() {
 			"<", indexOf(content, "RUN test -f /out/demo-api"),
 		))
 		Expect(indexOf(content, "WORKDIR /app")).To(BeNumerically(
+			"<", indexOf(content, "COPY --from=builder /out/demo-api /app/demo-api"),
+		))
+		Expect(indexOf(content, "COPY --from=builder /out/demo-api /app/demo-api")).To(BeNumerically(
 			"<", indexOf(content, "RUN apk add --no-cache ca-certificates\n"),
 		))
-		Expect(indexOf(content, "RUN mkdir -p /app/config")).To(BeNumerically(
-			"<", indexOf(content, "COPY --from=builder /out/demo-api /app/demo-api"),
+		Expect(indexOf(content, "RUN apk add --no-cache ca-certificates")).To(BeNumerically(
+			"<", indexOf(content, "RUN mkdir -p /app/config"),
 		))
 	})
 
@@ -375,16 +452,6 @@ var _ = Describe("Dockerfile render", func() {
 			"ENTRYPOINT [\"/bin/sh\", \"-ec\", \"/app/demo-api --config /app/config.yaml\"]",
 		))
 		Expect(content).NotTo(ContainSubstring("RUN cmake -S . -B build"))
-	})
-
-	It("does not inject extra BKMS platform variables", func() {
-		content, err := Render(defaultInput(LanguageGo))
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(content).NotTo(ContainSubstring("BKMS_GOPROXY"))
-		Expect(content).NotTo(ContainSubstring("BKMS_GOSUMDB"))
-		Expect(content).NotTo(ContainSubstring("BKMS_APP_DIR"))
-		Expect(content).NotTo(ContainSubstring("BKMS_BIN_DIR"))
 	})
 
 	It("uses trimmed image name as app name for generated artifact paths", func() {

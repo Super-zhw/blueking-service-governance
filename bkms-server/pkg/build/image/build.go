@@ -38,6 +38,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	bkciapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkci"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
+	bkmsreg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/registry"
 )
 
 const (
@@ -207,7 +208,7 @@ func genDockerfilePath(cfg *RepositoryConfig, buildDir string) string {
 // genPlatformBuildParams 生成镜像构建方式相关的流水线参数。
 //
 // - repositoryDockerfile 模式：sourceType=repository，其余平台生成 Dockerfile 参数为空字符串。
-// - platform 模式：sourceType=bkms_generated，写入 language / builderImage / runnerImage / 各命令数组 / start。
+// - platform 模式：sourceType=bkms_generated，写入 language / builderImage / runnerImage / 各命令数组 / start / extraFiles。
 //
 // 命令数组以 JSON 字符串数组传递，避免流水线环境变量注入吞掉真实换行
 func genPlatformBuildParams(cfg *RepositoryConfig, app *bkmsapp.Application) (map[string]string, error) {
@@ -223,6 +224,7 @@ func genPlatformBuildParams(cfg *RepositoryConfig, app *bkmsapp.Application) (ma
 		pipelineparam.DockerfileBuildCommands:      "",
 		pipelineparam.DockerfileRuntimeEnvCommands: "",
 		pipelineparam.DockerfileStartCommand:       "",
+		pipelineparam.DockerfileExtraFiles:         "",
 	}
 	if cfg.EffectiveImageBuildMode() != ImageBuildModePlatform || cfg.PlatformBuildConfig == nil {
 		return params, nil
@@ -241,15 +243,16 @@ func genPlatformBuildParams(cfg *RepositoryConfig, app *bkmsapp.Application) (ma
 	params[pipelineparam.DockerfileRunnerImage] = platBuildCfg.RunnerImage
 
 	if cmds := platBuildCfg.Commands; cmds != nil {
-		preBuildCommands, err := encodeDockerfileCommands(cmds.PreBuild)
+		var preBuildCommands, buildCommands, runtimeEnvCommands string
+		preBuildCommands, err = encodeDockerfileCommands(cmds.PreBuild)
 		if err != nil {
 			return nil, errors.Wrap(err, "encode Dockerfile pre-build commands")
 		}
-		buildCommands, err := encodeDockerfileCommands(cmds.Build)
+		buildCommands, err = encodeDockerfileCommands(cmds.Build)
 		if err != nil {
 			return nil, errors.Wrap(err, "encode Dockerfile build commands")
 		}
-		runtimeEnvCommands, err := encodeDockerfileCommands(cmds.RuntimeEnv)
+		runtimeEnvCommands, err = encodeDockerfileCommands(cmds.RuntimeEnv)
 		if err != nil {
 			return nil, errors.Wrap(err, "encode Dockerfile runtime env commands")
 		}
@@ -258,6 +261,11 @@ func genPlatformBuildParams(cfg *RepositoryConfig, app *bkmsapp.Application) (ma
 		params[pipelineparam.DockerfileRuntimeEnvCommands] = runtimeEnvCommands
 		params[pipelineparam.DockerfileStartCommand] = cmds.Start
 	}
+	extraFiles, err := encodeDockerfileCommands(platBuildCfg.ExtraFiles)
+	if err != nil {
+		return nil, errors.Wrap(err, "encode Dockerfile extra files")
+	}
+	params[pipelineparam.DockerfileExtraFiles] = extraFiles
 	return params, nil
 }
 
@@ -310,10 +318,33 @@ func genPipelineBuildRepoAndImageParams(
 		pipelineparam.RepoCheckoutBy: "BRANCH",
 		pipelineparam.RepoRevision:   branch,
 		// 镜像仓库相关参数
-		pipelineparam.ImageRegistry: registry.Registry,
-		pipelineparam.ImageName:     app.Name,
-		pipelineparam.ImageTag:      imageTag,
-		// 已经预先添加到蓝盾上的镜像仓库凭证 ID
+		pipelineparam.ImageRegistry:     registry.Registry,
+		pipelineparam.ImageRegistryHost: sourceImageRegistryHost(registry),
+		pipelineparam.ImageName:         app.Name,
+		pipelineparam.ImageTag:          imageTag,
+		// 已经预先添加到蓝盾上的镜像仓库凭证 ID；源镜像拉取与推送同源复用
 		pipelineparam.ImageCredential: registry.BkCICredentialID,
 	}, nil
+}
+
+// sourceImageRegistryHost 插件 sourceMirrorTicketPair 要的是 registry host。
+// 不按构建方式区分：仓库自带 Dockerfile 同样可能拿镜像源里的私有镜像做基础镜像，也需要拉取凭证
+func sourceImageRegistryHost(registry *bkmsreg.ImageRegistry) string {
+	if registry == nil {
+		return ""
+	}
+	// 公开仓库或未登记蓝盾凭证时不要填 pair，否则插件会拿空凭证去 docker login
+	if strings.TrimSpace(registry.Username) == "" || strings.TrimSpace(registry.BkCICredentialID) == "" {
+		return ""
+	}
+	// 插件键只要 host（可带端口），Registry 字段是 host/namespace 且可能带 scheme
+	addr := strings.ToLower(strings.TrimSpace(registry.Registry))
+	for _, scheme := range []string{"https://", "http://"} {
+		if trimmed, ok := strings.CutPrefix(addr, scheme); ok {
+			addr = trimmed
+			break
+		}
+	}
+	host, _, _ := strings.Cut(addr, "/")
+	return host
 }

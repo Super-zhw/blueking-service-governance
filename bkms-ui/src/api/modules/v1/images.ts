@@ -6,7 +6,7 @@
 import type { Config } from '~/api/interceptors';
 import type { NoInfer } from '~/api/ts-helpers';
 import { v1Fetch } from '~/api/clients';
-import type { ListDeployableImageTagsRequest, PaginatedDeployableImageTagOutputObjs, ListAppImagesRequest, PaginatedAppImagesOutputObjs, RefreshAppImagesRequest, RefreshResultInfoOutputObj, DeleteAppImageRequest, ImageEmptyOutput, ListImageTagDeployRecordsRequest, PaginatedImageTagDeployRecordOutputObjs, PromoteAppImageRequest, ListAppImageUsagesRequest, ImageTagUsagesOutputObj, ListPlatformBuildImagesRequest, RuntimeImagesOutputObjs, ListPlatformBuildImageTagsRequest, PaginatedRuntimeImageTagOutputObjs } from '~/@types/v1/images';
+import type { ListDeployableImageTagsRequest, PaginatedDeployableImageTagOutputObjs, ListAppImagesRequest, PaginatedAppImagesOutputObjs, RefreshAppImagesRequest, RefreshResultInfoOutputObj, DeleteAppImageRequest, ImageEmptyOutput, ListImageTagDeployRecordsRequest, PaginatedImageTagDeployRecordOutputObjs, PromoteAppImageRequest, ListAppImageUsagesRequest, ImageTagUsagesOutputObj, ListPlatformBuildImagesRequest, RuntimeImagesOutputObjs, ListPlatformBuildImageTagsRequest, PaginatedRuntimeImageTagOutputObjs, ListCustomBuildImagesRequest, CustomRuntimeImagesOutputObjs, ListCustomBuildImageTagsRequest, PaginatedCustomRuntimeImageTagOutputObjs, RefreshCustomBuildImageTagsRequest } from '~/@types/v1/images';
 
 export const ImagesService = {
   /**
@@ -175,4 +175,61 @@ export const ImagesService = {
     params?: NoInfer<Request>,
     config?: Config,
   ) => await v1Fetch.get<Request, ResponseData>('/platform-build-images/{imageID}/tags')(params, config),
+  /**
+   * 获取工作空间自定义构建镜像候选列表
+   *
+   * 候选仅以工作空间已落库的自定义镜像记录为准，不过滤快照同步状态，也不校验镜像在仓库中是否仍然存在；候选数量预期在百条以内，因此不分页
+   *
+   * @method GET
+   * @path /workspaces/{workspaceID}/custom-build-images
+   * @tag images
+   * @param workspaceID path string required 工作空间 ID
+   * @param type query string required 镜像类型：builder / runner
+   * @param keyword query string 搜索关键字
+   * @response 200 ListCustomRuntimeImagesOutput OK
+   * @response 400 GinErrorOutput Bad Request
+   */
+  listCustomBuildImages: async <Request extends ListCustomBuildImagesRequest = ListCustomBuildImagesRequest, ResponseData = CustomRuntimeImagesOutputObjs>(
+    params?: NoInfer<Request>,
+    config?: Config,
+  ) => await v1Fetch.get<Request, ResponseData>('/workspaces/{workspaceID}/custom-build-images')(params, config),
+  /**
+   * 获取工作空间自定义构建镜像可用 TAG 列表
+   *
+   * 镜像以完整名称传入而非记录 ID，因为用户手动输入、尚未落库的镜像没有记录 ID。
+   * 已落库镜像读本地快照、手动输入镜像用工作空间凭证实时拉取，两条来源的出入参、
+   * 分页与总数口径完全一致，调用方无需按来源分支处理，也不传递来源标识
+   *
+   * @method GET
+   * @path /workspaces/{workspaceID}/custom-build-images/tags
+   * @tag images
+   * @param workspaceID path string required 工作空间 ID
+   * @param name query string required 镜像完整仓库名称，含仓库前缀且不带 tag
+   * @param keyword query string 搜索关键字
+   * @param page query number required 分页参数：页码，从 1 开始
+   * @param pageSize query number required 分页参数：每页数量，支持 5/10/20/50/100
+   * @response 200 ListCustomRuntimeImageTagsOutput OK
+   * @response 400 GinErrorOutput Bad Request
+   */
+  listCustomBuildImageTags: async <Request extends ListCustomBuildImageTagsRequest = ListCustomBuildImageTagsRequest, ResponseData = PaginatedCustomRuntimeImageTagOutputObjs>(
+    params?: NoInfer<Request>,
+    config?: Config,
+  ) => await v1Fetch.get<Request, ResponseData>('/workspaces/{workspaceID}/custom-build-images/tags')(params, config),
+  /**
+   * 手动刷新工作空间自定义构建镜像的 TAG 快照
+   *
+   * 同步等待上限为 10 秒。刷新中与刷新失败均为正常响应，通过 data.status 的 refreshing / failed 表达，不作为错误抛出
+   *
+   * @method POST
+   * @path /workspaces/{workspaceID}/custom-build-images/tags/refresh
+   * @tag images
+   * @param workspaceID path string required 工作空间 ID
+   * @param body body RefreshCustomRuntimeImageTagsInput required 刷新参数
+   * @response 200 RefreshCustomRuntimeImageTagsOutput OK
+   * @response 400 GinErrorOutput Bad Request
+   */
+  refreshCustomBuildImageTags: async <Request extends RefreshCustomBuildImageTagsRequest = RefreshCustomBuildImageTagsRequest, ResponseData = RefreshResultInfoOutputObj>(
+    params?: NoInfer<Request>,
+    config?: Config,
+  ) => await v1Fetch.post<Request, ResponseData>('/workspaces/{workspaceID}/custom-build-images/tags/refresh')(params, config),
 };

@@ -21,6 +21,7 @@ package instance
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -28,25 +29,12 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/constant"
 )
 
-// ExecAdminCmdOptions 执行管理命令的统一参数
-type ExecAdminCmdOptions struct {
-	// Trpc 专用
-	Method string // HTTP 方法 (GET/POST/PUT)
-	URL    string // 访问的 URL
-	Params map[string]string
-	Body   string
-	// Taf 专用
-	Command string // 执行的命令（如 "taf.viewversion"）
-	// 通用
-	InstanceIDs []string
-}
-
 // ListTrpcAdminCmds 查询 Trpc 管理命令列表
 func ListTrpcAdminCmds(ctx context.Context, appID, envName string, instanceIDs []string) ([]string, error) {
 	return client.New().ListTrpcAdminCmds(ctx, appID, envName, instanceIDs)
 }
 
-// ExecAdminCmd 执行管理命令，根据 appType 自动路由
+// ExecAdminCmd 执行管理命令：校验类型必填参数 → 按 appType 路由到 Trpc/Taf API。
 func ExecAdminCmd(
 	ctx context.Context,
 	workspaceID, appID, envName string,
@@ -54,24 +42,50 @@ func ExecAdminCmd(
 ) ([]client.AdminCmdResult, error) {
 	app, err := client.New().GetAppMinimal(ctx, workspaceID, appID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "get app info")
 	}
 
 	switch app.Type {
 	case constant.AppTypeTrpc:
-		return client.New().ExecuteTrpcAdminCmd(ctx, appID, envName, client.ExecuteTrpcAdminCmdOptions{
-			InstanceIDs: opts.InstanceIDs,
-			Method:      opts.Method,
-			URL:         opts.URL,
-			Params:      opts.Params,
-			Body:        opts.Body,
-		})
+		return execTrpcAdminCmd(ctx, appID, envName, opts)
 	case constant.AppTypeTaf:
-		return client.New().ExecuteTafAdminCmd(ctx, appID, envName, client.ExecuteTafAdminCmdOptions{
-			InstanceIDs: opts.InstanceIDs,
-			Command:     opts.Command,
-		})
+		return execTafAdminCmd(ctx, appID, envName, opts)
 	default:
 		return nil, errors.Errorf("unsupported app type for admin cmd: %s", app.Type)
 	}
+}
+
+func execTrpcAdminCmd(
+	ctx context.Context, appID, envName string, opts ExecAdminCmdOptions,
+) ([]client.AdminCmdResult, error) {
+	if opts.Method == "" {
+		return nil, errors.New("method is required for Trpc app")
+	}
+	if opts.URL == "" {
+		return nil, errors.New("url is required for Trpc app")
+	}
+	if opts.ParamsJSON != "" {
+		if err := json.Unmarshal([]byte(opts.ParamsJSON), &opts.Params); err != nil {
+			return nil, errors.Wrap(err, "parse params JSON")
+		}
+	}
+	return client.New().ExecuteTrpcAdminCmd(ctx, appID, envName, client.ExecuteTrpcAdminCmdOptions{
+		InstanceIDs: opts.InstanceIDs,
+		Method:      opts.Method,
+		URL:         opts.URL,
+		Params:      opts.Params,
+		Body:        opts.Body,
+	})
+}
+
+func execTafAdminCmd(
+	ctx context.Context, appID, envName string, opts ExecAdminCmdOptions,
+) ([]client.AdminCmdResult, error) {
+	if opts.Command == "" {
+		return nil, errors.New("command is required for Taf app")
+	}
+	return client.New().ExecuteTafAdminCmd(ctx, appID, envName, client.ExecuteTafAdminCmdOptions{
+		InstanceIDs: opts.InstanceIDs,
+		Command:     opts.Command,
+	})
 }

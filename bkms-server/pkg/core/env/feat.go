@@ -27,6 +27,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
@@ -199,16 +200,24 @@ func (s *FeatureEnvService) Create(ctx context.Context, input CreateFeatureEnvIn
 		OwnerAppID:  input.App.ID,
 		SourceEnvID: input.SourceEnv.ID,
 		Cluster: model.BizCluster{
-			ProjectCode: input.SourceEnv.Cluster.ProjectCode,
-			ClusterID:   input.SourceEnv.Cluster.ClusterID,
-			ClusterType: input.SourceEnv.Cluster.ClusterType,
-			Namespace:   name,
+			ProjectCode:  input.SourceEnv.Cluster.ProjectCode,
+			ClusterID:    input.SourceEnv.Cluster.ClusterID,
+			ClusterType:  input.SourceEnv.Cluster.ClusterType,
+			Namespace:    name,
+			IsFederation: input.SourceEnv.Cluster.IsFederation,
 		},
 		Creator: input.Creator,
 	}
 
+	if conflictErr := findClusterNamespaceOccupant(
+		ctx, s.environmentStore, env.Cluster, bson.NilObjectID,
+	); conflictErr != nil {
+		return nil, errors.Wrap(conflictErr, "check feature environment cluster namespace conflict")
+	}
+
 	envID, err := s.environmentStore.Create(ctx, env)
 	if err != nil {
+		err = rewriteWriteErrIfClusterOccupied(ctx, s.environmentStore, env.Cluster, bson.NilObjectID, err)
 		return nil, errors.Wrap(err, "create feature environment")
 	}
 	env.ID = envID

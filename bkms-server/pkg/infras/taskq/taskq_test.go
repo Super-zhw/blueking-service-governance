@@ -38,6 +38,14 @@ type sampleArgs struct {
 	Step int    `json:"step"`
 }
 
+type stringerArgs struct {
+	ID string `json:"id"`
+}
+
+func (a stringerArgs) String() string {
+	return "id=" + a.ID
+}
+
 var _ = Describe("Test taskq TaskType handler", func() {
 	It("decodes payload into typed args when executed", func() {
 		var got sampleArgs
@@ -67,6 +75,27 @@ var _ = Describe("Test taskq TaskType handler", func() {
 		payload := lo.Must(json.Marshal(sampleArgs{ID: "a"}))
 		err := task.Handler()(context.Background(), asynq.NewTask("skip", payload))
 		Expect(stderrors.Is(err, asynq.SkipRetry)).To(BeTrue())
+	})
+
+	It("omits args from the log prefix unless Args implements Stringer", func() {
+		Expect(formatHandlerArgs(sampleArgs{ID: "secret"})).To(BeEmpty())
+		Expect(formatHandlerArgs(stringerArgs{ID: "abc"})).To(Equal(" args=id=abc"))
+	})
+
+	It("logs ErrFixedRetry as in progress rather than a failure", func() {
+		Expect(formatHandlerResult(nil)).To(BeEmpty())
+		Expect(formatHandlerResult(errors.Wrap(ErrFixedRetry, "ticket in progress"))).
+			To(Equal(" in_progress=ticket in progress: taskq: retry with fixed interval"))
+		Expect(formatHandlerResult(errors.Wrap(ErrStopRetry, "bad arg"))).
+			To(Equal(" err=bad arg: taskq: stop retry"))
+		Expect(formatHandlerResult(stderrors.New("boom"))).To(Equal(" err=boom"))
+	})
+
+	It("flattens multi-line errors so one execution stays one log line", func() {
+		// wrapStopRetry 用 errors.Join, Error() 以 \n 拼接, 不压平会被日志采集按行切开
+		result := formatHandlerResult(wrapStopRetry(stderrors.New("boom")))
+		Expect(result).NotTo(ContainSubstring("\n"))
+		Expect(result).To(Equal(" err=boom; skip retry for the task"))
 	})
 
 	It("returns error as-is for retryable failures", func() {

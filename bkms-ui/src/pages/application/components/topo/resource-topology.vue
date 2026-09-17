@@ -528,6 +528,8 @@
 
     graphInstance.value = graph;
     graph.render();
+    // 记录首次渲染的数据指纹：后续轮询若内容一致则跳过增量更新（见 updateGraph）
+    lastFingerprint = JSON.stringify([buildGraphNodeData(), buildGraphEdgeData()]);
 
     // 修复：鼠标拖拽画布移出区域后，drag-canvas 拖拽状态无法正常终止
     // 离开画布时移除 drag-canvas 行为，回来时恢复
@@ -587,71 +589,77 @@
     resizeObserver.observe(graphContainerRef.value);
   }
 
-  // 更新边策略（只 diff 主边：hover 动态添加的辅助边不在 graphEdges 里，否则会误判为 removed 并删掉，且与 Behavior 内 activeEdgeIds 不同步）
-  async function updateGraphEdges() {
-    if (!graphInstance.value) return;
-    const edges = graphInstance.value.getEdgeData().filter(e => (e.data as TopologyEdge | undefined)?.isPrimary);
-    const { added, removed, common } = diffArrayFast(edges, buildGraphEdgeData(), 'id');
+  // 增量更新序号：快速连续切换环境时，过期的更新任务不得在 await 之后继续提交绘制/布局
+  let updateSeq = 0;
+  // 上一次成功更新的数据指纹：内容未变化时（30s 轮询返回同内容的新对象）跳过绘制
+  let lastFingerprint = '';
 
-    if (added.length > 0) {
-      graphInstance.value.addEdgeData(added);
+  /**
+   * 统一的增量更新：节点/边同批 diff → 一次 draw → 必要时一次 layout。
+   *
+   * 顺序是修复的关键（--story=138007525）：G6 的 removeNodeData 会**级联删除关联边**，
+   * 若节点增删后立刻提交绘制/布局，图会停在「有节点、无新边」的中间态；而布局是
+   * indented（缩进树），完全依赖边建立父子层次 → 所有节点被当成 N 个独立的根 →
+   * 全部堆到同一列/原点，表现为切换环境后拓扑图崩坏。因此必须等边补齐后再提交。
+   */
+  async function updateGraph() {
+    const graph = graphInstance.value;
+    if (!graph) return;
+
+    const seq = ++updateSeq;
+    const nextNodes = buildGraphNodeData();
+    const nextEdges = buildGraphEdgeData();
+
+    // 只 diff 主边：hover 动态添加的辅助边不在 graphEdges 里，否则会误判为 removed 并删掉，
+    // 且与 Behavior 内 activeEdgeIds 不同步
+    const currentNodes = graph.getNodeData();
+    const currentEdges = graph.getEdgeData().filter(e => (e.data as TopologyEdge | undefined)?.isPrimary);
+    const nodeDiff = diffArrayFast(currentNodes, nextNodes, 'id');
+    const edgeDiff = diffArrayFast(currentEdges, nextEdges, 'id');
+
+    const structChanged =
+      nodeDiff.added.length + nodeDiff.removed.length + edgeDiff.added.length + edgeDiff.removed.length > 0;
+    const fingerprint = JSON.stringify([nextNodes, nextEdges]);
+    // 结构未变且内容一致 → 无需任何绘制（轮询每次返回新对象引用，不能靠引用判断）
+    if (!structChanged && fingerprint === lastFingerprint) return;
+    lastFingerprint = fingerprint;
+
+    // 1) 节点（注意：removeNodeData 会级联删掉关联边）
+    if (nodeDiff.added.length > 0) {
+      graph.addNodeData(nodeDiff.added);
+    }
+    if (nodeDiff.removed.length > 0) {
+      graph.removeNodeData(nodeDiff.removed.map(node => node.id!));
+    }
+    if (nodeDiff.common.length > 0) {
+      graph.updateNodeData(nodeDiff.common);
     }
 
-    if (removed.length > 0) {
-      const ids = removed.map(edge => edge.id!);
-      graphInstance.value.removeEdgeData(ids as string[]);
+    // 2) 边：必须在提交绘制之前补齐，否则布局会在缺边状态下执行
+    if (edgeDiff.added.length > 0) {
+      graph.addEdgeData(edgeDiff.added);
+    }
+    if (edgeDiff.removed.length > 0) {
+      graph.removeEdgeData(edgeDiff.removed.map(edge => edge.id!) as string[]);
+    }
+    if (edgeDiff.common.length > 0) {
+      graph.updateEdgeData(edgeDiff.common);
     }
 
-    if (common.length > 0) {
-      graphInstance.value.updateEdgeData(common);
-    }
+    // 3) 一次绘制
+    await graph.draw();
+    if (seq !== updateSeq) return;
 
-    // 绘制边（不执行布局）
-    await graphInstance.value.draw();
-
-    // 如果新增或删除节点，则重新布局
-    if (added.length > 0 || removed.length > 0) {
-      await graphInstance.value.layout();
+    // 4) 仅在结构变化且图非空时重新布局（空图布局无意义，且可能污染图状态）
+    if (structChanged && graph.getNodeData().length > 0) {
+      await graph.layout();
     }
   }
 
-  // 更新节点策略
-  async function updateGraphNodes() {
-    if (!graphInstance.value) return;
-    const nodes = graphInstance.value.getNodeData();
-    const { added, removed, common } = diffArrayFast(nodes, buildGraphNodeData(), 'id');
-
-    if (added.length > 0) {
-      graphInstance.value.addNodeData(added);
-    }
-
-    if (removed.length > 0) {
-      graphInstance.value.removeNodeData(removed.map(node => node.id!));
-    }
-
-    if (common.length > 0) {
-      graphInstance.value.updateNodeData(common);
-    }
-    // 绘制节点（不执行布局）
-    await graphInstance.value.draw();
-
-    // 如果新增或删除节点，则重新布局
-    if (added.length > 0 || removed.length > 0) {
-      await graphInstance.value.layout();
-    }
-  }
-
-  // 路径 1: 外部节点数据变化 → 全量 diff + draw + layout
+  // 路径 1: 外部拓扑数据变化 → 节点/边同批 diff + 一次 draw + 必要时一次 layout
   watch(
-    () => props.nodes,
-    () => updateGraphNodes(),
-    { deep: true },
-  );
-
-  // 路径 1 (边): 外部边数据变化 → 全量 diff + draw + layout
-  watch(
-    () => props.edges,
-    () => updateGraphEdges(),
+    () => [props.nodes, props.edges],
+    () => updateGraph(),
     { deep: true },
   );
   watch(

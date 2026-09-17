@@ -37,9 +37,6 @@ import (
 // cfgFilePath 为配置文件所在路径
 var cfgFilePath = envx.Get("BKMS_CLI_CONFIG", filepath.Join(pathx.HomeDir(), ".bkms", "config.yaml"))
 
-// bkmsBaseURL 默认的 bkms 服务基础地址，通过 go build -ldflags 注入
-var bkmsBaseURL = ""
-
 // Defaults 为默认参数，即用户调用 bkms-cli 命令时，如果未指定相应参数，则使用这些默认值
 type Defaults struct {
 	WorkspaceID string `yaml:"workspaceID"`
@@ -58,8 +55,6 @@ func (d *Defaults) String() string {
 type Config struct {
 	// BkmsBaseURL 服务治理平台服务访问基础地址
 	BkmsBaseURL string `yaml:"bkmsBaseUrl"`
-	// Deprecated: 兼容历史配置项，读取后会迁移到 BkmsBaseURL
-	BkmsApigwURL string `yaml:"bkmsApigwUrl,omitempty"`
 	// Username 用户名
 	Username string `yaml:"username"`
 	// AccessToken 服务访问凭证
@@ -100,16 +95,16 @@ func (c *Config) Load() (*Config, error) {
 		return nil, err
 	}
 
-	// 兼容历史配置项，并统一去除尾斜杠
-	if conf.BkmsBaseURL == "" {
-		conf.BkmsBaseURL = conf.BkmsApigwURL
-	}
-	conf.BkmsBaseURL = strings.TrimSuffix(conf.BkmsBaseURL, "/")
-	conf.BkmsApigwURL = ""
+	normalizeLoadedConfig(conf)
 
 	// 初始化全局配置
 	G = conf
 	return conf, nil
+}
+
+// normalizeLoadedConfig 统一去除尾斜杠
+func normalizeLoadedConfig(conf *Config) {
+	conf.BkmsBaseURL = strings.TrimSuffix(conf.BkmsBaseURL, "/")
 }
 
 // createDefaultConfig 创建默认配置文件（含目录），并返回默认配置
@@ -120,9 +115,7 @@ func createDefaultConfig() (*Config, error) {
 		return nil, errors.Wrapf(err, "failed to create config directory %s", cfgDir)
 	}
 
-	conf := &Config{
-		BkmsBaseURL: bkmsBaseURL,
-	}
+	conf := &Config{}
 
 	contents, err := yaml.Marshal(conf)
 	if err != nil {
@@ -135,9 +128,9 @@ func createDefaultConfig() (*Config, error) {
 	return conf, nil
 }
 
-// Dump 将全局配置保存到文件
+// Dump 将当前配置保存到文件
 func (c *Config) Dump() error {
-	contents, err := yaml.Marshal(G)
+	contents, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
@@ -147,8 +140,42 @@ func (c *Config) Dump() error {
 	return nil
 }
 
+// SetBkmsBaseURL 更新 bkmsBaseUrl 并持久化。
+// ifUnset 为 true 时仅在当前仍为空时写入。
+func (c *Config) SetBkmsBaseURL(bkmsBaseURL string, ifUnset bool) (updated bool, err error) {
+	bkmsBaseURL = strings.TrimSpace(bkmsBaseURL)
+	if bkmsBaseURL == "" {
+		return false, errors.New("bkmsBaseUrl is required")
+	}
+	if ifUnset && strings.TrimSpace(c.BkmsBaseURL) != "" {
+		return false, nil
+	}
+	c.BkmsBaseURL = strings.TrimSuffix(bkmsBaseURL, "/")
+	if err := c.Dump(); err != nil {
+		return false, errors.Wrap(err, "save config")
+	}
+	return true, nil
+}
+
 // UserIsInitialized 判断配置是否已完成用户初始化，仅检查 AccessToken 等配置项是否存在
 // 不验证其真实有效性。
 func (c *Config) UserIsInitialized() bool {
 	return c.Username != "" && c.AccessToken != ""
+}
+
+// HasBkmsBaseURL reports whether bkmsBaseUrl is set.
+func (c *Config) HasBkmsBaseURL() bool {
+	return c != nil && strings.TrimSpace(c.BkmsBaseURL) != ""
+}
+
+// RequireBkmsBaseURL returns an error with setup guidance when bkmsBaseUrl is empty.
+func (c *Config) RequireBkmsBaseURL() error {
+	if c.HasBkmsBaseURL() {
+		return nil
+	}
+	return errors.New(
+		"bkmsBaseUrl is not configured\n\n" +
+			"Set it first, then continue:\n" +
+			"  bkms-cli config set --bkms-base-url <url>",
+	)
 }

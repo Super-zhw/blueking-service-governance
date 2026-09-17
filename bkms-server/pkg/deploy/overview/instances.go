@@ -24,7 +24,6 @@ import (
 	"maps"
 	"sync"
 
-	tkex "github.com/Tencent/bk-bcs/bcs-scenarios/kourse/pkg/apis/tkex/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"golang.org/x/sync/semaphore"
@@ -32,15 +31,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/gvr"
-	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
 	podstatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/status/workload/pod"
+	k8sworkload "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/workload"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
 )
 
@@ -70,17 +67,22 @@ type deployRecordsByCluster map[string][]deployRecordForEnv
 type clusterQuerier struct {
 	clusterID string
 	pods      *k8sclient.PodClient
-	gd        *k8sclient.Client
+	// workloads 主工作负载 Kind -> 客户端
+	workloads map[string]*k8sclient.Client
 	sem       *semaphore.Weighted
 }
 
-// newClusterQuerier 创建单集群查询器；集群配置只解析一次，Pod 与 GameDeployment 客户端共用。
+// newClusterQuerier 创建单集群查询器；集群配置只解析一次，Pod 与各类主工作负载客户端共用。
 func newClusterQuerier(clusterID string, sem *semaphore.Weighted) *clusterQuerier {
 	clusterCfg := cluster.NewConfig(clusterID)
+	workloads := make(map[string]*k8sclient.Client)
+	for _, driver := range k8sworkload.MainDrivers() {
+		workloads[driver.Kind()] = k8sclient.NewWithGVR(clusterCfg, driver.GVR())
+	}
 	return &clusterQuerier{
 		clusterID: clusterID,
 		pods:      k8sclient.NewPodClient(clusterCfg),
-		gd:        k8sclient.NewWithGVR(clusterCfg, gvr.GameDeploy),
+		workloads: workloads,
 		sem:       sem,
 	}
 }
@@ -193,32 +195,31 @@ func queryEnvClusterDataForCluster(
 }
 
 // queryEnvClusterDataForEnv 查询单个环境的实例数与主容器资源规格。
-// Pod List 与 GameDeployment Get 并发。GD Get 失败才返回 error；
+// Pod List 与主工作负载 Get 并发。工作负载 Get 失败才返回 error；
 // Pod List 失败只打日志，实例数降级为 null，资源规格仍返回。
 func queryEnvClusterDataForEnv(
 	ctx context.Context,
 	querier *clusterQuerier,
 	item deployRecordForEnv,
 ) (*envClusterData, error) {
-	gdName := extractGameDeployName(item.Record)
-	if gdName == "" {
+	kind, name := extractMainWorkload(item.Record)
+	if name == "" {
 		return nil, nil
 	}
 
 	var (
 		pods    []unstructured.Unstructured
-		gd      *tkex.GameDeployment
+		wl      *k8sworkload.View
 		podsErr error
-		gdErr   error
+		wlErr   error
 	)
 
-	// 两个查询各自把错误带回，互不取消：其中一个失败仍可让另一个跑完
 	var wg sync.WaitGroup
 	wg.Go(func() {
 		pods, podsErr = listPods(ctx, querier, item)
 	})
 	wg.Go(func() {
-		gd, gdErr = getGameDeploy(ctx, querier, item, gdName)
+		wl, wlErr = getMainWorkload(ctx, querier, item, kind, name)
 	})
 	wg.Wait()
 
@@ -230,25 +231,54 @@ func queryEnvClusterDataForEnv(
 			slog.Any("error", podsErr),
 		)
 	}
-	if gdErr != nil {
-		return nil, gdErr
+	if wlErr != nil {
+		return nil, wlErr
 	}
 	return &envClusterData{
-		Resources: extractMainContainerResources(ctx, gd),
-		Instances: instanceCounts(gd, pods, podsErr == nil),
+		Resources: extractMainContainerResources(ctx, item.Record.Namespace, name, wl.Containers),
+		Instances: instanceCounts(wl.Replicas, pods, podsErr == nil),
 	}, nil
 }
 
-// instanceCounts 仅在 Pod List 成功且 GD 带有 replicas 时返回实例数，否则为 nil。
-func instanceCounts(gd *tkex.GameDeployment, pods []unstructured.Unstructured, podsOK bool) *InstanceCounts {
-	replicas, ok := extractGameDeployReplicas(gd)
-	if !podsOK || !ok {
+// getMainWorkload 按 ns/name Get 主工作负载，并解析出副本数与容器规格。
+func getMainWorkload(
+	ctx context.Context,
+	querier *clusterQuerier,
+	item deployRecordForEnv,
+	kind, name string,
+) (*k8sworkload.View, error) {
+	driver, err := k8sworkload.Get(kind)
+	if err != nil {
+		return nil, errors.Wrap(err, "get workload driver")
+	}
+	client, ok := querier.workloads[kind]
+	if !ok {
+		return nil, errors.Errorf("no k8s client for workload kind %s", kind)
+	}
+
+	if err = querier.sem.Acquire(ctx, 1); err != nil {
+		return nil, errors.Wrap(err, "acquire k8s request slot")
+	}
+	defer querier.sem.Release(1)
+
+	ns := item.Record.Namespace
+	res, err := client.Get(ctx, ns, name, metav1.GetOptions{})
+	if err != nil {
+		return nil, errors.Wrapf(err, "get %s %s/%s", kind, ns, name)
+	}
+	return driver.View(res.Object)
+}
+
+// instanceCounts 仅在 Pod List 成功且工作负载带有 replicas 时返回实例数，否则为 nil。
+// replicas 缺失时视为「期望数不可用」：K8s 缺省虽为 1，总览更稳妥地不去猜。
+func instanceCounts(replicas *int32, pods []unstructured.Unstructured, podsOK bool) *InstanceCounts {
+	if !podsOK || replicas == nil {
 		return nil
 	}
 	running, abnormal := countPodStates(pods)
 	return &InstanceCounts{
 		Running:  running,
-		Expected: replicas,
+		Expected: *replicas,
 		Abnormal: abnormal,
 	}
 }
@@ -265,14 +295,9 @@ func countPodStates(pods []unstructured.Unstructured) (running, abnormal int32) 
 	return running, abnormal
 }
 
-// extractGameDeployName 从部署记录的 ResourceKeys 中取 GameDeployment 名称；没有则返回空串。
-func extractGameDeployName(rec *appmodel.Record) string {
-	for _, key := range rec.ResourceKeys {
-		if key.Kind == k8skind.GameDeploy {
-			return key.Name
-		}
-	}
-	return ""
+// extractMainWorkload 从部署记录取主工作负载 Kind 与名称。
+func extractMainWorkload(rec *appmodel.Record) (kind, name string) {
+	return rec.MainWorkload()
 }
 
 // listPods 在环境命名空间内按 LabelSelector List Pod。
@@ -308,55 +333,19 @@ func listPods(
 	return list.Items, nil
 }
 
-// getGameDeploy 按 ns/name Get GameDeployment 并转为结构体。
-func getGameDeploy(
-	ctx context.Context,
-	querier *clusterQuerier,
-	item deployRecordForEnv,
-	gdName string,
-) (*tkex.GameDeployment, error) {
-	if err := querier.sem.Acquire(ctx, 1); err != nil {
-		return nil, errors.Wrap(err, "acquire k8s request slot")
-	}
-	defer querier.sem.Release(1)
-
-	res, err := querier.gd.Get(ctx, item.Record.Namespace, gdName, metav1.GetOptions{})
-	if err != nil {
-		return nil, errors.Wrapf(
-			err, "get game deployment %s/%s", item.Record.Namespace, gdName,
-		)
-	}
-
-	var gd tkex.GameDeployment
-	if err = runtime.DefaultUnstructuredConverter.FromUnstructured(res.Object, &gd); err != nil {
-		return nil, errors.Wrap(err, "convert game deployment from unstructured")
-	}
-	return &gd, nil
-}
-
-// extractGameDeployReplicas 读取 GameDeployment.spec.replicas。
-// 字段缺失时返回 ok=false：K8s 缺省虽为 1，总览更稳妥地视为「期望数不可用」。
-func extractGameDeployReplicas(gd *tkex.GameDeployment) (int32, bool) {
-	if gd == nil || gd.Spec.Replicas == nil {
-		return 0, false
-	}
-	return *gd.Spec.Replicas, true
-}
-
-// extractMainContainerResources 读取 GameDeployment 主容器的 CPU/内存 requests 与 limits。
-// 找不到名为 main 的容器或字段缺失时，对应字段为空字符串。
-func extractMainContainerResources(ctx context.Context, gd *tkex.GameDeployment) ResourceSpec {
-	if gd == nil {
-		return ResourceSpec{}
-	}
-	c, found := lo.Find(gd.Spec.Template.Spec.Containers, func(c corev1.Container) bool {
+// extractMainContainerResources 读取 workload 主容器的 CPU/内存 requests 与 limits。
+// 找不到主容器或字段缺失时，对应字段为空字符串。
+func extractMainContainerResources(
+	ctx context.Context, ns, name string, containers []corev1.Container,
+) ResourceSpec {
+	c, found := lo.Find(containers, func(c corev1.Container) bool {
 		return c.Name == defaults.WorkloadMainContainerName
 	})
 	if !found {
-		if len(gd.Spec.Template.Spec.Containers) > 0 {
-			log.WarnAttrs(ctx, "deploy overview skips resources, game deployment has no main container",
-				slog.String("namespace", gd.Namespace),
-				slog.String("name", gd.Name),
+		if len(containers) > 0 {
+			log.WarnAttrs(ctx, "deploy overview skips resources, workload has no main container",
+				slog.String("namespace", ns),
+				slog.String("name", name),
 			)
 		}
 		return ResourceSpec{}

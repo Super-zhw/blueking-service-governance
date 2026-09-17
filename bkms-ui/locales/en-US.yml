@@ -54,6 +54,10 @@
 关联的资源实例: Associated resource instance
 去申请: Apply
 申请权限: IAM
+您没有访问当前空间的权限: You do not have permission to access the current workspace
+申请成为开发者: Apply to become a developer
+申请成为管理员: Apply to become an administrator
+暂无权限申请地址: No permission application URL is available
 集群创建: Cluster creation
 项目查看: Project view
 空间管理: Space Management
@@ -223,8 +227,11 @@ tag不能为空: Tag cannot be empty
 查看操作详情: view record detail
 成功: success
 失败: failed
+请选择应用: Please select an application
+请输入应用名称: Please enter the application name
 搜索操作人、操作类型、操作状态: "search operator, type, status"
 环境管理: Environment management
+集群组件: Cluster Components
 新建环境: Create environment
 环境模板: Environment template
 去添加集群: Add Cluster
@@ -308,6 +315,7 @@ tag不能为空: Tag cannot be empty
 组件基础信息: Base Info
 组件ID: ID
 版本号: version
+版本号（镜像 Tag）: version (image tag)
 组件类型: type
 备注信息: description
 组件输入模板: Input Template
@@ -419,6 +427,8 @@ VPC网络 (underlay): VPC network (underlay)
 策略配置: Policy Configuration
 流水线: Pipeline
 复制: Copy
+复制仓库地址: Copy Repository Address
+复制凭证: Copy Credential
 全屏: Fullscreen
 自定义应用编排，拥有灵活的可定制性: Customize application orchestration with flexible customizability
 请输入变量名: Please enter the variable name
@@ -669,6 +679,10 @@ yaml 文件路径已更改: yaml FilePath has been changed
 "{0} 内容（只读，不可修改）": "{0} content (read-only, cannot be modified)"
 （来源于 BSCP 的文件仅能查看，不能编辑）: (Files sourced from BSCP can only be viewed, not edited)
 '服务"{0}"未上线全量版本，请先将服务上线到全部实例。': Service "{0}" has no fully released version. Please complete the release to all instances first.
+'您没有服务 “{0}” 的权限，请重新选择': You do not have permission for service "{0}". Please select another service.
+您没有当前 BSCP 服务的权限，请重新选择: You do not have permission for the current BSCP service. Please select another service.
+当前 BSCP 服务未上线全量版本，无法保存: The current BSCP service has no fully released version and cannot be saved.
+BSCP 配置内容非合法 YAML 格式，无法保存: The BSCP configuration content is not valid YAML and cannot be saved.
 请选择业务: Please select a business
 请选择服务: Please select a service
 请选择配置项: Please select a configuration item
@@ -1011,6 +1025,8 @@ Request为最小值，Limit为最大值: Request is the minimum value, Limit is 
 您修改了北极星配置信息，以上环境需要重新部署应用后方可生效: You have modified Polaris configuration. The above environments require redeployment to take effect.
 "您修改了以下内容，需要重新部署应用后方可生效：": "You have modified the following content. Redeployment is required for the changes to take effect:"
 权重: Weight
+权重因子: Weight Factor
+"按实例机型动态分配流量。开启后，可在关联环境中打开「动态权重」": Dynamically distribute traffic based on instance machine type. After enabling it, you can enable Dynamic Weight in associated environments.
 北极星负责人: Polaris Owner
 请输入负责人: Please enter owner
 服务标签: Service Labels
@@ -1022,7 +1038,7 @@ Request为最小值，Limit为最大值: Request is the minimum value, Limit is 
 北极星Token不能为空: Polaris Token cannot be empty
 权重不能小于1: Weight cannot be less than 1
 北极星负责人不能为空: Polaris owner cannot be empty
-创建后不可修改，请认真填写；可快捷填入: This field cannot be changed after creation. Please fill it in carefully, or use Quick Fill
+可快捷填入: Can be filled in quickly
 所有管理员: All Administrators
 所有SRE: All SREs
 所有开发者: All Developers
@@ -1030,6 +1046,10 @@ Request为最小值，Limit为最大值: Request is the minimum value, Limit is 
 凭证信息会写入到应用环境变量中:
   The credential information will be written into the application
   environment variable
+"该配置为立即生效，凭证不会写入应用环境变量。如需查看北极星 Token，请到北极星控制台查看（仅北极星负责人可见）。":
+  This configuration takes effect immediately, so credentials are not written to application environment variables.
+  To view the Polaris token, go to the Polaris console (visible only to Polaris owners).
+前往北极星: Go to Polaris
 敏感字段，仅支持在应用环境变量中获取: Sensitive field, only available in application environment variables
 请输入数字、英文字母、.、-、_，长度不超过128个字符:
   Please enter numbers, English letters , -, _, with
@@ -1049,6 +1069,9 @@ Request为最小值，Limit为最大值: Request is the minimum value, Limit is 
 已修改: Modified
 未修改: Unmodified
 实例数不能小于1: The number of instances cannot be less than 1
+请输入大于或等于 1 的整数: Please enter an integer greater than or equal to 1
+实例删除后副本数已变为 0，请填写期望实例数后重新部署:
+  All instances have been deleted and the replica count is now 0. Enter the desired number of instances and redeploy.
 在滚动更新期间,允许超出原定副本数额外创建的新 Pod 的最大数量:
   During rolling updates, the maximum number of
   additional new Pods that can be created beyond the original replica count
@@ -1232,6 +1255,19 @@ APM 实例: APM Instance
 开启后将自动上报 tRPC 服务的健康状态到北极星:
   After enabling, the health status of the tRPC service
   will be automatically reported to Polaris
+生效方式: Effective Mode
+请选择生效方式: Please select the effective mode
+立即生效: Effective Immediately
+下次部署生效: Effective on Next Deployment
+创建后不可修改: Cannot be modified after creation
+"部署后才将实例注册到北极星，同时注入北极星 Token、服务端口等内容到应用环境变量中": "Instances are registered to Polaris only after deployment, and the Polaris token, service port, and related values are injected into the application's environment variables"
+实例何时注册、摘除北极星，还受生命周期和健康探针影响: When Polaris instances are registered or deregistered is also affected by lifecycle and health probes
+立即生效时，服务端口不会写入环境变量: In immediate mode, the service port is not written to environment variables
+平台会自动在框架配置文件追加服务注册信息，由 tRPC 框架自动完成心跳上报:
+  The platform will append the service registration to the framework config file,
+  and the tRPC framework will report heartbeats automatically
+"需要业务主动完成心跳上报 {0}": The application must report heartbeats itself {0}
+参考文档: See documentation
 需要在框架配置文件的 server.service 中包含该北极星服务名，健康检查才会生效：:
   "The Polaris service name must
   be included in server.service of the framework configuration file for health
@@ -1483,6 +1519,8 @@ CLB 区域: CLB Region
 从源码构建: Build from Source
 代码分支: Code Branch
 源码构建: Build from Source
+暂无选项: No options
+输入关键字搜索: Search by keyword
 生产类型环境只能部署已经晋级的镜像 Tag: Production-type environments can only deploy images that have been promoted
 构建中...: Building...
 构建成功: Build Successful
@@ -1601,6 +1639,19 @@ Key 不能重复: Key 不能重复
 "删除需要具备写权限的凭证。跳转到：{0} 配置凭证后重试。": "Delete requires write permission credentials. Please go to {0} to configure credentials and try again."
 去配置: Configure
 "部署预检发现{0}类问题": "Pre-deployment check found {0} type(s) of issues"
+联邦集群资源规格不一致: Federated cluster resource spec mismatch
+当前环境已绑定联邦集群。联邦集群要求 CPU、内存的 Requests 与 Limits 必须一致，否则无法部署。: This environment is bound to a federated cluster. CPU and memory Requests must match Limits, otherwise the environment cannot be deployed.
+"建议前往 {0} 将 Requests 调整为与 Limits 一致后再部署。": "Go to {0} and set Requests equal to Limits before deploying."
+缺少必选集群组件: Missing Required Cluster Components
+"{0} 个组件": "{0} component(s)"
+以下必选集群组件在目标环境所在集群中尚未安装，缺失时应用无法正常部署。: The following required cluster components are not installed in the target environment's cluster, so the application cannot be deployed normally.
+"建议前往 {0} 安装组件后再部署。": "Go to {0}, install the components, and then deploy."
+存在阻断问题，请先解决后再部署: Blocking issues exist. Resolve them before deploying.
+资源: Resource
+联邦集群不支持灰度操作: Federated clusters do not support gray deployment.
+联邦集群暂不支持自动扩缩: Federated clusters do not currently support autoscaling.
+该环境绑定联邦集群，不支持作为来源环境创建新环境: This environment is bound to a federated cluster and cannot be used as the source for a new environment.
+暂不支持选择绑定联邦集群的环境: Environments bound to federated clusters are not currently supported.
 环境变量未定义: Undefined Environment Variables
 "{0} 个变量": "{0} variables"
 "以下环境变量在当前配置中被引用，但在目标部署环境中未定义，部署后将被渲染为空值，{0}": "The following environment variables are referenced in the current configuration but are not defined in the target deployment environment. The deployment will be rendered as empty value, {0}"
@@ -1730,9 +1781,13 @@ CPU requests 使用率: CPU Requests Usage
 使用仓库 Dockerfile: Use Repository Dockerfile
 构建镜像: Build Image
 运行镜像: Runtime Image
+打包额外文件: Extra Files
+"每行一个，可填写文件路径或目录，相对构建目录，例如：": "One path or directory per line, relative to the build directory, for example:"
+文件会按相对路径打包到运行镜像的 /app 目录，例如 data/privatekey.pem 打包后为 /app/data/privatekey.pem。: Files are copied into /app in the runtime image by relative path. For example, data/privatekey.pem becomes /app/data/privatekey.pem.
 请选择镜像: Please select an image
 请选择标签: Please select a tag
 该镜像已不在当前平台镜像列表中，请重新选择: This image is no longer in the platform's image list, please select again
+所选镜像 Tag 已不在当前镜像的 Tag 列表中，请重新选择: The selected image tag is no longer in the current image's tag list, please select again
 用于编译源码的镜像（含 Go 工具链），对应 builder 阶段基础镜像。: Image for compiling source code (includes Go toolchain), corresponds to the builder stage base image.
 运行服务的基础镜像（精简、无编译器），对应 runner 阶段基础镜像。: Base image for running services (lightweight, no compiler), corresponds to the runner stage base image.
 "构建镜像的版本（{0}）与运行镜像（{1}）不一致，可能导致 glibc/musl 等基础库差异，引发运行时兼容问题。建议保持两者一致，如已确认可忽略。": "The version of the build image ({0}) does not match the runtime image ({1}), which may cause differences in base libraries such as glibc/musl and lead to runtime compatibility issues. It is recommended to keep them consistent; can be ignored if confirmed."
@@ -1773,15 +1828,17 @@ runner 阶段: Runner Stage
 查看日志: View Logs
 构建日志: Build Logs
 "应用关联的特性环境：{0} 个": "Feature environments associated with the application: {0}"
-特性部署: Feature Deployment
-特性环境展示名称: Feature Environment Display Name
+来源环境: Source Environment
+请选择来源环境: Please select a source environment
+无法获取环境标识: Unable to get the environment identifier
 环境展示名称: Environment Display Name
-基于来源环境快速创建一个隔离的特性环境，适合灰度测试等场景。特性环境仅对当前应用可见。: Quickly create an isolated feature environment based on the source environment, suitable for grayscale testing and other scenarios. The feature environment is only visible to the current application.
-"特性环境会继承来源环境的配置，后续也可以在“应用配置”页面修改特性环境配置。": "The feature environment will inherit the configuration of the source environment, and the feature environment configuration can also be modified later on the 'Application Configuration' page."
+"这里创建的是当前应用的特性环境：只属于本应用，其他应用无法使用，适合灰度验证、联调等场景，用完可以销毁。": "This creates a feature environment for the current application: it belongs to this application only and cannot be used by other applications. It suits scenarios such as grayscale verification and joint debugging, and can be destroyed when no longer needed."
+沿用来源环境的集群和环境分类。应用配置不会复制，新环境使用应用的默认配置。: The cluster and environment category are taken from the source environment. Application configuration is not copied; the new environment uses the application's default configuration.
+环境创建成功: Environment Created
+环境尚未部署实例，应用配置为默认值。如需调整配置，请先去配置再部署。: The environment has no running instances yet and uses the default application configuration. To adjust the configuration, configure it before deploying.
 "该操作不可恢复，请输入特性环境命名空间：{0} 进行确认": "This operation is irreversible. Please enter the feature environment namespace: {0} to confirm"
-仅对本应用可见。来源环境仅为创建时快照，之后互不影响。: Only visible to this application. The source environment is only a snapshot at the time of creation, and they do not affect each other afterwards.
-"如需销毁，请先移除部署；": "To destroy, please remove the deployment first;"
-"如需新建，部署时选择“特性部署”（部署 → 特性部署）；": "To create a new one, select 'Feature Deployment' when deploying (Deploy → Feature Deployment);"
+特性环境只属于当前应用，其他应用无法使用。来源环境仅为创建时快照，之后互不影响。: A feature environment belongs to the current application only and cannot be used by other applications. The source environment is just a snapshot taken at creation time; the two are independent afterwards.
+"环境创建后不会自动部署，需要单独执行部署；销毁前需先移除部署。": "Creating an environment does not deploy it; deployment is a separate action. Remove the deployment before destroying the environment."
 无法销毁特性环境: Cannot Destroy Feature Environment
 该特性环境有部署实例，请先移除部署后再销毁环境: This feature environment has deployment instances. Please remove the deployment before destroying the environment.
 立即移除部署: Remove Deployment Immediately
@@ -1800,15 +1857,29 @@ tRPC 运行时解析，平台不渲染进配置文件: Resolved by tRPC at runti
 "需要重新部署的 {0} 个环境": "{0} environment(s) requiring redeployment"
 "北极星 {0} 已关联以下环境，需要按以下顺序完成后才能删除：": "Polaris {0} is associated with the following environments. Complete them in the following order before deletion:"
 "共有 {0} 个环境的北极星更新，需要重新部署后方可生效": "Polaris updates for {0} environment(s) require redeployment to take effect"
+北极星配置待重新部署生效:
+  The Polaris config takes effect after redeployment
+待部署环境: Pending Environment
+修改内容: Changes
 "默认值为{0}": "The default value is {0}"
 一键添加: One-click Add
-"构建产物需放到 {0} 下，runner 阶段仅从此路径拷贝进运行镜像。不限定命令形式（{1} 等均可），只要最终产物落到该路径即可，例如：": "Build artifacts must be placed under {0}. The runner stage only copies from this path into the runtime image. There is no restriction on command format (e.g., {1}), as long as the final artifacts are placed in this path, for example:"
+"构建产物需输出为文件 {0}，runner 阶段只会把这个文件拷贝进运行镜像。不限定命令形式（{1} 等均可），只要最终产物是该文件即可，例如：": "Build artifacts must be output as the file {0}. The runner stage only copies this file into the runtime image. There is no restriction on command format (e.g., {1}), as long as the final artifact is this file, for example:"
 "若 go.mod 有使用工蜂私有仓库依赖包，构建参数中需要添加 {0}，取值见：": "If go.mod uses dependencies from Woa's private repository, you need to add {0} to the build parameters. Refer to:"
 一般可留空: Can generally be left empty
 "请确认以下变量信息（共 {count} 个）": "Please confirm the following variable information (total of {count} items)"
 目标环境: Target Environment
 未部署环境: Undeployed Environments
 单实例权重: Per-instance Weight
+动态权重: Dynamic Weight
+开启后北极星按机型动态调整该环境实例权重，上方填写的是基准权重。:
+  When on, Polaris adjusts this environment's instance weights by machine type.
+  The value above is the baseline weight.
+需先编辑该北极星并开启「权重因子」，保存后再回到此处打开。:
+  Edit this Polaris config and turn on Weight Factor first, save, then return
+  here to enable it.
+该环境已开启动态权重，北极星会按实例机型调整实际下发权重。:
+  Dynamic weight is on. Polaris adjusts the actual weight by instance machine
+  type.
 部分实例已覆盖: Some Instances Overridden
 "该环境下有 {count} 个实例在实例列表中单独调整过权重；总权重按各实例实际权重求和": "{count} instances in this environment have individually adjusted weights in the instance list. The total weight is the sum of the actual weights of all instances"
 健康实例数: Healthy Instances
@@ -1943,3 +2014,62 @@ CPU Limits 利用率: CPU Limits Utilization
 "运行实例 {0} / {1}": "Running Instances {0} / {1}"
 "涉及 {0} 个环境": "Across {0} Environment(s)"
 本页配置只会影响本空间之后新建的应用，已有应用不受影响。仅适用于平台托管部署的应用（如 tRPC、TAF），Helm / Agones 等自定义编排应用不适用。: This page's configuration will only affect newly created applications in the current workspace. Existing applications are not affected. Only applicable to platform-managed applications (e.g., tRPC, TAF), not applicable to custom编排 applications (e.g., Helm / Agones).
+"该配置为立即生效，删除后将同步从已关联环境中摘除北极星实例并移除配置。":
+  This configuration takes effect immediately. Deleting it will synchronously deregister Polaris instances from associated environments and remove the configuration.
+平台推荐镜像: Platform Recommended Images
+自定义镜像: Custom Images
+查看推送指引: View Push Guide
+推送指引: Push Guide
+请将镜像推送至当前空间绑定仓库后使用。凭证可在「空间设置 → 基本信息」查看。: Please push the image to the workspace bound repository before using. Credentials can be viewed in 「Workspace Settings → Basic Info」.
+登录镜像仓库: Login Image Registry
+推送到空间仓库: Push to Workspace Repository
+凭证: Credential
+暂无凭证: No Credential
+请输入镜像名称: Please enter an image name
+请输入镜像名称，且不能包含 tag: Please enter an image name without a tag
+快捷填入镜像名称: Quick-fill image name
+"请先将自定义的镜像推送至空间，{0}": "Please push the custom image to the workspace first, {0}"
+请先将自定义的镜像推送至空间: Please push the custom image to the workspace first
+刷新 Tag 列表: Refresh Tag List
+镜像 Tag 刷新成功: Image tags refreshed successfully
+刷新镜像 Tag 失败: Failed to refresh image tags
+刷新失败，请稍后重试: Failed to refresh. Please try again later
+已有刷新任务进行中，请稍后重试: A refresh task is already in progress, please try again later
+网络访问: Network Access
+HostPort 端口映射: HostPort Mapping
+环境绑定联邦集群时，容器需要通过所在节点的 HostPort 对外暴露访问。声明端口后，部署时会为容器端口自动映射节点端口，并将节点端口注入容器环境变量。: When an environment is bound to a federation cluster, containers are exposed via the node's HostPort. After declaring ports, node ports are automatically mapped to container ports and injected into container environment variables.
+端口声明: Port Declaration
+容器端口: Container Port
+对应环境变量: Corresponding Environment Variable
+"{count} 个环境待部署生效": "{count} environment(s) pending deployment"
+如 8080: e.g. 8080
+添加容器端口: Add Container Port
+对所有绑定联邦集群的环境生效: Takes effect for all environments bound to federation clusters
+请输入容器端口: Please enter a container port
+端口需为 1-65535 之间的整数: Port must be an integer between 1 and 65535
+端口重复: Duplicate port
+保存成功，需重新部署绑定联邦集群的环境后才会生效: Saved successfully. Redeploy environments bound to federation clusters for the changes to take effect.
+"新增端口：{ports}": "Add port(s): {ports}"
+"删除端口：{ports}": "Remove port(s): {ports}"
+节点端口的环境变量: Environment variable for node port
+填写容器端口后自动生成: Container port automatically generated
+当前空间没有绑定联邦集群的环境: No environments bound to a federation cluster in the current workspace
+HostPort 目前仅对绑定联邦集群的环境生效: HostPort currently only takes effect for environments bound to federation clusters
+仪表盘: Dashboard
+配置仪表盘: Configure Dashboards
+暂未配置仪表盘: No dashboards configured
+添加仪表盘: Add Dashboard
+编辑仪表盘: Edit Dashboard
+请选择仪表盘: Select a dashboard
+仪表盘名称: Dashboard Name
+展示名称: Display Name
+前往监控平台新建: Create in Monitoring Platform
+请选择仪表盘名称: Please select a dashboard name
+请选择监控平台中的仪表盘: Select a dashboard from the monitoring platform
+刷新仪表盘列表: Refresh dashboard list
+仪表盘列表已刷新: Dashboard list refreshed
+从监控平台已有仪表盘中选择，新建后可刷新列表: Select from existing monitoring dashboards. Refresh the list after creating a new one.
+已添加到本应用: Added to this application
+确认删除该仪表盘？: Delete this dashboard?
+"仪表盘名称: {name}": "Dashboard Name: {name}"
+可嵌入蓝鲸监控仪表盘，查看应用指标。配置步骤见 {0}: Embed BlueKing Monitor dashboards to view application metrics. See {0} for setup steps.

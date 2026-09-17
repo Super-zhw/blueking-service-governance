@@ -83,17 +83,21 @@
               ]"
             ></i>
           </Button>
-          <DeployActionButton
+          <Button
             v-if="canAddDeploy"
-            :label="$t('新增部署')"
-            show-feature-deploy
-            @deploy="emit('deploy', deployTargets)"
-            @feature-deploy="emit('feature-deploy')"
+            class="bg-[#fff]"
+            @click="emit('create-feature-env')"
           >
-            <template #label>
-              {{ $t('部署') }}
-            </template>
-          </DeployActionButton>
+            <Plus class="text-[18px]" />
+            {{ $t('新建环境') }}
+          </Button>
+          <Button
+            v-if="canAddDeploy"
+            theme="primary"
+            @click="emit('deploy', deployTargets)"
+          >
+            {{ $t('部署') }}
+          </Button>
         </div>
       </div>
 
@@ -160,20 +164,22 @@
             :pagination="pagination"
             row-class-name="cursor-pointer"
             :row-config="{ isHover: true }"
-            :row-height="48"
+            :settings="settings"
             :show-overflow="false"
+            :show-settings="true"
             :sort-config="sortConfig"
             @filter-change="handleFilterChange"
             @page-limit-change="handlePageLimitChange"
             @page-value-change="handlePageValueChange"
             @row-click="handleRowClick"
+            @setting-change="handleSettingChange"
           >
             <!-- 区分接口异常、筛选无结果和接口成功但无数据三种空态。 -->
             <template #empty>
               <TableException
                 :type="isError ? 'error' : hasFilter ? 'search' : 'empty'"
                 @clear="clearFilters"
-                @refresh="load"
+                @refresh="refreshOverview()"
               />
             </template>
             <TableColumn
@@ -211,6 +217,7 @@
               field="deployStatus"
               filter-multiple
               :filters="filterOptions.deployStatus"
+              :label="$t('部署状态')"
               min-width="130"
             >
               <template #header>
@@ -232,6 +239,7 @@
               </template>
             </TableColumn>
             <TableColumn
+              field="instances"
               :label="$t('实例数（运行/期望/异常）')"
               min-width="200"
             >
@@ -279,6 +287,7 @@
               </template>
             </TableColumn>
             <TableColumn
+              field="resource"
               :label="$t('资源规格')"
               min-width="120"
             >
@@ -298,6 +307,34 @@
                     </div>
                   </template>
                 </Popover>
+                <span v-else>--</span>
+              </template>
+            </TableColumn>
+            <TableColumn
+              field="imageTag"
+              :label="$t('镜像 Tag')"
+              min-width="180"
+              show-overflow="tooltip"
+            >
+              <template #default="{ row }: { row: DeployOverviewRow }">
+                <span>{{ row.imageTag || '--' }}</span>
+              </template>
+            </TableColumn>
+            <TableColumn
+              field="cluster"
+              :label="$t('集群')"
+              min-width="200"
+            >
+              <template #default="{ row }: { row: DeployOverviewRow }">
+                <div v-if="row.clusterName || row.clusterID">
+                  <div class="truncate text-[#313238]">{{ row.clusterName || row.clusterID }}</div>
+                  <div
+                    v-if="row.clusterName && row.clusterID"
+                    class="truncate text-[#979BA5]"
+                  >
+                    {{ row.clusterID }}
+                  </div>
+                </div>
                 <span v-else>--</span>
               </template>
             </TableColumn>
@@ -330,6 +367,8 @@
 
   import { Table, TableColumn } from '@blueking/table';
   import { Button, Popover, Radio, SearchSelect, Tag } from 'bkui-vue';
+  import { Plus } from 'bkui-vue/lib/icon';
+  import { APP_DEPLOY_STATUS } from '~/common/enums/deploy';
   import CustomFilter from '~/components/custom-filter.vue';
   import Layout from '~/components/skeleton/skeleton-layout';
   import Skeleton from '~/components/skeleton/skeleton.vue';
@@ -339,20 +378,23 @@
   import { useElementHeight } from '~/composables/use-element-height';
   import { envTypeMap, envTypeTagClassMap } from '~/composables/use-env-manager';
   import { useSearchPlaceholder } from '~/composables/use-search-placeholder';
+  import { useTableSettings } from '~/composables/use-table-settings';
   import { formatRelativeTimeWithTooltip } from '~/composables/use-time';
   import AutoScaleTag from '~/pages/application/detail/components/auto-scale-tag.vue';
   import { useAppDetail } from '~/stores/app-detail';
 
-  import DeployActionButton from '../deploy-action-button.vue';
   import StatIcon from './stat-icon.vue';
   import { type DeployOverviewDeployTarget, type DeployOverviewRow, useDeployOverview } from './use-deploy-overview';
+  import { useDeployOverviewPolling } from './use-deploy-overview-polling';
 
+  import type { AppDeployedEnvOutputObj } from '~/@types/v1/app';
   import type { EnvOutput } from '~/@types/v1/env';
 
   const props = defineProps<{ envList: EnvOutput[] }>();
   const emit = defineEmits<{
+    'create-feature-env': [];
     deploy: [targets: DeployOverviewDeployTarget[]];
-    'feature-deploy': [];
+    'refresh-env-list': [];
     'update:deploy-targets': [targets: DeployOverviewDeployTarget[]];
     'view-instances': [envName: string];
   }>();
@@ -383,6 +425,8 @@
     isLoading,
     load,
     pagination,
+    pollingIntervalMs,
+    rows,
     searchData,
     searchValue,
     sortConfig,
@@ -390,7 +434,19 @@
     visibleRows,
   } = useDeployOverview(toRef(props, 'envList'));
 
+  // 列设置：镜像 Tag、集群信息等新列默认不勾选，用户可在表格右上角列设置中开启。
+  // 列勾选与行高（size）偏好均持久化，刷新后恢复。
+  const { settings, handleSettingChange } = useTableSettings('deploy-overview', {
+    defaultChecked: ['displayName', 'type', 'deployStatus', 'instances', 'resource', 'deployedAt'],
+    disabled: ['displayName'],
+  });
+
   const { height: tableHeight } = useElementHeight(tableContentRef, { watchSource: isLoading });
+  const { refresh: refreshOverview, stop: stopPolling } = useDeployOverviewPolling({
+    getAppID: () => appDetailStore.appID,
+    getInterval: () => pollingIntervalMs.value,
+    load,
+  });
 
   /** 将最近部署时间转换为相对时间，并保留完整时间作为 tooltip。 */
   function formatDeployedAt(deployedAt: string) {
@@ -400,7 +456,8 @@
   /** 刷新过程中忽略重复点击，避免并发请求总览接口。 */
   function handleRefresh() {
     if (isLoading.value) return;
-    load();
+    emit('refresh-env-list');
+    void refreshOverview('manual');
   }
 
   /** 点击总览表格任意数据单元格时进入对应环境的实例列表。 */
@@ -408,11 +465,44 @@
     emit('view-instances', row.name);
   }
 
+  /** deploy-statuses 返回默认泳道状态变化时，刷新总览唯一数据源。 */
+  function syncDeployStatuses(list: AppDeployedEnvOutputObj[]) {
+    if (!rows.value.length) return;
+
+    const statusByEnvID = new Map<string, AppDeployedEnvOutputObj>();
+    const statusByEnvNameWithoutID = new Map<string, AppDeployedEnvOutputObj>();
+    list.forEach(item => {
+      if (item.trafficLaneName) return;
+      if (item.id) {
+        statusByEnvID.set(item.id, item);
+      } else if (item.name) {
+        statusByEnvNameWithoutID.set(item.name, item);
+      }
+    });
+
+    const hasStatusChanged = rows.value.some(row => {
+      const latest = row.envID ? statusByEnvID.get(row.envID) : statusByEnvNameWithoutID.get(row.name);
+      if (!latest) return false;
+      return (latest.deployStatus || APP_DEPLOY_STATUS.UNKNOWN) !== row.deployStatus;
+    });
+    if (hasStatusChanged) void refreshOverview('automatic', { queueWhenLoading: true });
+  }
+
   // 部署、移除部署等父级操作完成后，通过暴露的 load 主动刷新总览。
-  defineExpose({ load });
+  defineExpose({ load: refreshOverview, syncDeployStatuses });
 
   // 应用或应用类型变化时重新请求；composable 内部会丢弃上一应用的迟到响应。
-  watch([() => appDetailStore.appID, () => appDetailStore.appType], load, { immediate: true });
+  watch(
+    [() => appDetailStore.appID, () => appDetailStore.appType],
+    () => {
+      if (document.visibilityState === 'hidden') {
+        stopPolling();
+        return;
+      }
+      void refreshOverview('initial');
+    },
+    { immediate: true },
+  );
 
   // 环境列表可能晚于总览接口返回，持续把最新部署目标同步给已打开的新增部署侧栏。
   watch(deployTargets, targets => emit('update:deploy-targets', targets));

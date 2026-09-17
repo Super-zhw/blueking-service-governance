@@ -49,7 +49,7 @@ The key must be unique within the application.`,
 
   # Create with description
   bkms-cli envvar create app --app <appID> --key MY_VAR --value my-value --description "My variable"`,
-		PreRun: cmdutil.CommonPreRun,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key = strings.TrimSpace(key)
 
@@ -69,7 +69,7 @@ The key must be unique within the application.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&key, "key", "", "environment variable key (required)")
 	cmd.Flags().StringVar(&value, "value", "", "environment variable value")
 	cmd.Flags().StringVar(&description, "description", "", "variable description")

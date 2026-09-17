@@ -34,15 +34,15 @@ func NewResetCmd() *cobra.Command {
 	var appID, envName string
 
 	cmd := &cobra.Command{
-		Use:    "reset",
-		Short:  "Reset dev-mode configuration for an environment",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "reset",
+		Short: "Reset dev-mode configuration for an environment",
 		Long: `Remove the development mode configuration for an application environment.
 
 This clears the environment setting entirely, effectively disabling dev-mode for the
 specified environment.`,
 		Example: `  # Reset dev-mode for an environment
   bkms-cli app appspec dev-mode reset --app my-app --env prod`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := appspec.ResetHandler(
 				cmd.Context(), appID, envName, client.AppSpecSectionDevMode,
@@ -55,7 +55,7 @@ specified environment.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 
 	_ = cmd.MarkFlagRequired("app")

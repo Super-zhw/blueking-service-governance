@@ -22,15 +22,29 @@ import (
 	"errors"
 
 	"github.com/bytedance/mockey"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
+	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/discovery"
+	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
 )
 
 func mockPolarisDiscoveryFailure() {
 	mockey.Mock(cluster.NewConfig).Return(&cluster.Config{ClusterID: "test-cluster"}).Build()
 	mockey.Mock(discovery.GetGroupVersionResource).Return(nil, errors.New("test discovery error")).Build()
+}
+
+// k8sServiceClient 返回访问 core/v1 Service 的客户端
+func k8sServiceClient(clusterCfg *cluster.Config) (*k8sclient.Client, error) {
+	gvr, err := discovery.GetGroupVersionResource(
+		clusterCfg, k8skind.SVC, corev1.SchemeGroupVersion.String(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return k8sclient.NewWithGVR(clusterCfg, *gvr), nil
 }
 
 func newTestConfig(

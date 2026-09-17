@@ -43,8 +43,13 @@
         <div
           v-for="env in group.envs"
           :key="env.id || env.name"
+          v-bk-tooltips="{
+            content: getCustomDisabledReason(env),
+            disabled: !getCustomDisabledReason(env),
+            placement: 'bottom',
+          }"
           class="h-[32px] flex items-center px-[12px] bg-[#F5F7FA] cursor-pointer"
-          :class="isEnvDisabled(env) && !isEnvSelected(env) ? 'opacity-60 cursor-not-allowed' : ''"
+          :class="isEnvDisplayDisabled(env) ? 'opacity-60 cursor-not-allowed' : ''"
           @click="handleEnvItemClick(env)"
         >
           <div class="flex flex-1 min-w-0 items-center">
@@ -74,7 +79,12 @@
           >
             <Checkbox
               class="bg-[#fff]"
-              :disabled="(!isEnvSelected(env) && isEnvStatusDisabled(env)) || props.disabled || !getEnvValue(env)"
+              :disabled="
+                props.disabled ||
+                !!getCustomDisabledReason(env) ||
+                (!isEnvSelected(env) && isEnvStatusDisabled(env)) ||
+                !getEnvValue(env)
+              "
               :model-value="isEnvSelected(env)"
               @change="handleEnvSelect(env, $event)"
             />
@@ -112,6 +122,8 @@
       /** 这些状态的环境不可勾选且不计入全选，如 ['NotReady'] */
       disabledStatuses?: string[];
       envList: EnvOutput[];
+      /** 返回环境的业务禁用原因；有返回值时环境不可选择并展示提示 */
+      getEnvDisabledReason?: (env: EnvOutput) => string | undefined;
       /** 是否显示环境部署状态图标（为 true 时才会发起部署状态请求） */
       showDeployIcon?: boolean;
       /** v-model 值的来源字段：name（默认，兼容现有调用方）或 id */
@@ -131,14 +143,31 @@
   const appDetailStore = useAppDetail();
   const FEATURE_ENV_KIND = 'feature';
 
-  /** 环境名称 -> 部署状态 映射（仅 showDeployIcon 时请求） */
-  const appDeployStatusMap = ref<Map<string, AppDeployedEnvOutputObj>>(new Map());
+  /** 部署状态分别按环境 ID 和名称索引，ID 未命中时按名称兜底。 */
+  const appDeployStatusByID = ref<Map<string, AppDeployedEnvOutputObj>>(new Map());
+  const appDeployStatusByName = ref<Map<string, AppDeployedEnvOutputObj>>(new Map());
+  let deployStatusesRequest = 0;
 
   /** 获取当前应用在各环境的部署状态 */
   async function fetchDeployStatuses(appID: string) {
+    const requestToken = ++deployStatusesRequest;
     const res = await AppService.getAppDeployStatuses({ appID }).catch(() => []);
-    const list = (res || []) as AppDeployedEnvOutputObj[];
-    appDeployStatusMap.value = new Map(list.filter(item => item.name).map(item => [item.name!, item]));
+    if (requestToken !== deployStatusesRequest || appID !== appDetailStore.appID || !props.showDeployIcon) return;
+    const byID = new Map<string, AppDeployedEnvOutputObj>();
+    const byName = new Map<string, AppDeployedEnvOutputObj>();
+    ((res || []) as AppDeployedEnvOutputObj[]).forEach(status => {
+      if (status.id) byID.set(status.id, status);
+      if (status.name) byName.set(status.name, status);
+    });
+    appDeployStatusByID.value = byID;
+    appDeployStatusByName.value = byName;
+  }
+
+  function getEnvDeployStatus(env: EnvOutput) {
+    return (
+      (env.id ? appDeployStatusByID.value.get(env.id) : undefined) ||
+      (env.name ? appDeployStatusByName.value.get(env.name) : undefined)
+    );
   }
 
   /** 仅当开启图标且存在 appID 时才发起部署状态请求 */
@@ -148,7 +177,9 @@
       if (showDeployIcon && appID) {
         fetchDeployStatuses(appID);
       } else {
-        appDeployStatusMap.value = new Map();
+        deployStatusesRequest += 1;
+        appDeployStatusByID.value = new Map();
+        appDeployStatusByName.value = new Map();
       }
     },
     { immediate: true },
@@ -156,7 +187,7 @@
 
   /** 根据环境获取部署状态对应的 ColorIcon 图标名（与 env-select-panel.vue 保持一致） */
   function getEnvStatusIcon(env: EnvOutput): string {
-    const deployStatus = env.name ? appDeployStatusMap.value.get(env.name)?.deployStatus : undefined;
+    const deployStatus = getEnvDeployStatus(env)?.deployStatus;
     if (!deployStatus) return 'status-unknown';
     return getDeployStatusInfo(appDetailStore.appType || null, deployStatus).icon || 'status-unknown';
   }
@@ -196,6 +227,11 @@
     })),
   );
 
+  /** 获取业务层传入的环境禁用原因。 */
+  function getCustomDisabledReason(env: EnvOutput) {
+    return props.getEnvDisabledReason?.(env) || '';
+  }
+
   /** 环境对应的 v-model 值 */
   function getEnvValue(env: EnvOutput): string | undefined {
     return props.valueKey === 'id' ? env.id : env.name;
@@ -204,7 +240,7 @@
   // 获取分组内可用于提交的环境值列表（排除禁用状态）
   function getGroupEnvValues(envs: EnvOutput[]) {
     return envs
-      .filter(env => !isEnvDisabled(env))
+      .filter(env => !isEnvSelectionDisabled(env))
       .map(env => getEnvValue(env))
       .filter((value): value is string => !!value);
   }
@@ -212,8 +248,8 @@
   // 点击环境条目时切换勾选状态
   function handleEnvItemClick(env: EnvOutput) {
     if (props.disabled || !getEnvValue(env)) return;
-    // 状态禁用的环境（如 NotReady）不允许新增，但允许取消已选
-    if (isEnvStatusDisabled(env) && !isEnvSelected(env)) return;
+    // 业务规则禁用的环境始终不可操作；状态禁用的环境保持原有“已选可取消”行为
+    if (getCustomDisabledReason(env) || (isEnvStatusDisabled(env) && !isEnvSelected(env))) return;
     handleEnvSelect(env, !isEnvSelected(env));
   }
 
@@ -221,8 +257,7 @@
   function handleEnvSelect(env: EnvOutput, checked: boolean) {
     const envValue = getEnvValue(env);
     if (!envValue) return;
-    // 选中操作受状态禁用限制；取消操作不受限制（允许移除已选的禁用环境）
-    if (checked && isEnvStatusDisabled(env)) return;
+    if (getCustomDisabledReason(env) || (checked && isEnvStatusDisabled(env))) return;
     const selectedValues = modelValue.value || [];
     if (checked) {
       modelValue.value = selectedValues.includes(envValue) ? selectedValues : [...selectedValues, envValue];
@@ -246,15 +281,20 @@
     modelValue.value = selectedValues.filter(value => !groupEnvValueSet.has(value));
   }
 
-  /** 环境是否整体禁用（只读态或状态命中 disabledStatuses） */
-  function isEnvDisabled(env: EnvOutput) {
-    return props.disabled || isEnvStatusDisabled(env);
+  /** 环境是否需要展示禁用样式。 */
+  function isEnvDisplayDisabled(env: EnvOutput) {
+    return props.disabled || !!getCustomDisabledReason(env) || (isEnvStatusDisabled(env) && !isEnvSelected(env));
   }
 
   // 判断单个环境是否已选中
   function isEnvSelected(env: EnvOutput) {
     const envValue = getEnvValue(env);
     return !!envValue && (modelValue.value || []).includes(envValue);
+  }
+
+  /** 环境是否因状态或业务规则不可加入选中值。 */
+  function isEnvSelectionDisabled(env: EnvOutput) {
+    return isEnvStatusDisabled(env) || !!getCustomDisabledReason(env);
   }
 
   /** 环境状态是否被禁用（如 NotReady），命中时不可新增但可取消已选 */

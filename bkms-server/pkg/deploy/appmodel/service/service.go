@@ -29,10 +29,12 @@ import (
 	build "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/clusteraddon"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy"
 	deployappmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/hostport"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
 	polarisenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris/envvars"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg"
@@ -72,12 +74,14 @@ type Service struct {
 	bscpCfgStore                        bscpcfg.Store
 	workspaceCompsStore                 workspace.WorkspaceCompsStore
 	polarisConfigStore                  polaris.PolarisConfigStore
+	hostPortStore                       hostport.HostPortStore
 	appSpecStore                        appspec.AppSpecStore
 	buildConfigStore                    build.ConfigStore
 	buildAutoDeployRecordStore          autodeploy.RecordStore
 	appModelDeployRecordStore           deployappmodel.RecordStore
 	appModelDeployResourceSnapshotStore deployappmodel.ResourceSnapshotStore
 	appConfigFileStore                  appcfg.AppConfigFileStore
+	clusterAddonDefStore                clusteraddon.ClusterAddonDefStore
 }
 
 // ServiceDeps 部署服务所需依赖
@@ -94,6 +98,7 @@ type ServiceDeps struct {
 	PolarisVarReader                    *polarisenvvars.Reader               `validate:"required"`
 	WorkspaceCompsStore                 workspace.WorkspaceCompsStore        `validate:"required"`
 	PolarisConfigStore                  polaris.PolarisConfigStore           `validate:"required"`
+	HostPortStore                       hostport.HostPortStore               `validate:"required"`
 	BscpCfgStore                        bscpcfg.Store                        `validate:"required"`
 	AppSpecStore                        appspec.AppSpecStore                 `validate:"required"`
 	BuildConfigStore                    build.ConfigStore                    `validate:"required"`
@@ -101,6 +106,7 @@ type ServiceDeps struct {
 	AppModelDeployRecordStore           deployappmodel.RecordStore           `validate:"required"`
 	AppModelDeployResourceSnapshotStore deployappmodel.ResourceSnapshotStore `validate:"required"`
 	AppConfigFileStore                  appcfg.AppConfigFileStore            `validate:"required"`
+	ClusterAddonDefStore                clusteraddon.ClusterAddonDefStore    `validate:"required"`
 }
 
 var validate = validator.New(validator.WithRequiredStructEnabled())
@@ -124,12 +130,14 @@ func NewService(deps ServiceDeps) (*Service, error) {
 		bscpCfgStore:                        deps.BscpCfgStore,
 		workspaceCompsStore:                 deps.WorkspaceCompsStore,
 		polarisConfigStore:                  deps.PolarisConfigStore,
+		hostPortStore:                       deps.HostPortStore,
 		appSpecStore:                        deps.AppSpecStore,
 		buildConfigStore:                    deps.BuildConfigStore,
 		buildAutoDeployRecordStore:          deps.BuildAutoDeployRecordStore,
 		appModelDeployRecordStore:           deps.AppModelDeployRecordStore,
 		appModelDeployResourceSnapshotStore: deps.AppModelDeployResourceSnapshotStore,
 		appConfigFileStore:                  deps.AppConfigFileStore,
+		clusterAddonDefStore:                deps.ClusterAddonDefStore,
 	}, nil
 }
 
@@ -156,6 +164,7 @@ func NewServiceFromRegistry(reg *storereg.Registry) (*Service, error) {
 		PolarisVarReader:                    reg.PolarisVarReader,
 		WorkspaceCompsStore:                 reg.WorkspaceCompsStore,
 		PolarisConfigStore:                  reg.PolarisConfigStore,
+		HostPortStore:                       reg.HostPortStore,
 		BscpCfgStore:                        reg.BscpCfgStore,
 		AppSpecStore:                        reg.AppSpecStore,
 		BuildConfigStore:                    reg.BuildConfigStore,
@@ -163,6 +172,7 @@ func NewServiceFromRegistry(reg *storereg.Registry) (*Service, error) {
 		AppModelDeployRecordStore:           reg.AppModelDeployRecordStore,
 		AppModelDeployResourceSnapshotStore: reg.AppModelDeployResourceSnapshotStore,
 		AppConfigFileStore:                  reg.AppConfigFileStore,
+		ClusterAddonDefStore:                reg.ClusterAddonDefStore,
 	})
 }
 
@@ -178,18 +188,8 @@ func (s *Service) Deploy(ctx context.Context, app *bkmsapp.Application, params D
 		return "", errors.Wrap(err, "get env")
 	}
 
-	// 执行部署前置检查
-	if err = deploy.NewPreDeployChecker(
-		s.envStore, s.promotionStore, s.snapshotService,
-	).Do(ctx, &deploy.PreDeployCheckParams{
-		WorkspaceID:     app.WorkspaceID,
-		EnvName:         params.EnvName,
-		TrafficLaneName: params.TrafficLaneName,
-		AppType:         app.Type,
-		AppID:           app.ID,
-		ImageTag:        params.ImageTag,
-	}); err != nil {
-		return "", errors.Wrap(err, "pre deploy check")
+	if err = s.runPreDeployChecks(ctx, app, env, params); err != nil {
+		return "", err
 	}
 
 	appModel, err := s.appModelStore.GetAppModel(ctx, app.ID)
@@ -215,6 +215,7 @@ func (s *Service) Deploy(ctx context.Context, app *bkmsapp.Application, params D
 		s.polarisVarReader,
 		s.workspaceCompsStore,
 		s.polarisConfigStore,
+		s.hostPortStore,
 		s.bscpCfgStore,
 		s.appModelStore,
 		s.appSpecStore,
@@ -230,6 +231,7 @@ func (s *Service) Deploy(ctx context.Context, app *bkmsapp.Application, params D
 		s.buildConfigStore,
 		s.appConfigFileStore,
 		polaris.NewPolarisEnvStateManager(s.polarisConfigStore),
+		hostport.NewEnvStateManager(s.hostPortStore),
 		app,
 	)
 	deployID, err := deployer.Deploy(
@@ -248,6 +250,51 @@ func (s *Service) Deploy(ctx context.Context, app *bkmsapp.Application, params D
 	}
 
 	return deployID, nil
+}
+
+func (s *Service) runPreDeployChecks(
+	ctx context.Context,
+	app *bkmsapp.Application,
+	env *envmodel.Environment,
+	params DeployParams,
+) error {
+	if err := s.checkRequiredClusterAddons(ctx, app, env); err != nil {
+		return errors.Wrap(err, "check required cluster addons")
+	}
+	if err := deploy.NewPreDeployChecker(
+		s.envStore, s.promotionStore, s.snapshotService,
+	).Do(ctx, &deploy.PreDeployCheckParams{
+		WorkspaceID:     app.WorkspaceID,
+		EnvName:         params.EnvName,
+		TrafficLaneName: params.TrafficLaneName,
+		AppType:         app.Type,
+		AppID:           app.ID,
+		ImageTag:        params.ImageTag,
+	}); err != nil {
+		return errors.Wrap(err, "pre deploy check")
+	}
+	return nil
+}
+
+func (s *Service) checkRequiredClusterAddons(
+	ctx context.Context,
+	app *bkmsapp.Application,
+	env *envmodel.Environment,
+) error {
+	defs, err := s.clusterAddonDefStore.List(ctx)
+	if err != nil {
+		return errors.Wrap(err, "list cluster addon defs")
+	}
+	missing, err := clusteraddon.InspectRequiredAddons(
+		ctx, defs, app.Type, env, "",
+	)
+	if err != nil {
+		return errors.Wrap(err, "inspect required cluster addons")
+	}
+	if len(missing) > 0 {
+		return &clusteraddon.RequiredAddonsNotInstalledError{Missing: missing}
+	}
+	return nil
 }
 
 // DeployByAppID 通过 appID 装载应用后执行部署

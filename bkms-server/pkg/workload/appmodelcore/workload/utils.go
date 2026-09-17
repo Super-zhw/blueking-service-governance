@@ -20,6 +20,7 @@ package workload
 
 import (
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -38,4 +39,11 @@ func AppendAsUnstructured(
 		items = append(items, unstructured.Unstructured{Object: obj})
 	}
 	return items, nil
+}
+
+func labelSelectorMatchLabels(sel *metav1.LabelSelector) map[string]string {
+	if sel == nil {
+		return nil
+	}
+	return sel.MatchLabels
 }

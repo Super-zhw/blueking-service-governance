@@ -19,14 +19,15 @@
 package clusteraddon
 
 import (
+	"cmp"
 	"context"
-	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
-	"helm.sh/helm/v3/pkg/storage/driver"
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
+	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/helm"
 )
 
@@ -55,34 +56,16 @@ func (c *HelmChartInfo) FillAvailableVersions(repoIndex *RepoIndex) {
 	}
 }
 
-// FillClusterStatus 从集群实时查询 Helm Release 状态并填充到 ClusterAddonInfo
-// NOTE: 目前是对各个插件单独判断，实际上大部分插件会安装在同一个 namespace 下，
-// 后续考虑是否要优化为 list namespace 下的所有 helm release 以后集中判断
-func (info *ClusterAddonInfo) FillClusterStatus(ctx context.Context, clusterID string, addonDef *ClusterAddonDef) {
+// FillClusterStatus 从已查询的 Release 列表中匹配组件并填充安装信息。
+func (info *ClusterAddonInfo) FillClusterStatus(releases []*helm.Release) {
 	defer func() {
 		info.SupportedActions = GetSupportedActions(info.InstallInfo.Status)
 	}()
 
-	releaseName := GenerateReleaseName(addonDef)
-	debugLog := helm.NewHelmDebugLogger(ctx, releaseName, "list-addon-status")
-	cfg, err := helm.NewActionConfiguration(clusterID, info.InstallInfo.Namespace, debugLog)
-	if err != nil {
-		log.Warnf(ctx, "init helm action configuration for %s : %v", releaseName, err)
-		info.InstallInfo.Status = helm.StatusUnknown
-		info.InstallInfo.Message = fmt.Sprintf("init helm action configuration failed: %v", err)
-		return
-	}
-
-	// 查询 Release 状态
-	release, err := helm.GetReleaseStatus(cfg, releaseName)
-	if err != nil {
-		if errors.Is(err, driver.ErrReleaseNotFound) {
-			info.InstallInfo.Status = helm.StatusNotFound
-			return
-		}
-		log.Warnf(ctx, "get release status for %s : %v", releaseName, err)
-		info.InstallInfo.Status = helm.StatusUnknown
-		info.InstallInfo.Message = fmt.Sprintf("get release status failed: %v", err)
+	release := helm.FindReleaseByChart(releases, info.ChartInfo.ChartName,
+		cmp.Or(info.ChartInfo.ReleaseName, info.ChartInfo.ChartName))
+	if release == nil {
+		info.InstallInfo.Status = helm.StatusNotFound
 		return
 	}
 
@@ -90,16 +73,8 @@ func (info *ClusterAddonInfo) FillClusterStatus(ctx context.Context, clusterID s
 	info.InstallInfo.Status = release.DeployResult.Status
 	info.InstallInfo.Message = release.DeployResult.Description
 	info.InstallInfo.CurrentChartVersion = release.Chart.Version
-
-	// 获取当前 Values
-	values, vErr := helm.GetReleaseValues(cfg, releaseName, 0)
-	if vErr != nil {
-		log.Warnf(ctx, "get release values for %s : %v", releaseName, vErr)
-		info.InstallInfo.Message = fmt.Sprintf("get release values failed: %v", vErr)
-		return
-	}
-	if len(values) > 0 {
-		yamlData, mErr := yaml.Marshal(values)
+	if len(release.Values) > 0 {
+		yamlData, mErr := yaml.Marshal(release.Values)
 		if mErr == nil {
 			info.InstallInfo.CurrentValues = string(yamlData)
 		}
@@ -110,18 +85,97 @@ func (info *ClusterAddonInfo) FillClusterStatus(ctx context.Context, clusterID s
 func BuildAddonInfoList(
 	ctx context.Context,
 	addonDefs []*ClusterAddonDef,
+	env *envmodel.Environment,
 	namespace string,
-	clusterID string,
 	repoIndex *RepoIndex,
 ) []*ClusterAddonInfo {
 	var addons []*ClusterAddonInfo
-	for _, addonDef := range addonDefs {
+	for _, addonDef := range ApplicableAddonDefs(addonDefs, env) {
 		ns := addonDef.GetNamespace(namespace)
 		info := NewAddonInfoFromDef(addonDef, ns)
 		info.ChartInfo.FillAvailableVersions(repoIndex)
-		info.FillClusterStatus(ctx, clusterID, addonDef)
 		addons = append(addons, info)
+	}
+	// 每个 namespace 只查询一次；填充原列表中的对象，保持组件定义的顺序。
+	addonsByNamespace := lo.GroupBy(addons, func(info *ClusterAddonInfo) string { return info.InstallInfo.Namespace })
+	for ns, infos := range addonsByNamespace {
+		releases, err := queryAddonReleases(ctx, env.Cluster.ClusterID, ns)
+		if err != nil {
+			log.Warnf(ctx, "query addon status: %v", err)
+			for _, info := range infos {
+				info.InstallInfo.Status = helm.StatusUnknown
+				info.InstallInfo.Message = err.Error()
+			}
+			continue
+		}
+		for _, info := range infos {
+			info.FillClusterStatus(releases)
+		}
 	}
 
 	return addons
+}
+
+// ApplicableAddonDefs 返回适用于环境集群的组件定义，供列表展示和部署检查共用。
+func ApplicableAddonDefs(defs []*ClusterAddonDef, env *envmodel.Environment) []*ClusterAddonDef {
+	return lo.Filter(defs, func(def *ClusterAddonDef, _ int) bool {
+		return def.IsApplicableToEnv(env)
+	})
+}
+
+// InspectRequiredAddons 查询必选组件状态。缺失作为检查结果，查询失败作为错误返回。
+// namespace 的取值与组件列表、安装和卸载接口保持一致：优先使用传入值，为空时取各组件的 defaultNamespace，再回退到 bcs-system。
+// 当前部署预检和创建部署均传空值，保留按 namespace 复用查询，不因前端安装表单固定使用 bcs-system 而在此写死。
+func InspectRequiredAddons(
+	ctx context.Context,
+	defs []*ClusterAddonDef,
+	appType string,
+	env *envmodel.Environment,
+	namespace string,
+) ([]AddonReference, error) {
+	var missing []AddonReference
+	// 同一 namespace 的 Release 列表在本次检查中只读取一次，包括空列表。
+	releasesByNamespace := make(map[string][]*helm.Release)
+	// 只检查适用于目标环境、且当前应用类型必选的组件。
+	for _, def := range ApplicableAddonDefs(defs, env) {
+		if !lo.Contains(def.RequiredForAppTypes, appType) {
+			continue
+		}
+		addon := AddonReference{Name: def.Name, DisplayName: def.DisplayName}
+		ns := def.GetNamespace(namespace)
+		releases, ok := releasesByNamespace[ns]
+		if !ok {
+			var err error
+			releases, err = queryAddonReleases(ctx, env.Cluster.ClusterID, ns)
+			if err != nil {
+				return nil, errors.Wrapf(err, "inspect required addon %s", def.Name)
+			}
+			releasesByNamespace[ns] = releases
+		}
+		// 按 Chart 匹配实际安装实例，优先同名 Release，否则取名称字典序最小的候选。
+		release := helm.FindReleaseByChart(releases, def.ChartInfo.ChartName, GenerateReleaseName(def))
+		// 无法确定状态时中止预检，避免将查询异常当成组件缺失。
+		if release != nil && release.DeployResult.Status == helm.StatusUnknown {
+			return nil, errors.Errorf("addon %s release %s status is unknown in cluster %s namespace %s",
+				def.Name, release.Name, env.Cluster.ClusterID, ns)
+		}
+		// 只有 deployed 满足部署要求，未安装或其他已知状态都计入缺失列表。
+		if release == nil || release.DeployResult.Status != helm.StatusDeployed {
+			missing = append(missing, addon)
+		}
+	}
+	return missing, nil
+}
+
+func queryAddonReleases(ctx context.Context, clusterID, namespace string) ([]*helm.Release, error) {
+	debugLog := helm.NewHelmDebugLogger(ctx, "", "query-addon-status")
+	cfg, err := helm.NewActionConfiguration(clusterID, namespace, debugLog)
+	if err != nil {
+		return nil, errors.Wrapf(err, "init helm configuration in cluster %s namespace %s", clusterID, namespace)
+	}
+	releases, err := helm.ListReleases(cfg)
+	if err != nil {
+		return nil, errors.Wrapf(err, "list addon releases in cluster %s namespace %s", clusterID, namespace)
+	}
+	return releases, nil
 }

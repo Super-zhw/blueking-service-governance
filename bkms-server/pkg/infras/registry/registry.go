@@ -20,8 +20,10 @@
 package registry
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"slices"
 	"strings"
@@ -30,6 +32,7 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 	"github.com/pkg/errors"
@@ -64,6 +67,10 @@ func (d *ImageDetail) HumanizeSize() string {
 const (
 	// defaultTimeout 默认的远程请求超时时间
 	defaultTimeout = 30 * time.Second
+	// defaultDialTimeout 建立 TCP 连接的超时时间，避免仓库地址不可达时请求长期挂起
+	defaultDialTimeout = 10 * time.Second
+	// defaultTLSHandshakeTimeout TLS 握手超时时间
+	defaultTLSHandshakeTimeout = 10 * time.Second
 )
 
 // IsTagNotFound 判断错误链中是否包含“镜像 tag 不存在”错误
@@ -102,6 +109,8 @@ func New(username, password string, insecure bool) *Client {
 	}
 	// 构建 Transport，强制设置超时时间
 	transport := &http.Transport{
+		DialContext:           (&net.Dialer{Timeout: defaultDialTimeout}).DialContext,
+		TLSHandshakeTimeout:   defaultTLSHandshakeTimeout,
 		ResponseHeaderTimeout: defaultTimeout,
 	}
 
@@ -120,15 +129,15 @@ func New(username, password string, insecure bool) *Client {
 // repoName: 仓库名称
 // - 格式：[registry/][namespace/]repository
 // - 示例：mirrors.tencent.com/bkpaas/bkpaas-app-operator、library/ubuntu、nginx 等
-func (c *Client) ListAllTags(repoName string) ([]string, error) {
+func (c *Client) ListAllTags(ctx context.Context, repoName string) ([]string, error) {
 	repo, err := name.NewRepository(repoName, c.nameOpts...)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse repo name")
+		return nil, errors.Wrapf(err, "parse repo name %s", repoName)
 	}
 
-	tags, err := remote.List(repo, c.remoteOpts...)
+	tags, err := remote.List(repo, c.withContext(ctx)...)
 	if err != nil {
-		return nil, errors.Wrap(err, "list repo tags")
+		return nil, errors.Wrapf(err, "list tags of %s", repoName)
 	}
 
 	// 按 Tag 名称降序排列
@@ -145,8 +154,10 @@ func (c *Client) ListAllTags(repoName string) ([]string, error) {
 // page: 页码，从 1 开始
 // pageSize: 每页大小，默认为 100
 // 返回值：tags: 指定页的 TAG 列表，total: 总数量，err: 错误信息
-func (c *Client) ListTags(repoName, keyword string, page, pageSize int) ([]string, int, error) {
-	tags, err := c.ListAllTags(repoName)
+func (c *Client) ListTags(
+	ctx context.Context, repoName, keyword string, page, pageSize int,
+) ([]string, int, error) {
+	tags, err := c.ListAllTags(ctx, repoName)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -181,20 +192,20 @@ func (c *Client) ListTags(repoName, keyword string, page, pageSize int) ([]strin
 }
 
 // GetTagDetail 获取单个镜像 TAG 的详细信息
-func (c *Client) GetTagDetail(repoName, tagName string) (ImageDetail, error) {
+func (c *Client) GetTagDetail(ctx context.Context, repoName, tagName string) (ImageDetail, error) {
 	var detail ImageDetail
 	detail.Tag = tagName
 
 	// 创建标签的完整引用
 	tagRef, err := name.ParseReference(fmt.Sprintf("%s:%s", repoName, tagName), c.nameOpts...)
 	if err != nil {
-		return detail, errors.Wrap(err, "parse tag reference")
+		return detail, errors.Wrapf(err, "parse tag reference %s:%s", repoName, tagName)
 	}
 
 	// 获取 Manifest 描述符
-	desc, err := remote.Get(tagRef, c.remoteOpts...)
+	desc, err := remote.Get(tagRef, c.withContext(ctx)...)
 	if err != nil {
-		return detail, errors.Wrap(err, "get manifest")
+		return detail, errors.Wrapf(err, "get manifest of %s:%s", repoName, tagName)
 	}
 
 	detail.Digest = desc.Digest.String()
@@ -232,30 +243,30 @@ func (c *Client) GetTagDetail(repoName, tagName string) (ImageDetail, error) {
 	return detail, nil
 }
 
+// HeadManifest 用 HEAD 确认远端仓库中指定 tag 的 manifest 是否存在，不拉取层数据
+func (c *Client) HeadManifest(ctx context.Context, repoName, tagName string) error {
+	_, err := c.headDescriptor(ctx, repoName, tagName)
+	return err
+}
+
 // DeleteTag 删除远端仓库中的指定镜像标签
 // 利用开源库 go-containerregistry 删除镜像，只能删除底层镜像，无法删除对应仓库如 bkrepo、mirrors 仓库自己额外的元数据
 // 删除后在仓库相应页面还有可能看到镜像，但使用命令拉取/同步仓库无法拉到对应镜像，在 bkms 侧不受影响
-func (c *Client) DeleteTag(repoName, tagName string) error {
-	// 1. 构建 tag 引用：repoName:tagName
-	tagRef, err := name.ParseReference(fmt.Sprintf("%s:%s", repoName, tagName), c.nameOpts...)
+func (c *Client) DeleteTag(ctx context.Context, repoName, tagName string) error {
+	// 获取镜像 desc 信息
+	desc, err := c.headDescriptor(ctx, repoName, tagName)
 	if err != nil {
-		return errors.Wrap(err, "parse tag reference")
+		return err
 	}
 
-	// 2. 通过 HEAD 请求获取该 tag 对应的 digest
-	desc, err := remote.Head(tagRef, c.remoteOpts...)
-	if err != nil {
-		return errors.Wrap(err, "head manifest")
-	}
-
-	// 3. 构建 digest 引用：repoName@sha256:xxxxx
+	// 构建 digest 引用：repoName@sha256:xxxxx
 	digestRef, err := name.ParseReference(fmt.Sprintf("%s@%s", repoName, desc.Digest.String()), c.nameOpts...)
 	if err != nil {
 		return errors.Wrap(err, "parse digest reference")
 	}
 
-	// 4. 按 digest 删除
-	if err = remote.Delete(digestRef, c.remoteOpts...); err != nil {
+	// 按 digest 删除
+	if err = remote.Delete(digestRef, c.withContext(ctx)...); err != nil {
 		return errors.Wrap(err, "delete tag")
 	}
 	return nil
@@ -270,9 +281,11 @@ func (c *Client) DeleteTag(repoName, tagName string) error {
 // page: 页码，从 1 开始
 // pageSize: 每页大小，默认为 100
 // 返回值：details: 指定页的镜像详细信息列表，total: 总数量，err: 错误信息
-func (c *Client) ListTagsWithDetail(repoName, keyword string, page, pageSize int) ([]ImageDetail, int, error) {
+func (c *Client) ListTagsWithDetail(
+	ctx context.Context, repoName, keyword string, page, pageSize int,
+) ([]ImageDetail, int, error) {
 	// 获取所有 TAG
-	tags, total, err := c.ListTags(repoName, keyword, page, pageSize)
+	tags, total, err := c.ListTags(ctx, repoName, keyword, page, pageSize)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "list tags")
 	}
@@ -290,7 +303,7 @@ func (c *Client) ListTagsWithDetail(repoName, keyword string, page, pageSize int
 			defer func() { <-semaphore }()
 
 			// 获取标签详情
-			detail, gErr := c.GetTagDetail(repoName, tag)
+			detail, gErr := c.GetTagDetail(ctx, repoName, tag)
 			if gErr != nil {
 				// 单个失败不影响其他请求，设置为空数据即可
 				log.ErrorNoContextf("failed to get details for repo %s tag %s: %v", repoName, tag, gErr)
@@ -310,4 +323,26 @@ func (c *Client) ListTagsWithDetail(repoName, keyword string, page, pageSize int
 		return strings.Compare(b.Tag, a.Tag)
 	})
 	return details, total, nil
+}
+
+// headDescriptor 按 repoName:tag 做 HEAD，返回 digest 描述符供删除等后续步骤使用
+func (c *Client) headDescriptor(ctx context.Context, repoName, tagName string) (*v1.Descriptor, error) {
+	tagRef, err := name.ParseReference(fmt.Sprintf("%s:%s", repoName, tagName), c.nameOpts...)
+	if err != nil {
+		return nil, errors.Wrapf(err, "parse tag reference %s:%s", repoName, tagName)
+	}
+	desc, err := remote.Head(tagRef, c.withContext(ctx)...)
+	if err != nil {
+		return nil, errors.Wrapf(err, "head manifest %s:%s", repoName, tagName)
+	}
+	return desc, nil
+}
+
+// withContext 在基础 remote 选项后追加 context，使请求可随调用方取消或超时中断。
+//
+// 必须复制切片而非直接 append 到 c.remoteOpts：底层数组共享会让并发调用互相覆盖 context
+func (c *Client) withContext(ctx context.Context) []remote.Option {
+	opts := make([]remote.Option, 0, len(c.remoteOpts)+1)
+	opts = append(opts, c.remoteOpts...)
+	return append(opts, remote.WithContext(ctx))
 }

@@ -27,6 +27,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	envhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/env"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/clierr"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
@@ -68,7 +69,7 @@ Only specified fields will be updated.`,
 			updatedKey = strings.TrimSpace(updatedKey)
 
 			if sensitive && noSensitive {
-				return errors.New("--sensitive and --no-sensitive cannot be used together")
+				return clierr.Usagef("--sensitive and --no-sensitive cannot be used together")
 			}
 
 			scopeType, scopeValue, err := envhandler.ParseScope(scope)
@@ -117,7 +118,7 @@ Only specified fields will be updated.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVar(&key, "key", "", "current environment variable key (required)")
 	cmd.Flags().StringVar(&updatedKey, "updated-key", "", "new environment variable key (optional, defaults to --key)")
 	cmd.Flags().StringVar(&scope, "scope", "", "scope in format 'workspace' or 'envType:<value>' (default: workspace)")

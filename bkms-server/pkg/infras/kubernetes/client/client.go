@@ -23,6 +23,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 
 	"github.com/TencentBlueKing/gopkg/mapx"
 	"github.com/pkg/errors"
@@ -31,6 +32,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/jsonmergepatch"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/utils/ptr"
 
@@ -42,7 +45,7 @@ const (
 	// listApiLimit 列表查询单次条数限制
 	listApiLimit = 1000
 
-	// defaultFieldManager SSA 模式下的默认 FieldManager 标识
+	// defaultFieldManager SSA / Merge Patch 写入资源时的默认 FieldManager 标识
 	defaultFieldManager = "bkms-server"
 )
 
@@ -132,6 +135,7 @@ func (c *Client) List(
 ) (*unstructured.UnstructuredList, error) {
 	var obj map[string]any
 	var items []unstructured.Unstructured
+	var resourceVersion string
 
 	opts.Limit = listApiLimit
 	opts.Continue = ""
@@ -141,6 +145,12 @@ func (c *Client) List(
 		if err != nil {
 			return nil, errors.Wrap(err, c.genResActionDesc("list", c.gvr, namespace, ""))
 		}
+
+		// 续传 Watch 必须用首次 List 的 resourceVersion，避免 continue 翻页覆盖后丢空窗事件
+		if resourceVersion == "" {
+			resourceVersion = ret.GetResourceVersion()
+		}
+
 		obj = ret.Object
 		items = append(items, ret.Items...)
 		if ret.GetContinue() == "" {
@@ -149,7 +159,28 @@ func (c *Client) List(
 		opts.Continue = ret.GetContinue()
 	}
 
-	return &unstructured.UnstructuredList{Object: obj, Items: items}, nil
+	list := &unstructured.UnstructuredList{Object: obj, Items: items}
+	if resourceVersion != "" {
+		list.SetResourceVersion(resourceVersion)
+	}
+
+	return list, nil
+}
+
+// Watch 从 opts.ResourceVersion 起订阅资源变更；调用方负责 Stop
+// 连接时长由调用方通过 opts.TimeoutSeconds 约束，本方法不写死上限
+// 这里不校验 ResourceVersion：留空是 apiserver 允许的用法（从当前状态起推），
+// 是否必须带续传位点属于业务语义，由调用方在上层校验
+// BOOKMARK 原样返回，是否转发由调用方过滤
+func (c *Client) Watch(
+	ctx context.Context, namespace string, opts metav1.ListOptions,
+) (watch.Interface, error) {
+	w, err := c.cli.Resource(c.gvr).Namespace(namespace).Watch(ctx, opts)
+	if err != nil {
+		return nil, errors.Wrap(err, c.genResActionDesc("watch", c.gvr, namespace, ""))
+	}
+
+	return w, nil
 }
 
 // Get 获取资源
@@ -175,7 +206,8 @@ func (c *Client) Create(
 	if err := c.validateManifest(manifest); err != nil {
 		return nil, errors.Wrap(err, "validate manifest")
 	}
-	obj := &unstructured.Unstructured{Object: manifest}
+	// 联邦环境网关要求对象体中有 namespace 字段
+	obj := &unstructured.Unstructured{Object: withMeta(manifest, namespace)}
 	ret, err := c.cli.Resource(c.gvr).Namespace(namespace).Create(ctx, obj, opts)
 	if err != nil {
 		// 资源已经存在时，抛出指定异常
@@ -205,39 +237,103 @@ func (c *Client) Update(
 	return ret, nil
 }
 
-// Upsert 创建或更新资源（如果资源存在则更新，否则创建）
-// 基于 Server-Side Apply (SSA) 实现，具备原生 upsert 语义，
-// 服务端自动处理字段合并和不可变字段保留，无需关心 resourceVersion、clusterIP 等字段
+// Upsert 创建或更新资源。
+//
+// 非联邦集群使用 Server-Side Apply：字段由 FieldManager 管理，省略字段会被清掉。
+// 联邦集群的 BCS 网关不支持 application/apply-patch+yaml，改走 JSON Merge Patch。
+// 为贴近 SSA「省略即删除」，联邦路径用 last-applied 注解做三路合并：上次写过、本次省略的字段会置 null；
+// 从未写入的字段（如 Service clusterIP、status）仍由 apiserver 保留。
 func (c *Client) Upsert(
 	ctx context.Context, namespace string, manifest map[string]any, opts metav1.PatchOptions,
 ) (*unstructured.Unstructured, error) {
-	// 检查 manifest 的合法性
+	if c.cfg.IsFederation() {
+		return c.upsertMergePatch(ctx, namespace, manifest, opts)
+	}
+	return c.upsertSSA(ctx, namespace, manifest, opts)
+}
+
+// upsertSSA 使用 Server-Side Apply 创建或更新资源。
+func (c *Client) upsertSSA(
+	ctx context.Context, namespace string, manifest map[string]any, opts metav1.PatchOptions,
+) (*unstructured.Unstructured, error) {
 	if err := c.validateManifest(manifest); err != nil {
 		return nil, errors.Wrap(err, "validate manifest")
 	}
 
-	// 清理 manifest 中嵌套 metadata 的零值 creationTimestamp，
-	// 避免 SSA 严格校验时因 CRD schema 未声明该字段而报错
-	// （例如 spec.template.metadata.creationTimestamp 由 typed struct 零值序列化产生）
+	// 清理 nested metadata 的零值 creationTimestamp，避免 SSA 严格校验失败
 	sanitizeManifestForSSA(manifest)
 
-	// 将 manifest 序列化为 JSON，作为 SSA Patch 的数据
 	data, err := json.Marshal(manifest)
 	if err != nil {
 		return nil, errors.Wrap(err, "marshal manifest to JSON")
 	}
 
-	// 设置默认 FieldManager
 	if opts.FieldManager == "" {
 		opts.FieldManager = defaultFieldManager
 	}
-	// 强制接管字段所有权，避免与其他管理器冲突
 	if opts.Force == nil {
 		opts.Force = ptr.To(true)
 	}
 
 	resName := mapx.GetStr(manifest, "metadata.name")
 	return c.Patch(ctx, namespace, resName, types.ApplyPatchType, data, opts)
+}
+
+// upsertMergePatch 使用三路 JSON Merge Patch 创建或更新资源，供联邦集群使用。
+//
+// 与 upsertSSA 的不一致（无法用 Merge Patch 完全复现 SSA）：
+//   - 删除依据是 last-applied 注解，不是 FieldManager：只清「上次本路径写过、本次省略」的字段；
+//     SSA 清的是本 FieldManager 拥有且本次未再 apply 的字段。opts.Force 在此无效，不会抢其他 manager 的字段。
+//   - 资源上还没有 last-applied 时（非本路径创建的存量对象），第一次 upsert 不会删除实况里的多余字段。
+//   - JSON Merge Patch 把数组当成整体替换；SSA 按 schema 可能按 name 合并列表项。
+//   - 会在对象上写入 bkms.tencent.com/last-applied-configuration，SSA 不会。
+func (c *Client) upsertMergePatch(
+	ctx context.Context, namespace string, manifest map[string]any, opts metav1.PatchOptions,
+) (*unstructured.Unstructured, error) {
+	if err := c.validateManifest(manifest); err != nil {
+		return nil, errors.Wrap(err, "validate manifest")
+	}
+
+	desired, err := prepareFederationDesired(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.FieldManager == "" {
+		opts.FieldManager = defaultFieldManager
+	}
+	resName := mapx.GetStr(manifest, "metadata.name")
+
+	live, err := c.Get(ctx, namespace, resName, metav1.GetOptions{})
+	if errors.Is(err, ErrResourceNotFound) {
+		return c.Create(ctx, namespace, desired, metav1.CreateOptions{FieldManager: opts.FieldManager})
+	}
+	if err != nil {
+		return nil, err
+	}
+	return c.applyFederationThreeWay(ctx, namespace, resName, desired, live, opts)
+}
+
+func (c *Client) applyFederationThreeWay(
+	ctx context.Context,
+	namespace, name string,
+	desired map[string]any,
+	live *unstructured.Unstructured,
+	opts metav1.PatchOptions,
+) (*unstructured.Unstructured, error) {
+	current, err := json.Marshal(live.Object)
+	if err != nil {
+		return nil, errors.Wrap(err, "marshal live object")
+	}
+	modified, err := json.Marshal(desired)
+	if err != nil {
+		return nil, errors.Wrap(err, "marshal desired object")
+	}
+	patch, err := jsonmergepatch.CreateThreeWayJSONMergePatch(lastAppliedFromLive(live), modified, current)
+	if err != nil {
+		return nil, errors.Wrap(err, "create three-way merge patch")
+	}
+	return c.Patch(ctx, namespace, name, types.MergePatchType, patch, opts)
 }
 
 // Patch 更新资源
@@ -268,7 +364,7 @@ func (c *Client) Delete(
 
 // validateManifest 校验传入的 manifest 的合法性
 func (c *Client) validateManifest(manifest map[string]any) error {
-	// namespace 不能在 manifest 中指定，必须在 func 参数中指定
+	// namespace 不能在调用方的 manifest 中指定，必须在 func 参数中指定；Create 会再写入对象体。
 	if mapx.GetStr(manifest, "metadata.namespace") != "" {
 		return errors.Errorf("namespace must provided as func parameter")
 	}
@@ -280,12 +376,30 @@ func (c *Client) validateManifest(manifest map[string]any) error {
 	return nil
 }
 
-// sanitizeManifestForSSA 清理 manifest 中不应出现在 SSA Patch 中的字段
+// withMeta 返回写入 namespace 后的 manifest，namespace 为空时原样返回。
 //
-// 当 typed struct（如 GameDeployment）通过 runtime.DefaultUnstructuredConverter.ToUnstructured 转换后，
-// 嵌套的 ObjectMeta（如 spec.template.metadata）中的零值 creationTimestamp 会被序列化出来，
-// 但某些 CRD 的 OpenAPI schema 并未声明该字段，导致 SSA 严格校验失败。
-// 此函数递归清理所有嵌套 metadata 中的 creationTimestamp 字段，使 SSA Patch 只包含有效字段。
+// 只浅拷贝顶层与 metadata 两层，既不修改调用方传入的 map，也不像 unstructured.DeepCopy
+// 那样要求 manifest 里全是 JSON 兼容类型（调用方常直接写 int 等 Go 字面量）。
+func withMeta(manifest map[string]any, namespace string) map[string]any {
+	if namespace == "" {
+		return manifest
+	}
+	obj := maps.Clone(manifest)
+	if obj == nil {
+		obj = map[string]any{}
+	}
+	metadata, _ := obj["metadata"].(map[string]any)
+	metadata = maps.Clone(metadata)
+	if metadata == nil {
+		metadata = map[string]any{}
+	}
+	metadata["namespace"] = namespace
+	obj["metadata"] = metadata
+	return obj
+}
+
+// sanitizeManifestForSSA 递归清理嵌套 metadata 中的 creationTimestamp。
+// typed struct（如 GameDeployment）转 unstructured 后，spec.template.metadata 可能带上零值时间戳。
 func sanitizeManifestForSSA(obj map[string]any) {
 	for key, val := range obj {
 		child, ok := val.(map[string]any)

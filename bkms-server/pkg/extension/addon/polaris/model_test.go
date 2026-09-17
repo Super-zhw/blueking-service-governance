@@ -42,6 +42,69 @@ var _ = Describe("PolarisConfig", func() {
 		})
 	})
 
+	Describe("EnvNamesOutsideScope", func() {
+		It("should return recorded environments that are no longer in scope", func() {
+			config := &polaris.PolarisConfig{
+				ScopeEnvNames: []string{"dev"},
+				EnvStates: map[string]polaris.PolarisEnvState{
+					"dev":  {},
+					"prod": {},
+					"stag": {},
+				},
+			}
+			Expect(config.EnvNamesOutsideScope()).To(Equal([]string{"prod", "stag"}))
+		})
+
+		It("should return empty when every recorded environment is still in scope", func() {
+			config := &polaris.PolarisConfig{
+				ScopeEnvNames: []string{"dev"},
+				EnvStates:     map[string]polaris.PolarisEnvState{"dev": {}},
+			}
+			Expect(config.EnvNamesOutsideScope()).To(BeEmpty())
+		})
+	})
+
+	Describe("TrackedEnvNames", func() {
+		It("should union scoped environments with recorded environments", func() {
+			config := &polaris.PolarisConfig{
+				ScopeEnvNames: []string{"dev", "stag"},
+				EnvStates: map[string]polaris.PolarisEnvState{
+					"dev":  {},
+					"prod": {},
+				},
+			}
+			Expect(config.TrackedEnvNames()).To(Equal([]string{"dev", "prod", "stag"}))
+		})
+	})
+
+	Describe("GetVars", func() {
+		It("should return token and service port for on_deploy configs", func() {
+			config := &polaris.PolarisConfig{
+				Properties: polaris.Properties{
+					InstanceKey:  "svc",
+					PolarisToken: "token",
+					ServicePort:  8080,
+				},
+			}
+			Expect(config.GetVars()).To(Equal([]polaris.ConfigVar{
+				{Key: "svc_polarisToken", Value: "token"},
+				{Key: "svc_serviceport", Value: "8080"},
+			}))
+		})
+
+		It("should return no vars for immediate-register configs", func() {
+			config := &polaris.PolarisConfig{
+				Properties: polaris.Properties{
+					InstanceKey:  "svc",
+					PolarisToken: "token",
+					ServicePort:  8080,
+					RegisterMode: polaris.RegisterModeImmediate,
+				},
+			}
+			Expect(config.GetVars()).To(BeEmpty())
+		})
+	})
+
 	Describe("GetEnvWeight", func() {
 		It("should use the fixed default when the environment has no explicit value", func() {
 			config := &polaris.PolarisConfig{}

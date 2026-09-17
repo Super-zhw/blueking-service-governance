@@ -30,6 +30,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/constant"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/clierr"
 )
 
 // CreateDeploy 创建部署，支持多环境（逗号分隔）
@@ -43,7 +44,7 @@ func CreateDeploy(ctx context.Context, workspaceID, appID, envName, deploySpecFi
 	cli := client.New()
 
 	// 校验所有环境名称合法性
-	if err := validateEnvNames(ctx, cli, workspaceID, envNames); err != nil {
+	if err := validateEnvNames(ctx, cli, appID, envNames); err != nil {
 		return err
 	}
 
@@ -75,7 +76,7 @@ func CreateDeploy(ctx context.Context, workspaceID, appID, envName, deploySpecFi
 	}
 
 	if len(errs) > 0 {
-		return errors.Errorf("deploy failed for some envs:\n  %s", strings.Join(errs, "\n  "))
+		return clierr.Reportedf("deploy failed for some envs:\n  %s", strings.Join(errs, "\n  "))
 	}
 
 	return nil

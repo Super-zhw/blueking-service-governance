@@ -32,8 +32,24 @@ type Client interface {
 	ValidateAccessToken(accessToken string) (string, error)
 	// ExchangeBkTicketForToken 使用 bk_ticket 兑换 access_token
 	ExchangeBkTicketForToken(username, bkTicket string) (string, error)
-	// GetBCSToken 从服务端获取 BCS Auth Info
-	GetBCSToken(ctx context.Context) (string, error)
+	// DevModePublishPreflight 开发模式 Publish 预检，获取 publish 所需的全部上下文信息
+	DevModePublishPreflight(
+		ctx context.Context,
+		appID, envName string,
+		instanceIDs []string,
+		publishAll bool,
+	) (*DevModePreflightData, error)
+	// ReportDevModePublish 上报开发模式发布结果
+	ReportDevModePublish(
+		ctx context.Context,
+		appID, envName string,
+		opts DevModePublishReportOptions,
+	) error
+	// ListDevModePublishRecords 获取开发模式发布记录列表
+	ListDevModePublishRecords(
+		ctx context.Context,
+		appID, envName, keyword string,
+	) ([]DevModePublishRecord, error)
 
 	// ---------- 工作空间 ----------
 
@@ -46,25 +62,43 @@ type Client interface {
 
 	// ListEnvs 获取环境列表
 	ListEnvs(ctx context.Context, workspaceID string) ([]Env, error)
+	// ListAppEnvs 获取应用可用的标准环境及专属特性环境
+	ListAppEnvs(ctx context.Context, appID string) ([]Env, error)
+	// GetEnv 获取环境详情
+	GetEnv(ctx context.Context, envID string) (*Env, error)
+	// CreateEnv 创建环境
+	CreateEnv(ctx context.Context, workspaceID string, body CreateEnvBody) (string, error)
+	// CreateFeatureEnv 从标准环境创建应用特性环境
+	CreateFeatureEnv(ctx context.Context, appID string, body CreateFeatureEnvBody) (*Env, error)
+	// UpdateEnvBasicInfo 更新环境基本信息（displayName / description）
+	UpdateEnvBasicInfo(ctx context.Context, envID string, body UpdateEnvBasicInfoBody) error
+	// DeleteEnv 删除环境
+	DeleteEnv(ctx context.Context, envID string) error
 
 	// ---------- 应用 ----------
 
 	// GetAppIDAutoSuffix 获取应用 ID 自动后缀
 	GetAppIDAutoSuffix(ctx context.Context) (string, error)
+	// ResolveApp 通过 ID 或 Name 解析应用，返回 appID
+	ResolveApp(ctx context.Context, workspaceID, input string) (string, error)
 	// ListApps 获取应用列表
 	ListApps(ctx context.Context, workspaceID string) ([]AppMinimal, error)
 	// GetAppMinimal 获取应用，过滤 ListApps 结果
 	GetAppMinimal(ctx context.Context, workspaceID, appID string) (*AppMinimal, error)
+	// GetApp 获取应用完整定义（含 BuildConfig / AppModelSpec）
+	GetApp(ctx context.Context, appID string) (*AppFull, error)
 	// CreateApp 创建应用
 	CreateApp(ctx context.Context, workspaceID string, body any) (*AppMinimal, error)
+	// DeleteApp 删除应用
+	DeleteApp(ctx context.Context, appID string) error
+	// UpdateAppBuildConfig 更新应用构建配置
+	UpdateAppBuildConfig(ctx context.Context, appID string, body AppBuildConfigUpdateBody) error
 	// CreateAppBuild 执行应用构建
 	CreateAppBuild(ctx context.Context, appID string, opts BuildOptions) error
 	// ListBuildRecords 获取最近的应用构建记录（10 条）
 	ListBuildRecords(ctx context.Context, appID, keyword string) ([]BuildRecord, error)
 	// ListAppImages 获取应用镜像列表
 	ListAppImages(ctx context.Context, appID, keyword string) ([]Image, error)
-	// GetEnvEffectiveDevMode 获取应用在某个环境下实际生效的开发模式配置
-	GetEnvEffectiveDevMode(ctx context.Context, appID, envName string) (*DevModeConfig, error)
 
 	// ---------- 应用配置文件 ----------
 
@@ -101,6 +135,8 @@ type Client interface {
 	ListHelmDeployRecords(
 		ctx context.Context, appID, envName, trafficLaneName, keyword string,
 	) ([]HelmDeployRecord, error)
+	// DeleteHelmDeploy 删除 Helm 部署
+	DeleteHelmDeploy(ctx context.Context, appID, envName, deployID string) error
 
 	// --- Trpc ---
 	// CreateAppTrpcDeploy 执行 Trpc 应用部署
@@ -112,6 +148,10 @@ type Client interface {
 	ListTrpcDeployRecords(
 		ctx context.Context, appID, envName, keyword, trafficLaneName string,
 	) ([]AppModelDeployRecord, error)
+	// DeleteTrpcDeploy 删除 Trpc 部署
+	DeleteTrpcDeploy(ctx context.Context, appID, envName string) error
+	// PreCheckTrpcDeploy 部署前检查 Trpc 应用
+	PreCheckTrpcDeploy(ctx context.Context, appID, envName string) (*DeployPrecheckResult, error)
 
 	// --- TAF ---
 	// CreateAppTafDeploy 执行 TAF 应用部署
@@ -120,6 +160,10 @@ type Client interface {
 	ListTafDeployRecords(
 		ctx context.Context, appID, envName, keyword, trafficLaneName string,
 	) ([]AppModelDeployRecord, error)
+	// DeleteTafDeploy 删除 TAF 部署
+	DeleteTafDeploy(ctx context.Context, appID, envName string) error
+	// PreCheckTafDeploy 部署前检查 TAF 应用
+	PreCheckTafDeploy(ctx context.Context, appID, envName string) (*DeployPrecheckResult, error)
 
 	// --- 通用 ---
 	// GrayscaleUpdateInstance 灰度更新 AppModel 实例
@@ -133,6 +177,10 @@ type Client interface {
 		appID, envName string,
 		opts ListAppInstancesOptions,
 	) (*PaginatedInstances, error)
+	// UpdateInstancePolaris 更新实例北极星权重/隔离状态
+	UpdateInstancePolaris(ctx context.Context, appID, envName string, opts UpdateInstancePolarisOptions) error
+	// BatchDeleteInstances 批量删除实例
+	BatchDeleteInstances(ctx context.Context, appID, envName string, opts BatchDeleteInstancesOptions) error
 
 	// --- 管理命令 ---
 	// ListTrpcAdminCmds 查询 Trpc 管理命令列表
@@ -160,6 +208,8 @@ type Client interface {
 	DeleteAppPolarisConfig(ctx context.Context, appID, configName string) error
 	// PatchAppPolarisConfig 更新应用的北极星配置（部分更新）
 	PatchAppPolarisConfig(ctx context.Context, appID, configName string, body any) error
+	// UpdatePolarisConfigEnvWeight 更新北极星配置在指定环境下的全局默认权重（对该环境所有实例生效）
+	UpdatePolarisConfigEnvWeight(ctx context.Context, appID, configName, envName string, weight int32) error
 
 	// ---------- 应用 / 空间组件 ----------
 
@@ -169,6 +219,19 @@ type Client interface {
 	CreateAppComponent(ctx context.Context, appID string, body any) (string, error)
 	// DeleteAppComponent 删除应用组件
 	DeleteAppComponent(ctx context.Context, appID, compName string) error
+
+	// ---------- 仪表盘 ----------
+
+	// ListDashboardDirectoryTree 获取工作空间下的仪表盘目录树
+	ListDashboardDirectoryTree(ctx context.Context, workspaceID string) ([]DashboardDirectoryItem, error)
+	// ListAppDashboards 获取应用绑定的仪表盘列表
+	ListAppDashboards(ctx context.Context, appID string) ([]AppDashboard, error)
+	// CreateAppDashboard 创建应用仪表盘绑定
+	CreateAppDashboard(ctx context.Context, appID, uid string) error
+	// UpdateAppDashboard 更新应用仪表盘绑定
+	UpdateAppDashboard(ctx context.Context, appID, uid string, opts UpdateAppDashboardOptions) error
+	// DeleteAppDashboard 删除应用仪表盘绑定
+	DeleteAppDashboard(ctx context.Context, appID, uid string) error
 
 	// ---------- AppSpec ----------
 

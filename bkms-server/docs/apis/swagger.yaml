@@ -6,6 +6,266 @@ definitions:
     type: string
     x-enum-varnames:
     - RoleCodeAdmin
+  appcfgfiledef.BSCPConfigInput:
+    properties:
+      bizID:
+        type: string
+      id:
+        type: string
+      serviceID:
+        type: string
+    required:
+    - bizID
+    - id
+    - serviceID
+    type: object
+  appcfgfiledef.BaseContentInfoObj:
+    properties:
+      content:
+        type: string
+      holderContentSourceType:
+        type: string
+      holderId:
+        type: string
+      holderName:
+        type: string
+      isFromAnotherFile:
+        type: boolean
+    type: object
+  appcfgfiledef.CreateDefInput:
+    properties:
+      baseAppConfigFileId:
+        description: overlay 文件引用的基础文件 ID（fileType=overlay 时必填）
+        type: string
+      bscpConfig:
+        allOf:
+        - $ref: '#/definitions/appcfgfiledef.BSCPConfigInput'
+        description: BSCP 来源配置（contentSourceType=bscp 时必填）
+      configKind:
+        description: 配置种类：framework / plain
+        enum:
+        - framework
+        - plain
+        type: string
+      content:
+        description: 初始内容（可选，仅 local 来源）
+        type: string
+      contentSourceType:
+        description: 内容来源：local / bscp
+        enum:
+        - local
+        - bscp
+        type: string
+      description:
+        description: 版本描述
+        type: string
+      fileFormat:
+        description: 文件格式
+        enum:
+        - yaml
+        - taf
+        type: string
+      fileType:
+        description: 文件类型：normal / overlay
+        enum:
+        - normal
+        - overlay
+        type: string
+      mountDir:
+        description: 容器内挂载目录（plain 必填）
+        maxLength: 255
+        type: string
+      name:
+        description: 文件名称
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - configKind
+    - contentSourceType
+    - fileFormat
+    - fileType
+    - name
+    type: object
+  appcfgfiledef.CreateDefOutput:
+    properties:
+      item:
+        $ref: '#/definitions/appcfgfiledef.DefDetailObj'
+    type: object
+  appcfgfiledef.DefDetailObj:
+    properties:
+      baseAppConfigFileId:
+        type: string
+      baseContentInfo:
+        $ref: '#/definitions/appcfgfiledef.BaseContentInfoObj'
+      configKind:
+        type: string
+      content:
+        type: string
+      contentSourceType:
+        type: string
+      createdAt:
+        type: string
+      creator:
+        type: string
+      currentVersion:
+        type: integer
+      editableContentField:
+        description: EditableContentField 前端可编辑的字段（"content" / "overlayContent" /
+          "none"）。
+        type: string
+      fileFormat:
+        type: string
+      fileId:
+        type: string
+      fileType:
+        type: string
+      hasEnvInstance:
+        description: HasEnvInstance 指定环境是否有独立实例（仅按环境查询时有意义）。
+        type: boolean
+      id:
+        type: string
+      isUnifiedConfig:
+        type: boolean
+      mountDir:
+        type: string
+      mountedEnvNames:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      overlayContent:
+        type: string
+      updatedAt:
+        type: string
+      updater:
+        type: string
+    type: object
+  appcfgfiledef.DefSummaryObj:
+    properties:
+      configKind:
+        type: string
+      createdAt:
+        type: string
+      creator:
+        type: string
+      id:
+        type: string
+      isUnifiedConfig:
+        type: boolean
+      mountDir:
+        type: string
+      mountedEnvNames:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    type: object
+  appcfgfiledef.DeleteDefOutput:
+    type: object
+  appcfgfiledef.EnvInstanceObj:
+    properties:
+      content:
+        type: string
+      currentVersion:
+        type: integer
+      envName:
+        type: string
+      fileId:
+        type: string
+      overlayContent:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+      updater:
+        type: string
+    type: object
+  appcfgfiledef.GetDefDetailOutput:
+    properties:
+      item:
+        $ref: '#/definitions/appcfgfiledef.DefDetailObj'
+    type: object
+  appcfgfiledef.ListDefsOutput:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/appcfgfiledef.DefDetailObj'
+        type: array
+    type: object
+  appcfgfiledef.ListEnvInstancesOutput:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/appcfgfiledef.EnvInstanceObj'
+        type: array
+    type: object
+  appcfgfiledef.MountPreviewItemObj:
+    properties:
+      configKind:
+        type: string
+      contentSource:
+        type: string
+      defId:
+        type: string
+      hasEnvFile:
+        type: boolean
+      mountDir:
+        type: string
+      name:
+        type: string
+    type: object
+  appcfgfiledef.MountPreviewOutput:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/appcfgfiledef.MountPreviewItemObj'
+        type: array
+    type: object
+  appcfgfiledef.ResetEnvOutput:
+    type: object
+  appcfgfiledef.UpdateContentInput:
+    properties:
+      content:
+        type: string
+      currentVersion:
+        type: integer
+      description:
+        type: string
+    type: object
+  appcfgfiledef.UpdateContentOutput:
+    properties:
+      content:
+        type: string
+      currentVersion:
+        type: integer
+      fileId:
+        type: string
+    type: object
+  appcfgfiledef.UpdateDefInput:
+    properties:
+      isUnifiedConfig:
+        type: boolean
+      mountDir:
+        maxLength: 255
+        type: string
+      mountedEnvNames:
+        items:
+          type: string
+        type: array
+      name:
+        maxLength: 64
+        minLength: 1
+        type: string
+    type: object
+  appcfgfiledef.UpdateDefOutput:
+    properties:
+      item:
+        $ref: '#/definitions/appcfgfiledef.DefSummaryObj'
+    type: object
   bkerrs.ErrCode:
     enum:
     - INVALID_ARGUMENT
@@ -380,7 +640,27 @@ definitions:
         description: Type 类型，可选项 group、user
         type: string
     type: object
+  github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardOutput:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+      uid:
+        type: string
+      uri:
+        type: string
+      url:
+        type: string
+    type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.EmptyOutput:
+    type: object
+  github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.ListDashboardsResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/serializer.DashboardDirectoryOutput'
+        type: array
     type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_autodeploy_serializer.BuildRecordOutputObj:
     properties:
@@ -618,6 +898,11 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_build_serializer.BuildCommandsInput'
         description: 命令配置
+      extraFiles:
+        description: 打包额外文件路径，相对构建目录；空列表表示不额外拷贝
+        items:
+          type: string
+        type: array
       runnerImage:
         description: 运行阶段基础镜像
         type: string
@@ -631,6 +916,11 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_build_serializer.BuildCommandsOutputObj'
         description: 命令配置
+      extraFiles:
+        description: 打包额外文件路径，相对构建目录
+        items:
+          type: string
+        type: array
       runnerImage:
         description: 运行阶段基础镜像
         type: string
@@ -792,6 +1082,11 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_core_app_serializer.BuildCommandsOutputObj'
         description: 命令配置
+      extraFiles:
+        description: 打包额外文件路径，相对构建目录
+        items:
+          type: string
+        type: array
       runnerImage:
         description: 运行阶段基础镜像
         type: string
@@ -866,6 +1161,28 @@ definitions:
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_extension_component_serializer.EmptyOutput:
     type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_extension_depservice_serializer.EmptyOutput:
+    type: object
+  ? github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardOutput
+  : properties:
+      title:
+        description: Title 仪表盘标题
+        type: string
+      uid:
+        description: UID 仪表盘 uid
+        type: string
+      url:
+        description: URL 仪表盘访问 URL
+        type: string
+    type: object
+  github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput:
+    type: object
+  ? github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.ListDashboardsResp
+  : properties:
+      data:
+        description: Data 应用绑定的仪表盘列表
+        items:
+          $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.DashboardOutput'
+        type: array
     type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_usergroup_serializer.EmptyOutput:
     type: object
@@ -1142,6 +1459,22 @@ definitions:
         description: 版本号
         type: integer
     type: object
+  serializer.AppDashboardCreateInput:
+    properties:
+      uid:
+        description: UID 仪表盘 uid
+        minLength: 1
+        type: string
+    required:
+    - uid
+    type: object
+  serializer.AppDashboardUpdateInput:
+    properties:
+      uid:
+        description: UID 新的仪表盘 uid（仅支持变更绑定的仪表盘）
+        minLength: 1
+        type: string
+    type: object
   serializer.AppDefinedEnvVarOutputObj:
     properties:
       createdAt:
@@ -1169,6 +1502,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/serializer.DeployOverviewAutoscalingObj'
         description: 自动扩缩容配置摘要，可选：无 GPA 配置时为 null
+      cluster:
+        allOf:
+        - $ref: '#/definitions/serializer.DeployOverviewClusterObj'
+        description: 环境绑定的业务集群信息
       deployStatus:
         description: 部署状态（原始枚举）
         type: string
@@ -1186,6 +1523,9 @@ definitions:
         type: string
       envType:
         description: 环境类型（development / test / staging / production）
+        type: string
+      imageTag:
+        description: 部署的镜像 Tag；无部署记录时为空字符串
         type: string
       instances:
         allOf:
@@ -1313,6 +1653,10 @@ definitions:
       isHealthy:
         description: 健康状态，即 k8s 探针检查结果
         type: boolean
+      latestPublish:
+        allOf:
+        - $ref: '#/definitions/serializer.PublishStatusOutputObj'
+        description: 最近一次开发模式发布状态
       message:
         description: 状态详情，一般为 pod.status.reason
         type: string
@@ -1324,6 +1668,10 @@ definitions:
         items:
           $ref: '#/definitions/serializer.PolarisInstanceInfoOutputObj'
         type: array
+      resources:
+        allOf:
+        - $ref: '#/definitions/serializer.AppInstanceResourcesObj'
+        description: 主容器资源规格（集群 Pod 实际值）
       restartCount:
         description: 重启次数
         example: "0"
@@ -1331,6 +1679,77 @@ definitions:
       status:
         description: 状态，由 pod.status.phase 等解析获得
         type: string
+    type: object
+  serializer.AppInstancePluginObj:
+    properties:
+      data:
+        description: 插件自有载荷；polaris 插件为 PolarisInstanceInfoOutputObj 列表，可为空列表
+      id:
+        description: 实例 ID（即 k8s pod 的 name），供前端关联本地行
+        type: string
+    type: object
+  serializer.AppInstancePluginWatchEvent:
+    properties:
+      object:
+        allOf:
+        - $ref: '#/definitions/serializer.AppInstancePluginObj'
+        description: 附属数据载荷
+      plugin:
+        description: 附属数据来源插件名，如 polaris
+        type: string
+      type:
+        description: |-
+          事件类型；恒为 PLUGIN，取值见 instance/watch/plugin.EventTypePlugin
+          Enums: PLUGIN
+        enum:
+        - PLUGIN
+        type: string
+    type: object
+  serializer.AppInstanceResourcesObj:
+    properties:
+      cpuLimits:
+        description: CPU limits（Kubernetes quantity 字符串），可选：未配置时不返回该字段
+        type: string
+      cpuRequests:
+        description: CPU requests，可选：未配置时不返回该字段
+        type: string
+      memoryLimits:
+        description: Memory limits，可选：未配置时不返回该字段
+        type: string
+      memoryRequests:
+        description: Memory requests，可选：未配置时不返回该字段
+        type: string
+    type: object
+  serializer.AppInstanceWatchEvent:
+    properties:
+      object:
+        allOf:
+        - $ref: '#/definitions/serializer.AppInstanceOutputObj'
+        description: 实例投影；字段集合对齐 AppInstanceOutputObj，其中 polarisInfos 在 Watch 场景恒为空数组
+      reason:
+        description: 流结束原因；仅 ENDED 使用
+        type: string
+      type:
+        description: |-
+          事件类型
+          Enums: ADDED, MODIFIED, DELETED, ENDED
+        enum:
+        - ADDED
+        - MODIFIED
+        - DELETED
+        - ENDED
+        type: string
+    type: object
+  serializer.AppInstanceWatchStreamDoc:
+    properties:
+      pluginEvent:
+        allOf:
+        - $ref: '#/definitions/serializer.AppInstancePluginWatchEvent'
+        description: 附属数据事件：PLUGIN
+      podEvent:
+        allOf:
+        - $ref: '#/definitions/serializer.AppInstanceWatchEvent'
+        description: Pod 投影事件：ADDED / MODIFIED / DELETED / ENDED
     type: object
   serializer.AppModelDeployRecordOutputObj:
     properties:
@@ -1365,6 +1784,9 @@ definitions:
       status:
         type: string
       updatedAt:
+        type: string
+      workloadKind:
+        description: 本次部署的主工作负载类型（GameDeployment 或 Deployment）
         type: string
     type: object
   serializer.AppModelResourceSnapshot:
@@ -2330,6 +2752,13 @@ definitions:
           type: string
         type: array
     type: object
+  serializer.ClusterAddonReferenceOutput:
+    properties:
+      displayName:
+        type: string
+      name:
+        type: string
+    type: object
   serializer.ClusterInfoOutput:
     properties:
       businessID:
@@ -2645,8 +3074,10 @@ definitions:
         - taf
         type: string
       name:
-        description: 应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-20 之间
-        maxLength: 20
+        description: |-
+          应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-64 之间。
+          todo 兼容前端用特性环境内部名（feat-{appID}-{n}）创建 overlay。
+        maxLength: 64
         minLength: 1
         type: string
       type:
@@ -2791,6 +3222,12 @@ definitions:
       enableHealthCheck:
         description: 是否启用健康检查，默认 false
         type: boolean
+      enableWeightFactor:
+        description: |-
+          是否启用权重因子，默认 false。仅 createNewService 为 true 时写入北极星；
+          开启后北极星按实例机型标记权重因子，
+          各环境还需单独开启动态权重才会真正按机型分流
+        type: boolean
       instanceKey:
         description: 组件实例标识，用于环境变量拼接，只能包含字母、数字、下划线
         type: string
@@ -2814,6 +3251,15 @@ definitions:
         type: string
       polarisToken:
         description: 北极星 Token（当 createNewService 为 false 时必填，为 true 时由平台创建后回填）
+        type: string
+      registerMode:
+        description: |-
+          注册模式，默认 on_deploy（等部署后注册）。
+          immediate 表示绑定环境后立即下发 PolarisConfig CR 与配套 Service 完成注册，
+          该配置不再注入环境变量和 tRPC 框架配置。创建后不可修改
+        enum:
+        - immediate
+        - on_deploy
         type: string
       scopeEnvNames:
         description: 生效的环境列表
@@ -3098,6 +3544,42 @@ definitions:
     - name
     - poolItems
     type: object
+  serializer.CreatePublishRecordsData:
+    properties:
+      recordIDs:
+        description: RecordIDs 新建的发布记录 ID 列表
+        items:
+          type: string
+        type: array
+    type: object
+  serializer.CreatePublishRecordsInput:
+    properties:
+      binaryName:
+        description: BinaryName 发布的二进制名称
+        type: string
+      fileSize:
+        description: FileSize 文件大小（字节）
+        minimum: 0
+        type: integer
+      md5:
+        description: MD5 文件 MD5 值
+        type: string
+      results:
+        description: Results 逐实例发布结果
+        items:
+          $ref: '#/definitions/serializer.PublishInstanceResult'
+        minItems: 1
+        type: array
+    required:
+    - binaryName
+    - md5
+    - results
+    type: object
+  serializer.CreatePublishRecordsOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.CreatePublishRecordsData'
+    type: object
   serializer.CreateRedisInstanceInput:
     properties:
       bkBizID:
@@ -3301,6 +3783,47 @@ definitions:
       data:
         $ref: '#/definitions/serializer.WorkspaceDetailOutputObj'
     type: object
+  serializer.CustomRuntimeImageOutputObj:
+    properties:
+      createdAt:
+        description: 创建时间
+        type: string
+      id:
+        description: 记录 ID
+        type: string
+      name:
+        description: 镜像仓库名称，含仓库前缀，不包含 tag
+        type: string
+      type:
+        description: 镜像类型
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
+    type: object
+  serializer.CustomRuntimeImageTagOutputObj:
+    properties:
+      builtAt:
+        description: 镜像构建时间
+        type: string
+      digest:
+        description: 摘要
+        type: string
+      size:
+        description: 镜像大小
+        example: "0"
+        type: string
+      tag:
+        description: 镜像标签名
+        type: string
+    type: object
+  serializer.CustomRuntimeImagesOutputObjs:
+    properties:
+      results:
+        items:
+          $ref: '#/definitions/serializer.CustomRuntimeImageOutputObj'
+        type: array
+    type: object
   serializer.CustomTagOptsInput:
     properties:
       prefix:
@@ -3337,6 +3860,23 @@ definitions:
       withRevision:
         description: 是否包含分支/Tag 名称
         type: boolean
+    type: object
+  serializer.DashboardDirectoryOutput:
+    properties:
+      dashboards:
+        items:
+          $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.DashboardOutput'
+        type: array
+      id:
+        type: integer
+      title:
+        type: string
+      uid:
+        type: string
+      uri:
+        type: string
+      url:
+        type: string
     type: object
   serializer.DeleteClusterAddonOutput:
     properties:
@@ -3398,6 +3938,24 @@ definitions:
         description: 非 True condition 的汇总消息，可选：一切正常时为空字符串
         type: string
     type: object
+  serializer.DeployOverviewClusterObj:
+    properties:
+      clusterID:
+        description: 集群 ID
+        type: string
+      clusterName:
+        description: 集群展示名（来自 BCS）；拉取失败时为空字符串
+        type: string
+      clusterType:
+        description: 集群类型
+        type: string
+      namespace:
+        description: 集群命名空间
+        type: string
+      projectCode:
+        description: 项目 code
+        type: string
+    type: object
   serializer.DeployOverviewInstancesObj:
     properties:
       abnormal:
@@ -3424,6 +3982,18 @@ definitions:
       memoryRequests:
         description: Memory requests，可选：未配置时不返回该字段
         type: string
+    type: object
+  serializer.DeployPreCheckOutput:
+    properties:
+      missingRequiredClusterAddons:
+        description: 缺失的必选集群组件标识及展示名
+        items:
+          $ref: '#/definitions/serializer.ClusterAddonReferenceOutput'
+        type: array
+      undefinedVars:
+        items:
+          $ref: '#/definitions/serializer.UndefinedEnvVarOutput'
+        type: array
     type: object
   serializer.DeployableImageTagOutputObj:
     properties:
@@ -3695,6 +4265,9 @@ definitions:
       clusterType:
         description: 集群类型
         type: string
+      isFederation:
+        description: 是否为 BCS 联邦 Host 集群
+        type: boolean
       namespace:
         description: 集群命名空间
         type: string
@@ -3914,13 +4487,6 @@ definitions:
       value:
         description: 环境变量值
         type: string
-    type: object
-  serializer.EnvVarPreCheckOutput:
-    properties:
-      undefinedVars:
-        items:
-          $ref: '#/definitions/serializer.UndefinedEnvVarOutput'
-        type: array
     type: object
   serializer.EnvVarReferenceSourceOutput:
     properties:
@@ -4824,6 +5390,32 @@ definitions:
         - $ref: '#/definitions/serializer.HelmSourceOutputObj'
         description: Helm 源配置
     type: object
+  serializer.HostPortEnvStateOutput:
+    properties:
+      appliedPorts:
+        items:
+          type: integer
+        type: array
+      pendingAddPorts:
+        items:
+          type: integer
+        type: array
+      pendingRemovePorts:
+        items:
+          type: integer
+        type: array
+    type: object
+  serializer.HostPortsOutput:
+    properties:
+      envStates:
+        additionalProperties:
+          $ref: '#/definitions/serializer.HostPortEnvStateOutput'
+        type: object
+      ports:
+        items:
+          type: integer
+        type: array
+    type: object
   serializer.ImageEmptyOutput:
     type: object
   serializer.ImageRegistryInput:
@@ -5343,6 +5935,16 @@ definitions:
           $ref: '#/definitions/serializer.ComponentDefOutputObj'
         type: array
     type: object
+  serializer.ListCustomRuntimeImageTagsOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.PaginatedCustomRuntimeImageTagOutputObjs'
+    type: object
+  serializer.ListCustomRuntimeImagesOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.CustomRuntimeImagesOutputObjs'
+    type: object
   serializer.ListDeployableImageTagsOutput:
     properties:
       data:
@@ -5480,6 +6082,11 @@ definitions:
         items:
           $ref: '#/definitions/serializer.ScopedEnvVarOutputObj'
         type: array
+    type: object
+  serializer.ListPublishRecordsOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.PaginatedPublishRecords'
     type: object
   serializer.ListRedisInstancesOutput:
     properties:
@@ -5823,14 +6430,26 @@ definitions:
   serializer.PaginatedAppInstancesOutputObj:
     properties:
       count:
-        description: 结果数量
+        description: 结果数量；全量为成功投影条数，分页为 LabelSelector 匹配的 Pod 总数
         example: "0"
         type: string
+      resourceVersion:
+        description: 集群 List 首次响应的 resourceVersion，供 Watch 续传；空列表时也可能有值
+        type: string
       results:
-        description: 查询结果
+        description: 查询结果，只含成功投影
         items:
           $ref: '#/definitions/serializer.AppInstanceOutputObj'
         type: array
+      skipped:
+        description: 无法投影的实例列表；分页模式为空数组，无跳过项时亦为空数组
+        items:
+          $ref: '#/definitions/serializer.SkippedAppInstanceObj'
+        type: array
+      skippedCount:
+        description: 本次响应中跳过的实例数（仅全量模式可能非 0）
+        example: "0"
+        type: string
     type: object
   serializer.PaginatedAppModelDeployRecordsOutputObjs:
     properties:
@@ -5873,6 +6492,22 @@ definitions:
         items:
           $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_build_serializer.BuildRecordOutputObj'
         type: array
+    type: object
+  serializer.PaginatedCustomRuntimeImageTagOutputObjs:
+    properties:
+      count:
+        description: 满足条件的总记录数
+        example: "0"
+        type: string
+      results:
+        description: 当前页的镜像 TAG 列表
+        items:
+          $ref: '#/definitions/serializer.CustomRuntimeImageTagOutputObj'
+        type: array
+      snapshotStatus:
+        allOf:
+        - $ref: '#/definitions/serializer.SnapshotStatusInfoOutputObj'
+        description: 快照状态信息，手动输入且尚无快照记录时 refreshStatus 为 idle
     type: object
   serializer.PaginatedDeployableImageTagOutputObjs:
     properties:
@@ -5943,6 +6578,16 @@ definitions:
         description: 查询结果
         items:
           $ref: '#/definitions/serializer.OperationRecordOutputObj'
+        type: array
+    type: object
+  serializer.PaginatedPublishRecords:
+    properties:
+      count:
+        example: "0"
+        type: string
+      results:
+        items:
+          $ref: '#/definitions/serializer.PublishRecordOutputObj'
         type: array
     type: object
   serializer.PaginatedRuntimeImageTagOutputObjs:
@@ -6024,6 +6669,9 @@ definitions:
         type: boolean
       enableHealthCheck:
         description: 是否启用健康检查（可选更新）
+        type: boolean
+      enableWeightFactor:
+        description: 是否启用权重因子（可选更新）；关闭只屏蔽各环境的动态权重，不清除各环境的开关取值
         type: boolean
       instanceKey:
         description: 组件实例标识（可选更新）
@@ -6187,6 +6835,14 @@ definitions:
       enableHealthCheck:
         description: 是否启用健康检查
         type: boolean
+      enableWeightFactor:
+        description: 是否启用权重因子（开启后才能为单个环境开启动态权重）
+        type: boolean
+      envDynamicWeights:
+        additionalProperties:
+          type: boolean
+        description: 各环境是否开启动态权重，key 为环境名称；未出现的环境表示未开启
+        type: object
       envStates:
         additionalProperties:
           $ref: '#/definitions/serializer.PolarisEnvStateOutput'
@@ -6218,6 +6874,9 @@ definitions:
         type: string
       polarisToken:
         description: 北极星 Token（敏感信息，返回时脱敏）
+        type: string
+      registerMode:
+        description: 注册模式：immediate（绑定后立即注册）| on_deploy（等部署后注册）
         type: string
       scopeEnvNames:
         description: 生效的环境列表
@@ -6298,6 +6957,10 @@ definitions:
         type: string
       serviceNamespace:
         description: 北极星命名空间
+        type: string
+      staticWeight:
+        description: 静态权重；开源版恒为 0，内部版为注册时的静态权重
+        example: "0"
         type: string
       weight:
         description: 权重
@@ -6497,6 +7160,52 @@ definitions:
       startPort:
         description: 起始端口
         type: integer
+    type: object
+  serializer.PreflightBodyInput:
+    properties:
+      instanceIDs:
+        description: InstanceIDs 指定的实例 ID 列表（与 PublishAll 二选一）
+        items:
+          type: string
+        type: array
+      publishAll:
+        description: PublishAll 是否发布到所有 Running 状态的实例（与 InstanceIDs 二选一）
+        type: boolean
+    type: object
+  serializer.PreflightData:
+    properties:
+      address:
+        description: Address 已组装好的集群完整地址；如 {baseUrl}/clusters/{clusterID}/
+        type: string
+      devMode:
+        allOf:
+        - $ref: '#/definitions/serializer.PreflightDevMode'
+        description: DevMode 开发模式相关路径配置
+      instanceIDs:
+        description: InstanceIDs 校验通过的实例 ID 列表
+        items:
+          type: string
+        type: array
+      namespace:
+        description: Namespace 目标命名空间
+        type: string
+      token:
+        description: Token 用户 Token，用于访问集群 API
+        type: string
+    type: object
+  serializer.PreflightDevMode:
+    properties:
+      mountPath:
+        description: MountPath 脚本挂载路径
+        type: string
+      workPath:
+        description: WorkPath 开发模式根目录
+        type: string
+    type: object
+  serializer.PreflightOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.PreflightData'
     type: object
   serializer.PreviewComponentDefInput:
     properties:
@@ -6777,8 +7486,75 @@ definitions:
       value:
         type: string
     type: object
+  serializer.PublishInstanceResult:
+    properties:
+      instance:
+        description: Instance 目标实例（pod）名称
+        type: string
+      message:
+        description: Message 失败原因等附加信息
+        type: string
+      status:
+        description: Status 发布状态：success / failed
+        enum:
+        - success
+        - failed
+        type: string
+    required:
+    - instance
+    - status
+    type: object
+  serializer.PublishRecordOutputObj:
+    properties:
+      binaryName:
+        type: string
+      createdAt:
+        type: string
+      fileSize:
+        type: integer
+      id:
+        type: string
+      instance:
+        type: string
+      md5:
+        type: string
+      message:
+        type: string
+      operator:
+        type: string
+      status:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  serializer.PublishStatusOutputObj:
+    properties:
+      binaryName:
+        description: 发布的二进制名称
+        type: string
+      md5:
+        description: 文件 MD5
+        type: string
+      message:
+        description: 失败原因等附加信息
+        type: string
+      operator:
+        description: 操作人
+        type: string
+      status:
+        description: 发布状态：success / failed
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
+    type: object
   serializer.PutEnvWeightInput:
     properties:
+      dynamicWeight:
+        description: |-
+          该环境是否开启动态权重，不传表示保持原值。
+          开启后上面的权重作为动态调权的基准权重
+        type: boolean
       weight:
         description: 单实例权重，取值范围 0-10000
         maximum: 10000
@@ -6793,6 +7569,13 @@ definitions:
         allOf:
         - $ref: '#/definitions/serializer.PolarisConfigOutputObj'
         description: 更新后的北极星配置
+    type: object
+  serializer.PutHostPortsInput:
+    properties:
+      ports:
+        items:
+          type: integer
+        type: array
     type: object
   serializer.RecoverConditionInput:
     properties:
@@ -6878,6 +7661,19 @@ definitions:
         type: string
     type: object
   serializer.RefreshAppImagesOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.RefreshResultInfoOutputObj'
+    type: object
+  serializer.RefreshCustomRuntimeImageTagsInput:
+    properties:
+      name:
+        description: 镜像完整仓库名称，含仓库前缀且不包含 tag 或 digest
+        type: string
+    required:
+    - name
+    type: object
+  serializer.RefreshCustomRuntimeImageTagsOutput:
     properties:
       data:
         $ref: '#/definitions/serializer.RefreshResultInfoOutputObj'
@@ -7100,6 +7896,18 @@ definitions:
         type: string
       type:
         description: 代码仓库类型
+        type: string
+    type: object
+  serializer.ResolveAppOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.ResolveAppOutputObj'
+    type: object
+  serializer.ResolveAppOutputObj:
+    properties:
+      id:
+        type: string
+      name:
         type: string
     type: object
   serializer.ResourceSpecInput:
@@ -7576,6 +8384,15 @@ definitions:
         type: string
     required:
     - state
+    type: object
+  serializer.SkippedAppInstanceObj:
+    properties:
+      id:
+        description: 实例 ID（即 k8s pod 的 name）；解析前无 name 时为空字符串
+        type: string
+      reason:
+        description: 跳过原因
+        type: string
     type: object
   serializer.SnapshotStatusInfoOutputObj:
     properties:
@@ -8127,8 +8944,8 @@ definitions:
         description: 版本描述
         type: string
       name:
-        description: 应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-20 之间
-        maxLength: 20
+        description: 应用配置文件名称，包含大小写字母、数字和符号（_-），长度 1-64 之间
+        maxLength: 64
         minLength: 1
         type: string
     required:
@@ -8900,6 +9717,279 @@ paths:
       summary: 查询单个应用详情
       tags:
       - app
+  /apps/{appID}/app-config-file-defs:
+    post:
+      consumes:
+      - application/json
+      operationId: CreateAppConfigFileDef
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 创建配置文件定义请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/appcfgfiledef.CreateDefInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.CreateDefOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 创建配置文件定义及默认文件
+      tags:
+      - app-config-file-defs
+  /apps/{appID}/app-config-file-defs/{id}:
+    delete:
+      operationId: DeleteAppConfigFileDef
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 配置文件定义 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.DeleteDefOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 删除配置文件定义及关联数据
+      tags:
+      - app-config-file-defs
+    get:
+      operationId: GetAppConfigFileDefDetail
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 配置文件定义 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 环境名称，为空返回默认文件
+        in: query
+        name: envName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.GetDefDetailOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取配置文件定义详情
+      tags:
+      - app-config-file-defs
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateAppConfigFileDef
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 配置文件定义 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新配置文件定义请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/appcfgfiledef.UpdateDefInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.UpdateDefOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 更新配置文件定义信息
+      tags:
+      - app-config-file-defs
+  /apps/{appID}/app-config-file-defs/{id}/content:
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateAppConfigFileDefContent
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 配置文件定义 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 环境名称，为空更新默认文件
+        in: query
+        name: envName
+        type: string
+      - description: 更新配置内容请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/appcfgfiledef.UpdateContentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.UpdateContentOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 更新配置文件内容
+      tags:
+      - app-config-file-defs
+  /apps/{appID}/app-config-file-defs/{id}/env-instances:
+    get:
+      operationId: ListAppConfigFileDefEnvInstances
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 配置文件定义 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.ListEnvInstancesOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 列出配置文件定义的环境实例
+      tags:
+      - app-config-file-defs
+  /apps/{appID}/app-config-file-defs/{id}/envs/{envName}:
+    delete:
+      operationId: ResetAppConfigFileDefEnvToDefault
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 配置文件定义 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.ResetEnvOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 恢复环境配置为默认值
+      tags:
+      - app-config-file-defs
+  /apps/{appID}/app-config-file-defs/defaults:
+    get:
+      operationId: ListDefaultFilesWithDef
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.ListDefsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 列出应用下所有配置文件定义及其默认文件信息
+      tags:
+      - app-config-file-defs
   /apps/{appID}/app-config-file/versions:
     get:
       operationId: ListAppConfigFileVersions
@@ -9877,6 +10967,146 @@ paths:
       summary: 获取应用 AppSpec 配置概况
       tags:
       - app-spec
+  /apps/{appID}/bkmonitor/dashboards:
+    get:
+      operationId: ListAppDashboards
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.ListDashboardsResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取应用绑定的仪表盘列表
+      tags:
+      - bkmonitor-dashboard
+    post:
+      consumes:
+      - application/json
+      operationId: CreateAppDashboard
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 绑定请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.AppDashboardCreateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 创建应用仪表盘绑定
+      tags:
+      - bkmonitor-dashboard
+  /apps/{appID}/bkmonitor/dashboards/{uid}:
+    delete:
+      operationId: DeleteAppDashboard
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 仪表盘 uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 删除应用仪表盘绑定
+      tags:
+      - bkmonitor-dashboard
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateAppDashboard
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 仪表盘 uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: 更新请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.AppDashboardUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_observability_bkmonitor_dashboard_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 更新应用仪表盘绑定
+      tags:
+      - bkmonitor-dashboard
   /apps/{appID}/bscpcfg/envs:
     get:
       operationId: ListBscpCfgEnvBindings
@@ -11492,10 +12722,6 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/bkerrs.GinErrorOutput'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
       security:
       - BkUserInfo: []
       - BkUserCredential: []
@@ -11538,10 +12764,6 @@ paths:
             $ref: '#/definitions/serializer.PutEnvWeightOutput'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-        "500":
-          description: Internal Server Error
           schema:
             $ref: '#/definitions/bkerrs.GinErrorOutput'
       security:
@@ -13811,6 +15033,7 @@ paths:
       - deploy
   /apps/{appID}/envs/{envName}/instances:
     get:
+      description: 北极星拉取失败不阻塞 Pod 输出：polarisInfos 为空数组，与未注册北极星同形，其余字段照常返回。
       operationId: ListAppInstances
       parameters:
       - description: 应用 ID
@@ -13827,15 +15050,17 @@ paths:
         in: query
         name: trafficLaneName
         type: string
-      - description: 页码，从 1 开始
+      - description: 为 true 时一次返回全量实例；禁止同时带 page 或 pageSize
+        in: query
+        name: all
+        type: boolean
+      - description: 页码，取值 1-10000；分页模式必填，all=true 时禁止出现
         in: query
         name: page
-        required: true
         type: integer
-      - description: 每页数量
+      - description: 每页数量；分页模式必填，all=true 时禁止出现
         in: query
         name: pageSize
-        required: true
         type: integer
       produces:
       - application/json
@@ -14305,6 +15530,58 @@ paths:
       summary: 执行 TAF 管理命令
       tags:
       - instance
+  /apps/{appID}/envs/{envName}/instances/watch:
+    get:
+      description: |-
+        SSE 同一条流上推送两类事件，信封不同：
+        1) Pod 事件 ADDED/MODIFIED/DELETED/ENDED，object 为实例投影；
+        DELETED 只保证 id，ENDED 时 object 为 null；Pod 事件不承载附属数据，polarisInfos 恒为空数组。
+        2) 附属数据事件 PLUGIN，带 plugin 标识来源（如 polaris、devmodePublish），object 为 {id, data}；
+        约 15s 一轮，仅该实例的附属数据有变化时推送。它不是实例的增删改，前端按 id 覆盖对应行的插件数据即可。
+        3）附属数据首包取自 List 响应内嵌的 polarisInfos，增量只看 PLUGIN 事件。
+        4）插件拉取失败时跳过本轮、不推事件也不拆流，页面保留上次已知状态。
+      operationId: WatchAppInstances
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 部署的泳道名称（空字符串表示不使用泳道）
+        in: query
+        name: trafficLaneName
+        type: string
+      - description: List 成功响应带回的续传位点
+        in: query
+        name: resourceVersion
+        required: true
+        type: string
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE 事件流；每条 data 为 podEvent 或
+          schema:
+            $ref: '#/definitions/serializer.AppInstanceWatchStreamDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 订阅应用实例投影变更
+      tags:
+      - instance
   /apps/{appID}/envs/{envName}/resource-topology:
     get:
       operationId: GetResourceTopology
@@ -14737,41 +16014,6 @@ paths:
       summary: 获取 TAF 类型应用部署记录下某个资源的快照详情（具体 k8s 资源的 Manifest 等）
       tags:
       - deploy
-  /apps/{appID}/envs/{envName}/taf-deploys/env-var-precheck:
-    get:
-      operationId: PreCheckTafDeployEnvVars
-      parameters:
-      - description: 应用 ID
-        in: path
-        name: appID
-        required: true
-        type: string
-      - description: 部署环境名称
-        in: path
-        name: envName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/serializer.EnvVarPreCheckOutput'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-      security:
-      - BkUserInfo: []
-      - BkUserCredential: []
-      summary: TAF 部署前环境变量校验
-      tags:
-      - deploy
   /apps/{appID}/envs/{envName}/taf-deploys/latest-status:
     get:
       operationId: GetLatestTafDeployStatus
@@ -14805,6 +16047,41 @@ paths:
       - BkUserInfo: []
       - BkUserCredential: []
       summary: 获取 TAF 应用最新一次部署的状态
+      tags:
+      - deploy
+  /apps/{appID}/envs/{envName}/taf-deploys/precheck:
+    get:
+      operationId: PreCheckTafDeploy
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.DeployPreCheckOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: TAF 部署前检查
       tags:
       - deploy
   /apps/{appID}/envs/{envName}/trpc-build-deploys:
@@ -15062,41 +16339,6 @@ paths:
       summary: 获取 Trpc 类型应用部署记录下某个资源的快照详情（具体 k8s 资源的 Manifest 等）
       tags:
       - deploy
-  /apps/{appID}/envs/{envName}/trpc-deploys/env-var-precheck:
-    get:
-      operationId: PreCheckTrpcDeployEnvVars
-      parameters:
-      - description: 应用 ID
-        in: path
-        name: appID
-        required: true
-        type: string
-      - description: 部署环境名称
-        in: path
-        name: envName
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/serializer.EnvVarPreCheckOutput'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-      security:
-      - BkUserInfo: []
-      - BkUserCredential: []
-      summary: Trpc 部署前环境变量校验
-      tags:
-      - deploy
   /apps/{appID}/envs/{envName}/trpc-deploys/latest-status:
     get:
       operationId: GetLatestTrpcDeployStatus
@@ -15130,6 +16372,41 @@ paths:
       - BkUserInfo: []
       - BkUserCredential: []
       summary: 获取 Trpc 应用最新一次部署的状态
+      tags:
+      - deploy
+  /apps/{appID}/envs/{envName}/trpc-deploys/precheck:
+    get:
+      operationId: PreCheckTrpcDeploy
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.DeployPreCheckOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: Trpc 部署前检查
       tags:
       - deploy
   /apps/{appID}/feat-envs:
@@ -15234,6 +16511,65 @@ paths:
       summary: 更新应用 Helm Chart 配置
       tags:
       - app
+  /apps/{appID}/hostports:
+    get:
+      operationId: ListHostPorts
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.HostPortsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取应用 HostPort 列表及联邦环境待部署状态
+      tags:
+      - hostport
+    put:
+      consumes:
+      - application/json
+      operationId: PutHostPorts
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.PutHostPortsInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.HostPortsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 全量保存应用 HostPort 端口列表
+      tags:
+      - hostport
   /apps/{appID}/images:
     get:
       operationId: ListAppImages
@@ -15486,6 +16822,36 @@ paths:
       summary: 手动刷新应用镜像快照
       tags:
       - images
+  /apps/{appID}/mount-preview:
+    get:
+      operationId: GetMountPreview
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 环境名称
+        in: query
+        name: envName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appcfgfiledef.MountPreviewOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取配置文件挂载预览
+      tags:
+      - app-config-file-defs
   /apps/{appID}/recommended-image-tag:
     get:
       operationId: GetRecommendedImageTag
@@ -16375,6 +17741,140 @@ paths:
       summary: 预览组件实例（试运行）
       tags:
       - component-insts
+  /devmode/{appID}/envs/{envName}/preflight:
+    post:
+      consumes:
+      - application/json
+      operationId: DevModePublishPreflight
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 预检请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.PreflightBodyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.PreflightOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 开发模式 Publish 预检
+      tags:
+      - devmode
+  /devmode/{appID}/envs/{envName}/publish-records:
+    get:
+      operationId: ListDevModePublishRecords
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 搜索关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 分页页码（从 1 开始）
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListPublishRecordsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取开发模式发布记录列表
+      tags:
+      - devmode
+    post:
+      consumes:
+      - application/json
+      operationId: CreateDevModePublishRecords
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 发布结果上报请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.CreatePublishRecordsInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.CreatePublishRecordsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 上报开发模式发布结果
+      tags:
+      - devmode
   /env-var-templates/app:
     get:
       description: 返回不带 scope 元数据的 `.env` 模板，供应用环境变量导入使用。
@@ -16706,7 +18206,7 @@ paths:
         name: envID
         required: true
         type: string
-      - description: 命名空间
+      - description: 命名空间，默认为插件定义中的 defaultNamespace
         in: query
         name: namespace
         type: string
@@ -16741,7 +18241,7 @@ paths:
         name: addonName
         required: true
         type: string
-      - description: 命名空间
+      - description: 命名空间，默认为插件定义中的 defaultNamespace
         in: query
         name: namespace
         type: string
@@ -18537,6 +20037,37 @@ paths:
       summary: 查询应用下的告警事件列表
       tags:
       - bkintegrations-bkmonitor
+  /workspaces/{workspaceID}/apps/resolve/{app}:
+    get:
+      operationId: ResolveApp
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      - description: 应用 ID 或名称
+        in: path
+        name: app
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ResolveAppOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 通过 ID 或 Name 解析应用
+      tags:
+      - app
   /workspaces/{workspaceID}/bkci-git-projects:
     get:
       operationId: ListBkCIOAuthGitProjects
@@ -18852,6 +20383,32 @@ paths:
       summary: 获取工作空间下的 APM 列表
       tags:
       - bkintegrations-bkmonitor
+  /workspaces/{workspaceID}/bkmonitor/dashboards:
+    get:
+      operationId: ListDashboardDirectoryTree
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_bkintegrations_serializer.ListDashboardsResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取蓝鲸监控仪表盘数据
+      tags:
+      - bkintegrations-bkmonitor
   /workspaces/{workspaceID}/bkmonitor/user-groups:
     get:
       operationId: ListUserGroups
@@ -19138,6 +20695,127 @@ paths:
       summary: 更新工作空间组件
       tags:
       - workspace-components
+  /workspaces/{workspaceID}/custom-build-images:
+    get:
+      description: 候选仅以工作空间已落库的自定义镜像记录为准，不过滤快照同步状态，也不校验镜像在仓库中是否仍然存在；候选数量预期在百条以内，因此不分页
+      operationId: ListCustomBuildImages
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      - description: 镜像类型：builder / runner
+        in: query
+        name: type
+        required: true
+        type: string
+      - description: 搜索关键字
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListCustomRuntimeImagesOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取工作空间自定义构建镜像候选列表
+      tags:
+      - images
+  /workspaces/{workspaceID}/custom-build-images/tags:
+    get:
+      description: |-
+        镜像以完整名称传入而非记录 ID，因为用户手动输入、尚未落库的镜像没有记录 ID。
+        已落库镜像读本地快照、手动输入镜像用工作空间凭证实时拉取，两条来源的出入参、
+        分页与总数口径完全一致，调用方无需按来源分支处理，也不传递来源标识
+      operationId: ListCustomBuildImageTags
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      - description: 镜像完整仓库名称，含仓库前缀且不带 tag
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: 搜索关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 分页参数：页码，从 1 开始
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页参数：每页数量，支持 5/10/20/50/100
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListCustomRuntimeImageTagsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取工作空间自定义构建镜像可用 TAG 列表
+      tags:
+      - images
+  /workspaces/{workspaceID}/custom-build-images/tags/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 同步等待上限为 10 秒。刷新中与刷新失败均为正常响应，通过 data.status 的 refreshing / failed
+        表达，不作为错误抛出
+      operationId: RefreshCustomBuildImageTags
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      - description: 刷新参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.RefreshCustomRuntimeImageTagsInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.RefreshCustomRuntimeImageTagsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 手动刷新工作空间自定义构建镜像的 TAG 快照
+      tags:
+      - images
   /workspaces/{workspaceID}/deps/redis:
     get:
       operationId: ListRedisInstances

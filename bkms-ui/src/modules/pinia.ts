@@ -17,7 +17,7 @@
  */
 
 // pina 持久化存储
-import { get, has, merge, set } from 'lodash-es';
+import { get, has, merge, pickBy, set } from 'lodash-es';
 import { createPinia } from 'pinia';
 import { STORAGE_KEY, STORAGE_VERSION } from '~/common/const';
 
@@ -94,9 +94,15 @@ function installPiniaStorage(opt: Partial<Options> = {}) {
       });
     }
 
-    // store 变化
+    // store 变化：仅用本 store 的非 undefined path 覆盖，与现有缓存合并写入。
+    // 否则多 store 共享 paths 整体覆盖时，任一 store 变化都会把其他 store 的 path 冲掉
+    // （如 space 变化冲掉 currentEnv、deploy-env 变化冲掉 statusTab）。
+    // 注意：仅支持顶层 path 的浅合并，嵌套 path（如 preferences.foo）会整体覆盖，请勿注册。
     store.$subscribe(() => {
-      options.setState(options.key, options.reducer(store, options.paths), options.storage);
+      const raw = options.getState(options.key, options.storage);
+      const saved = raw && typeof raw === 'object' ? raw : {};
+      const patch = pickBy(options.reducer(store, options.paths), value => value !== undefined);
+      options.setState(options.key, { ...saved, ...patch }, options.storage);
     });
   };
 }
@@ -120,8 +126,8 @@ export const install: UserModule = ({ app }) => {
     installPiniaStorage({
       key: STORAGE_KEY,
       version: STORAGE_VERSION,
-      ids: ['user', 'space', 'deploy-env'],
-      paths: ['statusTab', 'lastAppTemplateID', 'currentEnv'],
+      ids: ['user', 'space', 'deploy-env', 'ui'],
+      paths: ['statusTab', 'lastAppTemplateID', 'currentEnv', 'preferences'],
     }),
   );
   app.use(pinia);

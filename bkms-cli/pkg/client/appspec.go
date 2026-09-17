@@ -50,11 +50,19 @@ type AppDetail struct {
 
 // AppModelSpec represents the appModelSpec field in app detail.
 type AppModelSpec struct {
-	Command    []string       `json:"command"`
-	Args       []string       `json:"args"`
-	Components []AppComponent `json:"components"`
-	TrpcSpec   *TrpcSpec      `json:"trpcSpec,omitempty"`
-	TafSpec    *TafSpec       `json:"tafSpec,omitempty"`
+	Command    []string         `json:"command"`
+	Args       []string         `json:"args"`
+	Components []AppComponent   `json:"components"`
+	TrpcSpec   *TrpcSpec        `json:"trpcSpec,omitempty"`
+	TafSpec    *TafSpec         `json:"tafSpec,omitempty"`
+	EnvVars    []AppModelEnvVar `json:"envVars"`
+}
+
+// AppModelEnvVar 内联在应用模型 Spec 中的环境变量（对应 server 的 VariableOutputObj）
+type AppModelEnvVar struct {
+	Key         string `json:"key" yaml:"key"`
+	Value       string `json:"value" yaml:"value"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
 // TrpcSpec tRPC 框架配置

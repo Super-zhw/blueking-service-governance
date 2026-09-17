@@ -22,6 +22,7 @@
       <div class="flex-1 font-mono tracking-wider">{{ placeholder }}</div>
       <Eye
         class="ml-[4px] cursor-pointer hover:text-[#3A84FF]"
+        :fill="iconFill"
         @click="handleToggle"
       />
     </template>
@@ -29,6 +30,7 @@
       <span class="text-[#313238]">{{ value || emptyValuePlaceholder }}</span>
       <Unvisible
         class="ml-[4px] cursor-pointer hover:text-[#3A84FF]"
+        :fill="iconFill"
         @click="handleToggle"
       />
     </template>
@@ -42,6 +44,7 @@
 
   interface IProps {
     emptyValuePlaceholder?: string;
+    iconFill?: string;
     placeholder?: string;
     showValue?: boolean;
     value: string;
@@ -51,6 +54,7 @@
     showValue: false,
     placeholder: '********',
     emptyValuePlaceholder: '--',
+    iconFill: '#979BA5',
   });
   const emit = defineEmits(['toggle']);
 

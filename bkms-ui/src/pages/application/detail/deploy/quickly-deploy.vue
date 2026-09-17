@@ -47,30 +47,20 @@
         property="envName"
         required
       >
-        <Select
+        <!-- 目标环境选择器 -->
+        <EnvSelectPanel
+          ref="targetEnvSelectPanelRef"
           v-model="targetFormModel.envName"
-          :clearable="false"
-          filterable
-          :placeholder="$t('请选择')"
-        >
-          <Select.Option
-            v-for="item in sortedTargetEnvs"
-            :id="item.env.name || ''"
-            :key="item.env.name"
-            :name="item.env.displayName || item.env.name"
-          >
-            <span class="inline-flex items-center gap-[8px]">
-              <span>{{ item.env.displayName || item.env.name }}</span>
-              <Tag
-                v-if="item.env.type && envTypeMap[item.env.type]"
-                :class="envTypeTagClassMap[item.env.type]"
-                size="small"
-              >
-                {{ envTypeMap[item.env.type]?.name || item.env.type }}
-              </Tag>
-            </span>
-          </Select.Option>
-        </Select>
+          :aria-disabled="confirmLoading"
+          class="w-full"
+          :class="{ 'pointer-events-none opacity-60': confirmLoading }"
+          :columns="2"
+          :show-env-prefix="false"
+          :show-only-deployed-filter="false"
+          :sync-env-store="false"
+          @update:deploy-status-list="handleDeployStatusListUpdate"
+          @update:item="handleTargetEnvItemChange"
+        />
       </Form.FormItem>
     </Form>
     <!-- 部署表单 -->
@@ -108,28 +98,32 @@
 <script lang="ts" setup>
   import { computed, nextTick, reactive, ref, watch } from 'vue';
 
-  import { Button, Form, Message, Select, Sideslider, Tag } from 'bkui-vue';
+  import { Button, Form, Message, Sideslider } from 'bkui-vue';
   import { useI18n } from 'vue-i18n';
-  import { envTypeMap, envTypeTagClassMap } from '~/composables/use-env-manager';
+  import EnvSelectPanel from '~/components/env-select-panel.vue';
   import { useAppDetail } from '~/stores/app-detail';
   import { useTrpcDeployStore } from '~/stores/trpc-deploy';
 
   import QuicklyDeployForm from './quickly-deploy-form.vue';
 
+  import type { AppDeployedEnvOutputObj } from '~/@types/v1/app';
   import type { EnvOutput } from '~/@types/v1/env';
+
+  type OverviewDeployTarget = {
+    effectiveReplicas?: number;
+    env: EnvOutput;
+  };
 
   const isShow = defineModel<boolean>('isShow');
   const emits = defineEmits<{
     update: [envName?: string];
+    'update:deployStatusList': [list: AppDeployedEnvOutputObj[]];
   }>();
   const props = defineProps<{
     effectiveReplicas?: number;
     isProdEnv?: boolean;
     /** 传入时启用总览入口的目标环境选择；不传则保持实例列表入口的原有行为。 */
-    targetEnvs?: Array<{
-      effectiveReplicas?: number;
-      env: EnvOutput;
-    }>;
+    targetEnvs?: OverviewDeployTarget[];
   }>();
 
   const { t } = useI18n();
@@ -138,6 +132,7 @@
 
   const deployFormRef = ref<InstanceType<typeof QuicklyDeployForm>>();
   const targetEnvFormRef = ref();
+  const targetEnvSelectPanelRef = ref<null | { refresh?: () => Promise<void> }>(null);
   const confirmLoading = ref(false);
   const targetFormModel = reactive({ envName: '' });
   const targetFormRules = {
@@ -145,18 +140,11 @@
   };
   // 用 undefined 区分入口：空数组仍代表总览模式，只是环境列表尚未返回或当前没有可部署环境。
   const hasTargetSelector = computed(() => props.targetEnvs !== undefined);
-  const envTypeOrder = ['development', 'test', 'staging', 'production'];
-  const sortedTargetEnvs = computed(() =>
-    [...(props.targetEnvs || [])].sort((a, b) => {
-      const aIndex = envTypeOrder.indexOf(a.env.type || '');
-      const bIndex = envTypeOrder.indexOf(b.env.type || '');
-      const aWeight = aIndex === -1 ? envTypeOrder.length : aIndex;
-      const bWeight = bIndex === -1 ? envTypeOrder.length : bIndex;
-      return aWeight - bWeight;
-    }),
-  );
+  const selectedEnvItem = ref<EnvOutput>();
   const selectedTarget = computed(() => props.targetEnvs?.find(item => item.env.name === targetFormModel.envName));
-  const targetEnv = computed(() => (hasTargetSelector.value ? selectedTarget.value?.env : trpcDeployStore.curEnvItem));
+  const targetEnv = computed(() =>
+    hasTargetSelector.value ? selectedEnvItem.value || selectedTarget.value?.env : trpcDeployStore.curEnvItem,
+  );
   const targetEffectiveReplicas = computed(() =>
     hasTargetSelector.value ? selectedTarget.value?.effectiveReplicas : props.effectiveReplicas,
   );
@@ -185,6 +173,11 @@
   function handleClosed() {
     deployFormRef.value?.reset(1);
     targetFormModel.envName = '';
+    selectedEnvItem.value = undefined;
+  }
+
+  function handleDeployStatusListUpdate(list: AppDeployedEnvOutputObj[]) {
+    emits('update:deployStatusList', list);
   }
 
   /** 校验目标环境与部署表单，提交成功后关闭侧栏并通知父组件刷新对应入口的数据。 */
@@ -194,11 +187,11 @@
         const valid = await targetEnvFormRef.value?.validate?.().catch(() => false);
         if (!valid) return;
       }
-      const envName = targetEnv.value?.name;
-      if (!envName) return;
+      const env = targetEnv.value;
+      if (!env?.name) return;
 
       confirmLoading.value = true;
-      const submitted = await deployFormRef.value?.submit(envName);
+      const submitted = await deployFormRef.value?.submit(env.name, env);
       if (!submitted) return;
 
       Message({
@@ -207,7 +200,7 @@
       });
       deployFormRef.value?.reset(1);
       isShow.value = false;
-      emits('update', envName);
+      emits('update', env.name);
     } catch (err) {
       console.error(err);
     } finally {
@@ -215,11 +208,22 @@
     }
   }
 
-  // 每次从总览打开时保持目标环境未选择，由用户明确指定部署环境。
-  watch(isShow, newVal => {
+  function handleTargetEnvItemChange(env?: EnvOutput) {
+    selectedEnvItem.value = env;
+    if (env?.name) {
+      nextTick(() => targetEnvFormRef.value?.clearValidate?.());
+    }
+  }
+
+  // 首次挂载由环境选择器自动加载；再次打开时刷新已有选择器的数据。
+  watch(isShow, async newVal => {
     if (newVal) {
       if (hasTargetSelector.value) {
+        const wasTargetSelectorMounted = targetEnvSelectPanelRef.value !== null;
         targetFormModel.envName = '';
+        selectedEnvItem.value = undefined;
+        await nextTick();
+        if (wasTargetSelectorMounted) await targetEnvSelectPanelRef.value?.refresh?.();
       }
       nextTick(() => {
         targetEnvFormRef.value?.clearValidate?.();
@@ -237,6 +241,7 @@
       const currentTargetExists = targets?.some(item => item.env.name === targetFormModel.envName);
       if (currentTargetExists) return;
       targetFormModel.envName = '';
+      selectedEnvItem.value = undefined;
       nextTick(() => targetEnvFormRef.value?.clearValidate?.());
     },
     { deep: true },

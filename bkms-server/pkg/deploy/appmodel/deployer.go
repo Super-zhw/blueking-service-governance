@@ -31,6 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/autodeploy"
@@ -40,6 +41,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/secret"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/hostport"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
@@ -47,6 +49,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/discovery"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/gvr"
 	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
+	k8sworkload "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/workload"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload"
@@ -54,20 +57,21 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/registry"
 )
 
-// AnnotationKeyDeployID 部署 ID 的 Annotation Key，用于在 GameDeployment 及其 PodTemplate 中标记当前部署 ID
+// AnnotationKeyDeployID 部署 ID 的 Annotation Key，用于在主工作负载及其 PodTemplate 中标记当前部署 ID
 const AnnotationKeyDeployID = "bkms.tencent.com/deploy-id"
 
 // Deployer appmodel 应用部署器
 type Deployer struct {
-	recordStore            RecordStore
-	resourceSnapshotStore  ResourceSnapshotStore
-	buildDeployStore       autodeploy.RecordStore
-	appModelStore          appmodel.AppModelStore
-	builderService         *workload.BuilderService
-	appSpecStore           appspec.AppSpecStore
-	buildConfigStore       build.ConfigStore
-	appConfigFileStore     appcfg.AppConfigFileStore
-	polarisEnvStateManager *polaris.PolarisEnvStateManager
+	recordStore             RecordStore
+	resourceSnapshotStore   ResourceSnapshotStore
+	buildDeployStore        autodeploy.RecordStore
+	appModelStore           appmodel.AppModelStore
+	builderService          *workload.BuilderService
+	appSpecStore            appspec.AppSpecStore
+	buildConfigStore        build.ConfigStore
+	appConfigFileStore      appcfg.AppConfigFileStore
+	polarisEnvStateManager  *polaris.PolarisEnvStateManager
+	hostPortEnvStateManager *hostport.EnvStateManager
 
 	app *bkmsapp.Application
 
@@ -85,20 +89,22 @@ func NewDeployer(
 	buildConfigStore build.ConfigStore,
 	appConfigFileStore appcfg.AppConfigFileStore,
 	polarisEnvStateManager *polaris.PolarisEnvStateManager,
+	hostPortEnvStateManager *hostport.EnvStateManager,
 	app *bkmsapp.Application,
 ) *Deployer {
 	return &Deployer{
-		recordStore:            recordStore,
-		resourceSnapshotStore:  resourceSnapshotStore,
-		buildDeployStore:       buildDeployStore,
-		appModelStore:          appModelStore,
-		builderService:         builderService,
-		appSpecStore:           appSpecStore,
-		buildConfigStore:       buildConfigStore,
-		appConfigFileStore:     appConfigFileStore,
-		polarisEnvStateManager: polarisEnvStateManager,
-		app:                    app,
-		podManager:             &podManager{},
+		recordStore:             recordStore,
+		resourceSnapshotStore:   resourceSnapshotStore,
+		buildDeployStore:        buildDeployStore,
+		appModelStore:           appModelStore,
+		builderService:          builderService,
+		appSpecStore:            appSpecStore,
+		buildConfigStore:        buildConfigStore,
+		appConfigFileStore:      appConfigFileStore,
+		polarisEnvStateManager:  polarisEnvStateManager,
+		hostPortEnvStateManager: hostPortEnvStateManager,
+		app:                     app,
+		podManager:              &podManager{},
 	}
 }
 
@@ -129,11 +135,10 @@ func (d *Deployer) Deploy(
 	if err != nil {
 		return "", errors.Wrap(err, "build app model workload")
 	}
-	gameDeploy := buildResult.GameDeployment
 	extraObjs := buildResult.ExtraObjects
 
 	// 构建当前部署的 资源引用信息 并创建部署记录
-	resourceKeys := d.buildResourceKeys(gameDeploy, extraObjs)
+	resourceKeys := d.buildResourceKeys(buildResult.WorkloadKind, buildResult.Name(), extraObjs)
 	// 删除之前部署中下发的，现在已经不再需要的资源
 	expiredResources, err := d.getExpiredResources(ctx, env.Name, trafficLaneName, resourceKeys)
 	if err != nil {
@@ -141,7 +146,7 @@ func (d *Deployer) Deploy(
 	}
 	deployID, err = d.createDeployRecord(
 		ctx, env, trafficLaneName, imageTag, updateStrategy,
-		replicas, buildAutoDeployInfo, gameDeploy.Spec.Selector.MatchLabels, resourceKeys,
+		replicas, buildAutoDeployInfo, buildResult.Selector(), buildResult.WorkloadKind, resourceKeys,
 	)
 	if err != nil {
 		return "", errors.Wrap(err, "create deploy record")
@@ -180,11 +185,11 @@ func (d *Deployer) Deploy(
 	if err = d.upsertExtraObjects(ctx, clusterID, namespace, extraObjs); err != nil {
 		return "", errors.Wrap(err, "upsert extra objects")
 	}
-	// 在 GameDeployment 中注入 deployID，确保每次部署都能触发 Pod 滚动更新
-	d.injectDeployID(gameDeploy, deployID)
-	// 下发主工作负载资源（GameDeployment）到集群中
-	if err = d.upsertGameDeployment(ctx, clusterID, namespace, gameDeploy); err != nil {
-		return "", errors.Wrap(err, "upsert game deployment")
+	// 在主工作负载中注入 deployID，确保每次部署都能触发 Pod 滚动更新
+	d.injectDeployID(buildResult, deployID)
+	// 下发主工作负载资源到集群中
+	if err = d.upsertWorkload(ctx, clusterID, namespace, buildResult.GVR(), buildResult.MainWorkload); err != nil {
+		return "", errors.Wrap(err, "upsert main workload")
 	}
 
 	// 持久化已下发资源清单
@@ -193,7 +198,7 @@ func (d *Deployer) Deploy(
 		d.resourceSnapshotStore,
 		appModel.AppID,
 		deployID,
-		gameDeploy,
+		buildResult.MainWorkload,
 		extraObjs,
 		buildResult.SensitiveEnvVarValues,
 	)
@@ -213,12 +218,19 @@ func (d *Deployer) Deploy(
 		log.Errorf(ctx, "reconcile polaris config after deploy failed, app=%s env=%s: %v",
 			d.app.ID, env.Name, err)
 	}
+	if err = d.hostPortEnvStateManager.ReconcileAfterDeploy(
+		ctx, d.app, env, buildResult.HostPortAppliedPorts,
+	); err != nil {
+		log.Errorf(ctx, "reconcile hostport after deploy failed, app=%s env=%s: %v",
+			d.app.ID, env.Name, err)
+	}
 
 	return deployID, nil
 }
 
 // Uninstall 执行卸载操作，将最新部署的相关资源从集群中删除
-func (d *Deployer) Uninstall(ctx context.Context, envName, trafficLaneName string) error {
+func (d *Deployer) Uninstall(ctx context.Context, env *bkmsenv.Environment, trafficLaneName string) error {
+	envName := env.Name
 	// 获取最新部署记录
 	record, err := d.recordStore.GetLatest(ctx, d.app.ID, envName, trafficLaneName)
 	if err != nil {
@@ -261,6 +273,15 @@ func (d *Deployer) Uninstall(ctx context.Context, envName, trafficLaneName strin
 		log.Errorf(
 			ctx,
 			"reconcile polaris env states after uninstall failed, app=%s env=%s: %v",
+			d.app.ID,
+			envName,
+			err,
+		)
+	}
+	if err = d.hostPortEnvStateManager.ReconcileAfterUninstall(ctx, d.app, env); err != nil {
+		log.Errorf(
+			ctx,
+			"reconcile hostport env states after uninstall failed, app=%s env=%s: %v",
 			d.app.ID,
 			envName,
 			err,
@@ -314,13 +335,20 @@ func (d *Deployer) UpdateInstances(
 	if record.Status != StatusDeployed {
 		return errors.Errorf("deploy record status is %s, cannot update", record.Status)
 	}
+	kind, _ := record.MainWorkload()
+	driver, err := k8sworkload.GetMain(kind)
+	if err != nil {
+		return errors.Wrap(err, "get main workload driver")
+	}
+	if !driver.Capabilities().InplaceUpdate {
+		return errors.Errorf("workload %s does not support inplace or grayscale instance update", kind)
+	}
 
 	// 获取最新的 GameDeployment
 	gameDeploy, err := d.getLatestGameDeployment(ctx, record)
 	if err != nil {
 		return errors.Wrap(err, "get latest game deployment")
 	}
-
 	clusterID, namespace := record.ClusterID, record.Namespace
 	// 通过 Patch 的方式更新 GameDeployment 更新策略
 	patchBuilder := NewGameDeploymentJSONPatchBuilder(gameDeploy)
@@ -363,7 +391,7 @@ func (d *Deployer) UpdateInstances(
 		patches = append(patches, patchBuilder.BuildRollingUpdatePatch())
 	}
 
-	if err = d.patchGameDeployment(ctx, clusterID, namespace, gameDeploy.Name, patches); err != nil {
+	if err = d.patchWorkload(ctx, clusterID, namespace, gameDeploy.Name, gvr.GameDeploy, patches); err != nil {
 		log.Errorf(
 			ctx, "patch record %s game deployment %s with patches %+v failed, err: %v",
 			record.ID.Hex(), gameDeploy.Name, patches, err,
@@ -387,22 +415,22 @@ func (d *Deployer) Scale(ctx context.Context, envName, trafficLaneName string, r
 	if err != nil {
 		return errors.Wrap(err, "get latest deploy record")
 	}
-	// 获取最新的 GameDeployment
-	gameDeploy, err := d.getLatestGameDeployment(ctx, record)
+	kind, name := record.MainWorkload()
+	if name == "" {
+		return errors.Errorf("main workload not found in deploy record %s", record.ID.Hex())
+	}
+	driver, err := k8sworkload.Get(kind)
 	if err != nil {
-		return errors.Wrap(err, "get latest game deployment")
+		return errors.Wrap(err, "get workload driver")
 	}
 
-	// 通过 Patch 的方式更新 GameDeployment 副本数量
-	patches := []map[string]any{
-		NewGameDeploymentJSONPatchBuilder(gameDeploy).BuildReplicasPatch(replicas),
-	}
-	if err = d.patchGameDeployment(ctx, record.ClusterID, record.Namespace, gameDeploy.Name, patches); err != nil {
+	patches := []map[string]any{replicasJSONPatch(replicas)}
+	if err = d.patchWorkload(ctx, record.ClusterID, record.Namespace, name, driver.GVR(), patches); err != nil {
 		log.Errorf(
-			ctx, "patch record %s game deployment %s with patches %+v failed, err: %v",
-			record.ID.Hex(), gameDeploy.Name, patches, err,
+			ctx, "patch record %s %s %s with patches %+v failed, err: %v",
+			record.ID.Hex(), kind, name, patches, err,
 		)
-		return errors.Wrap(err, "patch game deployment")
+		return errors.Wrapf(err, "patch %s", kind)
 	}
 
 	// 更新部署记录
@@ -460,6 +488,14 @@ func (d *Deployer) BatchDeleteInstances(
 		log.Infof(ctx, "no running pods to delete, all pods selected are terminated")
 		return nil
 	}
+	kind, _ := record.MainWorkload()
+	driver, err := k8sworkload.GetMain(kind)
+	if err != nil {
+		return errors.Wrap(err, "get main workload driver")
+	}
+	if !driver.Capabilities().SelectedPodDeletion {
+		return errors.Errorf("workload %s does not support deleting selected running pods", kind)
+	}
 
 	// 通过 GameDeployment 删除运行态的 Pod
 	log.Infof(ctx, "deleting %d running pods via GameDeployment: %v", len(runningPods), runningPods)
@@ -484,8 +520,13 @@ func (d *Deployer) deleteRunningPodsByGameDeployment(
 		patchBuilder.BuildReplicasPatch(newReplicas),
 		patchBuilder.BuildPodsToDeletePatch(podNames),
 	}
-	if err = d.patchGameDeployment(
-		ctx, record.ClusterID, record.Namespace, gameDeploy.Name, patches,
+	if err = d.patchWorkload(
+		ctx,
+		record.ClusterID,
+		record.Namespace,
+		gameDeploy.Name,
+		gvr.GameDeploy,
+		patches,
 	); err != nil {
 		log.Errorf(
 			ctx, "patch record %s game deployment %s with patches %+v failed, err: %v",
@@ -509,21 +550,17 @@ func (d *Deployer) deleteRunningPodsByGameDeployment(
 	return nil
 }
 
-// injectDeployID 向 GameDeployment 的两个层级 Annotations 中注入 deployID
-// 1. GameDeployment.ObjectMeta.Annotations —— 资源级别标记，便于运维查询和追溯
-// 2. GameDeployment.Spec.Template.ObjectMeta.Annotations —— PodTemplate 级别标记，触发 Pod 滚动更新
-func (d *Deployer) injectDeployID(gameDeploy *tkex.GameDeployment, deployID string) {
-	// 注入到 GameDeployment 资源级别的 Annotations
-	if gameDeploy.Annotations == nil {
-		gameDeploy.Annotations = make(map[string]string)
-	}
-	gameDeploy.Annotations[AnnotationKeyDeployID] = deployID
+// injectDeployID 向主工作负载的资源级与 PodTemplate 级 Annotations 注入 deployID，触发滚动更新。
+func (d *Deployer) injectDeployID(result *workload.BuildResult, deployID string) {
+	injectDeployIDAnno(result.ObjectMeta(), deployID)
+	injectDeployIDAnno(result.TemplateMeta(), deployID)
+}
 
-	// 注入到 PodTemplate 级别的 Annotations，确保 PodTemplate 变化触发滚动更新
-	if gameDeploy.Spec.Template.Annotations == nil {
-		gameDeploy.Spec.Template.Annotations = make(map[string]string)
+func injectDeployIDAnno(meta *metav1.ObjectMeta, deployID string) {
+	if meta.Annotations == nil {
+		meta.Annotations = make(map[string]string)
 	}
-	gameDeploy.Spec.Template.Annotations[AnnotationKeyDeployID] = deployID
+	meta.Annotations[AnnotationKeyDeployID] = deployID
 }
 
 // setupAppModel 设置工作负载名称 & 镜像
@@ -610,58 +647,55 @@ func (d *Deployer) getLatestGameDeployment(ctx context.Context, record *Record) 
 	return &gameDeploy, nil
 }
 
-// upsertGameDeployment 更新或创建 GameDeployment 资源
-func (d *Deployer) upsertGameDeployment(
+// upsertWorkload 更新或创建主工作负载
+func (d *Deployer) upsertWorkload(
 	ctx context.Context,
 	clusterID, namespace string,
-	gameDeploy *tkex.GameDeployment,
+	resGVR schema.GroupVersionResource,
+	obj any,
 ) error {
-	// 使用 k8s runtime 提供的转换器，避免 json 转换导致 int 变 float64 的问题
-	manifest, err := runtime.DefaultUnstructuredConverter.ToUnstructured(gameDeploy)
+	manifest, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
-		return errors.Wrap(err, "convert game deployment to unstructured")
+		return errors.Wrap(err, "convert workload to unstructured")
 	}
 
-	client := k8sclient.NewWithGVR(cluster.NewConfig(clusterID), gvr.GameDeploy)
+	client := k8sclient.NewWithGVR(cluster.NewConfig(clusterID), resGVR)
 	if _, err = client.Upsert(ctx, namespace, manifest, metav1.PatchOptions{}); err != nil {
-		return errors.Wrap(err, "upsert game deployment")
+		return errors.Wrap(err, "upsert workload")
 	}
 	return nil
 }
 
-// patchGameDeployment 通过 patch 的方式更新 GameDeployment 资源
-func (d *Deployer) patchGameDeployment(
+// patchWorkload 通过 patch 的方式更新主工作负载
+func (d *Deployer) patchWorkload(
 	ctx context.Context,
-	clusterID, namespace, gameDeployName string,
+	clusterID, namespace, name string,
+	resGVR schema.GroupVersionResource,
 	patches []map[string]any,
 ) error {
-	// 过滤掉空 patch
 	patches = lo.Filter(patches, func(p map[string]any, _ int) bool {
 		return len(p) > 0
 	})
-	// patch 序列化
 	patchesByte, err := json.Marshal(patches)
 	if err != nil {
-		return errors.Wrap(err, "marshal game deployment patches")
+		return errors.Wrap(err, "marshal workload patches")
 	}
-	client := k8sclient.NewWithGVR(cluster.NewConfig(clusterID), gvr.GameDeploy)
-	// patch GameDeployment 资源
+	client := k8sclient.NewWithGVR(cluster.NewConfig(clusterID), resGVR)
 	if _, err = client.Patch(
-		ctx, namespace, gameDeployName, types.JSONPatchType, patchesByte, metav1.PatchOptions{},
+		ctx, namespace, name, types.JSONPatchType, patchesByte, metav1.PatchOptions{},
 	); err != nil {
-		return errors.Wrap(err, "patch game deployment")
+		return errors.Wrap(err, "patch workload")
 	}
 	return nil
 }
 
-// buildResourceKeys 构建资源引用信息（用于后续资源管理和追踪）
+// buildResourceKeys 构建资源引用信息（用于后续资源管理和追踪）。
+// workloadKind / workloadName 是主工作负载的 Kind 与名称。
 func (d *Deployer) buildResourceKeys(
-	gameDeploy *tkex.GameDeployment,
+	workloadKind, workloadName string,
 	extraObjs []unstructured.Unstructured,
 ) ResourceKeys {
-	// 主工作负载
-	resources := ResourceKeys{{Kind: gameDeploy.Kind, Name: gameDeploy.Name}}
-	// 其他资源
+	resources := ResourceKeys{{Kind: workloadKind, Name: workloadName}}
 	for _, obj := range extraObjs {
 		resources = append(resources, ResourceKey{
 			Kind: obj.GetKind(), Name: obj.GetName(),
@@ -703,6 +737,7 @@ func (d *Deployer) createDeployRecord(
 	replicas int32,
 	buildAutoDeployInfo *BuildAutoDeployInfo,
 	labelSelector map[string]string,
+	workloadKind string,
 	resourceKeys ResourceKeys,
 ) (string, error) {
 	timeNow := time.Now()
@@ -719,6 +754,7 @@ func (d *Deployer) createDeployRecord(
 		Replicas:        replicas,
 		DeletionCost:    defaults.PodDeletionCost,
 		LabelSelector:   labelSelector,
+		WorkloadKind:    workloadKind,
 		ResourceKeys:    resourceKeys,
 		Message:         "",
 		Status:          StatusDeploying,
@@ -791,4 +827,12 @@ func (d *Deployer) UpdateInstancePolaris(
 		return errors.Wrapf(err, "set polaris annotations for app %s instances", d.app.ID)
 	}
 	return nil
+}
+
+func replicasJSONPatch(replicas int32) map[string]any {
+	return map[string]any{
+		"op":    "replace",
+		"path":  "/spec/replicas",
+		"value": replicas,
+	}
 }

@@ -33,9 +33,8 @@ func NewEditCmd() *cobra.Command {
 	var appID, specFile string
 
 	cmd := &cobra.Command{
-		Use:    "edit",
-		Short:  "Edit application start command",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "edit",
+		Short: "Edit application start command",
 		Long: `Edit the application start command and arguments from a YAML file.
 
 The YAML file should contain 'command' and/or 'args' fields as string arrays.
@@ -61,6 +60,7 @@ unless explicitly overridden in the YAML file.`,
   #     language: go
   #     fileName: trpc_go.yaml
   #     filePath: /usr/local/trpc/conf`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := appspec.EditStartCommandHandler(cmd.Context(), appID, specFile); err != nil {
 				return errors.Wrap(err, "edit start command")
@@ -71,7 +71,7 @@ unless explicitly overridden in the YAML file.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVarP(&specFile, "file", "f", "", "path to YAML spec file (required)")
 
 	_ = cmd.MarkFlagRequired("app")

@@ -29,6 +29,7 @@
 package polaris
 
 import (
+	"sort"
 	"strconv"
 	"time"
 
@@ -41,6 +42,16 @@ import (
 
 // DefaultEnvWeight 环境未单独设置权重时使用的默认值。
 const DefaultEnvWeight int32 = 100
+
+// 注册模式，决定配置何时在北极星侧注册，以及是否参与 Workload 渲染。
+const (
+	// RegisterModeOnDeploy 等部署后注册：配置参与 Workload 渲染（环境变量、tRPC 框架配置），
+	// CR 随应用部署下发，是历史行为，也是缺省值。
+	RegisterModeOnDeploy = "on_deploy"
+	// RegisterModeImmediate 绑定后立即注册：配置不参与 Workload 渲染，绑定环境时直接下发
+	// PolarisConfig CR 与配套 Service 完成注册，无需业务部署。
+	RegisterModeImmediate = "immediate"
+)
 
 // PolarisServiceInstances 存储单个北极星服务的配置和实例信息
 type PolarisServiceInstances struct {
@@ -72,10 +83,16 @@ type Properties struct {
 	KeepNotReadyPod bool `bson:"keepNotReadyPod"`
 	// EnableHealthCheck 是否启用健康检查
 	EnableHealthCheck bool `bson:"enableHealthCheck"`
+	// EnableWeightFactor 该北极星配置是否启用权重因子，决定用户能否为单个环境开启动态权重。
+	// 具体哪些环境开由 EnvDynamicWeights 记录，CR 上的开关直接取后者
+	EnableWeightFactor bool `bson:"enableWeightFactor"`
 	// ServiceLabels 服务标签
 	ServiceLabels map[string]string `bson:"serviceLabels"`
 	// Operator 操作人
 	Operator string `bson:"operator"`
+	// RegisterMode 注册模式，取值见 RegisterModeOnDeploy / RegisterModeImmediate；
+	// 空值按 RegisterModeOnDeploy 解释，创建后不可修改
+	RegisterMode string `bson:"registerMode"`
 }
 
 // PolarisConfig 北极星配置实体，存储在独立的数据表中
@@ -97,10 +114,16 @@ type PolarisConfig struct {
 	// EnvStates 各环境中已经生效的关键字段和下发错误
 	EnvStates map[string]PolarisEnvState `bson:"envStates,omitempty"`
 
+	// NOTE: 后续考虑是否合并 EnvWeights 与 EnvDynamicWeights 等为一个字段，统一管理环境配置
 	// EnvWeights 各环境的单实例权重（key 为环境名）。
 	// 基本与 EnvStates 同生命周期：未部署离域立即删除；已部署离域保留至下次离域部署/卸载；
 	// 仍在 scope 内卸载时保留，供再次部署使用。缺省使用 DefaultEnvWeight。
 	EnvWeights map[string]int32 `bson:"envWeights,omitempty"`
+
+	// EnvDynamicWeights 各环境是否开启动态权重（key 为环境名），缺省视为关闭。
+	// 直接决定 CR 上的 dynamicWeight.enable，平台不再叠加 EnableWeightFactor 二次判断。
+	// 与 EnvWeights 共享环境生命周期，但加入 scope 时不预建默认值
+	EnvDynamicWeights map[string]bool `bson:"envDynamicWeights,omitempty"`
 
 	// CreatedAt 创建时间
 	CreatedAt time.Time `bson:"createdAt"`
@@ -118,15 +141,45 @@ func (c *PolarisConfig) IsAvailableInEnv(envName string) bool {
 	return lo.Contains(c.ScopeEnvNames, envName)
 }
 
+// IsImmediateRegister 判断配置是否为绑定后立即注册模式。
+// 空值按 RegisterModeOnDeploy 解释，保证存量数据与滚动发布窗口内的行为不变。
+func (c *PolarisConfig) IsImmediateRegister() bool {
+	return c.RegisterMode == RegisterModeImmediate
+}
+
+// EnvNamesOutsideScope 返回仍留有环境记录、但已经不在 scope 内的环境名称。
+func (c *PolarisConfig) EnvNamesOutsideScope() []string {
+	envNames := make([]string, 0)
+	for envName := range c.EnvStates {
+		if c.IsAvailableInEnv(envName) {
+			continue
+		}
+		envNames = append(envNames, envName)
+	}
+	sort.Strings(envNames)
+	return envNames
+}
+
+// TrackedEnvNames 返回配置仍在跟踪的全部环境：scope ∪ 仍有 EnvState 记录的环境。
+func (c *PolarisConfig) TrackedEnvNames() []string {
+	envNames := lo.Uniq(append(append([]string{}, c.ScopeEnvNames...), lo.Keys(c.EnvStates)...))
+	sort.Strings(envNames)
+	return envNames
+}
+
 // ConfigVar 配置变量
 type ConfigVar struct {
 	Key   string
 	Value string
 }
 
-// GetVars 获取北极星配置的变量列表
-// 返回变量: {instanceKey}_polarisToken, {instanceKey}_servicePort
+// GetVars 返回该配置会注入到 Workload 的环境变量：
+// {instanceKey}_polarisToken、{instanceKey}_serviceport。
+// immediate 模式不参与 Workload 渲染，返回空列表。
 func (c *PolarisConfig) GetVars() []ConfigVar {
+	if c.IsImmediateRegister() {
+		return []ConfigVar{}
+	}
 	return []ConfigVar{
 		{
 			Key:   c.InstanceKey + "_polarisToken",
@@ -141,22 +194,23 @@ func (c *PolarisConfig) GetVars() []ConfigVar {
 
 // ConfigUpdateData 定义了更新 PolarisConfig 时允许修改的数据
 type ConfigUpdateData struct {
-	InstanceKey       *string
-	ServicePort       *int32
-	Direct            *bool
-	KeepNotReadyPod   *bool
-	EnableHealthCheck *bool
-	ServiceLabels     map[string]string
+	InstanceKey        *string
+	ServicePort        *int32
+	Direct             *bool
+	KeepNotReadyPod    *bool
+	EnableHealthCheck  *bool
+	EnableWeightFactor *bool
+	ServiceLabels      map[string]string
 	// ScopeEnvNames 生效环境列表；nil 表示不更新，非 nil（含空切片）表示覆盖
 	ScopeEnvNames []string
 	PolarisToken  *string
 	Operator      *string
-	// envWeights 仅由 service 在 scope 变化时生成并交给 store 持久化。
-	envWeights map[string]int32
+	// envWeights、envDynamicWeights 仅由 service 在 scope 变化时生成并交给 store 持久化。
+	envWeights        map[string]int32
+	envDynamicWeights map[string]bool
 }
 
 // affectsWorkload 判断本次更新是否影响 PolarisConfig CR / 工作负载渲染。
-// operator 只同步北极星 Owners，不参与 CR，因此单独更新负责人时不触发动态下发。
 func (d *ConfigUpdateData) affectsWorkload() bool {
 	if d == nil {
 		return false
@@ -190,10 +244,13 @@ func (c *PolarisConfig) GenerateRegistryConfig() RegistryServiceEntry {
 
 // CollectRegistryServiceEntries 从给定的 PolarisConfig 列表中收集所有启用健康检查的配置的
 // registry service 条目。
+//
+// immediate 模式的配置不参与 Workload 渲染，不往框架配置文件注入 registry 配置；
+// 这类业务若确实需要框架侧上报，自行在配置文件中书写即可，Patcher 不会覆盖已有内容。
 func CollectRegistryServiceEntries(configs []*PolarisConfig) []RegistryServiceEntry {
 	var entries []RegistryServiceEntry
 	for _, config := range configs {
-		if config.EnableHealthCheck {
+		if config.EnableHealthCheck && !config.IsImmediateRegister() {
 			entries = append(entries, config.GenerateRegistryConfig())
 		}
 	}

@@ -35,6 +35,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/gvr"
 	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
 	k8sstatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/status"
+	deploystatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/status/workload/deployment"
 	gamedeploystatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/status/workload/gamedeployment"
 )
 
@@ -98,6 +99,26 @@ var _ = Describe("DeployStateGetter", func() {
 						Message: "All replicas are ready",
 					}
 					mockey.Mock(gamedeploystatus.Parse).Return(healthyResult, nil).Build()
+
+					state, err := getter.Get(ctx)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(state.Status).To(Equal(StatusDeployed))
+				})
+			})
+		})
+
+		Context("when the main workload is a Deployment", func() {
+			It("should return StatusDeployed when the Deployment is available", func() {
+				mockey.PatchConvey("test", GinkgoT(), func() {
+					record.ResourceKeys = ResourceKeys{{Kind: k8skind.Deploy, Name: "test-deploy"}}
+					getter = NewDeployStateGetter(record)
+
+					mockResource := &unstructured.Unstructured{}
+					mockey.Mock((*k8sclient.Client).Get).Return(mockResource, nil).Build()
+					mockey.Mock(deploystatus.Parse).Return(&k8sstatus.Result{
+						Code:    k8sstatus.Available,
+						Message: "Deployment is available",
+					}).Build()
 
 					state, err := getter.Get(ctx)
 					Expect(err).NotTo(HaveOccurred())
@@ -187,15 +208,16 @@ var _ = Describe("DeployStateGetter", func() {
 		})
 	})
 
-	Describe("getGameDeployName", func() {
-		It("should return GameDeployment name when exists", func() {
-			name := getter.getGameDeployName()
-			Expect(name).To(Equal("test-game-deploy"))
-
-			record.ResourceKeys = ResourceKeys{{Kind: k8skind.SVC, Name: "test-service"}}
+	Describe("getMainWorkload", func() {
+		It("prefers Deployment over GameDeployment", func() {
+			record.ResourceKeys = ResourceKeys{
+				{Kind: k8skind.Deploy, Name: "test-deploy"},
+				{Kind: k8skind.GameDeploy, Name: "test-game-deploy"},
+			}
 			getter = NewDeployStateGetter(record)
-			name = getter.getGameDeployName()
-			Expect(name).To(BeEmpty())
+			kind, name := getter.getMainWorkload()
+			Expect(kind).To(Equal(k8skind.Deploy))
+			Expect(name).To(Equal("test-deploy"))
 		})
 	})
 
@@ -212,7 +234,7 @@ var _ = Describe("DeployStateGetter", func() {
 
 					_, err := getter.Get(ctx)
 					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(ContainSubstring("GameDeployment resources are not managed"))
+					Expect(err.Error()).To(ContainSubstring("main workload is not managed"))
 				})
 			})
 		})

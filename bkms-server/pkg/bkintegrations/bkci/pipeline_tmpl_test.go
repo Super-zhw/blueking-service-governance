@@ -78,7 +78,7 @@ var _ = Describe("PipelineTemplatesReloader", func() {
 
 			var rendered map[string]any
 			Expect(json.Unmarshal(renderedData, &rendered)).To(Succeed())
-			Expect(rendered["version"]).To(Equal("1.2.0"))
+			Expect(rendered["version"]).To(Equal("1.4.0"))
 
 			stages := rendered["stages"].([]any)
 			triggerContainer := stages[0].(map[string]any)["containers"].([]any)[0].(map[string]any)
@@ -88,23 +88,35 @@ var _ = Describe("PipelineTemplatesReloader", func() {
 				paramIDs = append(paramIDs, param.(map[string]any)["id"].(string))
 			}
 			Expect(paramIDs).To(ContainElement("BKMS_DOCKER_BUILD_ARG_NAMES"))
+			Expect(paramIDs).To(ContainElement("BKMS_IMAGE_REGISTRY_HOST"))
 			Expect(paramIDs).To(ContainElement("BKMS_DOCKERFILE_SOURCE_TYPE"))
 			Expect(paramIDs).To(ContainElement("BKMS_DOCKERFILE_LANGUAGE"))
 			Expect(paramIDs).To(ContainElement("BKMS_IMAGE_BUILD_TOOLCHAIN_BASE_URL"))
 			Expect(paramIDs).To(ContainElement("BKMS_DOCKERFILE_BUILDER_IMAGE"))
 			Expect(paramIDs).To(ContainElement("BKMS_DOCKERFILE_START_COMMAND"))
+			Expect(paramIDs).To(ContainElement("BKMS_DOCKERFILE_EXTRA_FILES"))
 			Expect(paramIDs).NotTo(ContainElement("BKMS_DOCKERFILE_GENERATOR_BASE_URL"))
 
 			buildContainer := stages[1].(map[string]any)["containers"].([]any)[0].(map[string]any)
 			elements := buildContainer["elements"].([]any)
 			var scriptElement map[string]any
+			var dockerBuildElement map[string]any
 			for _, element := range elements {
 				candidate := element.(map[string]any)
-				if candidate["atomCode"] == "linuxScript" {
+				switch candidate["atomCode"] {
+				case "linuxScript":
 					scriptElement = candidate
-					break
+				case "DockerBuildAndPushImage":
+					dockerBuildElement = candidate
 				}
 			}
+			Expect(dockerBuildElement).NotTo(BeNil())
+			dockerInput := dockerBuildElement["data"].(map[string]any)["input"].(map[string]any)
+			sourceTickets := dockerInput["sourceMirrorTicketPair"].([]any)
+			Expect(sourceTickets).To(HaveLen(1))
+			Expect(sourceTickets[0].(map[string]any)["key"]).To(Equal("${BKMS_IMAGE_REGISTRY_HOST}"))
+			Expect(sourceTickets[0].(map[string]any)["value"]).To(Equal("${BKMS_IMAGE_CREDENTIAL}"))
+			Expect(dockerInput["targetTicketId"]).To(Equal("${BKMS_IMAGE_CREDENTIAL}"))
 			Expect(scriptElement).NotTo(BeNil())
 			Expect(scriptElement["@type"]).To(Equal("linuxScript"))
 			Expect(scriptElement["classType"]).To(Equal("linuxScript"))
@@ -119,6 +131,7 @@ var _ = Describe("PipelineTemplatesReloader", func() {
 			script := scriptElement["script"].(string)
 			Expect(script).To(ContainSubstring("BKMS_DOCKERFILE_SOURCE_TYPE"))
 			Expect(script).To(ContainSubstring("BKMS_DOCKERFILE_LANGUAGE"))
+			Expect(script).To(ContainSubstring("BKMS_DOCKERFILE_EXTRA_FILES"))
 			Expect(script).To(ContainSubstring("bkms_generated"))
 			Expect(script).NotTo(ContainSubstring("BKMS_DOCKERFILE_GENERATOR_BASE_URL"))
 			Expect(script).To(ContainSubstring(`if [ "$BKMS_DOCKERFILE_SOURCE_TYPE" != "bkms_generated" ]; then`))

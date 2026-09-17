@@ -34,14 +34,14 @@ func NewDisableCmd() *cobra.Command {
 	var appID, envName string
 
 	cmd := &cobra.Command{
-		Use:    "disable",
-		Short:  "Disable dev-mode for an environment",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "disable",
+		Short: "Disable dev-mode for an environment",
 		Long: `Disable the development mode for an application environment.
 
 After disabling, the application will need to be redeployed to take effect.`,
 		Example: `  # Disable dev-mode for an environment
   bkms-cli app appspec dev-mode disable --app my-app --env prod`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := appspec.SetEnabledHandler(
 				cmd.Context(), appID, envName, client.AppSpecSectionDevMode, false,
@@ -54,7 +54,7 @@ After disabling, the application will need to be redeployed to take effect.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (required)")
 
 	_ = cmd.MarkFlagRequired("app")

@@ -67,7 +67,13 @@
         property="branch"
         required
       >
-        <Input v-model.trim="formModel.branch" />
+        <RepoRefSelect
+          ref="branchSelectRef"
+          v-model="formModel.branch"
+          :repository-id="repoAlias"
+          :workspace-id="workspaceId"
+          @branch-commit="handleBranchSelect"
+        />
       </Form.FormItem>
     </template>
     <Form.FormItem
@@ -95,11 +101,13 @@
     </Form.FormItem>
   </Form>
 
-  <!-- 环境变量预检查弹窗 -->
+  <!-- “资源规格” 和 “环境变量” 统一预检查弹窗 -->
   <EnvVarPrecheckDialog
     v-if="precheckBeforeSubmit"
     v-model:is-show="isShowPrecheckDialog"
     :env-name="precheckEnvName"
+    :mismatches="federationMismatches"
+    :missing-required-cluster-addons="missingRequiredClusterAddons"
     :undefined-vars="undefinedVars"
     @cancel="cancelDeploy"
     @go-modify="cancelDeploy"
@@ -111,6 +119,7 @@
   import { computed, reactive, ref } from 'vue';
 
   import { Button, Form, Input, Select } from 'bkui-vue';
+  import { useAppRepoRefSelect } from '~/composables/use-app-repo-ref-select';
   import useLeaveConfirm from '~/composables/use-leave-confirm';
   import { useRecommendTag } from '~/composables/use-recommend-tag';
   import { useAppDetail } from '~/stores/app-detail';
@@ -119,7 +128,9 @@
   import ImageSelect from '../../components/image-select.vue';
   import EnvVarPrecheckDialog from './env-var-precheck-dialog.vue';
   import { type DeployableAppType, type DeployParams, useDeployAPIs } from './use-deploy';
-  import { useEnvVarPrecheck } from './use-env-var-precheck';
+  import { useDeployPrecheck } from './use-deploy-precheck';
+
+  import type { EnvOutput } from '~/@types/v1/env';
 
   // 镜像来源类型：从源码构建 / 已构建镜像
   type ImageSourceType = 'code' | 'image';
@@ -142,8 +153,20 @@
 
   const trpcDeployStore = useTrpcDeployStore();
   const appDetailStore = useAppDetail();
-  const { cancelDeploy, continueDeploy, isShowPrecheckDialog, precheck, precheckEnvName, undefinedVars } =
-    useEnvVarPrecheck();
+  const {
+    cancelDeploy,
+    continueDeploy,
+    federationMismatches,
+    isShowPrecheckDialog,
+    missingRequiredClusterAddons,
+    precheck,
+    precheckEnvName,
+    undefinedVars,
+  } = useDeployPrecheck();
+
+  const { workspaceId, repoAlias, branchSelectRef, prepareBranchAfterMount } = useAppRepoRefSelect(
+    () => appDetailStore.appDetail?.buildConfig?.repoBuildConfig?.repoAlias || '',
+  );
 
   // 当前选择的镜像来源
   const imageSource = ref<ImageSourceType>('image');
@@ -172,12 +195,18 @@
 
   // 推荐镜像 Tag：源码构建模式下自动推荐
   const { getDefaultBranch, fetchRecommendTag } = useRecommendTag(() => formModel.branch, {
+    manualFetchOnly: computed(() => !repoAlias.value),
     onRecommend: tag => {
       if (imageSource.value === 'code') {
         formModel.imageTag = tag;
       }
     },
   });
+
+  /** 分支确认后拉取推荐镜像 Tag */
+  function handleBranchSelect(branch: string) {
+    if (branch) fetchRecommendTag(branch);
+  }
   // 离开确认：表单有变更时提示用户
   const { confirmBox, forceCleanDirtyTag, withPausedWatch } = useLeaveConfirm(formModel);
 
@@ -212,13 +241,11 @@
     }
   }
 
-  /** 切换镜像来源；源码模式补充分支和推荐 Tag，镜像模式清空源码相关字段。 */
-  function handleChangeImageSource(source: ImageSourceType) {
+  /** 切换镜像来源；源码模式 prepare 默认分支并预拉列表，镜像模式清空源码相关字段。 */
+  async function handleChangeImageSource(source: ImageSourceType) {
     imageSource.value = source;
     if (source === 'code') {
-      const branch = getDefaultBranch();
-      formModel.branch = branch;
-      fetchRecommendTag(branch);
+      await prepareBranchAfterMount(getDefaultBranch());
     } else {
       formModel.branch = '';
       formModel.imageTag = '';
@@ -240,12 +267,12 @@
   }
 
   // 提交部署：内部完成校验、部署和脏标记清理
-  async function submit(targetEnvName: string) {
+  async function submit(targetEnvName: string, targetEnv?: EnvOutput) {
     const valid = await validate();
     if (!valid) return false;
 
     if (props.precheckBeforeSubmit) {
-      const precheckPassed = await precheck(targetEnvName);
+      const precheckPassed = await precheck(targetEnvName, targetEnv);
       if (!precheckPassed) return false;
     }
 

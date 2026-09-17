@@ -38,6 +38,10 @@ Use this command to create new deploys or view deploy records for your applicati
 	cmd.AddCommand(NewListCmd())
 	// 更新实例
 	cmd.AddCommand(NewUpdateCmd())
+	// 部署前检查
+	cmd.AddCommand(NewPrecheckCmd())
+	// 删除部署
+	cmd.AddCommand(NewDeployDeleteCmd())
 
 	return cmd
 }

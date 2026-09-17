@@ -104,6 +104,21 @@ var _ = Describe("GPAService K8s interactions", func() {
 			})
 		})
 
+		It("should reject apply on a federation env", func() {
+			mockey.PatchConvey("apply-federation-unsupported", GinkgoT(), func() {
+				env.Cluster.IsFederation = true
+				upsertMock := mockey.Mock((*k8sclient.Client).Upsert).Return(nil, nil).Build()
+
+				config := &GPAConfig{
+					Name: "web-autoscale", AppID: "app-1", MinReplicas: 2, MaxReplicas: 10,
+					Metrics: []GPAMetric{{Resource: ResourceCPU, AverageUtilization: 60}},
+				}
+				err := svc.Apply(ctx, env, config)
+				Expect(err).To(MatchError(ErrFederationNotSupported))
+				Expect(upsertMock.Times()).To(Equal(0))
+			})
+		})
+
 		It("should not call k8s when the scale target cannot be resolved", func() {
 			mockey.PatchConvey("apply-resolve-target-fail", GinkgoT(), func() {
 				resolveErr := errors.New("resolve target failed")

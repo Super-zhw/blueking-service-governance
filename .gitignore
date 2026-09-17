@@ -10,6 +10,7 @@
 *exvim*
 *vendor*
 build/
+dist/
 
 # Local AI coding agent config directories
 .codebuddy/
@@ -19,6 +20,10 @@ build/
 .gemini/
 .windsurf/
 .qwen/
+
+# Local AI temporary documents
+docs/reqs
+docs/superpowers
 
 !bkms-server/pkg/build/
 !bkms-server/pkg/build/build/
@@ -58,7 +63,6 @@ bkms-server/tests/.env
 bkms-server/tests/utdeps/gitea
 bkms-server/tests/utdeps/charts/repo/*.tgz
 bkms-server/tests/utdeps_db/mongo8/*
-bkms-server/tests/utdeps_db/rabbitmq/*
 .playwright-cli/
 /charts/bkms-server/charts/
 /charts/bkms-ui/charts/

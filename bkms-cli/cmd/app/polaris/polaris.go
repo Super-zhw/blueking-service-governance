@@ -41,6 +41,8 @@ configs for your applications.`,
 	cmd.AddCommand(NewDeleteCmd())
 	// 更新北极星配置
 	cmd.AddCommand(NewUpdateCmd())
+	// 更新北极星配置在指定环境下的全局权重
+	cmd.AddCommand(NewWeightCmd())
 
 	return cmd
 }

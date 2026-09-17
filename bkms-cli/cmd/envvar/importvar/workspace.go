@@ -92,10 +92,10 @@ Use --preview to see what would be imported without making any changes.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace ID")
+	cmdutil.AddWorkspaceFlag(cmd, &workspaceID)
 	cmd.Flags().StringVarP(&filePath, "file", "f", "", "path to the .env file to import")
 	cmd.Flags().BoolVar(&preview, "preview", false, "preview import without making changes")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("file")
 

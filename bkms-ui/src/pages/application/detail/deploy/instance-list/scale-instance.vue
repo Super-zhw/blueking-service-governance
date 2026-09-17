@@ -74,7 +74,12 @@
               {{ $t('手动调节') }}
             </Button>
             <Button
+              v-bk-tooltips="{
+                content: $t('联邦集群暂不支持自动扩缩'),
+                disabled: !isFederationEnv,
+              }"
               class="flex-1"
+              :disabled="isFederationEnv"
               :selected="formModel.mode === 'auto'"
               @click="handleChangeMode('auto')"
             >
@@ -278,6 +283,7 @@
   import { hasErrorCode, showApiErrorMessage } from '~/common/util';
   import DividerHeader from '~/components/divider-header.vue';
   import { useGPAConfigPolling } from '~/composables/use-gpa-config-polling';
+  import useIsFederationEnv from '~/composables/use-is-federation-env';
   import useLeaveConfirm from '~/composables/use-leave-confirm';
   import AutoScaleTag from '~/pages/application/detail/components/auto-scale-tag.vue';
   import { useAppDetail } from '~/stores/app-detail';
@@ -302,6 +308,7 @@
 
   const emit = defineEmits(['update']);
   const props = defineProps<{
+    beforeOpen?: () => Promise<void>;
     effectiveReplicas?: number;
     loading?: boolean;
   }>();
@@ -314,6 +321,7 @@
   const isShow = ref(false);
   const isInitLoading = ref(false);
   const isSubmitLoading = ref(false);
+  const isFederationEnv = useIsFederationEnv(() => trpcDeployStore.curEnvItem);
   const formRef = ref<InstanceType<typeof Form>>();
   const hasGPAConfig = ref(false);
   const initialEnabled = ref(false);
@@ -488,6 +496,7 @@
 
   // 保存自动调节配置，提交 GPA 最小/最大实例数和指标阈值。
   async function handleAutoSubmit() {
+    if (isFederationEnv.value) return false;
     const shouldConfirmSwitch = initialMode.value !== 'auto';
     const shouldEnableGPA = hasGPAConfig.value && !initialEnabled.value;
     if (shouldConfirmSwitch && !(await showToggleConfirm('auto'))) {
@@ -535,6 +544,7 @@
 
   // 切换扩缩容方式，并在进入自动调节时补齐默认指标行。
   function handleChangeMode(mode: ScaleMode) {
+    if (mode === 'auto' && isFederationEnv.value) return;
     formModel.mode = mode;
     if (mode === 'auto' && formModel.metrics.length === 0) {
       formModel.metrics.push(createMetric());
@@ -587,8 +597,19 @@
 
   // 打开侧边栏并加载当前环境扩缩容配置。
   async function handleOpen() {
-    isShow.value = true;
-    await fetchGPAConfig();
+    isInitLoading.value = true;
+    try {
+      // beforeOpen 失败时中止打开，由 finally 恢复按钮状态；异常不能抛给点击事件造成 unhandled rejection。
+      await props.beforeOpen?.();
+      await nextTick();
+      isShow.value = true;
+      await fetchGPAConfig();
+    } finally {
+      // 刷新生效规格失败时侧栏尚未打开，需要恢复按钮状态。
+      if (!isShow.value) {
+        isInitLoading.value = false;
+      }
+    }
   }
 
   // 删除指定触发条件指标，至少保留一条。

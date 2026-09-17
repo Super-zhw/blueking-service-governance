@@ -111,12 +111,23 @@ find_binary_in_dir() {
 }
 
 # 获取实际的二进制文件路径和名称
+# 优先级：
+# 0. 如果设置了 BKMS_DEVMODE_BINARY_PATH 环境变量（完整路径+二进制名称），直接使用
 # 1. 首先尝试在模板配置的路径下查找
 # 2. 如果找不到，依次尝试备用路径
 # 3. 环境变量中的 BKMS_APP_NAME 可能是小写，但实际文件名可能是大小写混合
 # 4. ls 命令输出的可执行文件可能带有 * 后缀，需要去掉
 # 返回: 设置全局变量 TRPC_BIN_PATH, SERVER_NAME 和 TRPC_LOG_PATH
 get_actual_server_name() {
+    # 优先使用 BKMS_DEVMODE_BINARY_PATH 环境变量（完整路径+二进制名称）
+    if [ -n "${BKMS_DEVMODE_BINARY_PATH}" ]; then
+        TRPC_BIN_PATH=$(dirname "${BKMS_DEVMODE_BINARY_PATH}")
+        SERVER_NAME=$(basename "${BKMS_DEVMODE_BINARY_PATH}")
+        TRPC_LOG_PATH="$(dirname "${TRPC_BIN_PATH}")/log"
+        log_info "Using BKMS_DEVMODE_BINARY_PATH: ${BKMS_DEVMODE_BINARY_PATH} (dir=${TRPC_BIN_PATH}, name=${SERVER_NAME})"
+        return 0
+    fi
+
     if [ -z "${SERVER_NAME_ENV}" ]; then
         log_error "SERVER_NAME_ENV is empty, cannot get actual server name"
         return 1

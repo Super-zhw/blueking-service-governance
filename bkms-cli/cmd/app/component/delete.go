@@ -24,6 +24,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	handler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/component"
+	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
@@ -44,6 +45,7 @@ The change takes effect after the next deployment. Only trpc and taf apps
 are supported.`,
 		Example: `  # Remove a component instance from an application
   bkms-cli app component delete --app my-app --name my-limits`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := handler.DeleteAppComponent(cmd.Context(), client.New(), appID, compName); err != nil {
 				return errors.Wrap(err, "delete app component")
@@ -55,7 +57,7 @@ are supported.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&compName, "name", "", "application-local component instance name")
 
 	_ = cmd.MarkFlagRequired("app")

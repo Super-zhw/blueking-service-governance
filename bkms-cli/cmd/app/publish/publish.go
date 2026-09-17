@@ -20,18 +20,18 @@
 package publish
 
 import (
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/publish"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/clierr"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/params"
 )
 
 // NewCmd 创建 publish 命令
 func NewCmd() *cobra.Command {
-	var appID, envName, file, instances, workspaceID string
+	var appID, envName, file, instances string
 	var publishAll bool
 
 	cmd := &cobra.Command{
@@ -50,51 +50,34 @@ is optional. Otherwise, you must specify it explicitly.`,
 bkms-cli app publish --app myapp --env stage -f /path/to/binary --instance-ids pod1,pod2
 
 # Publish to all Running instances
-bkms-cli app publish --app myapp --env stage -f /path/to/binary --all
-
-# Specify workspace explicitly
-bkms-cli app publish --workspace ws-demo --app myapp --env stage -f /path/to/binary --instance-ids pod1,pod2`,
-		PreRun: cmdutil.CommonPreRun,
+bkms-cli app publish --app myapp --env stage -f /path/to/binary --all`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			workspaceID = cmdutil.GetWorkspaceID(workspaceID)
 			specifiedInstanceIDs := params.NormalizeInstIDs(instances, ",")
 
 			if publishAll && len(specifiedInstanceIDs) > 0 {
-				return errors.New("--all and --instance-ids cannot be used together")
+				return clierr.Usagef("--all and --instance-ids cannot be used together")
 			}
 			if !publishAll && len(specifiedInstanceIDs) == 0 {
-				return errors.New("instance-ids is required unless --all is specified")
+				return clierr.Usagef("instance-ids is required unless --all is specified")
 			}
 
 			// 发布二进制到线上实例
-			publisher := publish.NewPublisher(cmd.Context(), client.New(), workspaceID, appID, envName)
-			if err := publisher.PreCheck(); err != nil {
+			publisher := publish.NewPublisher(cmd.Context(), client.New(), appID, envName)
+
+			// 执行 preflight 预检（由 server 端负责解析和校验实例列表）
+			if err := publisher.PreCheck(specifiedInstanceIDs, publishAll); err != nil {
 				return err
 			}
 
-			var (
-				targetInstanceIDs []string
-				err               error
-			)
-
-			switch {
-			case publishAll:
-				targetInstanceIDs, err = publisher.GetAllRunningInstanceIDs()
-			default:
-				targetInstanceIDs, err = publisher.GetSpecifiedInstanceIDs(specifiedInstanceIDs)
-			}
-			if err != nil {
-				return err
-			}
-			if err := publisher.Publish(file, targetInstanceIDs); err != nil {
+			if err := publisher.Publish(file, publisher.GetInstanceIDs()); err != nil {
 				return err
 			}
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&workspaceID, "workspace", "", "workspace id")
-	cmd.Flags().StringVar(&appID, "app", "", "Application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "Environment name (required)")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to the binary file to publish (required)")
 	cmd.Flags().
@@ -104,6 +87,8 @@ bkms-cli app publish --workspace ws-demo --app myapp --env stage -f /path/to/bin
 	_ = cmd.MarkFlagRequired("app")
 	_ = cmd.MarkFlagRequired("env")
 	_ = cmd.MarkFlagRequired("file")
+
+	cmd.AddCommand(newHistoryCmd())
 
 	return cmd
 }

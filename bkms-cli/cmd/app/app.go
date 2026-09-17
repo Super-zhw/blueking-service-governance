@@ -26,11 +26,14 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/appspec"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/build"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/component"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/dashboard"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/deploy"
+	appenv "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/env"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/image"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/instance"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/polaris"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/publish"
+	appupdate "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/cmd/app/update"
 )
 
 // NewCmd create env command
@@ -46,10 +49,18 @@ Use this command to list and manage applications in your BKMS workspaces.`,
 
 	// 创建应用
 	cmd.AddCommand(NewCreateCmd())
+	// 查看应用详情
+	cmd.AddCommand(NewGetCmd())
+	// 删除应用
+	cmd.AddCommand(NewDeleteCmd())
+	// 更新应用配置（命令组）
+	cmd.AddCommand(appupdate.NewCmd())
 	// 工作空间下的应用列表
 	cmd.AddCommand(NewListCmd())
 	// 应用构建管理（命令组）
 	cmd.AddCommand(build.NewCmd())
+	// 应用特性环境管理（命令组）
+	cmd.AddCommand(appenv.NewCmd())
 	// 应用部署管理（命令组）
 	cmd.AddCommand(deploy.NewCmd())
 	// 应用镜像管理（命令组）
@@ -64,6 +75,8 @@ Use this command to list and manage applications in your BKMS workspaces.`,
 	cmd.AddCommand(appspec.NewCmd())
 	// 应用组件实例管理（命令组）
 	cmd.AddCommand(component.NewCmd())
+	// 应用仪表盘绑定管理（命令组）
+	cmd.AddCommand(dashboard.NewCmd())
 	// 北极星配置管理（命令组）
 	cmd.AddCommand(polaris.NewCmd())
 

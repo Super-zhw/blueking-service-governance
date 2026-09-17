@@ -101,99 +101,36 @@
           <template v-else-if="builderData!.repoBuildConfig!.imageBuildMode === 'platform'">
             <Form.FormItem
               :label="$t('构建镜像')"
-              property="repoBuildConfig.platformBuildConfig.builderImage"
               required
             >
-              <div class="flex gap-[8px] items-start">
-                <Select
-                  v-model="selectedBuilderImageId"
-                  class="flex-grow-2"
-                  display-key="name"
-                  filterable
-                  id-key="id"
-                  :input-search="false"
-                  :list="builderImages"
-                  :placeholder="$t('请选择镜像')"
-                  @change="handleBuilderImageChange"
+              <div v-bkloading="{ loading: repoInfoLoading, size: 'small' }">
+                <ImageModeSelect
+                  v-model="builderData!.repoBuildConfig!.platformBuildConfig!.builderImage"
+                  :language="props.language"
+                  :repo-info="workspaceRepoInfo"
+                  :repo-info-loading="repoInfoLoading"
+                  type="builder"
+                  validate-prefix="repoBuildConfig"
+                  @init-complete="forceCleanDirtyTag"
                 />
-                <Select
-                  v-model="selectedBuilderTag"
-                  class="flex-grow-1"
-                  :disabled="!selectedBuilderImageId"
-                  display-key="tag"
-                  filterable
-                  id-key="tag"
-                  :list="builderImageTags"
-                  :loading="builderTagLoading"
-                  :placeholder="$t('请选择标签')"
-                  :remote-method="searchBuilderTag"
-                />
-              </div>
-              <div
-                v-if="staleBuilderWarning"
-                class="text-[12px] text-[#fe9c00] mt-[4px]"
-              >
-                {{ $t('该镜像已不在当前平台镜像列表中，请重新选择') }}
-              </div>
-              <div class="text-[12px] text-[#979ba5]">
-                {{ $t('用于编译源码的镜像（含 Go 工具链），对应 builder 阶段基础镜像。') }}
               </div>
             </Form.FormItem>
             <Form.FormItem
               :label="$t('运行镜像')"
-              property="repoBuildConfig.platformBuildConfig.runnerImage"
               required
             >
-              <div class="flex gap-[8px] items-start">
-                <Select
-                  v-model="selectedRunnerImageId"
-                  class="flex-grow-2"
-                  display-key="name"
-                  filterable
-                  id-key="id"
-                  :input-search="false"
-                  :list="runnerImages"
-                  :placeholder="$t('请选择镜像')"
-                  @change="handleRunnerImageChange"
-                />
-                <Select
-                  v-model="selectedRunnerTag"
-                  class="flex-grow-1"
-                  :disabled="!selectedRunnerImageId"
-                  display-key="tag"
-                  filterable
-                  id-key="tag"
-                  :list="runnerImageTags"
-                  :loading="runnerTagLoading"
-                  :placeholder="$t('请选择标签')"
-                  :remote-method="searchRunnerTag"
+              <div v-bkloading="{ loading: repoInfoLoading, size: 'small' }">
+                <ImageModeSelect
+                  v-model="builderData!.repoBuildConfig!.platformBuildConfig!.runnerImage"
+                  :language="props.language"
+                  :peer-image-value="builderData!.repoBuildConfig!.platformBuildConfig!.builderImage"
+                  :repo-info="workspaceRepoInfo"
+                  :repo-info-loading="repoInfoLoading"
+                  type="runner"
+                  validate-prefix="repoBuildConfig"
+                  @init-complete="forceCleanDirtyTag"
                 />
               </div>
-              <div
-                v-if="staleRunnerWarning"
-                class="text-[12px] text-[#fe9c00] mt-[4px]"
-              >
-                {{ $t('该镜像已不在当前平台镜像列表中，请重新选择') }}
-              </div>
-              <div class="text-[12px] text-[#979ba5]">
-                {{ $t('运行服务的基础镜像（精简、无编译器），对应 runner 阶段基础镜像。') }}
-              </div>
-              <Alert
-                v-if="imageVersionMismatchWarning"
-                class="mt-[4px]"
-                theme="warning"
-              >
-                <template #title>
-                  <div class="leading-[22px]">
-                    {{
-                      $t(
-                        '构建镜像的版本（{0}）与运行镜像（{1}）不一致，可能导致 glibc/musl 等基础库差异，引发运行时兼容问题。建议保持两者一致，如已确认可忽略。',
-                        [imageVersionMismatchWarning.builderVersion, imageVersionMismatchWarning.runnerVersion],
-                      )
-                    }}
-                  </div>
-                </template>
-              </Alert>
             </Form.FormItem>
             <!-- 高级命令 -->
             <Form.FormItem
@@ -240,6 +177,25 @@
                 </div>
                 <div class="mb-[24px] last:mb-0">
                   <div class="flex items-center gap-[8px] mb-[8px]">
+                    <span class="text-[14px] text-[#313238]">{{ $t('打包额外文件') }}</span>
+                    <Tag theme="success">{{ $t('runner 阶段') }}</Tag>
+                  </div>
+                  <Input
+                    v-model="extraFilesText"
+                    :placeholder="extraFilesPlaceholder"
+                    :rows="4"
+                    type="textarea"
+                  />
+                  <p class="mt-[4px] leading-[20px] text-[#c4c6cc]">
+                    {{
+                      $t(
+                        '文件会按相对路径打包到运行镜像的 /app 目录，例如 data/privatekey.pem 打包后为 /app/data/privatekey.pem。',
+                      )
+                    }}
+                  </p>
+                </div>
+                <div class="mb-[24px] last:mb-0">
+                  <div class="flex items-center gap-[8px] mb-[8px]">
                     <span class="text-[14px] text-[#313238]">{{ $t('运行环境命令') }}</span>
                     <Tag theme="success">{{ $t('runner 阶段') }}</Tag>
                   </div>
@@ -261,9 +217,9 @@
                     :rows="4"
                     type="textarea"
                   />
-                  <span class="text-[#c4c6cc]">{{
-                    $t('写入镜像的默认启动方式（ENTRYPOINT），构建时固化到镜像中。部署时可被「运行命令」覆盖')
-                  }}</span>
+                  <p class="mt-[4px] leading-[20px] text-[#c4c6cc]">
+                    {{ $t('写入镜像的默认启动方式（ENTRYPOINT），构建时固化到镜像中。部署时可被「运行命令」覆盖') }}
+                  </p>
                 </div>
               </ToggleCard>
             </Form.FormItem>
@@ -359,15 +315,16 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+  import { computed, nextTick, ref, watch } from 'vue';
 
-  import { Alert, Button, Exception, Form, Input, Select, Sideslider, Tag } from 'bkui-vue';
+  import { Button, Exception, Form, Input, Sideslider, Tag } from 'bkui-vue';
   import { Share } from 'bkui-vue/lib/icon';
-  import { cloneDeep, debounce } from 'lodash-es';
+  import { cloneDeep } from 'lodash-es';
   import { useI18n } from 'vue-i18n';
   import { BuildConfigOutputObj, TagConfigOutputObj } from '~/@types/v1/app';
   import { BkCIOAuthGitProjectOutput, BkCIPipelineVariableOutput } from '~/@types/v1/bkintegrations-bkci';
   import { BkintegrationsBkciService } from '~/api/modules/v1';
+  import { WorkspaceService } from '~/api/modules/v1/workspace';
   import { DOC_LINKS } from '~/common/const';
   import CardRadio, { type CardRadioOption } from '~/components/card-radio.vue';
   import TagConfigForm from '~/components/tag-config-form.vue';
@@ -375,8 +332,8 @@
   import useLeaveConfirm from '~/composables/use-leave-confirm';
   import BuildOutputHint from '~/pages/application/components/build-output-hint.vue';
   import GoBuildArgs from '~/pages/application/components/go-build-args.vue';
+  import ImageModeSelect from '~/pages/application/components/image-mode-select.vue';
   import PipelineParamsForm from '~/pages/application/components/pipeline-params-form.vue';
-  import { usePlatformBuildImages } from '~/pages/application/template/trpc/use-platform-build-images';
   import { useSpaceStore } from '~/stores/space';
 
   // BuildConfigOutputObj 已包含 tagConfig 字段，使用 Partial 使其可选
@@ -399,6 +356,11 @@
   const props = defineProps<IProps>();
   const emit = defineEmits(['confirm']);
   const spaceStore = useSpaceStore();
+
+  /** 空间镜像仓库信息（供 ImageModeSelect 复用，避免 builder/runner 两个实例重复请求 getWorkspace） */
+  const workspaceRepoInfo = ref<null | { password: string; repositoryAddress: string; username: string }>(null);
+  /** 仓库信息加载状态：加载期间 ImageModeSelect 显示 loading 并等待就绪后再初始化 */
+  const repoInfoLoading = ref(false);
   // 使用 useLeaveConfirm hook 管理表单变化检测
   const { confirmBox, forceCleanDirtyTag } = useLeaveConfirm(builderData);
   /** 当前选中的来源 */
@@ -426,6 +388,7 @@
     platformBuildConfig: {
       builderImage: '',
       runnerImage: '',
+      extraFiles: [],
       commands: {
         build: [],
         preBuild: [],
@@ -443,26 +406,13 @@
   const buildPlaceholder = computed(
     () => `${t('留空则使用平台默认：')}\ngo build -o /out/${props.appName || '{{ appName }}'} .`,
   );
+  const extraFilesPlaceholder = computed(
+    () => `${t('每行一个，可填写文件路径或目录，相对构建目录，例如：')}\ndata/privatekey.pem\ncerts/`,
+  );
 
-  // 镜像字段的 required 规则覆盖 FormItem 默认的 trigger: 'change' 规则，
-  // 避免自动选中镜像时（selectedImageId 程序化变化）触发校验导致红色错误闪烁
+  // 镜像字段校验已迁移至 ImageModeSelect 组件内 FormItem 级 rules，
+  // 父级 formRef.validate() 经跨组件注册机制生效
   const rules = ref({
-    'repoBuildConfig.platformBuildConfig.builderImage': [
-      {
-        required: true,
-        message: t('构建镜像不能为空'),
-        validator: () => !!selectedBuilderImageId.value,
-        trigger: 'custom',
-      },
-    ],
-    'repoBuildConfig.platformBuildConfig.runnerImage': [
-      {
-        required: true,
-        message: t('运行镜像不能为空'),
-        validator: () => !!selectedRunnerImageId.value,
-        trigger: 'custom',
-      },
-    ],
     'repoBuildConfig.sourceDir': [
       {
         message: t('构建目录不能以 / 开头'),
@@ -488,70 +438,20 @@
     },
   ]);
 
-  // ========== 镜像选择 ==========
-  const {
-    builderImages,
-    runnerImages,
-    selectedBuilderImageId,
-    selectedRunnerImageId,
-    builderImageTags,
-    runnerImageTags,
-    selectedBuilderTag,
-    selectedRunnerTag,
-    builderTagLoading,
-    runnerTagLoading,
-    staleBuilderWarning,
-    staleRunnerWarning,
-    imageVersionMismatchWarning,
-    fetchImageTags,
-    fetchPlatformBuildImages,
-    handleBuilderImageChange,
-    handleRunnerImageChange,
-    resetState,
-  } = usePlatformBuildImages({
-    getStoredImage: type =>
-      builderData.value?.repoBuildConfig?.platformBuildConfig?.[type === 'builder' ? 'builderImage' : 'runnerImage'],
-    setImageValue: (type, value) => {
-      const config = builderData.value?.repoBuildConfig?.platformBuildConfig;
-      if (config) {
-        config[type === 'builder' ? 'builderImage' : 'runnerImage'] = value;
-      }
-    },
-    getLanguage: () => props.language,
-  });
-
-  // ========== 镜像 tag 远程搜索 ==========
-  const searchBuilderTag = debounce((keyword: string) => {
-    if (selectedBuilderImageId.value) {
-      fetchImageTags('builder', selectedBuilderImageId.value, keyword);
-    }
-  }, 300);
-
-  const searchRunnerTag = debounce((keyword: string) => {
-    if (selectedRunnerImageId.value) {
-      fetchImageTags('runner', selectedRunnerImageId.value, keyword);
-    }
-  }, 300);
-
-  onBeforeUnmount(() => {
-    searchBuilderTag.cancel();
-    searchRunnerTag.cancel();
-  });
-
   // ========== 构建方式互斥 ==========
+  // 切到 platform → 清空 dockerfile（镜像列表由 ImageModeSelect 组件挂载后自行拉取）
+  // 切到 repositoryDockerfile → 重置 platformBuildConfig（组件随 v-if 卸载，状态自然清空）
   watch(
     () => builderData.value?.repoBuildConfig?.imageBuildMode,
     newVal => {
       if (!builderData.value?.repoBuildConfig) return;
       if (newVal === 'platform') {
         builderData.value.repoBuildConfig.dockerfile = '';
-        // 获取平台通用构建镜像列表
-        fetchPlatformBuildImages('builder');
-        fetchPlatformBuildImages('runner');
       } else if (newVal === 'repositoryDockerfile') {
         builderData.value.repoBuildConfig.platformBuildConfig = {
           builderImage: '',
           runnerImage: '',
+          extraFiles: [],
           commands: {
             build: [],
             preBuild: [],
@@ -559,7 +459,6 @@
             start: '',
           },
         };
-        resetState();
       }
     },
   );
@@ -598,6 +497,20 @@
     set: val => {
       if (builderData.value?.repoBuildConfig?.platformBuildConfig?.commands) {
         builderData.value.repoBuildConfig.platformBuildConfig.commands.runtimeEnv = val
+          ? val
+              .split('\n')
+              .map(s => s.trim())
+              .filter(Boolean)
+          : [];
+      }
+    },
+  });
+
+  const extraFilesText = computed({
+    get: () => builderData.value?.repoBuildConfig?.platformBuildConfig?.extraFiles?.join('\n') ?? '',
+    set: val => {
+      if (builderData.value?.repoBuildConfig?.platformBuildConfig) {
+        builderData.value.repoBuildConfig.platformBuildConfig.extraFiles = val
           ? val
               .split('\n')
               .map(s => s.trim())
@@ -658,10 +571,11 @@
     tagConfig.value = existingTagConfig || null;
   };
 
-  /** 切换代码库 */
+  /** 切换代码库：同步别名并清空旧默认分支，避免新仓库仍显示无效分支 */
   const handleProjectChange = (data: BkCIOAuthGitProjectOutput) => {
     if (!builderData.value?.repoBuildConfig) return;
     builderData.value.repoBuildConfig.repoAlias = data?.alias || '';
+    builderData.value.repoBuildConfig.defaultBranch = '';
   };
   /** 流水线动态表单字段 */
   const params = ref<BkCIPipelineVariableOutput[]>([]);
@@ -770,6 +684,9 @@
     // 回显来源
     currentBuilderType.value = props.type;
 
+    // 拉取空间镜像仓库信息（供 ImageModeSelect 复用）
+    fetchWorkspaceRepoInfo();
+
     // 重置缓存（每次打开侧边栏时重新开始）
     repoBuildConfigCache.value = null;
     pipelineBuildConfigCache.value = null;
@@ -800,6 +717,7 @@
           builderData.value.repoBuildConfig.platformBuildConfig = {
             builderImage: '',
             runnerImage: '',
+            extraFiles: [],
             commands: {
               build: [],
               preBuild: [],
@@ -809,17 +727,50 @@
           };
         }
       }
-      // 如果当前是 platform 模式，获取镜像列表并回填
-      if (builderData.value?.repoBuildConfig?.imageBuildMode === 'platform') {
-        fetchPlatformBuildImages('builder');
-        fetchPlatformBuildImages('runner');
+      if (
+        builderData.value.repoBuildConfig?.platformBuildConfig &&
+        !builderData.value.repoBuildConfig.platformBuildConfig.extraFiles
+      ) {
+        builderData.value.repoBuildConfig.platformBuildConfig.extraFiles = [];
       }
+      // 镜像列表由 ImageModeSelect 组件挂载后自行拉取与模式识别
     }
     // 回显 tagConfig 配置
     restoreTagConfig();
     // 将初始 tagConfig 存入对应来源的缓存
     tagConfigCache.value[props.type] = cloneDeep(tagConfig.value);
   };
+
+  /** 拉取空间镜像仓库信息，供 ImageModeSelect 复用（避免 builder/runner 两个实例重复请求） */
+  async function fetchWorkspaceRepoInfo() {
+    repoInfoLoading.value = true;
+    const workspaceID = spaceStore.currentSpace;
+    if (!workspaceID) {
+      // 无空间 ID：无仓库信息可拉，视作加载结束（避免 ImageModeSelect 一直等待）
+      repoInfoLoading.value = false;
+      return;
+    }
+    try {
+      const res = await WorkspaceService.getWorkspace({ workspaceID });
+      const registry = res?.imageRegistry;
+      if (!registry?.registry) {
+        // 空间未绑定镜像仓库：repoInfo 保持 null，同样结束加载
+        return;
+      }
+      workspaceRepoInfo.value = {
+        repositoryAddress: registry.registry,
+        username: registry.username ?? '',
+        password: registry.password ?? '',
+      };
+      // dirty 清理改由 ImageModeSelect 初始化完成事件（init-complete）统一处理：
+      // 回填 emit 发生在 repoInfoLoading 结束后，晚于此处的 nextTick 竞争时机
+    } catch (err) {
+      console.error('Failed to fetch workspace image registry:', err);
+    } finally {
+      // 所有出口（成功 / 未绑定 / 失败）统一结束加载，ImageModeSelect 收到后开始初始化
+      repoInfoLoading.value = false;
+    }
+  }
 
   function handleBeforeClose() {
     return confirmBox();

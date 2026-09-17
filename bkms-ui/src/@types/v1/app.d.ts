@@ -80,6 +80,17 @@ export type CreateAppRequest = CreateAppInput & {
   workspaceID: string;
 };
 
+export interface ResolveAppRequest {
+  /**
+   * 工作空间 ID
+   */
+  workspaceID: string;
+  /**
+   * 应用 ID 或名称
+   */
+  app: string;
+}
+
 export interface GetAppIDAutoSuffixOutput {
   /**
    * 后缀字符串
@@ -163,6 +174,15 @@ export interface CreateAppInput {
 
 export interface CreateAppOutput {
   data?: AppOutputObj;
+}
+
+export interface ResolveAppOutput {
+  data?: ResolveAppOutputObj;
+}
+
+export interface ResolveAppOutputObj {
+  id?: string;
+  name?: string;
 }
 
 export interface AppOutputObj {
@@ -392,6 +412,10 @@ export interface PlatformBuildConfigInput {
    */
   commands?: BuildCommandsInput;
   /**
+   * 打包额外文件路径，相对构建目录；空列表表示不额外拷贝
+   */
+  extraFiles?: string[];
+  /**
    * 运行阶段基础镜像
    */
   runnerImage?: string;
@@ -553,6 +577,10 @@ export interface AppDeployOverviewEnvObj {
    */
   autoscaling?: DeployOverviewAutoscalingObj;
   /**
+   * 环境绑定的业务集群信息
+   */
+  cluster?: DeployOverviewClusterObj;
+  /**
    * 部署状态（原始枚举）
    */
   deployStatus?: string;
@@ -576,6 +604,10 @@ export interface AppDeployOverviewEnvObj {
    * 环境类型（development / test / staging / production）
    */
   envType?: string;
+  /**
+   * 部署的镜像 Tag；无部署记录时为空字符串
+   */
+  imageTag?: string;
   /**
    * 实例数，可选：集群查询失败或缺少 workload 时为 null
    */
@@ -615,6 +647,29 @@ export interface DeployOverviewAutoscalingObj {
    * 集群 GPA CR 运行状态，可选：未启用 / CR 缺失 / 查询失败时为 null
    */
   status?: DeployOverviewAutoscalingStatusObj;
+}
+
+export interface DeployOverviewClusterObj {
+  /**
+   * 集群 ID
+   */
+  clusterID?: string;
+  /**
+   * 集群展示名（来自 BCS）；拉取失败时为空字符串
+   */
+  clusterName?: string;
+  /**
+   * 集群类型
+   */
+  clusterType?: string;
+  /**
+   * 集群命名空间
+   */
+  namespace?: string;
+  /**
+   * 项目 code
+   */
+  projectCode?: string;
 }
 
 export interface DeployOverviewInstancesObj {
@@ -953,6 +1008,10 @@ export interface PlatformBuildConfigOutputObj {
    * 命令配置
    */
   commands?: BuildCommandsOutputObj;
+  /**
+   * 打包额外文件路径，相对构建目录
+   */
+  extraFiles?: string[];
   /**
    * 运行阶段基础镜像
    */

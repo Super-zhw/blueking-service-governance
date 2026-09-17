@@ -33,7 +33,6 @@ import (
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	bkmapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkmonitor"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
 	bkmmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
@@ -76,7 +75,12 @@ func (h *Handler) GetApmServiceName(c *gin.Context) {
 		return
 	}
 
-	_, content, err := appcfg.GetEnvContent(ctx, h.registry.AppConfigFileStore, app.ID, env.Name)
+	cfgProvider := appcfg.NewMountableFileProvider(
+		h.registry.AppConfigFileStore,
+		h.registry.AppConfigFileDefStore,
+		h.registry.AppConfigFileVersionStore,
+	)
+	cfwc, err := cfgProvider.GetFrameworkMountableFile(ctx, app.ID, env.Name)
 	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "getting env content"))
 		return
@@ -95,7 +99,7 @@ func (h *Handler) GetApmServiceName(c *gin.Context) {
 		return
 	}
 
-	serviceName, svcErr := bkmmodel.GetApmServiceName(app.Type, content, appEnvVars.ToMap())
+	serviceName, svcErr := bkmmodel.GetApmServiceName(app.Type, cfwc.Content, appEnvVars.ToMap())
 	if svcErr != nil {
 		log.Errorf(ctx, "get apm service name error for app %s env %s: %v", app.ID, env.Name, svcErr)
 		if errors.Is(svcErr, bkmmodel.ErrAPMConfigMissing) {
@@ -139,7 +143,7 @@ func (h *Handler) ListApms(c *gin.Context) {
 		return
 	}
 
-	client, err := bkmapi.New(auth.MustGetUser(ctx).ID)
+	client, err := bkmapi.NewMonitorClient(auth.MustGetUser(ctx).ID)
 	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "new bkmonitor client"))
 		return
@@ -269,7 +273,7 @@ func (h *Handler) CreateEnvApm(c *gin.Context) {
 	}
 
 	// APM 创建成功后，异步将 workspace 下 admin/sre 人员同步到新告警组
-	go bkmmodel.NewUserGroupService(perm.NewManager(), storereg.G().EnvStore).SyncMembersForEnvWithRetry(
+	go bkmmodel.NewUserGroupService(storereg.G().EnvStore).SyncMembersForEnvWithRetry(
 		context.WithoutCancel(ctx), ws, env.Name, auth.MustGetUser(ctx).ID,
 	)
 
@@ -479,4 +483,81 @@ func (h *Handler) GetInstanceTimeSeries(c *gin.Context) {
 	}
 
 	ginutils.OK(c, &serializer.InstanceTimeSeriesResp{Data: respData})
+}
+
+// ListDashboardDirectoryTree 获取蓝鲸监控仪表盘数据
+//
+//	@ID			ListDashboardDirectoryTree
+//	@Summary	获取蓝鲸监控仪表盘数据
+//	@Tags		bkintegrations-bkmonitor
+//	@Produce	json
+//	@Security	BkUserInfo
+//	@Security	BkUserCredential
+//	@Param		workspaceID	path		string	true	"工作空间 ID"
+//	@Success	200			{object}	serializer.ListDashboardsResp
+//	@Failure	400			{object}	bkerrs.GinErrorOutput
+//	@Router		/workspaces/{workspaceID}/bkmonitor/dashboards [get]
+func (h *Handler) ListDashboardDirectoryTree(c *gin.Context) {
+	var uriInput serializer.WorkspaceURIInput
+	if err := ginutils.BindURI(c, &uriInput); err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+
+	ctx := c.Request.Context()
+	ws, err := ginperm.ValidateWorkspaceByID(ctx, h.registry, uriInput.WorkspaceID, ginperm.TypeView)
+	if err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+
+	bkMonitorProjectID, err := ws.ResolveBkMonitorProjectID()
+	if err != nil {
+		bkerrs.AbortWithErr(
+			c,
+			bkerrs.Wrapf(
+				err,
+				bkerrs.ErrCodeInvalidRequest,
+				"bk monitor project is not ready for workspace %s",
+				ws.ID,
+			),
+		)
+		return
+	}
+
+	client, err := bkmapi.NewMonitorClient(auth.MustGetUser(ctx).ID)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "new bkmonitor client"))
+		return
+	}
+
+	tree, err := client.GetDashboardDirectoryTree(ctx, bkMonitorProjectID)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "list dashboard directory tree"))
+		return
+	}
+
+	ginutils.OK(c, &serializer.ListDashboardsResp{
+		Data: lo.Map(tree, func(node *bkmapi.DashboardDirectoryNode, _ int) *serializer.DashboardDirectoryOutput {
+			return &serializer.DashboardDirectoryOutput{
+				ID:    node.ID,
+				UID:   node.UID,
+				Title: node.Title,
+				URI:   node.URI,
+				URL:   node.URL,
+				Dashboards: lo.Map(
+					node.Dashboards,
+					func(item bkmapi.DashboardItem, _ int) *serializer.DashboardOutput {
+						return &serializer.DashboardOutput{
+							ID:    item.ID,
+							UID:   item.UID,
+							Title: item.Title,
+							URI:   item.URI,
+							URL:   item.URL,
+						}
+					},
+				),
+			}
+		}),
+	})
 }

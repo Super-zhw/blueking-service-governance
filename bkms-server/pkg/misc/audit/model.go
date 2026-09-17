@@ -63,6 +63,8 @@ const (
 	OperationTypeGray OperationType = "gray"
 	// OperationTypeExecute 执行操作
 	OperationTypeExecute OperationType = "execute"
+	// OperationTypePublish 开发模式发布操作
+	OperationTypePublish OperationType = "publish"
 )
 
 // AllOperationTypes 所有操作类型
@@ -76,6 +78,7 @@ var AllOperationTypes = []OperationType{
 	OperationTypeScale,
 	OperationTypeGray,
 	OperationTypeExecute,
+	OperationTypePublish,
 }
 
 // DisplayName 操作类型展示用名称 TODO 国际化
@@ -101,6 +104,8 @@ func (t OperationType) DisplayName() string {
 		return "灰度"
 	case OperationTypeExecute:
 		return "执行"
+	case OperationTypePublish:
+		return "发布"
 	default:
 		// 默认返回原始值
 		return string(t)
@@ -127,6 +132,8 @@ const (
 	ResourceTypePortPool ResourceType = "portPool"
 	// ResourceTypeAlertStrategy 告警策略
 	ResourceTypeAlertStrategy ResourceType = "alertStrategy"
+	// ResourceTypeDashboard 应用仪表盘绑定
+	ResourceTypeDashboard ResourceType = "dashboard"
 )
 
 // AllResourceTypes 所有资源类型
@@ -139,6 +146,7 @@ var AllResourceTypes = []ResourceType{
 	ResourceTypeClusterAddon,
 	ResourceTypePortPool,
 	ResourceTypeAlertStrategy,
+	ResourceTypeDashboard,
 }
 
 // DisplayName 资源类型展示用名称 TODO 国际化
@@ -160,6 +168,8 @@ func (t ResourceType) DisplayName() string {
 		return "端口池"
 	case ResourceTypeAlertStrategy:
 		return "告警策略"
+	case ResourceTypeDashboard:
+		return "仪表盘"
 	default:
 		// 默认返回原始值
 		return string(t)
@@ -206,6 +216,10 @@ const (
 	AttributePolaris Attribute = "polaris"
 	// AttributeGPA 自动扩缩容（GPA）配置
 	AttributeGPA Attribute = "gpa"
+	// AttributeHostPort 随机 HostPort 端口映射
+	AttributeHostPort Attribute = "hostport"
+	// AttributeDevModePublish 开发模式发布
+	AttributeDevModePublish Attribute = "devModePublish"
 )
 
 // DisplayName 属性展示用名称 TODO 国际化
@@ -247,6 +261,10 @@ func (t Attribute) DisplayName() string {
 		return "北极星"
 	case AttributeGPA:
 		return "自动扩缩容配置"
+	case AttributeHostPort:
+		return "HostPort 端口映射"
+	case AttributeDevModePublish:
+		return "开发模式发布"
 	default:
 		// 默认返回原始值
 		return string(t)

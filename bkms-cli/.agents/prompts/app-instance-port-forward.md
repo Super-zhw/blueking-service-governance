@@ -103,29 +103,27 @@ resp, err := proxy.SayHello(ctx, &pb.HelloRequest{Msg: "hello"})
 - 端口号范围为 1-65535。
 - 目标实例必须处于 Running 状态。
 - 需要具备应用编辑权限和目标环境的部署操作权限。
-- 连接空闲 30 分钟无数据传输将自动关闭。
-- 最大并发连接数为 10（同一个 port-forward 命令内）。
-- 使用 `--local-address 0.0.0.0` 时会显示安全警告。
+- 非 loopback 地址监听（如 `0.0.0.0`）时会显示安全警告。
 - 按 `Ctrl+C` 可停止端口转发。
 
 ## 输出说明
 
-命令启动后会输出以下信息：
+命令启动后会输出以下结构化日志：
 
 ```
-Forwarding from 127.0.0.1:18080 -> pod/pod-1:8080
+level=INFO msg="forwarding established" listen_address=127.0.0.1:18080 instance_id=pod-1 remote_port=8080
 ```
 
 每当有新连接建立时会输出：
 
 ```
-Handling connection for 18080
+level=INFO msg="handling connection" instance_id=pod-1 local_port=18080 remote_port=8080
 ```
 
 连接失败时会输出错误信息：
 
 ```
-Port-forward connection failed for pod/pod-1:8080: <error message>
+level=ERROR msg="port-forward connection failed" instance_id=pod-1 remote_port=8080 error=<message>
 ```
 
 停止时输出：

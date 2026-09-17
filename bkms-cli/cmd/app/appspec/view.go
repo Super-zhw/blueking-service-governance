@@ -31,9 +31,8 @@ func NewViewCmd() *cobra.Command {
 	var appID, envName, outputFormat string
 
 	cmd := &cobra.Command{
-		Use:    "view",
-		Short:  "View all AppSpec sections",
-		PreRun: cmdutil.CommonPreRun,
+		Use:   "view",
+		Short: "View all AppSpec sections",
 		Long: `View all AppSpec sections for an application.
 
 When --env is not specified, shows the default configuration.
@@ -47,14 +46,15 @@ Start command is always shown as global config regardless of --env.`,
 
   # Output in JSON format
   bkms-cli app appspec view --app my-app -o json`,
+		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return appspec.ViewAllHandler(cmd.Context(), appID, envName, outputFormat)
 		},
 	}
 
-	cmd.Flags().StringVar(&appID, "app", "", "application ID (required)")
+	cmdutil.AddAppFlags(cmd, &appID)
 	cmd.Flags().StringVar(&envName, "env", "", "environment name (optional, omit for default config)")
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", output.FlagUsage)
+	output.AddFormatFlag(cmd, &outputFormat)
 
 	_ = cmd.MarkFlagRequired("app")
 

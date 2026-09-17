@@ -66,7 +66,7 @@
                 :mode="envSelectMode"
                 :multi-selectable="isEnvMultiSelectable"
                 preserve-missing-model-value
-                @update:deploy-status-list="deployStatusList = $event"
+                @update:deploy-status-list="handleDeployStatusListUpdate"
                 @update:env-list="envList = $event"
                 @update:item="handleEnvChange"
                 @update:items="handleEnvsChange"
@@ -103,16 +103,16 @@
           v-if="isDeployStatusVisible && !isMultiEnvMode"
           #right
         >
-          <!-- 部署/特性部署 -->
-          <DeployActionButton
-            :label="$t('部署')"
+          <Button
             :loading="precheckLoading"
-            :show-feature-deploy="canFeatureDeploy"
-            @deploy="handleShowFullUpdateDialog"
-            @feature-deploy="handleShowFeatureDeploy"
-          />
+            theme="primary"
+            @click="handleShowFullUpdateDialog"
+          >
+            {{ $t('部署') }}
+          </Button>
           <!-- 扩缩容 -->
           <ScaleInstance
+            :before-open="fetchEffectiveDeploySpec"
             :effective-replicas="effectiveDeploySpec?.replicas"
             @update="fetchEffectiveDeploySpec"
           />
@@ -184,8 +184,9 @@
           v-if="activeTab === 'overview'"
           ref="deployOverviewRef"
           :env-list="envList"
+          @create-feature-env="handleShowCreateFeatureEnv"
           @deploy="handleOverviewDeploy"
-          @feature-deploy="handleShowFeatureDeploy"
+          @refresh-env-list="refreshEnvSelectPanel"
           @update:deploy-targets="handleOverviewDeployTargetsUpdate"
           @view-instances="handleViewEnvInstances"
         />
@@ -282,15 +283,14 @@
               <template #description>
                 <div class="text-[#4D4F56] text-[14px] leading-[22px]">{{ $t('该环境尚未部署应用') }}</div>
               </template>
-              <!-- 部署/特性部署 -->
-              <DeployActionButton
+              <Button
                 class="mt-[8px]"
-                :label="$t('立即部署')"
                 :loading="precheckLoading"
-                :show-feature-deploy="canFeatureDeploy"
-                @deploy="handleShowQuicklyDeploy"
-                @feature-deploy="handleShowFeatureDeploy"
-              />
+                theme="primary"
+                @click="handleShowQuicklyDeploy"
+              >
+                {{ $t('立即部署') }}
+              </Button>
             </Exception>
           </Skeleton>
         </template>
@@ -305,6 +305,7 @@
       :is-prod-env="isProdEnv"
       :target-envs="overviewDeployTargets"
       @update="handleQuickDeploySuccess"
+      @update:deploy-status-list="handleDeployStatusListUpdate"
     />
     <!-- 移除部署 -->
     <RemoveDeploy
@@ -320,17 +321,12 @@
       :latest-build-status="buildLogInfo.status"
       @update="handleUpdateDeploySuccess"
     />
-    <!-- 特性部署 -->
-    <FeatureDeploy
-      v-model:is-show="isShowFeatureDeploy"
-      :effective-replicas="effectiveDeploySpec?.replicas"
-      @env-created="refreshFeatureEnvData"
-      @update="handleFeatureDeploySuccess"
-    />
-    <!-- 普通部署在打开侧栏前执行环境变量预检查 -->
+    <!-- 普通部署在打开侧栏前统一执行“资源规格”和“环境变量”预检查 -->
     <EnvVarPrecheckDialog
       v-model:is-show="isShowPrecheckDialog"
       :env-name="precheckEnvName"
+      :mismatches="federationMismatches"
+      :missing-required-cluster-addons="missingRequiredClusterAddons"
       :undefined-vars="undefinedVars"
       @cancel="cancelDeploy"
       @go-modify="cancelDeploy"
@@ -347,9 +343,18 @@
       :error="featureEnvError"
       :list="featureEnvList"
       :loading="featureEnvLoading"
+      @create="handleShowCreateFeatureEnv"
       @deleted="handleFeatureEnvDeleted"
+      @deploy="handleDeployFeatureEnvFromList"
       @deploy-removed="refreshFeatureEnvData"
       @refresh="fetchFeatureEnvList"
+    />
+
+    <!-- 从特性环境列表打开时保留底层列表侧栏 -->
+    <CreateFeatureEnv
+      v-model:is-show="isShowCreateFeatureEnv"
+      @created="refreshFeatureEnvData"
+      @deploy="handleDeployFeatureEnv"
     />
   </div>
 </template>
@@ -384,11 +389,10 @@
   import KeyValueBadge from '../../components/key-value-badge.vue';
   import ResourceTopology from '../../components/topo/index.vue';
   import { DEPLOY_ENV_SELECT_SLOT_SELECTOR } from './constants';
-  import DeployActionButton from './deploy-action-button.vue';
+  import CreateFeatureEnv from './create-feature-env.vue';
   import DeployEvent from './deploy-event.vue';
   import DeployHistory from './deploy-history.vue';
   import EnvVarPrecheckDialog from './env-var-precheck-dialog.vue';
-  import FeatureDeploy from './feature-deploy.vue';
   import FeatureEnvSideslider from './feature-env-sideslider.vue';
   import FullUpdate from './instance-list/full-update.vue';
   import InstanceList from './instance-list/instance-list.vue';
@@ -398,7 +402,7 @@
   import QuicklyDeploy from './quickly-deploy.vue';
   import RemoveDeploy from './remove-deploy.vue';
   import { DeployableAppType, useDeployAPIs } from './use-deploy';
-  import { useEnvVarPrecheck } from './use-env-var-precheck';
+  import { useDeployPrecheck } from './use-deploy-precheck';
 
   import type { DeployOverviewDeployTarget } from './overview/use-deploy-overview';
   import type { AppDeployedEnvOutputObj } from '~/@types/v1/app';
@@ -419,11 +423,23 @@
   const appDetailStore = useAppDetail();
   const { getAppDeployStatusInfo } = useDeployStatusMap();
   const { t } = useI18n();
-  const { cancelDeploy, continueDeploy, isShowPrecheckDialog, precheck, precheckEnvName, undefinedVars } =
-    useEnvVarPrecheck();
+  const {
+    cancelDeploy,
+    continueDeploy,
+    federationMismatches,
+    isShowPrecheckDialog,
+    missingRequiredClusterAddons,
+    precheck,
+    precheckEnvName,
+    undefinedVars,
+  } = useDeployPrecheck();
 
   // 环境列表（从 EnvSelect 组件 emit 获取）
-  const envSelectPanelRef = ref<null | { refreshDeployStatuses?: () => Promise<void> }>(null);
+  const envSelectPanelRef = ref<null | {
+    refresh?: () => Promise<void>;
+    refreshDeployStatuses?: () => Promise<void>;
+    refreshEnvList?: () => Promise<void>;
+  }>(null);
   const envList = ref<EnvOutput[]>([]);
   const envSelectRefreshKey = ref(0);
   const envListLoading = ref(true);
@@ -446,10 +462,16 @@
     const envName = curEnv.value;
     const curEnvItemName = trpcDeployStore.curEnvItem?.name;
     if (activeTab.value === TAB_NAMES.overview) return;
-    if (!appID || !envName || trpcDeployStore.curEnvItem?.status === 'NotReady') return;
+    if (!appID || !envName || trpcDeployStore.curEnvItem?.status === 'NotReady') {
+      effectiveDeploySpec.value = undefined;
+      return;
+    }
     if (envName !== curEnvItemName) return;
     // 非 trpc/taf 类型应用不请求该接口
-    if (isHelmLikeAppType(appDetailStore.appType)) return;
+    if (isHelmLikeAppType(appDetailStore.appType)) {
+      effectiveDeploySpec.value = undefined;
+      return;
+    }
     const res = await AppSpecService.getEnvEffectiveAppSpecResources(
       {
         appID,
@@ -466,9 +488,7 @@
     ) {
       return;
     }
-    if (res) {
-      effectiveDeploySpec.value = res;
-    }
+    effectiveDeploySpec.value = res || undefined;
   }
 
   const envStore = useDeployEnvStore();
@@ -524,7 +544,6 @@
     return status !== APP_DEPLOY_STATUS.UNINSTALLED;
   });
   const isProdEnv = computed(() => trpcDeployStore.curEnvItem?.type === 'production');
-  const canFeatureDeploy = computed(() => isAppModelAppType(appDetailStore.appType));
   const canManageFeatureEnvs = computed(() => isAppModelAppType(appDetailStore.appType));
 
   const initLoading = ref(true);
@@ -835,6 +854,13 @@
   }
 
   const deployOverviewRef = ref<InstanceType<typeof DeployOverview>>();
+
+  /** 环境选择器刷新部署状态后，同步检查总览表格是否需要重新拉取。 */
+  function handleDeployStatusListUpdate(list: AppDeployedEnvOutputObj[]) {
+    deployStatusList.value = list;
+    deployOverviewRef.value?.syncDeployStatuses?.(list);
+  }
+
   // undefined 表示从实例列表打开；数组（包括空数组）表示从总览打开并启用目标环境选择器。
   const overviewDeployTargets = ref<DeployOverviewDeployTarget[] | undefined>();
 
@@ -851,14 +877,16 @@
     }
   }
 
-  /** 部署成功后按入口刷新：总览刷新聚合数据，实例页刷新当前环境部署状态。 */
+  /** 部署成功后按入口刷新：总览刷新聚合数据，实例页刷新当前环境及环境选择器的部署状态。 */
   async function handleQuickDeploySuccess() {
     if (overviewDeployTargets.value !== undefined) {
-      await Promise.all([envSelectPanelRef.value?.refreshDeployStatuses?.(), deployOverviewRef.value?.load()]);
+      await Promise.all([refreshEnvSelectPanel(), deployOverviewRef.value?.load()]);
       fetchFeatureEnvList();
       return;
     }
-    await handleGetLatestDeployStatus();
+    // 首次部署从实例页发起，成功后需同步更新顶部环境选择器的部署状态图标和“仅显示已部署环境”筛选结果。
+    await Promise.all([handleGetLatestDeployStatus(), refreshEnvSelectPanel()]);
+    fetchFeatureEnvList();
   }
 
   /** 从实例列表打开快速部署，并关闭总览入口专用的目标环境选择模式。 */
@@ -868,8 +896,12 @@
 
     precheckLoading.value = true;
     try {
-      const precheckPassed = await precheck(envName);
+      const precheckPassed = await precheck(envName, trpcDeployStore.curEnvItem);
       if (!precheckPassed) return;
+      if (trpcDeployStore.curEnvItem?.name !== envName) return;
+
+      await fetchEffectiveDeploySpec();
+      if (trpcDeployStore.curEnvItem?.name !== envName) return;
 
       // 清空总览目标是入口标记，保证实例列表仍读取当前环境，不显示目标环境选择器。
       overviewDeployTargets.value = undefined;
@@ -909,8 +941,10 @@
 
     precheckLoading.value = true;
     try {
-      const precheckPassed = await precheck(envName);
-      if (precheckPassed) {
+      const precheckPassed = await precheck(envName, trpcDeployStore.curEnvItem);
+      if (precheckPassed && trpcDeployStore.curEnvItem?.name === envName) {
+        await fetchEffectiveDeploySpec();
+        if (trpcDeployStore.curEnvItem?.name !== envName) return;
         showFullUpdateDialog.value = true;
       }
     } catch (error) {
@@ -926,8 +960,8 @@
     }
   }
 
-  // 特性部署
-  const isShowFeatureDeploy = ref(false);
+  // 特性环境
+  const isShowCreateFeatureEnv = ref(false);
   const featureEnvList = ref<FeatureEnvOutput[]>([]);
   const featureEnvLoading = ref(false);
   const featureEnvError = ref(false);
@@ -977,16 +1011,46 @@
     return envList.value.find(env => env.name !== payload.envName && env.status !== 'NotReady');
   }
 
-  /** 特性部署成功后切换到新环境的实例列表，并刷新总览及特性环境数量。 */
-  function handleFeatureDeploySuccess(env?: EnvOutput) {
-    if (env?.name) {
+  /** 首次部署特性环境：完成环境变量预检查后切到实例页并打开快速部署侧栏。 */
+  async function handleDeployFeatureEnv(env: EnvOutput) {
+    if (!env.name || precheckLoading.value) return;
+
+    precheckLoading.value = true;
+    try {
+      const precheckPassed = await precheck(env.name);
+      if (!precheckPassed) return;
+
+      isShowFeatureEnvSideslider.value = false;
       envSelectRefreshKey.value += 1;
       envStore.updateCurrentEnv(env.name);
       trpcDeployStore.updateCurEnvItem(env);
-      activeTab.value = 'instance';
+      activeTab.value = TAB_NAMES.instance;
+      latestDeployStatus.value = null;
+      effectiveDeploySpec.value = undefined;
+      initLoading.value = true;
+      overviewDeployTargets.value = undefined;
+      isShowQuicklyDeploy.value = true;
+    } catch (error) {
+      console.warn(error);
+    } finally {
+      precheckLoading.value = false;
     }
-    deployOverviewRef.value?.load();
-    fetchFeatureEnvList();
+  }
+
+  /** 特性环境列表的字段是 EnvOutput 子集，优先复用完整环境信息。 */
+  function handleDeployFeatureEnvFromList(env: FeatureEnvOutput) {
+    if (!env.name) return;
+    const knownEnv = envList.value.find(item => item.name === env.name);
+    handleDeployFeatureEnv(
+      knownEnv || {
+        displayName: env.displayName,
+        id: env.id,
+        kind: 'feature',
+        name: env.name,
+        status: env.status,
+        type: env.type,
+      },
+    );
   }
 
   /** 删除特性环境后修正单/多选环境状态，避免后续继续请求已销毁环境。 */
@@ -1025,10 +1089,15 @@
     refreshFeatureEnvData();
   }
 
-  /** 权限与应用类型允许时打开复用的特性部署侧栏。 */
-  function handleShowFeatureDeploy() {
-    if (!canFeatureDeploy.value) return;
-    isShowFeatureDeploy.value = true;
+  /** 应用类型允许时打开新建环境侧栏；列表侧栏保持打开以支持双层侧栏。 */
+  function handleShowCreateFeatureEnv() {
+    if (!canManageFeatureEnvs.value) return;
+    isShowCreateFeatureEnv.value = true;
+  }
+
+  /** 重新拉取环境列表和部署状态，避免部署侧栏使用 EnvSelect 的旧缓存。 */
+  async function refreshEnvSelectPanel() {
+    await envSelectPanelRef.value?.refresh?.();
   }
 
   /** 重新创建环境选择器并刷新总览、特性环境列表，确保三处数据一致。 */
@@ -1057,7 +1126,7 @@
       status: APP_DEPLOY_STATUS.UNINSTALLED,
     };
     initLoading.value = false;
-    await envSelectPanelRef.value?.refreshDeployStatuses?.();
+    await refreshEnvSelectPanel();
     deployOverviewRef.value?.load();
     fetchFeatureEnvList();
     stop();

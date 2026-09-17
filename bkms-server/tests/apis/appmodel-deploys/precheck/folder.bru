@@ -1,0 +1,99 @@
+meta {
+  name: precheck
+  seq: 4
+}
+
+auth {
+  mode: inherit
+}
+
+script:pre-request {
+  const common = require("./common");
+
+  if (!bru.getVar("envVarPrecheckReady")) {
+    const suffix = bru.getVar("randomSuffix");
+    const keySuffix = suffix.toUpperCase().replace(/[^A-Z0-9_]/g, "_");
+    const workspaceID = `evpc-ws-${suffix}`;
+    const envName = `evpc-env-${suffix}`;
+    const namespace = `evpc-ns-${suffix}`;
+    const trpcAppID = `evpc-trpc-${suffix}`;
+    const tafAppID = `evpc-taf-${suffix}`;
+    const definedAppID = `evpc-defined-${suffix}`;
+    const trpcUndefinedKey = `PRECHECK_TRPC_${keySuffix}`;
+    const tafUndefinedKey = `PRECHECK_TAF_${keySuffix}`;
+    const definedKey = `PRECHECK_DEFINED_${keySuffix}`;
+
+    const ws = await common.createWorkspace({id: workspaceID});
+    await common.createEnvironment({
+      name: envName,
+      workspaceID: ws.id,
+      type: "test",
+      description: "Deploy env var pre-check API suite",
+      cluster: {
+        clusterID: "BCS-K8S-00001",
+        clusterType: "single",
+        namespace: namespace
+      }
+    });
+
+    await common.createTrpcApp({
+      id: trpcAppID,
+      name: trpcAppID,
+      workspaceID: ws.id,
+      appModelSpec: {
+        trpcSpec: {
+          language: "go",
+          fileName: "trpc_go.yaml",
+          filePath: "/tmp/",
+          fileContent:
+            "undefined: ${{ env." + trpcUndefinedKey + " }}\n" +
+            "defined: ${{ env." + definedKey + " }}\n"
+        },
+        command: [],
+        args: [],
+        envVars: [{key: definedKey, value: ""}]
+      }
+    });
+
+    await common.createTafApp({
+      id: tafAppID,
+      name: tafAppID,
+      workspaceID: ws.id,
+      appModelSpec: {
+        tafSpec: {
+          fileName: "taf_config.conf",
+          filePath: "/tmp/",
+          fileContent: "undefined=${{ env." + tafUndefinedKey + " }}\n"
+        },
+        command: [],
+        args: [],
+        envVars: []
+      }
+    });
+
+    await common.createTrpcApp({
+      id: definedAppID,
+      name: definedAppID,
+      workspaceID: ws.id,
+      appModelSpec: {
+        trpcSpec: {
+          language: "go",
+          fileName: "trpc_go.yaml",
+          filePath: "/tmp/",
+          fileContent: "defined: ${{ env." + definedKey + " }}\n"
+        },
+        command: [],
+        args: [],
+        envVars: [{key: definedKey, value: ""}]
+      }
+    });
+
+    bru.setVar("envVarPrecheckEnvName", envName);
+    bru.setVar("envVarPrecheckTrpcAppID", trpcAppID);
+    bru.setVar("envVarPrecheckTafAppID", tafAppID);
+    bru.setVar("envVarPrecheckDefinedAppID", definedAppID);
+    bru.setVar("envVarPrecheckTrpcUndefinedKey", trpcUndefinedKey);
+    bru.setVar("envVarPrecheckTafUndefinedKey", tafUndefinedKey);
+    bru.setVar("envVarPrecheckReady", true);
+  }
+}
