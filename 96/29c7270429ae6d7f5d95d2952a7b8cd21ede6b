@@ -1,0 +1,14 @@
+bkms-server/pkg/observability/metrics/metrics.go
+  h_2321bec5d80d15 33-34,512
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9629c7270429ae6d7f5d95d2952a7b8cd21ede6b",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
