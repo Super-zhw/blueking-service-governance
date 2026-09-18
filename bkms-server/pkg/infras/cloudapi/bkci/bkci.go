@@ -361,9 +361,7 @@ func (c *ApiClient) ListPipelines(
 	return c.listPipelinesByPaging(ctx, projectCode, keyword, page, pageSize)
 }
 
-// listPipelinesByCommunity 社区版流水线搜索：v4_user_pipeline_search_by_name。
-// 与内部版 paging_search_by_name 不同：仅支持按名称搜索（无分页参数），
-// 返回 data 为数组，元素仅含 channelCode/pipelineId/pipelineName。
+// listPipelinesByCommunity 流水线搜索 - 社区版
 func (c *ApiClient) listPipelinesByCommunity(
 	ctx context.Context, projectCode, keyword string,
 ) (int64, []Pipeline, error) {
@@ -404,8 +402,7 @@ func (c *ApiClient) listPipelinesByCommunity(
 	return int64(len(pipelines)), pipelines, nil
 }
 
-// listPipelinesByPaging 内部版流水线搜索：v4_user_pipeline_paging_search_by_name。
-// 支持分页与名称搜索，返回 data.count + data.records。
+// listPipelinesByPaging 流水线搜索
 func (c *ApiClient) listPipelinesByPaging(
 	ctx context.Context, projectCode, keyword string, page, pageSize int64,
 ) (int64, []Pipeline, error) {
