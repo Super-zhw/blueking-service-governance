@@ -1833,16 +1833,21 @@ definitions:
         description: 编程框架，只影响差异能力；blank 表示无预设框架
         enum:
         - blank
-        - trpc
         - taf
+        - trpc-go
+        - trpc-cpp
+        - trpc-java
+        - trpc-python
+        - trpc-nodejs
         type: string
       language:
         description: 编程语言，只影响构建
         enum:
         - go
         - cpp
+        - java
         - python
-        - node
+        - nodejs
         type: string
       tafSpec:
         allOf:
