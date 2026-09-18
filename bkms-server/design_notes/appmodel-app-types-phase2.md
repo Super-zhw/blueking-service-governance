@@ -62,11 +62,38 @@
 - `devmode.go` 的 WorkloadType vs AppType 混用
 - `AppDetailOutputObj`/`AppInfoOutputObj` 输出 language/framework
 
+## 九、trpc/taf 收归 standard（framework 数据驱动，已定方案）
+
+核心：把 trpc/taf 的框架差异（创建过程逐行同构，只有 3 处差异——配置文件 Format、Workload.Type、
+框架配置字段）收归到 `standard`，用 `app.Framework` 驱动，达到数据驱动、少依赖 appType 判断。
+
+已拍板 3 项决策：
+
+1. **Workload.Type 一律收敛为 `standard`**（框架不决定部署形态，框架差异全走 FrameworkPreset）。
+2. **TrpcConfig/TafConfig 统一为 `FrameworkConfig{FileName, FilePath, FileContent}`**（Language 已上提顶层 `app.Language`）。
+3. **FrameworkPreset 最小化：只放 `ConfigFormat`**（治理能力清单后续再扩）。
+
+### 第一步：框架预设 + 统一创建
+
+1. `appmodel` 包加 `FrameworkPreset{ConfigFormat}` + `frameworkPresets` map（7 个 framework 值：
+   blank=无、taf=taf、trpc-*=yaml）。
+2. `Workload` 加 `FrameworkConfig` 字段（FileName/FilePath/FileContent，替代 TrpcConfig/TafConfig）。
+3. `standard.Service.Create` 读 `frameworkPresets[app.Framework].ConfigFormat` 决定是否/如何建配置文件；
+   `Workload.Type` 一律 `WorkloadTypeStandard`；写 `FrameworkConfig`。
+4. 序列化：`AppModelSpecInput` 加框架配置输入 + `ToStandardCreateParams` 读它；handler 传递 framework config。
+
+### 第二步：渲染/治理按 framework 分派（= 上文「二」「三」的细化）
+
+- `standard/plugin.go` 由 no-op 改为读 framework：trpc-* → polaris patcher + config 渲染；taf → config 渲染；
+  blank → no-op。
+- admin/APM/devmode 由 `switch app.Type` 改为 `switch app.Framework`（后续把治理能力清单也放进预设）。
+
 ---
 
 ## 优先级建议
 
 - **P0**：一（冗余字段收敛，尤其 `AppInfoOutputObj.Language` 读 TrpcSpec 导致 standard 语言不显示）
 - **P0**：四（plain 渲染接通，否则 standard 的 plain 配置文件实际不生效）
+- **P0**：九（trpc/taf 收归 standard —— framework 数据驱动的核心架构工作，第一步「框架预设+统一创建」）
 - **P1**：二（框架分支重挂）+ 三（插件重组织）+ 五（API 收尾）
 - **P2**：六（CLI）+ 七（前端）+ 八（清理）
