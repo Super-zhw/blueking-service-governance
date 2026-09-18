@@ -22018,8 +22018,12 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "blank",
-                        "trpc",
-                        "taf"
+                        "taf",
+                        "trpc-go",
+                        "trpc-cpp",
+                        "trpc-java",
+                        "trpc-python",
+                        "trpc-nodejs"
                     ]
                 },
                 "language": {
@@ -22028,8 +22032,9 @@ const docTemplate = `{
                     "enum": [
                         "go",
                         "cpp",
+                        "java",
                         "python",
-                        "node"
+                        "nodejs"
                     ]
                 },
                 "tafSpec": {
