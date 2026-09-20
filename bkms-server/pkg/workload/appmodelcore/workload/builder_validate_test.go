@@ -112,7 +112,7 @@ var _ = Describe("buildDirectConfigMap", func() {
 
 		// Verify volumes
 		Expect(volumes).To(HaveLen(1))
-		Expect(volumes[0].Name).To(Equal("my-app-plain-direct"))
+		Expect(volumes[0].Name).To(Equal("plain-direct"))
 		Expect(volumes[0].ConfigMap).NotTo(BeNil())
 		Expect(volumes[0].ConfigMap.Items).To(HaveLen(2))
 	})
