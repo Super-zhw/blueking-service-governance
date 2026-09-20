@@ -280,7 +280,7 @@ var _ = Describe("TrpcAdminService", func() {
 			Entry("C++ language - server.admin_port", "cpp",
 				func(cfg *admincmd.AdminConfig) { cfg.Server.AdminPort = "11016" },
 				"11016", false, ""),
-			Entry("Node language - server.admin_port", "node",
+			Entry("Node language - server.admin_port", "nodejs",
 				func(cfg *admincmd.AdminConfig) { cfg.Server.AdminPort = "11017" },
 				"11017", false, ""),
 			Entry("Java language - server.admin.admin_port", "java",
