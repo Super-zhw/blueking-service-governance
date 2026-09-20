@@ -1,0 +1,16 @@
+bkms-cli/pkg/handler/appcfgfile/view.go
+  h_2321bec5d80d15 114
+bkms-cli/pkg/handler/appcfgfile/view_test.go
+  h_2321bec5d80d15 170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3ffe1161e3c7d59ba6e2767f28345f54b3bbc101",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

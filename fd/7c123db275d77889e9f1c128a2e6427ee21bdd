@@ -1,0 +1,30 @@
+.gitignore
+  h_2321bec5d80d15 85,86
+bkms-cli/pkg/client/app_config_file.go
+  h_2321bec5d80d15 93-110
+bkms-cli/pkg/client/client.go
+  h_2321bec5d80d15 613-646
+bkms-cli/pkg/client/mocks/mock_client.go
+  h_2321bec5d80d15 477-550
+bkms-cli/pkg/client/types.go
+  h_2321bec5d80d15 109,110
+bkms-cli/pkg/handler/appcfgfile/edit.go
+  h_2321bec5d80d15 33-34,50,67,72,113,114,115-164
+bkms-cli/pkg/handler/appcfgfile/edit_test.go
+  h_2321bec5d80d15 88-91,93,179-205,207-213,215-218,220-223,225-267,270-281
+bkms-cli/pkg/handler/appcfgfile/view.go
+  h_2321bec5d80d15 32,89,94,116,118,137-147,148-149,150-167
+bkms-cli/pkg/handler/appcfgfile/view_test.go
+  h_2321bec5d80d15 105-108,110,142-150,152-161,165-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fd7c123db275d77889e9f1c128a2e6427ee21bdd",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
