@@ -1,0 +1,24 @@
+bkms-cli/cmd/app/appcfgfile/delete_version.go
+  h_2321bec5d80d15 33,43,48,56
+bkms-cli/cmd/app/appcfgfile/edit.go
+  h_2321bec5d80d15 36,45,69
+bkms-cli/cmd/app/appcfgfile/list_versions.go
+  h_2321bec5d80d15 34,42,53
+bkms-cli/cmd/app/appcfgfile/rollback_version.go
+  h_2321bec5d80d15 33,43,64
+bkms-cli/cmd/app/appcfgfile/view.go
+  h_2321bec5d80d15 36,44,55
+bkms-cli/cmd/app/appcfgfile/view_version.go
+  h_2321bec5d80d15 34,44,60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f4f6c77ec28cf65973eb90e237ffc281e56f67c5",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
