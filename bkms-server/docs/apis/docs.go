@@ -22357,19 +22357,19 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "imageTag",
-                "operations"
+                "targets"
             ],
             "properties": {
                 "imageTag": {
                     "description": "部署的镜像版本",
                     "type": "string"
                 },
-                "operations": {
-                    "description": "各环境的部署操作列表",
+                "targets": {
+                    "description": "各环境的部署目标列表",
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/serializer.BatchDeployEnvOperation"
+                        "$ref": "#/definitions/serializer.BatchDeployTarget"
                     }
                 }
             }
@@ -22424,24 +22424,6 @@ const docTemplate = `{
                 }
             }
         },
-        "serializer.BatchDeployEnvOperation": {
-            "type": "object",
-            "required": [
-                "envName",
-                "replicas"
-            ],
-            "properties": {
-                "envName": {
-                    "description": "部署环境名称",
-                    "type": "string"
-                },
-                "replicas": {
-                    "description": "副本数量",
-                    "type": "integer",
-                    "minimum": 1
-                }
-            }
-        },
         "serializer.BatchDeployEnvResultObj": {
             "type": "object",
             "properties": {
@@ -22456,6 +22438,24 @@ const docTemplate = `{
                 "success": {
                     "description": "是否成功",
                     "type": "boolean"
+                }
+            }
+        },
+        "serializer.BatchDeployTarget": {
+            "type": "object",
+            "required": [
+                "envName",
+                "replicas"
+            ],
+            "properties": {
+                "envName": {
+                    "description": "部署环境名称",
+                    "type": "string"
+                },
+                "replicas": {
+                    "description": "副本数量",
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

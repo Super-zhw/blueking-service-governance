@@ -244,21 +244,21 @@ func (h *Handler) BatchCreateAppModelDeploy(c *gin.Context) {
 	}
 
 	// 逐环境执行部署；单个环境失败不影响其它环境
-	results := make([]*serializer.BatchDeployEnvResultObj, 0, len(input.Operations))
-	for _, op := range input.Operations {
-		result := &serializer.BatchDeployEnvResultObj{EnvName: op.EnvName}
+	results := make([]*serializer.BatchDeployEnvResultObj, 0, len(input.Targets))
+	for _, target := range input.Targets {
+		result := &serializer.BatchDeployEnvResultObj{EnvName: target.EnvName}
 
-		app, _, err := h.validateAppModelDeployAppEnv(ctx, uriInput.AppID, op.EnvName, perm.TypeEdit, true)
+		app, _, err := h.validateAppModelDeployAppEnv(ctx, uriInput.AppID, target.EnvName, perm.TypeEdit, true)
 		if err != nil {
 			result.Detail = err.Error()
 			results = append(results, result)
 			continue
 		}
 
-		deploypkg.TrackEnvAddApp(ctx, h.registry.EnvStore, app.WorkspaceID, op.EnvName, app.ID)
+		deploypkg.TrackEnvAddApp(ctx, h.registry.EnvStore, app.WorkspaceID, target.EnvName, app.ID)
 		deployID, err := deployService.Deploy(ctx, app, appmodeldeploysvc.DeployParams{
-			EnvName:  op.EnvName,
-			Replicas: op.Replicas,
+			EnvName:  target.EnvName,
+			Replicas: target.Replicas,
 			ImageTag: input.ImageTag,
 		})
 		if err != nil {
@@ -273,7 +273,7 @@ func (h *Handler) BatchCreateAppModelDeploy(c *gin.Context) {
 			appmodeldeploypoll.Task.NewTask(appmodeldeploypoll.Args{
 				WorkspaceID: app.WorkspaceID,
 				AppID:       app.ID,
-				EnvName:     op.EnvName,
+				EnvName:     target.EnvName,
 				DeployID:    deployID,
 			}),
 			asynq.ProcessIn(appmodeldeploypoll.PollingInterval()),

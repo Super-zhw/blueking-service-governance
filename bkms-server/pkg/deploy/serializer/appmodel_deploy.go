@@ -144,8 +144,8 @@ type AppURIInput struct {
 	AppID string `uri:"appID" binding:"required,uri_slug"`
 }
 
-// BatchDeployEnvOperation 跨环境批量部署中单个环境的部署参数。
-type BatchDeployEnvOperation struct {
+// BatchDeployTarget 跨环境批量部署中单个环境的部署目标。
+type BatchDeployTarget struct {
 	// 部署环境名称
 	EnvName string `json:"envName" binding:"required,uri_slug"`
 	// 副本数量
@@ -156,8 +156,8 @@ type BatchDeployEnvOperation struct {
 type BatchCreateAppModelDeployInput struct {
 	// 部署的镜像版本
 	ImageTag string `json:"imageTag" binding:"required"`
-	// 各环境的部署操作列表
-	Operations []BatchDeployEnvOperation `json:"operations" binding:"required,min=1,dive"`
+	// 各环境的部署目标列表
+	Targets []BatchDeployTarget `json:"targets" binding:"required,min=1,dive"`
 }
 
 // BatchDeployEnvResultObj 单个环境的批量部署结果。

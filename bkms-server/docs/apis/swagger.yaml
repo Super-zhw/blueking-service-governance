@@ -2308,15 +2308,15 @@ definitions:
       imageTag:
         description: 部署的镜像版本
         type: string
-      operations:
-        description: 各环境的部署操作列表
+      targets:
+        description: 各环境的部署目标列表
         items:
-          $ref: '#/definitions/serializer.BatchDeployEnvOperation'
+          $ref: '#/definitions/serializer.BatchDeployTarget'
         minItems: 1
         type: array
     required:
     - imageTag
-    - operations
+    - targets
     type: object
   serializer.BatchCreateAppModelDeployOutput:
     properties:
@@ -2351,19 +2351,6 @@ definitions:
     required:
     - instanceIDs
     type: object
-  serializer.BatchDeployEnvOperation:
-    properties:
-      envName:
-        description: 部署环境名称
-        type: string
-      replicas:
-        description: 副本数量
-        minimum: 1
-        type: integer
-    required:
-    - envName
-    - replicas
-    type: object
   serializer.BatchDeployEnvResultObj:
     properties:
       detail:
@@ -2375,6 +2362,19 @@ definitions:
       success:
         description: 是否成功
         type: boolean
+    type: object
+  serializer.BatchDeployTarget:
+    properties:
+      envName:
+        description: 部署环境名称
+        type: string
+      replicas:
+        description: 副本数量
+        minimum: 1
+        type: integer
+    required:
+    - envName
+    - replicas
     type: object
   serializer.BgEnvVarOutputObj:
     properties:
