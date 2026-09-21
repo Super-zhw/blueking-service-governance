@@ -1,0 +1,46 @@
+bkms-server/configs/config.yaml
+  h_2321bec5d80d15 238
+bkms-server/pkg/bkintegrations/bkci/manager.go
+  h_2321bec5d80d15 473
+bkms-server/pkg/common/config/types.go
+  h_2321bec5d80d15 371-373
+bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  h_2321bec5d80d15 215,251,356,360-363,366-388,390-404,405,406-407,417,420,422,747,779-780,781,783-784,786,789,795-796,823,857
+bkms-server/pkg/infras/cloudapi/bkci/bkci_test.go
+  h_2321bec5d80d15 174,179,184
+bkms-server/pkg/infras/cloudapi/bkci/client.go
+  h_2321bec5d80d15 45,49,96,99,101-102,108
+bkms-server/pkg/infras/cloudapi/bkci/stub.go
+  h_2321bec5d80d15 431-434,440
+bkms-server/pkg/infras/cloudapi/bkci/types.go
+  h_2321bec5d80d15 40,41,42,43,44,45,46-53,54-55
+bkms-server/tests/configs/config.yaml
+  h_2321bec5d80d15 179
+charts/bkms-server/values.yaml
+  h_2321bec5d80d15 371-373,374
+bkms-server/design_notes/devops_feature_flags.md
+  h_2321bec5d80d15 2,3,4,5,6,7-8,9,10,11,12-15,16,17,18,20-21,22,23,25-26,27-28,29,30-31,33-34,35
+bkms-server/pkg/workload/appmodelcore/workload/workload_test.go
+  s_a30e2c9b71529c::t_864fd638a86bcd 1318-1319
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4e890fbecd891942fc894dad3c3450345722aa3d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_a30e2c9b71529c": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a0668d4cf77b70b7e2b0ba1cd5745f",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
