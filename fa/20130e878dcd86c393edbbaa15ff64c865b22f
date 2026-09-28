@@ -1,0 +1,27 @@
+bkms-server/pkg/workload/appmodelcore/workload/workload_test.go
+  s_2a2ca6d060b57e::t_f5843dbf87ca47 1324
+  s_2a2ca6d060b57e::t_060eac87c7d75b 1318-1320
+bkms-server/cmd/migration/bind_bscp_project.go
+  h_2321bec5d80d15 49-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fa20130e878dcd86c393edbbaa15ff64c865b22f",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_2a2ca6d060b57e": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a0b3d31fa371a68829e199608baab6",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

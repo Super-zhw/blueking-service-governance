@@ -1,0 +1,20 @@
+bkms-server/pkg/core/app/app.go
+  h_2321bec5d80d15 42-45,48,50-77,97,100
+bkms-server/pkg/core/app/handler/app.go
+  h_2321bec5d80d15 158-159
+bkms-server/pkg/core/app/serializer/app.go
+  h_2321bec5d80d15 186,188
+bkms-server/pkg/workload/appmodelcore/trpc/admincmd/admin_cmd.go
+  h_2321bec5d80d15 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ddcbdb05fac7af0138b0b10dbdcca3bfca06b2f5",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

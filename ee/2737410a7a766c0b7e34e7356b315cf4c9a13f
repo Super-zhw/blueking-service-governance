@@ -1,0 +1,14 @@
+bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  h_2321bec5d80d15 364,405
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ee2737410a7a766c0b7e34e7356b315cf4c9a13f",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

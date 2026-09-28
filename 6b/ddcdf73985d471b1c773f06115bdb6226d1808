@@ -1,0 +1,18 @@
+bkms-server/pkg/extension/addon/hostport/store.go
+  h_2321bec5d80d15 34-35
+bkms-server/design_notes/appmodel-app-types.md
+  h_2321bec5d80d15 1,3,5,7-14,16-21,23-24,26-28,30,32,34-35,37-42,44,46-48,50,52,54,56,58-59,61,63,65-67,69,71,73,75,77-89
+bkms-server/design_notes/app-capabilities.md
+  h_2321bec5d80d15 1-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "6bddcdf73985d471b1c773f06115bdb6226d1808",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

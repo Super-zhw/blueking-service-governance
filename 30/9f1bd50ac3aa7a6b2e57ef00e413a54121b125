@@ -1,0 +1,14 @@
+bkms-server/design_notes/appmodel-app-types-phase2.md
+  h_2321bec5d80d15 65-90,97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "309f1bd50ac3aa7a6b2e57ef00e413a54121b125",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

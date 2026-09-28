@@ -1,0 +1,18 @@
+bkms-server/design_notes/devops_community.md
+  h_2321bec5d80d15 3-4,6,8,10-14,16-17,19,21-23,25,27,30,37,40,42
+bkms-server/pkg/infras/cloudapi/bkci/bkci.go
+  h_2321bec5d80d15 356-410,420,423,425,784-787,797-799
+bkms-server/pkg/infras/cloudapi/bkci/types.go
+  h_2321bec5d80d15 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "097dfeb3f78bb3b94c179d53593fc4eb8c585fa2",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+bkms-server/cmd/migration/access_token.go
+  h_2321bec5d80d15 1-47
+bkms-server/cmd/migration/app_bscpcfg_mgr.go
+  h_2321bec5d80d15 57-58,62,68,76,82,93,102-108
+bkms-server/cmd/migration/bind_bscp_project.go
+  h_2321bec5d80d15 50,70,77-83
+bkms-server/cmd/migration/list_bscp_projects.go
+  h_2321bec5d80d15 46,61,66-72
+bkms-server/go.mod
+  h_2321bec5d80d15 83
+bkms-server/pkg/extension/bscpcfg/model/feature_flag.go
+  h_2321bec5d80d15 113-125,128-131
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  h_2321bec5d80d15 134,146,154
+bkms-server/pkg/workload/bscpcfg/builder.go
+  h_2321bec5d80d15 196-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "811762adda5156166fdb9299de9f6aef6a37b490",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

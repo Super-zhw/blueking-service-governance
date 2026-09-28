@@ -1,0 +1,24 @@
+bkms-server/pkg/workload/appmodelcore/trpc/admincmd/admin_cmd_test.go
+  s_2a2ca6d060b57e::t_634afe4f26f745 283
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b5436441aabc70656807934afac6e5ab882a8b77",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_2a2ca6d060b57e": {
+      "agent_id": {
+        "tool": "CodeBuddy-Plugin",
+        "id": "01a0b3d31fa371a68829e199608baab6",
+        "model": "unknown"
+      },
+      "human_author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

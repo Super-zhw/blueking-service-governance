@@ -1,0 +1,16 @@
+bkms-server/pkg/misc/audit/model.go
+  h_2321bec5d80d15 66,108
+bkms-server/pkg/workload/appmodelcore/workload/workload_test.go
+  h_2321bec5d80d15 1318-1320,1324
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0a1ca0f3492961b92b54ef99d257ebceded209fc",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
