@@ -1,0 +1,16 @@
+bkms-cli/cmd/workspace/list.go
+  h_35547c76ab0580 47,62-72
+bkms-cli/pkg/client/workspace.go
+  h_35547c76ab0580 21-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a083c5fa1923d05cd2883f0b52990f78a8aa9bbb",
+  "prompts": {},
+  "humans": {
+    "h_35547c76ab0580": {
+      "author": "huiwenzhang <huiwenzhang@tencent.com>"
+    }
+  }
+}
