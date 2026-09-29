@@ -164,12 +164,9 @@ func setBscpCfgForApp(
 		return enableBscpCfgForApp(ctx, reg, user, appID)
 	}
 
-	if err := reg.BscpCfgStore.UpsertFeatureFlag(ctx, &model.FeatureFlag{
-		AppID:    appID,
-		Enabled:  false,
-		Operator: user.ID,
-	}); err != nil {
-		return errors.Wrapf(err, "upsert feature flag for app %s", appID)
+	disabled := false
+	if err := reg.BscpCfgStore.UpdateMetadata(ctx, appID, &model.MetadataUpdate{Enable: &disabled}); err != nil {
+		return errors.Wrapf(err, "disable bscp config for app %s", appID)
 	}
 	return nil
 }
@@ -209,23 +206,14 @@ func enableBscpCfgForApp(
 	}
 
 	if _, initErr := mgr.InitMetadata(ctx, &svc.InitMetadataParams{
-		AppID:          app.ID,
-		WorkloadName:   workloadName,
-		WorkloadKind:   workloadKind,
-		BscpBizID:      ws.BkSystems.BkCCBizID,
-		BscpProjectID:  ws.BkSystems.BkBSCPProjectID,
-		BscpProjectKey: ws.BkSystems.BkBSCPProjectKey,
-		Operator:       user.ID,
+		AppID:         app.ID,
+		WorkloadName:  workloadName,
+		WorkloadKind:  workloadKind,
+		BscpBizID:     ws.BkSystems.BkCCBizID,
+		BscpProjectID: ws.BkSystems.BkBSCPProjectID,
+		Operator:      user.ID,
 	}); initErr != nil {
 		return errors.Wrapf(initErr, "init metadata for app %s", appID)
-	}
-
-	if upsertErr := reg.BscpCfgStore.UpsertFeatureFlag(ctx, &model.FeatureFlag{
-		AppID:    appID,
-		Enabled:  true,
-		Operator: user.ID,
-	}); upsertErr != nil {
-		return errors.Wrapf(upsertErr, "upsert feature flag for app %s", appID)
 	}
 
 	return nil

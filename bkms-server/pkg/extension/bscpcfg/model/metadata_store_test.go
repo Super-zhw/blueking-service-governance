@@ -57,16 +57,11 @@ var _ = Describe("MetadataStore", func() {
 		Context("when creating a valid metadata", func() {
 			It("should create successfully", func() {
 				meta := &model.Metadata{
-					AppID:          testAppID,
-					BscpBizID:      "12345",
-					ProjectID:      "12345",
-					ProjectKey:     "BK-BSCP-12345",
-					MountPath:      "/data/bscp",
-					CredentialID:   "cred-1",
-					CredentialName: "bkms-credential",
-					Token:          "test-token",
-					FeedAddr:       "bscp-feed.example.com:9500",
-					Operator:       "tester",
+					AppID:        testAppID,
+					Enable:       true,
+					MountPath:    "/data/bscp",
+					WorkloadName: "test-workload",
+					Operator:     "tester",
 				}
 
 				err := store.Create(ctx, meta)
@@ -75,12 +70,10 @@ var _ = Describe("MetadataStore", func() {
 				// 验证写入
 				stored, err := store.Get(ctx, testAppID)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(stored.BscpBizID).To(Equal("12345"))
+				Expect(stored.Enable).To(BeTrue())
 				Expect(stored.MountPath).To(Equal("/data/bscp"))
-				Expect(stored.CredentialID).To(Equal("cred-1"))
-				Expect(stored.CredentialName).To(Equal("bkms-credential"))
-				Expect(stored.Token).To(Equal("test-token"))
-				Expect(stored.FeedAddr).To(Equal("bscp-feed.example.com:9500"))
+				Expect(stored.WorkloadName).To(Equal("test-workload"))
+				Expect(stored.Operator).To(Equal("tester"))
 				Expect(stored.CreatedAt).NotTo(BeZero())
 				Expect(stored.UpdatedAt).NotTo(BeZero())
 			})
@@ -89,29 +82,15 @@ var _ = Describe("MetadataStore", func() {
 		Context("when creating duplicate metadata", func() {
 			It("should return ErrMetadataAlreadyExists", func() {
 				meta := &model.Metadata{
-					AppID:          testAppID,
-					BscpBizID:      "12345",
-					ProjectID:      "12345",
-					ProjectKey:     "BK-BSCP-12345",
-					MountPath:      "/data/bscp",
-					CredentialID:   "cred-1",
-					CredentialName: "bkms-credential",
-					Token:          "test-token",
-					FeedAddr:       "bscp-feed.example.com:9500",
+					AppID:     testAppID,
+					MountPath: "/data/bscp",
 				}
 				err := store.Create(ctx, meta)
 				Expect(err).NotTo(HaveOccurred())
 
 				meta2 := &model.Metadata{
-					AppID:          testAppID,
-					BscpBizID:      "12345",
-					ProjectID:      "12345",
-					ProjectKey:     "BK-BSCP-12345",
-					MountPath:      "/data/bscp2",
-					CredentialID:   "cred-1",
-					CredentialName: "bkms-credential",
-					Token:          "test-token",
-					FeedAddr:       "bscp-feed.example.com:9500",
+					AppID:     testAppID,
+					MountPath: "/data/bscp2",
 				}
 				err = store.Create(ctx, meta2)
 				Expect(err).To(MatchError(model.ErrMetadataAlreadyExists))
@@ -121,17 +100,6 @@ var _ = Describe("MetadataStore", func() {
 		Context("when required fields are missing", func() {
 			It("should return validation error for missing appID", func() {
 				meta := &model.Metadata{
-					BscpBizID: "12345",
-					MountPath: "/data/bscp",
-				}
-				err := store.Create(ctx, meta)
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("validation failed"))
-			})
-
-			It("should return validation error for missing bscpBizID", func() {
-				meta := &model.Metadata{
-					AppID:     testAppID,
 					MountPath: "/data/bscp",
 				}
 				err := store.Create(ctx, meta)
@@ -144,16 +112,10 @@ var _ = Describe("MetadataStore", func() {
 	Describe("Get", func() {
 		BeforeEach(func() {
 			meta := &model.Metadata{
-				AppID:          testAppID,
-				BscpBizID:      "99",
-				ProjectID:      "99",
-				ProjectKey:     "BK-BSCP-99",
-				MountPath:      "/etc/bscp",
-				CredentialID:   "cred-1",
-				CredentialName: "bkms-credential",
-				Token:          "test-token",
-				FeedAddr:       "bscp-feed.example.com:9500",
-				Operator:       "admin",
+				AppID:     testAppID,
+				Enable:    true,
+				MountPath: "/etc/bscp",
+				Operator:  "admin",
 			}
 			err := store.Create(ctx, meta)
 			Expect(err).NotTo(HaveOccurred())
@@ -163,7 +125,7 @@ var _ = Describe("MetadataStore", func() {
 			It("should return the meta", func() {
 				meta, err := store.Get(ctx, testAppID)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(meta.BscpBizID).To(Equal("99"))
+				Expect(meta.Enable).To(BeTrue())
 				Expect(meta.MountPath).To(Equal("/etc/bscp"))
 				Expect(meta.Operator).To(Equal("admin"))
 			})
@@ -180,32 +142,26 @@ var _ = Describe("MetadataStore", func() {
 	Describe("Update", func() {
 		BeforeEach(func() {
 			meta := &model.Metadata{
-				AppID:          testAppID,
-				BscpBizID:      "100",
-				ProjectID:      "100",
-				ProjectKey:     "BK-BSCP-100",
-				MountPath:      "/old/path",
-				CredentialID:   "cred-1",
-				CredentialName: "bkms-credential",
-				Token:          "old-token",
-				FeedAddr:       "bscp-feed.example.com:9500",
-				Operator:       "user1",
+				AppID:     testAppID,
+				Enable:    true,
+				MountPath: "/old/path",
+				Operator:  "user1",
 			}
 			err := store.Create(ctx, meta)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		Context("when updating token", func() {
-			It("should update token successfully", func() {
-				newToken := "new-token"
+		Context("when updating enable", func() {
+			It("should update enable successfully", func() {
+				newEnable := false
 				err := store.Update(ctx, testAppID, &model.MetadataUpdate{
-					Token: &newToken,
+					Enable: &newEnable,
 				})
 				Expect(err).NotTo(HaveOccurred())
 
 				updated, err := store.Get(ctx, testAppID)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(updated.Token).To(Equal("new-token"))
+				Expect(updated.Enable).To(BeFalse())
 			})
 		})
 
@@ -250,9 +206,9 @@ var _ = Describe("MetadataStore", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				// 更新其他字段，workload 为 nil
-				newToken := "another-token"
+				newEnable := false
 				err = store.Update(ctx, testAppID, &model.MetadataUpdate{
-					Token: &newToken,
+					Enable: &newEnable,
 				})
 				Expect(err).NotTo(HaveOccurred())
 
@@ -260,7 +216,7 @@ var _ = Describe("MetadataStore", func() {
 				updated, err := store.Get(ctx, testAppID)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(updated.WorkloadName).To(Equal("existing-workload"))
-				Expect(updated.Token).To(Equal("another-token"))
+				Expect(updated.Enable).To(BeFalse())
 			})
 		})
 
@@ -290,15 +246,8 @@ var _ = Describe("MetadataStore", func() {
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			meta := &model.Metadata{
-				AppID:          testAppID,
-				BscpBizID:      "200",
-				ProjectID:      "200",
-				ProjectKey:     "BK-BSCP-200",
-				MountPath:      "/tmp",
-				CredentialID:   "cred-1",
-				CredentialName: "bkms-credential",
-				Token:          "test-token",
-				FeedAddr:       "bscp-feed.example.com:9500",
+				AppID:     testAppID,
+				MountPath: "/tmp",
 			}
 			err := store.Create(ctx, meta)
 			Expect(err).NotTo(HaveOccurred())
@@ -325,16 +274,9 @@ var _ = Describe("MetadataStore", func() {
 	Describe("Update WorkloadKind", func() {
 		BeforeEach(func() {
 			meta := &model.Metadata{
-				AppID:          testAppID,
-				BscpBizID:      "100",
-				ProjectID:      "100",
-				ProjectKey:     "BK-BSCP-100",
-				MountPath:      "/data/bscp",
-				CredentialID:   "cred-1",
-				CredentialName: "bkms-credential",
-				Token:          "test-token",
-				FeedAddr:       "bscp-feed.example.com:9500",
-				Operator:       "user1",
+				AppID:     testAppID,
+				MountPath: "/data/bscp",
+				Operator:  "user1",
 			}
 			err := store.Create(ctx, meta)
 			Expect(err).NotTo(HaveOccurred())
@@ -364,9 +306,9 @@ var _ = Describe("MetadataStore", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				// 更新其他字段，workloadKind 为 nil
-				newToken := "another-token"
+				newEnable := false
 				err = store.Update(ctx, testAppID, &model.MetadataUpdate{
-					Token: &newToken,
+					Enable: &newEnable,
 				})
 				Expect(err).NotTo(HaveOccurred())
 
@@ -374,7 +316,7 @@ var _ = Describe("MetadataStore", func() {
 				updated, err := store.Get(ctx, testAppID)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(updated.WorkloadKind).To(Equal("Deployment"))
-				Expect(updated.Token).To(Equal("another-token"))
+				Expect(updated.Enable).To(BeFalse())
 			})
 		})
 
@@ -406,18 +348,11 @@ var _ = Describe("MetadataStore", func() {
 				defer func() { _ = store.Delete(ctx, anotherAppID) }()
 
 				meta := &model.Metadata{
-					AppID:          anotherAppID,
-					BscpBizID:      "100",
-					ProjectID:      "100",
-					ProjectKey:     "BK-BSCP-100",
-					MountPath:      "/data/bscp",
-					CredentialID:   "cred-1",
-					CredentialName: "bkms-credential",
-					Token:          "test-token",
-					FeedAddr:       "bscp-feed.example.com:9500",
-					WorkloadKind:   "Deployment",
-					WorkloadName:   "my-deploy",
-					Operator:       "user1",
+					AppID:        anotherAppID,
+					MountPath:    "/data/bscp",
+					WorkloadKind: "Deployment",
+					WorkloadName: "my-deploy",
+					Operator:     "user1",
 				}
 				err := store.Create(ctx, meta)
 				Expect(err).NotTo(HaveOccurred())
@@ -486,6 +421,16 @@ var _ = Describe("Metadata Model Logic", func() {
 			update.ApplyTo(meta)
 
 			Expect(meta.WorkloadKind).To(Equal(""))
+		})
+
+		It("should apply Enable when non-nil", func() {
+			meta := &model.Metadata{AppID: "app-1"}
+			enable := true
+			update := &model.MetadataUpdate{Enable: &enable}
+
+			update.ApplyTo(meta)
+
+			Expect(meta.Enable).To(BeTrue())
 		})
 
 		It("should handle nil update gracefully", func() {

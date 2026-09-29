@@ -25,10 +25,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
 	"github.com/spf13/cast"
 
-	svccfg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
@@ -39,8 +37,6 @@ import (
 
 // Manager 应用配置管理业务管理器。
 type Manager struct {
-	feedAddr string
-
 	client bscpapi.ConfigClient
 
 	configStore model.Store
@@ -59,7 +55,6 @@ func NewManager(
 	return &Manager{
 		client:      configClient,
 		configStore: configStore,
-		feedAddr:    svccfg.G.BSCP.FeedAddr,
 	}, nil
 }
 
@@ -79,12 +74,6 @@ func (m *Manager) InitMetadata(
 		return nil, errors.Wrap(err, "get metadata")
 	}
 
-	// 获取或创建 Credential
-	cred, err := m.GetOrCreateCredential(ctx, params.BscpBizID, cast.ToInt64(params.BscpProjectID))
-	if err != nil {
-		return nil, errors.Wrap(err, "get or create bscpcfg credential")
-	}
-
 	// 获取或创建后置脚本
 	hookID, err := m.GetOrCreatePostHook(ctx, params.BscpBizID, cast.ToInt64(params.BscpProjectID), params.AppID)
 	if err != nil {
@@ -92,18 +81,12 @@ func (m *Manager) InitMetadata(
 	}
 
 	meta := &model.Metadata{
-		AppID:          params.AppID,
-		BscpBizID:      params.BscpBizID,
-		ProjectID:      params.BscpProjectID,
-		ProjectKey:     params.BscpProjectKey,
-		CredentialID:   fmt.Sprintf("%d", cred.ID),
-		CredentialName: cred.Name,
-		Token:          cred.EncCredential,
-		FeedAddr:       m.feedAddr,
-		WorkloadName:   params.WorkloadName,
-		WorkloadKind:   params.WorkloadKind,
-		PostHookID:     fmt.Sprintf("%d", hookID),
-		Operator:       params.Operator,
+		AppID:        params.AppID,
+		Enable:       true,
+		WorkloadName: params.WorkloadName,
+		WorkloadKind: params.WorkloadKind,
+		PostHookID:   fmt.Sprintf("%d", hookID),
+		Operator:     params.Operator,
 	}
 
 	if err = m.configStore.CreateMetadata(ctx, meta); err != nil {
@@ -125,19 +108,7 @@ func (m *Manager) CreateEnvBinding(
 	ctx context.Context,
 	params *CreateEnvBindingParams,
 ) (*model.Snapshot, error) {
-	// 0. FeatureFlag 作为写接口前置门禁：未启用时拒绝
-	flag, err := m.configStore.GetFeatureFlag(ctx, params.AppID)
-	if err != nil {
-		if errors.Is(err, model.ErrFeatureFlagNotFound) {
-			return nil, errors.New("bscpcfg feature flag is not enabled")
-		}
-		return nil, errors.Wrap(err, "get feature flag")
-	}
-	if !flag.Enabled {
-		return nil, errors.New("bscpcfg feature flag is disabled")
-	}
-
-	// 1. 检查 Metadata 是否存在
+	// 1. 检查 Metadata 是否存在且启用
 	meta, err := m.configStore.GetMetadata(ctx, params.AppID)
 	if err != nil {
 		if errors.Is(err, model.ErrMetadataNotFound) {
@@ -145,19 +116,14 @@ func (m *Manager) CreateEnvBinding(
 		}
 		return nil, errors.Wrap(err, "get metadata")
 	}
+	if !meta.Enable {
+		return nil, errors.New("bscpcfg is disabled")
+	}
 
-	bizID := params.BscpBizID
+	bizID := params.Workspace.BkSystems.BkCCBizID
 	projectIDStr := params.Workspace.BkSystems.BkBSCPProjectID
 	if projectIDStr == "" {
 		return nil, errors.New("workspace is not bound to a BSCP project")
-	}
-	// 校验 meta.ProjectID 与 workspace 绑定一致，防止重绑项目后 credential/hook 跨项目错配
-	if meta.ProjectID != "" && meta.ProjectID != projectIDStr {
-		return nil, errors.Errorf(
-			"metadata projectID %s mismatch workspace BkBSCPProjectID %s, re-bind bscp project first",
-			meta.ProjectID,
-			projectIDStr,
-		)
 	}
 	projectID := cast.ToInt64(projectIDStr)
 
@@ -207,7 +173,7 @@ func (m *Manager) CreateEnvBinding(
 	}
 
 	// 5. 刷新 Credential Scope
-	credID := cast.ToInt64(meta.CredentialID)
+	credID := cast.ToInt64(params.Workspace.BkSystems.BscpCredentialID)
 	if err = m.RefreshCredentialScopes(ctx, bizID, projectID, credID, *bscpApp, *bscpEnv); err != nil {
 		return nil, errors.Wrap(err, "refresh credential scopes")
 	}
@@ -299,79 +265,6 @@ func (m *Manager) DeleteByApp(ctx context.Context, appID string) error {
 		return errors.Wrap(err, "delete metadata")
 	}
 	return nil
-}
-
-// === cred 管理 ===
-
-// GetCredentialByName 通过名称查询指定业务下的 Credential
-func (m *Manager) GetCredentialByName(
-	ctx context.Context, bizID string, projectID int64, name string,
-) (*bscpapi.Credential, error) {
-	credentials, err := m.client.ListCredentials(ctx, bizID, projectID)
-	if err != nil {
-		return nil, errors.Wrapf(err, "list credentials for biz %s, project %d", bizID, projectID)
-	}
-
-	cred, found := lo.Find(credentials, func(c bscpapi.Credential) bool {
-		return c.Name == name
-	})
-	if !found {
-		return nil, errors.Wrapf(
-			ErrCredentialNotFound, "credential %q not found in biz %s, project %d", name, bizID, projectID,
-		)
-	}
-
-	return &cred, nil
-}
-
-// GetOrCreateCredential 获取或创建 Credential（幂等）。
-func (m *Manager) GetOrCreateCredential(
-	ctx context.Context, bizID string, projectID int64,
-) (cred *bscpapi.Credential, err error) {
-	defer func() {
-		if err != nil {
-			metrics.BscpcfgStepFailed("get_or_create_credential")
-		}
-	}()
-
-	cred, err = m.GetCredentialByName(ctx, bizID, projectID, credentialName)
-	if err == nil {
-		return cred, nil
-	}
-
-	if !errors.Is(err, ErrCredentialNotFound) {
-		return nil, err
-	}
-
-	log.Infof(ctx, "credential %q not found in biz %s, project %d, creating...", credentialName, bizID, projectID)
-	_, err = m.client.CreateCredential(ctx, &bscpapi.CreateCredentialReq{
-		BizID:     bizID,
-		ProjectID: projectID,
-		Name:      credentialName,
-		Memo:      "auto-created by bkms platform",
-	})
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"create credential %q in biz %s, project %d",
-			credentialName,
-			bizID,
-			projectID,
-		)
-	}
-
-	cred, err = m.GetCredentialByName(ctx, bizID, projectID, credentialName)
-	if err != nil {
-		return nil, errors.Wrapf(
-			err,
-			"get credential %q after creation in biz %s, project %d",
-			credentialName,
-			bizID,
-			projectID,
-		)
-	}
-
-	return cred, nil
 }
 
 // RefreshCredentialScopes 为指定 app+env 添加 credential scope（幂等）。

@@ -50,13 +50,6 @@ type Store interface {
 	// DeleteEnvBinding 删除指定 app+env 的绑定
 	DeleteEnvBinding(ctx context.Context, appID, envName string) error
 
-	// === FeatureFlag 操作 ===
-
-	// GetFeatureFlag 查询单个应用的 FeatureFlag
-	GetFeatureFlag(ctx context.Context, appID string) (*FeatureFlag, error)
-	// UpsertFeatureFlag 创建或更新 FeatureFlag（幂等）
-	UpsertFeatureFlag(ctx context.Context, flag *FeatureFlag) error
-
 	// === 聚合操作 ===
 
 	// DeleteEnvBindingsByApp 删除应用下所有 EnvBinding（应用删除时级联）
@@ -67,11 +60,10 @@ type Store interface {
 	GetSnapshot(ctx context.Context, appID, envName string) (*Snapshot, error)
 }
 
-// StoreMongo Store 的 MongoDB 实现，组合 Metadata、EnvBinding 和 FeatureFlag 存储
+// StoreMongo Store 的 MongoDB 实现，组合 Metadata、EnvBinding 存储
 type StoreMongo struct {
-	defStore         MetadataStore
-	bindingStore     EnvBindingStore
-	featureFlagStore FeatureFlagStore
+	defStore     MetadataStore
+	bindingStore EnvBindingStore
 }
 
 // NewStoreMongo 创建统一的配置管理存储
@@ -85,9 +77,8 @@ func NewStoreMongo(client *mongo.Client, dbName string) (Store, error) {
 		return nil, err
 	}
 	return &StoreMongo{
-		defStore:         defStore,
-		bindingStore:     bindingStore,
-		featureFlagStore: NewFeatureFlagStoreMongo(client, dbName),
+		defStore:     defStore,
+		bindingStore: bindingStore,
 	}, nil
 }
 
@@ -144,18 +135,6 @@ func (s *StoreMongo) DeleteEnvBindingsByApp(ctx context.Context, appID string) e
 // ListEnvBindingsByApp 获取应用下所有环境的绑定列表
 func (s *StoreMongo) ListEnvBindingsByApp(ctx context.Context, appID string) ([]*EnvBinding, error) {
 	return s.bindingStore.ListByApp(ctx, appID)
-}
-
-// === FeatureFlag 操作 ===
-
-// GetFeatureFlag 查询单个应用的 FeatureFlag
-func (s *StoreMongo) GetFeatureFlag(ctx context.Context, appID string) (*FeatureFlag, error) {
-	return s.featureFlagStore.Get(ctx, appID)
-}
-
-// UpsertFeatureFlag 创建或更新 FeatureFlag（幂等）
-func (s *StoreMongo) UpsertFeatureFlag(ctx context.Context, flag *FeatureFlag) error {
-	return s.featureFlagStore.Upsert(ctx, flag)
 }
 
 // GetSnapshot 获取指定 app+env 的聚合快照。

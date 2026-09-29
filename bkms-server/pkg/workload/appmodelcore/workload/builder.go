@@ -363,9 +363,15 @@ func (b *Builder) applyPostProcessing(
 		hostPortAppliedPorts = appliedPorts
 	}
 
-	if err := bscpcfg.InjectFromStore(
+	// 查 workspace 获取 BSCP 项目/credential 信息（注入时使用）
+	ws, err := b.workspaceStore.Get(in.ctx, b.app.WorkspaceID)
+	if err != nil {
+		return gd, extraObjs, nil, errors.Wrapf(err, "get workspace %s", b.app.WorkspaceID)
+	}
+
+	if err = bscpcfg.InjectFromStore(
 		in.ctx, b.bscpCfgStore, b.app.ID, in.env.Name,
-		defaults.WorkloadMainContainerName, &gd.Spec.Template.Spec,
+		defaults.WorkloadMainContainerName, ws, &gd.Spec.Template.Spec,
 	); err != nil {
 		return gd, extraObjs, nil, errors.Wrap(err, "injecting bscp config")
 	}

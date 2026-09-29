@@ -30,16 +30,10 @@ var _ = Describe("Snapshot", func() {
 	newValidSnapshot := func() *model.Snapshot {
 		return &model.Snapshot{
 			Metadata: &model.Metadata{
-				AppID:          "test-app",
-				BscpBizID:      "12345",
-				ProjectID:      "12345",
-				ProjectKey:     "BK-BSCP-12345",
-				MountPath:      "/data/bscp",
-				CredentialID:   "cred-1",
-				CredentialName: "bkms-credential",
-				Token:          "test-token",
-				FeedAddr:       "bscp-feed.example.com:9500",
-				WorkloadName:   "test-workload",
+				AppID:        "test-app",
+				Enable:       true,
+				MountPath:    "/data/bscp",
+				WorkloadName: "test-workload",
 			},
 			EnvBinding: &model.EnvBinding{
 				AppID:       "test-app",
@@ -88,22 +82,6 @@ var _ = Describe("Snapshot", func() {
 			It("should return error", func() {
 				snap := newValidSnapshot()
 				snap.Metadata.MountPath = ""
-				Expect(snap.Validate()).To(HaveOccurred())
-			})
-		})
-
-		Context("when Metadata.Token is empty", func() {
-			It("should return error", func() {
-				snap := newValidSnapshot()
-				snap.Metadata.Token = ""
-				Expect(snap.Validate()).To(HaveOccurred())
-			})
-		})
-
-		Context("when Metadata.FeedAddr is empty", func() {
-			It("should return error", func() {
-				snap := newValidSnapshot()
-				snap.Metadata.FeedAddr = ""
 				Expect(snap.Validate()).To(HaveOccurred())
 			})
 		})

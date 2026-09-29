@@ -152,20 +152,15 @@ func (input *PatchMetadataInput) ToUpdateModel() (*model.MetadataUpdate, error) 
 
 // MetadataOutput Metadata 输出对象。
 type MetadataOutput struct {
-	AppID          string    `json:"appID"`
-	BscpBizID      string    `json:"bscpBizID"`
-	ProjectID      string    `json:"projectID"`
-	ProjectKey     string    `json:"projectKey"`
-	MountPath      string    `json:"mountPath"`
-	WorkloadName   string    `json:"workloadName"`
-	WorkloadKind   string    `json:"workloadKind"`
-	CredentialName string    `json:"credentialName"`
-	FeedAddr       string    `json:"feedAddr"`
-	Token          string    `json:"token"`
-	PostHookID     string    `json:"postHookID"`
-	Operator       string    `json:"operator"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
+	AppID        string    `json:"appID"`
+	Enable       bool      `json:"enable"`
+	MountPath    string    `json:"mountPath"`
+	WorkloadName string    `json:"workloadName"`
+	WorkloadKind string    `json:"workloadKind"`
+	PostHookID   string    `json:"postHookID"`
+	Operator     string    `json:"operator"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 // MetadataResponse 包装 MetadataOutput 的响应结构。
@@ -177,12 +172,9 @@ type MetadataResponse struct {
 type EnvBindingOutput struct {
 	AppID        string    `json:"appID"`
 	EnvName      string    `json:"envName"`
-	BscpBizID    string    `json:"bscpBizID"`
 	MountPath    string    `json:"mountPath"`
 	WorkloadName string    `json:"workloadName"`
 	WorkloadKind string    `json:"workloadKind"`
-	FeedAddr     string    `json:"feedAddr"`
-	Token        string    `json:"token"`
 	BscpEnvID    string    `json:"bscpEnvID"`
 	BscpEnvName  string    `json:"bscpEnvName"`
 	BscpAppID    string    `json:"bscpAppID"`
@@ -199,17 +191,6 @@ type EnvBindingResponse struct {
 // EnvBindingListResponse 包装 EnvBindingOutput 列表的响应结构。
 type EnvBindingListResponse struct {
 	Data []*EnvBindingOutput `json:"data"`
-}
-
-// FeatureFlagOutput FeatureFlag 输出对象。
-type FeatureFlagOutput struct {
-	// Enabled 是否启用新版 BSCP 配置管理
-	Enabled bool `json:"enabled"`
-}
-
-// FeatureFlagResponse 包装 FeatureFlagOutput 的响应结构。
-type FeatureFlagResponse struct {
-	Data *FeatureFlagOutput `json:"data"`
 }
 
 // -----------------------------------------------------------------------------
@@ -230,15 +211,10 @@ func (o *MetadataOutput) FromModel(m *model.Metadata) *MetadataOutput {
 		return o
 	}
 	o.AppID = m.AppID
-	o.BscpBizID = m.BscpBizID
-	o.ProjectID = m.ProjectID
-	o.ProjectKey = m.ProjectKey
+	o.Enable = m.Enable
 	o.MountPath = m.MountPath
 	o.WorkloadName = m.WorkloadName
 	o.WorkloadKind = m.WorkloadKind
-	o.CredentialName = m.CredentialName
-	o.FeedAddr = m.FeedAddr
-	o.Token = m.Token
 	o.PostHookID = m.PostHookID
 	o.Operator = m.Operator
 	o.CreatedAt = m.CreatedAt
@@ -256,12 +232,9 @@ func (o *EnvBindingOutput) FromModel(d *model.Snapshot) *EnvBindingOutput {
 	}
 	o.AppID = d.EnvBinding.AppID
 	o.EnvName = d.EnvBinding.EnvName
-	o.BscpBizID = d.Metadata.BscpBizID
 	o.MountPath = d.Metadata.MountPath
 	o.WorkloadName = d.Metadata.WorkloadName
 	o.WorkloadKind = d.Metadata.WorkloadKind
-	o.FeedAddr = d.Metadata.FeedAddr
-	o.Token = d.Metadata.Token
 	o.BscpEnvID = d.EnvBinding.BscpEnvID
 	o.BscpEnvName = d.EnvBinding.BscpEnvName
 	o.BscpAppID = d.EnvBinding.BscpAppID

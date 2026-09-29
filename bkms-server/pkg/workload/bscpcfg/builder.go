@@ -26,9 +26,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	svccfg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
-	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/model"
 )
 
 const (
@@ -162,30 +161,22 @@ func Build(params Params) *PodFragment {
 
 // BuildFromStore 从 Store 获取配置快照并装配 pod 片段。
 //
-// 当指定 app+env 未配置时返回 nil, nil，调用方无需额外判断。
+// 当指定 app+env 未配置、或配置管理未启用时返回 nil, nil，调用方无需额外判断。
 func BuildFromStore(
 	ctx context.Context,
 	store bscpcfg.Store,
 	appID, envName string,
+	ws *workspace.Workspace,
 ) (*PodFragment, error) {
-	// FeatureFlag 未启用时直接跳过
-	flag, err := store.GetFeatureFlag(ctx, appID)
-	if err != nil {
-		if errors.Is(err, model.ErrFeatureFlagNotFound) {
-			return nil, nil
-		}
-		return nil, errors.Wrap(err, "get bscpcfg feature flag")
-	}
-	if !flag.Enabled {
-		log.Infof(ctx, "bscpcfg feature flag disabled for app %s, skip injection", appID)
-		return nil, nil
-	}
-
 	snapshot, err := store.GetSnapshot(ctx, appID, envName)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting bscp config snapshot")
 	}
 	if snapshot == nil {
+		return nil, nil
+	}
+	// 未启用（Metadata 不存在或 Enable=false）时不注入
+	if !snapshot.Metadata.Enable {
 		return nil, nil
 	}
 
@@ -199,12 +190,12 @@ func BuildFromStore(
 	}
 
 	fragment := Build(Params{
-		BscpBizID:    snapshot.Metadata.BscpBizID,
+		BscpBizID:    ws.BkSystems.BkCCBizID,
 		AppNames:     snapshot.GetBscpAppName(),
 		MountPath:    snapshot.Metadata.MountPath,
-		FeedAddr:     snapshot.Metadata.FeedAddr,
-		Token:        snapshot.Metadata.Token,
-		ProjectKey:   snapshot.Metadata.ProjectKey,
+		FeedAddr:     svccfg.G.BSCP.FeedAddr,
+		Token:        ws.BkSystems.BscpToken,
+		ProjectKey:   ws.BkSystems.BkBSCPProjectKey,
 		EnvName:      snapshot.EnvBinding.BscpEnvName,
 		InitImage:    svccfg.G.BSCP.InitImage,
 		SidecarImage: svccfg.G.BSCP.SidecarImage,

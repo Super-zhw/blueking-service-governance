@@ -64,24 +64,21 @@ var _ = Describe("Manager", func() {
 	// newInitParams 构造一个 InitMetadata 入参。
 	newInitParams := func() *service.InitMetadataParams {
 		return &service.InitMetadataParams{
-			AppID:          testAppID,
-			BscpBizID:      "12345",
-			BscpProjectID:  "12",
-			BscpProjectKey: "BK-BSCP-00012",
-			Operator:       "tester",
+			AppID:         testAppID,
+			BscpBizID:     "12345",
+			BscpProjectID: "12",
+			Operator:      "tester",
 		}
 	}
 
 	Describe("InitMetadata", func() {
 		Context("when called for the first time", func() {
-			It("should create metadata with credential and post hook", func() {
+			It("should create metadata with enable and post hook", func() {
 				meta, err := mgr.InitMetadata(ctx, newInitParams())
 				Expect(err).NotTo(HaveOccurred())
 				Expect(meta).NotTo(BeNil())
 				Expect(meta.AppID).To(Equal(testAppID))
-				Expect(meta.BscpBizID).To(Equal("12345"))
-				Expect(meta.CredentialID).NotTo(BeEmpty())
-				Expect(meta.CredentialName).To(Equal("bkms-credential"))
+				Expect(meta.Enable).To(BeTrue())
 				Expect(meta.PostHookID).NotTo(BeEmpty())
 				Expect(meta.Operator).To(Equal("tester"))
 			})
@@ -95,31 +92,7 @@ var _ = Describe("Manager", func() {
 				second, err := mgr.InitMetadata(ctx, newInitParams())
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(second.CredentialID).To(Equal(first.CredentialID))
 				Expect(second.PostHookID).To(Equal(first.PostHookID))
-			})
-		})
-	})
-
-	Describe("GetOrCreateCredential", func() {
-		Context("when the credential already exists", func() {
-			It("should return it", func() {
-				cred, err := mgr.GetOrCreateCredential(ctx, "12345", 12)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(cred).NotTo(BeNil())
-				Expect(cred.Name).To(Equal("bkms-credential"))
-			})
-		})
-
-		Context("when called twice", func() {
-			It("should be idempotent", func() {
-				first, err := mgr.GetOrCreateCredential(ctx, "12345", 12)
-				Expect(err).NotTo(HaveOccurred())
-
-				second, err := mgr.GetOrCreateCredential(ctx, "12345", 12)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(second.ID).To(Equal(first.ID))
 			})
 		})
 	})
@@ -231,17 +204,11 @@ var _ = Describe("Manager", func() {
 // createTestMetadata 创建一个满足 MetadataStore 校验的 Metadata。
 func createTestMetadata(ctx context.Context, store model.Store, appID string) {
 	err := store.CreateMetadata(ctx, &model.Metadata{
-		AppID:          appID,
-		BscpBizID:      "12345",
-		ProjectID:      "12345",
-		ProjectKey:     "BK-BSCP-12345",
-		MountPath:      "/data/bscp",
-		CredentialID:   "1",
-		CredentialName: "bkms-credential",
-		Token:          "test-token",
-		FeedAddr:       "bscp-feed.example.com:9500",
-		WorkloadName:   "test-workload",
-		Operator:       "tester",
+		AppID:        appID,
+		Enable:       true,
+		MountPath:    "/data/bscp",
+		WorkloadName: "test-workload",
+		Operator:     "tester",
 	})
 	Expect(err).NotTo(HaveOccurred())
 }

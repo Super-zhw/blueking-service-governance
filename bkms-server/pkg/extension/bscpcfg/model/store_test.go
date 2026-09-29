@@ -87,70 +87,16 @@ var _ = Describe("Store", func() {
 			})
 		})
 	})
-
-	Describe("FeatureFlag", func() {
-		Context("when upserting an enabled flag", func() {
-			It("should be retrievable and enabled", func() {
-				err := store.UpsertFeatureFlag(ctx, &model.FeatureFlag{
-					AppID:    testAppID,
-					Enabled:  true,
-					Operator: "tester",
-				})
-				Expect(err).NotTo(HaveOccurred())
-
-				flag, err := store.GetFeatureFlag(ctx, testAppID)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(flag.Enabled).To(BeTrue())
-				Expect(flag.Operator).To(Equal("tester"))
-			})
-		})
-
-		Context("when upserting the same app again", func() {
-			It("should update the existing flag", func() {
-				err := store.UpsertFeatureFlag(ctx, &model.FeatureFlag{
-					AppID:    testAppID,
-					Enabled:  true,
-					Operator: "tester",
-				})
-				Expect(err).NotTo(HaveOccurred())
-
-				err = store.UpsertFeatureFlag(ctx, &model.FeatureFlag{
-					AppID:    testAppID,
-					Enabled:  false,
-					Operator: "admin",
-				})
-				Expect(err).NotTo(HaveOccurred())
-
-				flag, err := store.GetFeatureFlag(ctx, testAppID)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(flag.Enabled).To(BeFalse())
-				Expect(flag.Operator).To(Equal("admin"))
-			})
-		})
-
-		Context("when feature flag does not exist", func() {
-			It("should return ErrFeatureFlagNotFound", func() {
-				_, err := store.GetFeatureFlag(ctx, testAppID)
-				Expect(err).To(MatchError(model.ErrFeatureFlagNotFound))
-			})
-		})
-	})
 })
 
 // createTestMetadata 创建一个满足 MetadataStore 校验的 Metadata。
 func createTestMetadata(ctx context.Context, store model.Store, appID string) {
 	err := store.CreateMetadata(ctx, &model.Metadata{
-		AppID:          appID,
-		BscpBizID:      "12345",
-		ProjectID:      "12345",
-		ProjectKey:     "BK-BSCP-12345",
-		MountPath:      "/data/bscp",
-		CredentialID:   "cred-1",
-		CredentialName: "bkms-credential",
-		Token:          "test-token",
-		FeedAddr:       "bscp-feed.example.com:9500",
-		WorkloadName:   "test-workload",
-		Operator:       "tester",
+		AppID:        appID,
+		Enable:       true,
+		MountPath:    "/data/bscp",
+		WorkloadName: "test-workload",
+		Operator:     "tester",
 	})
 	Expect(err).NotTo(HaveOccurred())
 }

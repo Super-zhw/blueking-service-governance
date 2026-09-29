@@ -91,13 +91,12 @@ func (h *Handler) InitMetadata(c *gin.Context) {
 	}
 
 	appConfig, err := mgr.InitMetadata(ctx, &svc.InitMetadataParams{
-		AppID:          app.ID,
-		WorkloadName:   workloadName,
-		WorkloadKind:   workloadKind,
-		BscpBizID:      ws.BkSystems.BkCCBizID,
-		BscpProjectID:  ws.BkSystems.BkBSCPProjectID,
-		BscpProjectKey: ws.BkSystems.BkBSCPProjectKey,
-		Operator:       auth.MustGetUser(ctx).ID,
+		AppID:         app.ID,
+		WorkloadName:  workloadName,
+		WorkloadKind:  workloadKind,
+		BscpBizID:     ws.BkSystems.BkCCBizID,
+		BscpProjectID: ws.BkSystems.BkBSCPProjectID,
+		Operator:      auth.MustGetUser(ctx).ID,
 	})
 	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "init metadata"))

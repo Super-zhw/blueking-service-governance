@@ -24,24 +24,14 @@ import (
 )
 
 // Metadata 应用配置管理元信息（全局共享，一个 App 一条记录）。
+//
+// 注：BSCP 项目、credential、token、feedAddr 等 workspace 级信息不再冗余到 Metadata，
+// 统一从 workspace（BkSystems）与全局配置读取。
 type Metadata struct {
 	// AppID bkms 应用 ID（唯一键，一个 App 只有一条记录）
 	AppID string `bson:"appID" validate:"required"`
-	// BscpBizID BSCP 业务 ID
-	BscpBizID string `bson:"bscpBizID" validate:"required"`
-	// ProjectID BSCP 项目 ID（数字，以 string 存储）
-	ProjectID string `bson:"projectID" validate:"required"`
-	// ProjectKey BSCP 项目 Key（如 BK-BSCP-12345）
-	ProjectKey string `bson:"projectKey" validate:"required"`
-
-	// CredentialID BSCP Credential ID（每个业务下唯一，名称固定为 bkms-credential）
-	CredentialID string `bson:"credentialID" validate:"required"`
-	// CredentialName BSCP Credential 名称
-	CredentialName string `bson:"credentialName" validate:"required"`
-	// Token BSCP Credential 的访问令牌（用于 sidecar 拉取配置）
-	Token string `bson:"token" validate:"required"`
-	// FeedAddr BSCP 服务订阅地址（sidecar 连接的 feed server 地址）
-	FeedAddr string `bson:"feedAddr" validate:"required"`
+	// Enable 是否启用 BSCP 配置管理（查询不到 Metadata 或为 false 表示未开启）
+	Enable bool `bson:"enable"`
 	// PostHookID BSCP 后置脚本 ID
 	PostHookID string `bson:"postHookID,omitempty"`
 
@@ -64,16 +54,12 @@ type Metadata struct {
 type MetadataUpdate struct {
 	// MountPath 更新挂载路径（nil 表示不更新）
 	MountPath *string
-	// CredentialID 更新 credential ID（nil 表示不更新）
-	CredentialID *string
-	// CredentialName 更新 credential 名称（nil 表示不更新）
-	CredentialName *string
-	// Token 更新 token（nil 表示不更新）
-	Token *string
 	// WorkloadName 更新目标 workload 名称（nil 表示不更新）
 	WorkloadName *string
 	// WorkloadKind 更新目标工作负载类型（nil 表示不更新）
 	WorkloadKind *string
+	// Enable 更新启用开关（nil 表示不更新）
+	Enable *bool
 }
 
 // ApplyTo 将更新数据应用到 Metadata 对象上
@@ -87,16 +73,10 @@ func (u *MetadataUpdate) ApplyTo(m *Metadata) {
 	if u.WorkloadName != nil {
 		m.WorkloadName = *u.WorkloadName
 	}
-	if u.CredentialID != nil {
-		m.CredentialID = *u.CredentialID
-	}
-	if u.CredentialName != nil {
-		m.CredentialName = *u.CredentialName
-	}
-	if u.Token != nil {
-		m.Token = *u.Token
-	}
 	if u.WorkloadKind != nil {
 		m.WorkloadKind = *u.WorkloadKind
+	}
+	if u.Enable != nil {
+		m.Enable = *u.Enable
 	}
 }

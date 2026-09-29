@@ -38,12 +38,6 @@ func validateSnapshot(sl validator.StructLevel) {
 	if d.Metadata.MountPath == "" {
 		sl.ReportError(d.Metadata.MountPath, "Metadata.MountPath", "MountPath", "required", "")
 	}
-	if d.Metadata.Token == "" {
-		sl.ReportError(d.Metadata.Token, "Metadata.Token", "Token", "required", "")
-	}
-	if d.Metadata.FeedAddr == "" {
-		sl.ReportError(d.Metadata.FeedAddr, "Metadata.FeedAddr", "FeedAddr", "required", "")
-	}
 	if d.Metadata.WorkloadName == "" {
 		sl.ReportError(d.Metadata.WorkloadName, "Metadata.WorkloadName", "WorkloadName", "required", "")
 	}

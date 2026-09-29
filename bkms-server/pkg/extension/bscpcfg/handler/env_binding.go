@@ -84,7 +84,6 @@ func (h *Handler) CreateEnvBinding(c *gin.Context) {
 		EnvName:   strings.TrimSpace(uri.EnvName),
 		EnvType:   env.Type,
 		Workspace: ws,
-		BscpBizID: ws.BkSystems.BkCCBizID,
 		Operator:  auth.MustGetUser(ctx).ID,
 	})
 	if err != nil {

@@ -24,13 +24,12 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
-	bscpapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bscp"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
 )
@@ -103,56 +102,31 @@ func runBindBscpProject(
 		return errors.Errorf("workspace %s missing BkCCBizID", workspaceID)
 	}
 
-	client, err := bscpapi.NewConfigClient(auth.MustGetUser(ctx))
-	if err != nil {
-		return errors.Wrap(err, "create bscp config client")
-	}
-
-	project, err := resolveProject(ctx, client, ws.BkSystems.BkCCBizID, projectKey)
+	binding, err := workspace.BindBscpProject(ctx, ws.BkSystems.BkCCBizID, projectKey)
 	if err != nil {
 		return err
 	}
 
-	projectIDStr := cast.ToString(project.ID)
 	if !execute {
 		log.Infof(ctx, "[DRY-RUN] would bind workspace %s to BSCP project %s (key %s)",
-			workspaceID, projectIDStr, project.Spec.Key)
+			workspaceID, binding.ProjectID, binding.ProjectKey)
 		return nil
 	}
 
-	ws.BkSystems.BkBSCPProjectID = strings.TrimSpace(projectIDStr)
-	ws.BkSystems.BkBSCPProjectKey = strings.TrimSpace(project.Spec.Key)
+	ws.BkSystems.BkBSCPProjectID = strings.TrimSpace(binding.ProjectID)
+	ws.BkSystems.BkBSCPProjectKey = strings.TrimSpace(binding.ProjectKey)
+	ws.BkSystems.BscpCredentialID = binding.CredentialID
+	ws.BkSystems.BscpToken = binding.Token
 	if err = reg.WorkspaceStore.Update(ctx, ws); err != nil {
 		return errors.Wrap(err, "update workspace bk systems")
 	}
 
-	log.Infof(ctx, "workspace %s bound to BSCP project %s (key %s)", workspaceID, projectIDStr, project.Spec.Key)
+	log.Infof(
+		ctx,
+		"workspace %s bound to BSCP project %s (key %s)",
+		workspaceID,
+		binding.ProjectID,
+		binding.ProjectKey,
+	)
 	return nil
-}
-
-// resolveProject 解析要绑定的 BSCP 项目：显式指定 projectKey 时按 key 查询，
-// 否则自动选择 Default 项目。
-func resolveProject(
-	ctx context.Context,
-	client bscpapi.ConfigClient,
-	bizID, projectKey string,
-) (*bscpapi.Project, error) {
-	if projectKey != "" {
-		project, err := client.GetProjectByKey(ctx, bizID, projectKey)
-		if err != nil {
-			return nil, errors.Wrapf(err, "get bscp project by key %s", projectKey)
-		}
-		return project, nil
-	}
-
-	projects, err := client.ListProjects(ctx, bizID)
-	if err != nil {
-		return nil, errors.Wrapf(err, "list bscp projects for biz %s", bizID)
-	}
-	project := bscpapi.DefaultProject(projects)
-	if project == nil {
-		return nil, errors.Errorf("no bscp project found under biz %s", bizID)
-	}
-	log.Infof(ctx, "auto-selected default project %q (key %s)", project.Spec.Name, project.Spec.Key)
-	return project, nil
 }
