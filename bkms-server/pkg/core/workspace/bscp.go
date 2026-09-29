@@ -28,23 +28,18 @@ import (
 	bscpapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bscp"
 )
 
-// bscpCredentialName 固定的 Credential 名称，每个 BSCP 项目下只有一个
+// bscpCredentialName 固定的 Credential 名称
 const bscpCredentialName = "bkms-credential" // nolint: gosec
 
-// BscpBinding 绑定 BSCP 项目的结果，用于写入 workspace 的 BkSystems。
+// BscpBinding 绑定 BSCP 项目的结果。
 type BscpBinding struct {
-	// ProjectID BSCP 项目 ID
-	ProjectID string
-	// ProjectKey BSCP 项目 Key
-	ProjectKey string
-	// CredentialID BSCP Credential ID
+	ProjectID    string
+	ProjectKey   string
 	CredentialID string
-	// Token BSCP Credential 的访问令牌（用于 sidecar 拉取配置）
-	Token string
+	Token        string
 }
 
-// BindBscpProject 绑定 workspace 到 BSCP 项目：解析项目（显式 projectKey 或 Default 项目），
-// 并确保 credential 存在，返回需要写入 workspace 的字段。
+// BindBscpProject 解析项目（显式 projectKey 或 Default 项目）并确保 credential 存在。
 func BindBscpProject(ctx context.Context, bizID, projectKey string) (*BscpBinding, error) {
 	client, err := bscpapi.NewConfigClient(auth.MustGetUser(ctx))
 	if err != nil {
@@ -69,7 +64,7 @@ func BindBscpProject(ctx context.Context, bizID, projectKey string) (*BscpBindin
 	}, nil
 }
 
-// resolveProject 解析要绑定的 BSCP 项目：显式指定 projectKey 时按 key 查询，否则选择 Default 项目。
+// resolveProject 解析要绑定的 BSCP 项目。
 func resolveProject(
 	ctx context.Context,
 	client bscpapi.ConfigClient,
@@ -94,7 +89,7 @@ func resolveProject(
 	return project, nil
 }
 
-// ensureBscpCredential 确保 BSCP 项目的 credential 存在（幂等），返回 credential ID 和 token。
+// ensureBscpCredential 确保 credential 存在（幂等），返回 ID 和 token。
 func ensureBscpCredential(
 	ctx context.Context,
 	client bscpapi.ConfigClient,

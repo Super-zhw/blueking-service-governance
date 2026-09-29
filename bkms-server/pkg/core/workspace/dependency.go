@@ -96,8 +96,8 @@ func EnsureBkSystems(ctx context.Context, workspaceID, bkciProjectID string, biz
 		BkBSCPProjectID:  bscpBinding.ProjectID,
 		BkBSCPProjectKey: bscpBinding.ProjectKey,
 		// BSCP Credential ID / Token
-		BscpCredentialID: bscpBinding.CredentialID,
 		BscpToken:        bscpBinding.Token,
+		BscpCredentialID: bscpBinding.CredentialID,
 		// 表明用户创建项目时是否绑定了已有的蓝盾项目
 		IsBoundExistedBKCIProject: isBoundExistedBKCIProject,
 		// 运营产品 ID

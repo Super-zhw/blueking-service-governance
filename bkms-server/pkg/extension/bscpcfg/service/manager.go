@@ -74,6 +74,11 @@ func (m *Manager) InitMetadata(
 		return nil, errors.Wrap(err, "get metadata")
 	}
 
+	// 检查 workspace 是否已绑定 BSCP 项目
+	if params.BscpBizID == "" || params.BscpProjectID == "" {
+		return nil, errors.New("workspace is not bound to a BSCP project")
+	}
+
 	// 获取或创建后置脚本
 	hookID, err := m.GetOrCreatePostHook(ctx, params.BscpBizID, cast.ToInt64(params.BscpProjectID), params.AppID)
 	if err != nil {
@@ -124,6 +129,9 @@ func (m *Manager) CreateEnvBinding(
 	projectIDStr := params.Workspace.BkSystems.BkBSCPProjectID
 	if projectIDStr == "" {
 		return nil, errors.New("workspace is not bound to a BSCP project")
+	}
+	if params.Workspace.BkSystems.BscpCredentialID == "" {
+		return nil, errors.New("workspace bscp credential is not ready")
 	}
 	projectID := cast.ToInt64(projectIDStr)
 

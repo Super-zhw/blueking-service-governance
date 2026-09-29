@@ -363,7 +363,6 @@ func (b *Builder) applyPostProcessing(
 		hostPortAppliedPorts = appliedPorts
 	}
 
-	// 查 workspace 获取 BSCP 项目/credential 信息（注入时使用）
 	ws, err := b.workspaceStore.Get(in.ctx, b.app.WorkspaceID)
 	if err != nil {
 		return gd, extraObjs, nil, errors.Wrapf(err, "get workspace %s", b.app.WorkspaceID)

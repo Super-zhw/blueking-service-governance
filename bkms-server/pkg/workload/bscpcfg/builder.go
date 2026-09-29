@@ -161,7 +161,7 @@ func Build(params Params) *PodFragment {
 
 // BuildFromStore 从 Store 获取配置快照并装配 pod 片段。
 //
-// 当指定 app+env 未配置、或配置管理未启用时返回 nil, nil，调用方无需额外判断。
+// 当指定 app+env 未配置、或配置管理未启用时返回 nil, nil。
 func BuildFromStore(
 	ctx context.Context,
 	store bscpcfg.Store,

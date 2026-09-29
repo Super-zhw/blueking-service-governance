@@ -23,15 +23,10 @@ import (
 	"time"
 )
 
-// Metadata 应用配置管理元信息（全局共享，一个 App 一条记录）。
-//
-// 注：BSCP 项目、credential、token、feedAddr 等 workspace 级信息不再冗余到 Metadata，
-// 统一从 workspace（BkSystems）与全局配置读取。
+// Metadata 应用配置管理元信息（全局共享，一个 App 一条记录）
 type Metadata struct {
 	// AppID bkms 应用 ID（唯一键，一个 App 只有一条记录）
 	AppID string `bson:"appID" validate:"required"`
-	// Enable 是否启用 BSCP 配置管理（查询不到 Metadata 或为 false 表示未开启）
-	Enable bool `bson:"enable"`
 	// PostHookID BSCP 后置脚本 ID
 	PostHookID string `bson:"postHookID,omitempty"`
 
@@ -42,6 +37,9 @@ type Metadata struct {
 	// MountPath 配置文件在容器中的挂载路径（所有环境共享同一路径）
 	MountPath string `bson:"mountPath"`
 
+	// Enable 是否启用 BSCP 配置管理
+	// 查询不到 Metadata 或为 false 表示未开启
+	Enable bool `bson:"enable"`
 	// Operator 最近操作人
 	Operator string `bson:"operator"`
 	// CreatedAt 创建时间

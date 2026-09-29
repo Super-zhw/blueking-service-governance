@@ -42,9 +42,9 @@ type InitMetadataParams struct {
 	WorkloadName string
 	// WorkloadKind 目标工作负载类型
 	WorkloadKind string
-	// BscpBizID BSCP 业务 ID（= workspace.BkSystems.BkCCBizID）
+	// BscpBizID BSCP 业务 ID
 	BscpBizID string
-	// BscpProjectID BSCP 项目 ID（= workspace.BkSystems.BkBSCPProjectID）
+	// BscpProjectID BSCP 项目 ID
 	BscpProjectID string
 	// 操作人
 	Operator string

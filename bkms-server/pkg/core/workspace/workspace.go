@@ -90,10 +90,10 @@ type BkSystems struct {
 	BkBSCPProjectID string `bson:"bkBSCPProjectID"`
 	// BkBSCPProjectKey BSCP 项目 Key（如 BK-BSCP-12345）
 	BkBSCPProjectKey string `bson:"bkBSCPProjectKey"`
-	// BscpCredentialID BSCP Credential ID（绑定 BSCP 项目时创建）
-	BscpCredentialID string `bson:"bscpCredentialID"`
-	// BscpToken BSCP Credential 的访问令牌（用于 sidecar 拉取配置）
+	// BscpToken BSCP Credential token
 	BscpToken string `bson:"bscpToken"`
+	// BscpCredentialID BSCP Credential ID
+	BscpCredentialID string `bson:"bscpCredentialID"`
 
 	// BkCCBizID bkcc 业务 ID
 	BkCCBizID string `bson:"bkCCBizID"`

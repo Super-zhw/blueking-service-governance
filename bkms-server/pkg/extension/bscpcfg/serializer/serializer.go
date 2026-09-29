@@ -153,11 +153,11 @@ func (input *PatchMetadataInput) ToUpdateModel() (*model.MetadataUpdate, error) 
 // MetadataOutput Metadata 输出对象。
 type MetadataOutput struct {
 	AppID        string    `json:"appID"`
-	Enable       bool      `json:"enable"`
+	PostHookID   string    `json:"postHookID"`
 	MountPath    string    `json:"mountPath"`
 	WorkloadName string    `json:"workloadName"`
 	WorkloadKind string    `json:"workloadKind"`
-	PostHookID   string    `json:"postHookID"`
+	Enable       bool      `json:"enable"`
 	Operator     string    `json:"operator"`
 	CreatedAt    time.Time `json:"createdAt"`
 	UpdatedAt    time.Time `json:"updatedAt"`
