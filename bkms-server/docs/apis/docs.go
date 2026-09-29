@@ -2559,49 +2559,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/apps/{appID}/bscpcfg/feature-flag": {
-            "get": {
-                "security": [
-                    {
-                        "BkUserInfo": []
-                    },
-                    {
-                        "BkUserCredential": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bscpcfg"
-                ],
-                "summary": "获取应用的 bscpcfg FeatureFlag",
-                "operationId": "GetBscpCfgFeatureFlag",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "应用 ID",
-                        "name": "appID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/serializer.FeatureFlagResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
-                    }
-                }
-            }
-        },
         "/apps/{appID}/bscpcfg/metadata": {
             "get": {
                 "security": [
@@ -22901,6 +22858,10 @@ const docTemplate = `{
                     "description": "蓝盾制品库项目 ID",
                     "type": "string"
                 },
+                "bscpCredentialID": {
+                    "description": "BSCP Credential ID",
+                    "type": "string"
+                },
                 "isBoundExistedBKCIProject": {
                     "description": "是否绑定已有蓝盾项目",
                     "type": "boolean"
@@ -25323,9 +25284,6 @@ const docTemplate = `{
                 "bscpAppID": {
                     "type": "string"
                 },
-                "bscpBizID": {
-                    "type": "string"
-                },
                 "bscpEnvID": {
                     "type": "string"
                 },
@@ -25338,16 +25296,10 @@ const docTemplate = `{
                 "envName": {
                     "type": "string"
                 },
-                "feedAddr": {
-                    "type": "string"
-                },
                 "mountPath": {
                     "type": "string"
                 },
                 "operator": {
-                    "type": "string"
-                },
-                "token": {
                     "type": "string"
                 },
                 "updatedAt": {
@@ -25975,23 +25927,6 @@ const docTemplate = `{
                 "name": {
                     "description": "来源环境名称，来源环境已删除时为空",
                     "type": "string"
-                }
-            }
-        },
-        "serializer.FeatureFlagOutput": {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "description": "Enabled 是否启用新版 BSCP 配置管理",
-                    "type": "boolean"
-                }
-            }
-        },
-        "serializer.FeatureFlagResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/serializer.FeatureFlagOutput"
                 }
             }
         },
@@ -28453,17 +28388,11 @@ const docTemplate = `{
                 "appID": {
                     "type": "string"
                 },
-                "bscpBizID": {
-                    "type": "string"
-                },
                 "createdAt": {
                     "type": "string"
                 },
-                "credentialName": {
-                    "type": "string"
-                },
-                "feedAddr": {
-                    "type": "string"
+                "enable": {
+                    "type": "boolean"
                 },
                 "mountPath": {
                     "type": "string"
@@ -28472,15 +28401,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "postHookID": {
-                    "type": "string"
-                },
-                "projectID": {
-                    "type": "string"
-                },
-                "projectKey": {
-                    "type": "string"
-                },
-                "token": {
                     "type": "string"
                 },
                 "updatedAt": {
@@ -32538,6 +32458,7 @@ const docTemplate = `{
                 "visibleEnvNames": {
                     "description": "可见标准环境名称，必填；显式传空数组表示清空配置",
                     "type": "array",
+                    "uniqueItems": true,
                     "items": {
                         "type": "string"
                     }

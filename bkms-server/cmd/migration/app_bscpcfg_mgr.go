@@ -171,7 +171,7 @@ func setBscpCfgForApp(
 	return nil
 }
 
-// enableBscpCfgForApp 启用指定 appID 的 bscp 配置：初始化 Credential、PostHook、Metadata 与 FeatureFlag。
+// enableBscpCfgForApp 启用指定 appID 的 bscp 配置：初始化 PostHook 与 Metadata，并置 enable 为 true。
 func enableBscpCfgForApp(
 	ctx context.Context,
 	reg *storereg.Registry,
@@ -214,6 +214,12 @@ func enableBscpCfgForApp(
 		Operator:      user.ID,
 	}); initErr != nil {
 		return errors.Wrapf(initErr, "init metadata for app %s", appID)
+	}
+
+	// 已存在的 Metadata 幂等返回时 enable 可能仍为 false，这里显式置为 true
+	enabled := true
+	if err := reg.BscpCfgStore.UpdateMetadata(ctx, appID, &model.MetadataUpdate{Enable: &enabled}); err != nil {
+		return errors.Wrapf(err, "enable bscp config for app %s", appID)
 	}
 
 	return nil
