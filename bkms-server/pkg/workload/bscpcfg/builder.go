@@ -172,11 +172,8 @@ func BuildFromStore(
 	if err != nil {
 		return nil, errors.Wrap(err, "getting bscp config snapshot")
 	}
-	if snapshot == nil {
-		return nil, nil
-	}
-	// 未启用（Metadata 不存在或 Enable=false）时不注入
-	if !snapshot.Metadata.Enable {
+	// 未配置或未启用时不注入
+	if snapshot == nil || !snapshot.Metadata.Enable {
 		return nil, nil
 	}
 

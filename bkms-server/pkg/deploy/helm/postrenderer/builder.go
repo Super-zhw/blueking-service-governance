@@ -226,7 +226,6 @@ func buildBscpPostRenderer(
 		return nil, errors.Wrap(err, "create bscp config store")
 	}
 
-	// 查 workspace 获取 BSCP 项目/credential 信息（注入时使用）
 	wsStore, err := workspace.NewWorkspaceStoreMongo(database.Client(), database.Name())
 	if err != nil {
 		return nil, errors.Wrap(err, "create workspace store")
