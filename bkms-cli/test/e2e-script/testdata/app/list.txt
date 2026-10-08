@@ -1,4 +1,4 @@
-# app-list.txt: app list 基本行为
+# app list 基本行为
 # 对应 app/app_test.go
 
 # app list 正常退出

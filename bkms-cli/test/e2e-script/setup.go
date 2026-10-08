@@ -34,8 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/config"
 )
 
-// envConfig 持有从环境变量中读取的 E2E 配置。
-// 字段上的 `env:",required"` 标签确保缺失时 Parse 返回错误。
+// envConfig 持有从环境变量中读取的 E2E 配置，缺失任一项则 Parse 报错。
 type envConfig struct {
 	APIUrl      string `env:"BKMS_API_URL,required"`
 	Username    string `env:"BKMS_USERNAME,required"`
@@ -45,12 +44,7 @@ type envConfig struct {
 	EnvName     string `env:"BKMS_ENV_NAME,required"`
 }
 
-// setup 是已认证场景的 testscript.Params.Setup 钩子。
-// 每个脚本执行前均调用一次，负责：
-//  1. 解析必要环境变量
-//  2. 在 $WORK 目录中生成临时 CLI 配置文件（含完整认证信息）
-//  3. 将所有 BKMS_* 变量及 $BKMS_CLI_BIN/$BKMS_CLI_CONFIG 注入脚本环境
-//  4. 执行 login 与 workspace set 使会话就绪
+// setup 是已认证场景的 Setup 钩子，每个脚本执行前调用一次。
 func setup(env *testscript.Env) error {
 	cfg, err := loadEnvConfig()
 	if err != nil {
@@ -69,11 +63,10 @@ func setup(env *testscript.Env) error {
 
 	injectEnv(env, cfg, binPath, cfgPath)
 
-	return loginAndSetWorkspace(env, binPath, cfgPath, cfg)
+	return loginAndSetWorkspace(binPath, cfgPath, cfg)
 }
 
-// setupUnauth 是未认证场景的 Setup 钩子。
-// 仅注入最小配置（仅含 API 地址，无 token），不执行 login。
+// setupUnauth 是未认证场景的 Setup 钩子：配置仅含 API 地址，不执行 login。
 func setupUnauth(env *testscript.Env) error {
 	cfg, err := loadEnvConfig()
 	if err != nil {
@@ -103,11 +96,8 @@ func loadEnvConfig() (*envConfig, error) {
 	return cfg, nil
 }
 
-// findBinary 按以下优先顺序查找 bkms-cli 可执行文件：
-//  1. BKMS_CLI_BIN 环境变量（若已设置但文件不存在则报错）
-//  2. ./build/bkms-cli-e2e{ext}
-//  3. ./build/bkms-cli-{GOOS}-{GOARCH}{ext}
-//  4. ./build/bkms-cli{ext}
+// findBinary 查找 bkms-cli 可执行文件，优先取 BKMS_CLI_BIN，
+// 否则在 build 目录（可由 BKMS_CLI_BUILD_DIR 覆盖）中按候选名依次探测。
 func findBinary() (string, error) {
 	ext := ""
 	if runtime.GOOS == "windows" {
@@ -123,7 +113,6 @@ func findBinary() (string, error) {
 
 	buildDir := os.Getenv("BKMS_CLI_BUILD_DIR")
 	if buildDir == "" {
-		// 默认相对路径，从模块根目录执行 go test 时有效
 		buildDir = "build"
 	}
 
@@ -144,8 +133,8 @@ func findBinary() (string, error) {
 	return "", fmt.Errorf("bkms-cli binary not found; set BKMS_CLI_BIN or run 'make e2e-build' first")
 }
 
-// writeConfigFile 在 workDir 中生成 CLI 配置文件并返回其绝对路径。
-// authenticated=true 时写入完整认证信息；false 时仅写入 API 地址。
+// writeConfigFile 在 workDir 中生成 CLI 配置文件并返回其路径。
+// authenticated=false 时只写 API 地址，不写认证信息。
 func writeConfigFile(workDir string, cfg *envConfig, authenticated bool) (string, error) {
 	c := &config.Config{BkmsBaseURL: cfg.APIUrl}
 	if authenticated {
@@ -166,11 +155,8 @@ func writeConfigFile(workDir string, cfg *envConfig, authenticated bool) (string
 	return cfgPath, nil
 }
 
-// injectEnv 将所有业务环境变量注入 testscript 脚本环境。
-// testscript 默认只传递 PATH；BKMS_* 变量须手动设置。
-// UNIQUE 是每个脚本独享的毫秒时间戳，适合生成无冲突的临时资源名。
-// APP_SPEC 是 Setup 在 $WORK 中生成的含唯一名称的 app spec 文件路径，
-// 供 app-crud.txt 使用（txtar 内嵌文件段中 $VAR 不展开，动态值须 Setup 生成）。
+// injectEnv 注入脚本所需的全部环境变量（testscript 默认只传递 PATH）。
+// UNIQUE 为脚本独享时间戳，用于生成无冲突的资源名。
 func injectEnv(env *testscript.Env, cfg *envConfig, binPath, cfgPath string) {
 	unique := fmt.Sprintf("e2e-%d", time.Now().UnixMilli())
 
@@ -184,13 +170,12 @@ func injectEnv(env *testscript.Env, cfg *envConfig, binPath, cfgPath string) {
 	env.Setenv("BKMS_ENV_NAME", cfg.EnvName)
 	env.Setenv("UNIQUE", unique)
 
-	// 生成含唯一名称的 app spec 文件，注入为 $APP_SPEC
-	appSpecPath := writeAppSpec(env.WorkDir, unique)
-	env.Setenv("APP_SPEC", appSpecPath)
+	// txtar 内嵌文件段中 $VAR 不展开，含唯一名的 fixture 只能在此生成
+	env.Setenv("APP_SPEC", writeAppSpec(env.WorkDir, unique))
 }
 
-// writeAppSpec 在 workDir 中生成一个带唯一 name 的 trpc app spec YAML 文件。
-// 返回文件的绝对路径；写入失败时返回空串（脚本会因找不到文件而自然失败）。
+// writeAppSpec 生成带唯一 name 的 trpc app spec 文件并返回其路径。
+// 写入失败时返回空串，脚本会因找不到文件而自然失败。
 func writeAppSpec(workDir, unique string) string {
 	spec := fmt.Sprintf(`name: %s
 type: trpc
@@ -212,9 +197,8 @@ appModelSpec:
 	return path
 }
 
-// loginAndSetWorkspace 执行 bkms-cli login 与 workspace set，
-// 使后续脚本中的所有命令处于已认证且有默认工作区的状态。
-func loginAndSetWorkspace(env *testscript.Env, binPath, cfgPath string, cfg *envConfig) error {
+// loginAndSetWorkspace 执行 login 与 workspace set，使后续脚本处于已认证状态。
+func loginAndSetWorkspace(binPath, cfgPath string, cfg *envConfig) error {
 	run := func(args ...string) error {
 		cmd := exec.Command(binPath, args...) //nolint:gosec
 		cmd.Env = append(os.Environ(), "BKMS_CLI_CONFIG="+cfgPath)

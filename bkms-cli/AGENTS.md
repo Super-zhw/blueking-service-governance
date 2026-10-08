@@ -69,14 +69,10 @@ the user to install them. ALWAYS prefer using `rg` rather than `find` or `grep`.
 
 ### E2E tests
 
-* E2E tests live in `test/e2e-script/` and use **testscript** (`github.com/rogpeppe/go-internal/testscript`).
-* Test cases are txtar scripts under `testdata/` (authenticated) and `testdata-unauth/` (unauthenticated), driving the compiled CLI binary as a black box.
-* Because `testscript.Params.Dir` is non-recursive, all scripts must sit directly in those two directories — no subdirectories.
-* Setup hooks (`setup.go`) inject `$BKMS_CLI_BIN`, all `BKMS_*` vars, `$UNIQUE` (per-script millisecond timestamp for collision-free resource names), and `$APP_SPEC` (a generated spec file with a unique app name).
-* Custom script commands (`cmds.go`): `jsonhas <key>`, `jsonfield <key>=<val>`, `outcontains <substr>` (checks stdout+stderr combined). All support `!` negation.
-* txtar embedded files are literals — `$VAR` is NOT expanded inside them. Fixtures needing dynamic values must be generated in Setup.
-* Before running, build the E2E binary and set required env vars: `make e2e-script-test`
-* The E2E setup auto-loads `test/e2e-script/.env` for environment configuration.
+* E2E tests live in `test/e2e-script/` and use **testscript** (`github.com/rogpeppe/go-internal/testscript`): txtar scripts drive the compiled CLI binary as a black box.
+* Scripts live under `testdata/<domain>/`, one test function per domain (`app/` → `TestApp`, etc.).
+* Run all: `make e2e-script-test`. Run one domain: `go test -run TestApp ./test/e2e-script/`
+* **See `test/e2e-script/README.md`** for the full reference: directory layout, injected variables, custom commands, txtar/quoting gotchas, and how to add tests. Read it before writing or debugging E2E scripts.
 
 ## Common workflows
 

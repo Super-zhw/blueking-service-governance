@@ -1,4 +1,4 @@
-# app-crud.txt: app 创建/查询/删除完整流程
+# app 创建/查询/删除完整流程
 # 对应 app/crud_test.go
 #
 # $UNIQUE 由 Setup 注入（格式 e2e-<毫秒时间戳>），保证每次运行资源名不冲突。

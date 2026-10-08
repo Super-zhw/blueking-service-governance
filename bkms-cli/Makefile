@@ -93,11 +93,11 @@ e2e-script-test: e2e-build ## 构建 E2E 专用二进制并执行 testscript E2E
 		echo "Loading env file: test/e2e-script/.env"; \
 		set -a && . ./test/e2e-script/.env && set +a && \
 		BKMS_CLI_BIN=$(shell pwd)/build/bkms-cli-e2e \
-		go test -v -timeout 15m -run 'TestE2E|TestE2EUnauth' ./test/e2e-script/...; \
+		go test -v -timeout 15m ./test/e2e-script/...; \
 	else \
 		echo "test/e2e-script/.env not found, using current shell environment"; \
 		BKMS_CLI_BIN=$(shell pwd)/build/bkms-cli-e2e \
-		go test -v -timeout 15m -run 'TestE2E|TestE2EUnauth' ./test/e2e-script/...; \
+		go test -v -timeout 15m ./test/e2e-script/...; \
 	fi
 
 ##@ 开发工具安装命令

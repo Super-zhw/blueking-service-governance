@@ -1,4 +1,4 @@
-# base-workspace.txt: workspace 基本命令
+# workspace 基本命令
 # 对应 base/workspace_test.go
 
 # workspace list 正常退出

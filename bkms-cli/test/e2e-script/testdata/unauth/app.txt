@@ -1,4 +1,4 @@
-# unauth-app.txt: 未认证时 app list 应报未授权
+# 未认证时 app list 应报未授权
 # 对应 app/app_test.go（RunWithoutAuth 分支）
 
 ! exec $BKMS_CLI_BIN app list

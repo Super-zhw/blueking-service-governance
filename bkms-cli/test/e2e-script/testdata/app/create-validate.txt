@@ -1,4 +1,4 @@
-# app-create-validate.txt: app create 输入校验（本地校验，不需要真实服务）
+# app create 输入校验（本地校验，不需要真实服务）
 # 对应 app/create_validate_test.go
 # 这些用例全部走 CLI 本地 validator，不依赖网络
 

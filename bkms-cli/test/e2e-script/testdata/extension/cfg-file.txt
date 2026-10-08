@@ -1,4 +1,4 @@
-# extension-cfg-file.txt: app app-cfg-file 子命令
+# app app-cfg-file 子命令
 # 对应 extension/cfg_file_test.go
 
 # view 正常退出

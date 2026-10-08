@@ -1,4 +1,4 @@
-# unauth-workspace.txt: 未认证时 workspace 命令应报未授权
+# 未认证时 workspace 命令应报未授权
 # 对应 base/workspace_test.go（RunWithoutAuth 分支）
 
 ! exec $BKMS_CLI_BIN workspace list

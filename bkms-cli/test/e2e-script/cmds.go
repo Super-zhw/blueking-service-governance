@@ -27,7 +27,7 @@ import (
 )
 
 // customCmds 返回脚本中可用的自定义命令映射。
-// 所有命令均通过 ts.ReadFile("stdout") 读取上一条 exec 命令的标准输出。
+// 各命令均读取上一条 exec 的输出；加 ! 前缀为反向断言。
 func customCmds() map[string]func(ts *testscript.TestScript, neg bool, args []string) {
 	return map[string]func(ts *testscript.TestScript, neg bool, args []string){
 		"jsonhas":     cmdJSONHas,
@@ -36,12 +36,7 @@ func customCmds() map[string]func(ts *testscript.TestScript, neg bool, args []st
 	}
 }
 
-// cmdJSONHas 断言上一条命令的 stdout 是合法 JSON，且包含指定的顶层键。
-//
-// 用法：
-//
-//	jsonhas <key> [<key>...]
-//	! jsonhas <key>        — 断言键不存在
+// cmdJSONHas 断言 stdout 是 JSON 对象且含指定顶层键：jsonhas <key>...
 func cmdJSONHas(ts *testscript.TestScript, neg bool, args []string) {
 	if len(args) == 0 {
 		ts.Fatalf("jsonhas: at least one key required")
@@ -64,12 +59,7 @@ func cmdJSONHas(ts *testscript.TestScript, neg bool, args []string) {
 	}
 }
 
-// cmdJSONField 断言上一条命令的 stdout 是合法 JSON，且指定字段的字符串值与期望相符。
-//
-// 用法：
-//
-//	jsonfield <key>=<expected>
-//	! jsonfield <key>=<expected>   — 断言字段值不等于 expected
+// cmdJSONField 断言 stdout 中指定字段的值与期望相符：jsonfield <key>=<expected>
 func cmdJSONField(ts *testscript.TestScript, neg bool, args []string) {
 	if len(args) != 1 {
 		ts.Fatalf("jsonfield: exactly one key=value argument required")
@@ -102,13 +92,8 @@ func cmdJSONField(ts *testscript.TestScript, neg bool, args []string) {
 	}
 }
 
-// cmdOutContains 断言上一条命令的 stdout+stderr 合并输出包含指定子串。
-// 用于需要同时检查两个流的场景，等价于旧框架的 ExpectOutputContains。
-//
-// 用法：
-//
-//	outcontains <substring>
-//	! outcontains <substring>   — 断言输出不包含该子串
+// cmdOutContains 断言 stdout+stderr 合并输出含指定子串：outcontains <substring>
+// 用于错误信息流向不确定的场景
 func cmdOutContains(ts *testscript.TestScript, neg bool, args []string) {
 	if len(args) != 1 {
 		ts.Fatalf("outcontains: exactly one argument required")

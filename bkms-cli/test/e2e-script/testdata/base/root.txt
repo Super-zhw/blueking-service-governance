@@ -1,4 +1,4 @@
-# base-root.txt: 根命令基本行为
+# 根命令基本行为
 # 对应 base/root_test.go
 
 # 无参数时输出 help 并以 0 退出

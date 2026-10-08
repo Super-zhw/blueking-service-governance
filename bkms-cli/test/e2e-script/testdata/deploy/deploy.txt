@@ -1,4 +1,4 @@
-# deploy.txt: app deploy 子命令
+# app deploy 子命令
 # 对应 deploy/deploy_test.go
 
 # list 正常退出

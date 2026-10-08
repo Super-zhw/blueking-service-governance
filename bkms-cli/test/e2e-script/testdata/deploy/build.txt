@@ -1,4 +1,4 @@
-# deploy-build.txt: app build 子命令
+# app build 子命令
 # 对应 deploy/build_test.go
 
 exec $BKMS_CLI_BIN app build list --app $BKMS_APP_ID
