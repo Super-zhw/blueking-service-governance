@@ -1,0 +1,64 @@
+bkms-server/cmd/migration/app_bscpcfg_mgr.go
+  h_2321bec5d80d15 167-169,209-214
+bkms-server/cmd/migration/bind_bscp_project.go
+  h_2321bec5d80d15 31,105,112,116-119,124-130
+bkms-server/pkg/core/workspace/bscp.go
+  h_2321bec5d80d15 19,25,27-29,31-43,46-52,54-57,59-69,72-81,83,86,88,90-92,94,97-106,108-111,114-122,125-129,131-134,136-138
+bkms-server/pkg/core/workspace/dependency.go
+  h_2321bec5d80d15 78-83,95-100
+bkms-server/pkg/core/workspace/workspace.go
+  h_2321bec5d80d15 93-96
+bkms-server/pkg/deploy/appmodel/service/service.go
+  h_2321bec5d80d15 225
+bkms-server/pkg/deploy/handler/appmodel_deploy_steps.go
+  h_2321bec5d80d15 139,504
+bkms-server/pkg/deploy/helm/postrenderer/bscp.go
+  h_2321bec5d80d15 29,69,71
+bkms-server/pkg/deploy/helm/postrenderer/builder.go
+  h_2321bec5d80d15 54,221-222,228-239
+bkms-server/pkg/extension/bscpcfg/handler/metadata.go
+  h_2321bec5d80d15 94-99
+bkms-server/pkg/extension/bscpcfg/model/metadata.go
+  h_2321bec5d80d15 27-29,33-34,61-62,79-81
+bkms-server/pkg/extension/bscpcfg/model/metadata_store.go
+  h_2321bec5d80d15 133-136
+bkms-server/pkg/extension/bscpcfg/model/metadata_store_test.go
+  h_2321bec5d80d15 60-64,73,75-76,85-86,92-93,115-118,128,145-148,154-156,158,164,209,211,219,249-250,277-279,309,311,319,351-355,426-435
+bkms-server/pkg/extension/bscpcfg/model/snapshot_test.go
+  h_2321bec5d80d15 33-36
+bkms-server/pkg/extension/bscpcfg/model/store.go
+  h_2321bec5d80d15 63,65-66,80-81
+bkms-server/pkg/extension/bscpcfg/model/store_test.go
+  h_2321bec5d80d15 95-99
+bkms-server/pkg/extension/bscpcfg/serializer/serializer.go
+  h_2321bec5d80d15 155-163,214
+bkms-server/pkg/extension/bscpcfg/service/manager.go
+  h_2321bec5d80d15 84-89,111,119-121,123,176
+bkms-server/pkg/extension/bscpcfg/service/manager_test.go
+  h_2321bec5d80d15 67-70,76,81,207-211
+bkms-server/pkg/extension/bscpcfg/service/types.go
+  h_2321bec5d80d15 45,47,60
+bkms-server/pkg/workload/appmodelcore/workload/builder.go
+  h_2321bec5d80d15 366-372,374
+bkms-server/pkg/workload/appmodelcore/workload/builder_service.go
+  h_2321bec5d80d15 54,172,184
+bkms-server/pkg/workload/appmodelcore/workload/module.go
+  h_2321bec5d80d15 41
+bkms-server/pkg/workload/bscpcfg/builder.go
+  h_2321bec5d80d15 29,164,169,178-181,193,196-198
+bkms-server/pkg/workload/bscpcfg/inject.go
+  h_2321bec5d80d15 28,48,51
+bkms-server/pkg/workload/instance/handler/instance.go
+  h_2321bec5d80d15 440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e410d796f10234b0f2aa9ab9cdd378a0b81e5103",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
