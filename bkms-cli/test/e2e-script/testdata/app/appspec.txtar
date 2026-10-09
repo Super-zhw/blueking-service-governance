@@ -1,5 +1,4 @@
 # app appspec 全部子命令及边界场景测试
-# 对应 app/appspec_test.go
 
 # ==================== appspec view（聚合视图）====================
 

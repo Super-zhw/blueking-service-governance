@@ -1,5 +1,4 @@
 # app app-cfg-file 子命令
-# 对应 extension/cfg_file_test.go
 
 # view 正常退出
 exec $BKMS_CLI_BIN app app-cfg-file view --app $BKMS_APP_ID

@@ -1,5 +1,4 @@
 # app instance 子命令
-# 对应 app/instance_test.go
 
 exec $BKMS_CLI_BIN app instance list --app $BKMS_APP_ID --env $BKMS_ENV_NAME
 stdout .

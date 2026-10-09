@@ -1,5 +1,4 @@
 # app polaris 子命令
-# 对应 extension/polaris_test.go
 
 exec $BKMS_CLI_BIN app polaris list --app $BKMS_APP_ID
 stdout .

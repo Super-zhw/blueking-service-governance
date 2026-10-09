@@ -1,5 +1,4 @@
 # 登录与登出行为
-# 对应 base/auth_test.go
 
 # 有效 token 登录成功（实际输出 "User login... Success!"，注意首字母大写）
 exec $BKMS_CLI_BIN login --access-token $BKMS_TOKEN

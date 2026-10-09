@@ -1,5 +1,4 @@
 # app deploy 子命令
-# 对应 deploy/deploy_test.go
 
 # list 正常退出
 exec $BKMS_CLI_BIN app deploy list --app $BKMS_APP_ID --env $BKMS_ENV_NAME

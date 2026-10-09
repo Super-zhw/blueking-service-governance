@@ -1,5 +1,4 @@
 # config 命令行为
-# 对应 base/config_test.go
 
 # config view 正常退出
 exec $BKMS_CLI_BIN config view

@@ -1,5 +1,4 @@
 # workspace 基本命令
-# 对应 base/workspace_test.go
 
 # workspace list 正常退出
 exec $BKMS_CLI_BIN workspace list

@@ -1,5 +1,4 @@
 # app component 子命令
-# 对应 extension/component_test.go
 
 exec $BKMS_CLI_BIN app component list --app $BKMS_APP_ID
 stdout .

@@ -25,7 +25,7 @@ go test -run 'TestApp/crud' ./test/e2e-script/
 
 Go 侧：`e2e_test.go`（入口）、`setup.go`（环境变量注入 + 登录）、`cmds.go`（自定义命令）。
 
-新增脚本：直接在领域目录下建 `.txt`。新增领域：`Params.Dir` 不递归，需在
+新增脚本：直接在领域目录下建 `.txtar`。新增领域：`Params.Dir` 不递归，需在
 `e2e_test.go` 加一行 `func TestFoo(t *testing.T) { runDomain(t, "foo", setup) }`。
 
 ## 脚本变量
