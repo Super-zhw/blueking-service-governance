@@ -1,0 +1,14 @@
+bkms-cli/test/e2e-script/README.md
+  h_2321bec5d80d15 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d7a6625ae99cf03d4ac224fa90c5d8e00fb45b03",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
