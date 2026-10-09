@@ -82,6 +82,12 @@ const (
 
 // 环境类型
 const (
+	// EnvTypeDevelopment 开发环境类型
+	EnvTypeDevelopment = "development"
+	// EnvTypeTest 测试环境类型
+	EnvTypeTest = "test"
+	// EnvTypeStaging 预发布环境类型
+	EnvTypeStaging = "staging"
 	// EnvTypeProduction 正式环境类型
 	EnvTypeProduction = "production"
 )
