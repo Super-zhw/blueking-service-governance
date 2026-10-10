@@ -20,8 +20,8 @@ go test -run 'TestApp/crud' ./test/e2e-script/
 
 ## 目录
 
-脚本按领域分目录，每个目录一个测试函数：`app/` → `TestApp`、`base/` → `TestBase`、
-`deploy/`、`envvar/`、`extension/`、`unauth/`（未认证场景，配置不含 token）。
+脚本按领域分目录，每个目录一个测试函数：`app/` → `TestApp`、`appspec/` → `TestAppspec`、
+`base/` → `TestBase`、`deploy/`、`envvar/`、`extension/`、`unauth/`（未认证场景，配置不含 token）。
 
 Go 侧：`e2e_test.go`（入口）、`setup.go`（环境变量注入 + 登录）、`cmds.go`（自定义命令）。
 
@@ -44,4 +44,6 @@ Setup 注入（testscript 默认只传 `PATH`）：
 
 - `jsonhas <key>...` — stdout 是 JSON 且含指定顶层键
 - `jsonfield <key>=<value>` — 字段值匹配
-- `outcontains <substr>` — stdout+stderr 合并输出含子串（错误流向不确定时用）
+
+错误断言用内置 `stderr <regex>`，成功输出用 `stdout <regex>`（两者均为 RE2 正则，
+`(?m)` 多行匹配）。CLI 错误统一走 stderr，正常输出走 stdout。

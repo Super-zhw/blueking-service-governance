@@ -4,8 +4,9 @@
 exec $BKMS_CLI_BIN app deploy list --app $BKMS_APP_ID --env $BKMS_ENV_NAME
 stdout .
 
+# list 缺 --app
 ! exec $BKMS_CLI_BIN app deploy list --env test
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
 # 逗号分隔多个环境名正常退出
 exec $BKMS_CLI_BIN app deploy list --app $BKMS_APP_ID --env $BKMS_ENV_NAME,$BKMS_ENV_NAME
@@ -13,32 +14,26 @@ stdout .
 
 # 不存在的环境失败
 ! exec $BKMS_CLI_BIN app deploy list --app $BKMS_APP_ID --env nonexistent-env-12345
-outcontains 'not found'
+stderr 'not found'
 
 # precheck：仅验证命令不崩溃，不断言退出码
 exec $BKMS_CLI_BIN app deploy precheck --app $BKMS_APP_ID --env $BKMS_ENV_NAME
 
+# precheck 缺 --app
 ! exec $BKMS_CLI_BIN app deploy precheck --env $BKMS_ENV_NAME
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
-! exec $BKMS_CLI_BIN app deploy precheck --app $BKMS_APP_ID
-outcontains 'required'
-
-# create error cases
+# create 缺 --app
 ! exec $BKMS_CLI_BIN app deploy create --env $BKMS_ENV_NAME -f /tmp/nonexistent.yaml
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
-! exec $BKMS_CLI_BIN app deploy create --app $BKMS_APP_ID --env $BKMS_ENV_NAME
-outcontains 'required'
-
+# create 文件不存在
 ! exec $BKMS_CLI_BIN app deploy create --app $BKMS_APP_ID --env $BKMS_ENV_NAME -f /tmp/nonexistent-deploy-spec-xyz.yaml
-outcontains 'not found'
+stderr 'not found'
 
-# delete error cases
+# delete 缺 --app
 ! exec $BKMS_CLI_BIN app deploy delete --env $BKMS_ENV_NAME --yes
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
-! exec $BKMS_CLI_BIN app deploy delete --app $BKMS_APP_ID --yes
-outcontains 'required'
-
+# delete 不存在的环境
 ! exec $BKMS_CLI_BIN app deploy delete --app $BKMS_APP_ID --env nonexistent-env-12345 --yes

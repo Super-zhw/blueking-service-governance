@@ -4,25 +4,25 @@
 # 注意：testscript 只把单引号当引号语法（双引号是普通字符，不阻止空格分词）。
 # 要在单引号串内嵌入一个单引号，需把它写两遍：'name'' is required' → name' is required
 ! exec $BKMS_CLI_BIN app create -f missing-name.yaml
-outcontains '''name'' is required'
+stderr '''name'' is required'
 
 ! exec $BKMS_CLI_BIN app create -f missing-build.yaml
-outcontains '''buildConfig'' is required'
+stderr '''buildConfig'' is required'
 
 ! exec $BKMS_CLI_BIN app create -f invalid-name-format.yaml
-outcontains '''name'' is invalid'
+stderr '''name'' is invalid'
 
 ! exec $BKMS_CLI_BIN app create -f invalid-type.yaml
-outcontains '''type'' is invalid'
+stderr '''type'' is invalid'
 
 ! exec $BKMS_CLI_BIN app create -f invalid-build-source.yaml
-outcontains 'is invalid'
+stderr 'is invalid'
 
 ! exec $BKMS_CLI_BIN app create -f invalid-trpc-language.yaml
-outcontains 'is invalid'
+stderr 'is invalid'
 
 ! exec $BKMS_CLI_BIN app create -f invalid-helm-repo-type.yaml
-outcontains 'is invalid'
+stderr 'is invalid'
 
 -- missing-name.yaml --
 type: trpc

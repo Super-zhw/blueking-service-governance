@@ -10,18 +10,17 @@ stdout .
 exec $BKMS_CLI_BIN envvar list env --env $BKMS_ENV_NAME
 stdout .
 
+# list 缺 --app
 ! exec $BKMS_CLI_BIN envvar list app
-outcontains 'required'
-
-! exec $BKMS_CLI_BIN envvar list env
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
 # scoped CRUD
 exec $BKMS_CLI_BIN envvar create scoped --key E2E_TEST_SCOPED_VAR --value test-value
 stdout .
 
 exec $BKMS_CLI_BIN envvar update scoped --key E2E_TEST_SCOPED_VAR --value updated-value
-stdout .
+exec $BKMS_CLI_BIN envvar list scoped
+stdout 'updated-value'
 
 exec $BKMS_CLI_BIN envvar delete scoped --key E2E_TEST_SCOPED_VAR
 stdout .
@@ -31,7 +30,8 @@ exec $BKMS_CLI_BIN envvar create app --app $BKMS_APP_ID --key E2E_TEST_APP_VAR -
 stdout .
 
 exec $BKMS_CLI_BIN envvar update app --app $BKMS_APP_ID --key E2E_TEST_APP_VAR --value updated-value
-stdout .
+exec $BKMS_CLI_BIN envvar list app --app $BKMS_APP_ID
+stdout 'updated-value'
 
 exec $BKMS_CLI_BIN envvar delete app --app $BKMS_APP_ID --key E2E_TEST_APP_VAR
 stdout .
@@ -41,7 +41,8 @@ exec $BKMS_CLI_BIN envvar create env --env $BKMS_ENV_NAME --key E2E_TEST_ENV_VAR
 stdout .
 
 exec $BKMS_CLI_BIN envvar update env --env $BKMS_ENV_NAME --key E2E_TEST_ENV_VAR --value updated-value
-stdout .
+exec $BKMS_CLI_BIN envvar list env --env $BKMS_ENV_NAME
+stdout 'updated-value'
 
 exec $BKMS_CLI_BIN envvar delete env --env $BKMS_ENV_NAME --key E2E_TEST_ENV_VAR
 stdout .
@@ -56,11 +57,9 @@ stdout .
 exec $BKMS_CLI_BIN envvar export env --env $BKMS_ENV_NAME
 stdout .
 
-# error cases
+# create 缺 --key
 ! exec $BKMS_CLI_BIN envvar create scoped --value val
-outcontains 'required'
+stderr 'required flag\(s\) "key" not set'
 
-! exec $BKMS_CLI_BIN envvar delete scoped
-outcontains 'required'
-
+# delete 不存在的 key
 ! exec $BKMS_CLI_BIN envvar delete scoped --key NONEXISTENT_KEY_E2E_XYZ

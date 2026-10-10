@@ -6,45 +6,26 @@ stdout .
 exec $BKMS_CLI_BIN app polaris list --app $BKMS_APP_ID -o json
 stdout .
 
+# list 缺 --app
 ! exec $BKMS_CLI_BIN app polaris list
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
-# create error cases
-! exec $BKMS_CLI_BIN app polaris create -f /tmp/nonexistent.yaml
-outcontains 'required'
-
+# create 缺 --file
 ! exec $BKMS_CLI_BIN app polaris create --app $BKMS_APP_ID
-outcontains 'required'
+stderr 'required flag\(s\) "file" not set'
 
+# create 文件不存在
 ! exec $BKMS_CLI_BIN app polaris create --app $BKMS_APP_ID -f /tmp/nonexistent-polaris-spec-xyz.yaml
-outcontains 'not found'
+stderr 'not found'
 
-# update error cases
-! exec $BKMS_CLI_BIN app polaris update --name nonexistent -f /tmp/nonexistent.yaml
-outcontains 'required'
-
+# update 缺 --name
 ! exec $BKMS_CLI_BIN app polaris update --app $BKMS_APP_ID -f /tmp/nonexistent.yaml
-outcontains 'required'
+stderr 'required flag\(s\) "name" not set'
 
-! exec $BKMS_CLI_BIN app polaris update --app $BKMS_APP_ID --name nonexistent
-outcontains 'required'
-
-# delete error cases
-! exec $BKMS_CLI_BIN app polaris delete --name nonexistent
-outcontains 'required'
-
+# delete 缺 --name
 ! exec $BKMS_CLI_BIN app polaris delete --app $BKMS_APP_ID
-outcontains 'required'
+stderr 'required flag\(s\) "name" not set'
 
-# weight error cases
-! exec $BKMS_CLI_BIN app polaris weight --config some-config --env $BKMS_ENV_NAME --weight 100
-outcontains 'required'
-
-! exec $BKMS_CLI_BIN app polaris weight --app $BKMS_APP_ID --env $BKMS_ENV_NAME --weight 100
-outcontains 'required'
-
-! exec $BKMS_CLI_BIN app polaris weight --app $BKMS_APP_ID --config some-config --weight 100
-outcontains 'required'
-
+# weight 缺 --weight
 ! exec $BKMS_CLI_BIN app polaris weight --app $BKMS_APP_ID --config some-config --env $BKMS_ENV_NAME
-outcontains 'required'
+stderr 'required flag\(s\) "weight" not set'

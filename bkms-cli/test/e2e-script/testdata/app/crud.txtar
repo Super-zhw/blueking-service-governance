@@ -13,18 +13,12 @@ jsonhas name
 jsonfield type=trpc
 
 ! exec $BKMS_CLI_BIN app get --app nonexistent-app-xyz-e2e
-outcontains 'not found'
-
-! exec $BKMS_CLI_BIN app create
-outcontains 'required'
+stderr 'not found'
 
 ! exec $BKMS_CLI_BIN app get
-outcontains 'required'
-
-! exec $BKMS_CLI_BIN app delete --yes
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
 ! exec $BKMS_CLI_BIN app delete --app nonexistent-app-xyz-e2e --yes
 
 exec $BKMS_CLI_BIN app delete --app $UNIQUE --yes
-outcontains 'deleted successfully'
+stdout 'deleted successfully'

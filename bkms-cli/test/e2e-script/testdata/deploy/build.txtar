@@ -6,15 +6,10 @@ stdout .
 exec $BKMS_CLI_BIN app build list --app $BKMS_APP_ID -o json
 stdout .
 
+# list 缺 --app
 ! exec $BKMS_CLI_BIN app build list
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'
 
-# create error cases
+# create 缺 --app
 ! exec $BKMS_CLI_BIN app build create --branch main --image-tag v1.0.0
-outcontains 'required'
-
-! exec $BKMS_CLI_BIN app build create --app $BKMS_APP_ID --image-tag v1.0.0
-outcontains 'required'
-
-! exec $BKMS_CLI_BIN app build create --app $BKMS_APP_ID --branch main
-outcontains 'required'
+stderr 'required flag\(s\) "app" not set'

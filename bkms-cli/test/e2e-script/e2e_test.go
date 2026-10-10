@@ -60,6 +60,7 @@ func runDomain(t *testing.T, domain string, setupFn func(*testscript.Env) error)
 }
 
 func TestApp(t *testing.T)       { runDomain(t, "app", setup) }
+func TestAppspec(t *testing.T)   { runDomain(t, "appspec", setup) }
 func TestBase(t *testing.T)      { runDomain(t, "base", setup) }
 func TestDeploy(t *testing.T)    { runDomain(t, "deploy", setup) }
 func TestEnvvar(t *testing.T)    { runDomain(t, "envvar", setup) }

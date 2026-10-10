@@ -30,9 +30,8 @@ import (
 // 各命令均读取上一条 exec 的输出；加 ! 前缀为反向断言。
 func customCmds() map[string]func(ts *testscript.TestScript, neg bool, args []string) {
 	return map[string]func(ts *testscript.TestScript, neg bool, args []string){
-		"jsonhas":     cmdJSONHas,
-		"jsonfield":   cmdJSONField,
-		"outcontains": cmdOutContains,
+		"jsonhas":   cmdJSONHas,
+		"jsonfield": cmdJSONField,
 	}
 }
 
@@ -89,23 +88,5 @@ func cmdJSONField(ts *testscript.TestScript, neg bool, args []string) {
 	}
 	if !neg && !match {
 		ts.Fatalf("jsonfield: field %q: got %q, want %q\nstdout: %s", key, actual, expected, raw)
-	}
-}
-
-// cmdOutContains 断言 stdout+stderr 合并输出含指定子串：outcontains <substring>
-// 用于错误信息流向不确定的场景
-func cmdOutContains(ts *testscript.TestScript, neg bool, args []string) {
-	if len(args) != 1 {
-		ts.Fatalf("outcontains: exactly one argument required")
-	}
-	sub := args[0]
-
-	combined := ts.ReadFile("stdout") + ts.ReadFile("stderr")
-	has := strings.Contains(combined, sub)
-	if neg && has {
-		ts.Fatalf("outcontains: output unexpectedly contains %q\ncombined: %s", sub, combined)
-	}
-	if !neg && !has {
-		ts.Fatalf("outcontains: output does not contain %q\ncombined: %s", sub, combined)
 	}
 }
