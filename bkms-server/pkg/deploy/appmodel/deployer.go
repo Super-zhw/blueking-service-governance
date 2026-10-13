@@ -317,13 +317,9 @@ func (d *Deployer) syncBuildAutoDeployStatus(ctx context.Context, record *Record
 	return nil
 }
 
-// UpdateInstances 更新部分/全量应用实例
-// 使用场景：
-// 1. 灰度更新功能：指定几个 Pod，执行仅镜像更新操作（InplaceUpdate）
-// 2. 全量更新功能：执行全量 Pod 镜像更新操作（RollingUpdate / InplaceUpdate）
-//
-// 全量更新（未指定实例，或指定的实例覆盖了全部运行态的 Pod）无论何种更新策略，都视为一次部署，
-// 会新建部署记录并返回其 ID（状态由调用方投递的轮询任务推进）；灰度更新不新建部署记录，返回的 deployID 为空串
+// UpdateInstances 更新应用实例镜像
+//   - 灰度更新：指定部分 Pod 原地更新，不新建部署记录，返回空 deployID
+//   - 全量更新：未指定 Pod 或指定了全部运行态 Pod，视为一次部署，新建部署记录并返回 deployID
 func (d *Deployer) UpdateInstances(
 	ctx context.Context,
 	envName, trafficLaneName, imageTag, updateStrategy string,
@@ -353,32 +349,23 @@ func (d *Deployer) UpdateInstances(
 		return "", errors.Wrap(err, "get latest game deployment")
 	}
 	clusterID, namespace := record.ClusterID, record.Namespace
-	// 指定的实例覆盖了全部运行态的 Pod 时，同样视为全量更新
+	// workloadPods 为工作负载下的全部 Pod，podNames 为请求指定的 Pod
+	var workloadPods []unstructured.Unstructured
 	if len(podNames) > 0 {
-		isAll, cErr := d.podManager.IsAllRunningPods(ctx, clusterID, namespace, podNames, record.LabelSelector)
-		if cErr != nil {
-			return "", errors.Wrap(cErr, "check whether all running pods are specified")
+		if workloadPods, err = d.podManager.ListPods(ctx, clusterID, namespace, record.LabelSelector); err != nil {
+			return "", errors.Wrap(err, "list pods for instances update")
 		}
-		if isAll {
+		// 指定了全部运行态 Pod，按全量更新处理
+		if d.podManager.coversAllRunningPods(workloadPods, podNames) {
 			podNames = nil
 		}
 	}
-	// 通过 Patch 的方式更新 GameDeployment 更新策略
 	patchBuilder := NewGameDeploymentJSONPatchBuilder(gameDeploy)
-	patches := []map[string]any{
-		patchBuilder.BuildMainContainerImagePatch(imageTag),
-	}
-	// 如果指定实例，则表示是灰度更新，需要设置 DeletionCost + 分区
+	imagePatch := patchBuilder.BuildMainContainerImagePatch(imageTag)
+	patches := []map[string]any{imagePatch}
 	if len(podNames) > 0 {
-		// 查询 Pod 状态并分类为终止态和运行态，只有运行态的，且镜像 TAG 与灰度镜像不同的需要参与灰度 & 分区设置
-		shouldGrayscalePodNames, cErr := d.podManager.FilterShouldGrayscalePodNames(
-			ctx, record.ClusterID, record.Namespace, imageTag, podNames, record.LabelSelector,
-		)
-		if cErr != nil {
-			return "", errors.Wrap(cErr, "classify pods by status")
-		}
-
-		// 先执行 Pod 的 Patch，设置 deletionCost 为上一次的值 -1 确保这部分 Pods 优先被更新
+		// 灰度更新：调低待灰度 Pod 的 DeletionCost 使其优先更新，并通过分区保留其余 Pod 为旧版本
+		shouldGrayscalePodNames := d.podManager.FilterShouldGrayscalePodNames(workloadPods, podNames, imageTag)
 		record.DeletionCost--
 		if err = d.podManager.SetPodDeletionCost(
 			ctx, clusterID, namespace, shouldGrayscalePodNames, record.DeletionCost,
@@ -386,8 +373,7 @@ func (d *Deployer) UpdateInstances(
 			return "", errors.Wrap(err, "set pod deletion cost")
 		}
 
-		// 计算分区，即不需要更新的 Pod 数量（本次灰度排除在外的）
-		// 处于灰度更新中时，分区应该用老版本的 Pod 数量，减去待灰度的 Pod 数量
+		// 分区 = 旧版本 Pod 数 - 本次待灰度 Pod 数（灰度进行中时旧版本数需扣除已更新的 Pod）
 		var partition int
 		if gameDeploy.Status.Canary.Revision != gameDeploy.Status.CurrentRevision {
 			partition = int(*gameDeploy.Spec.Replicas-gameDeploy.Status.UpdatedReplicas) - len(shouldGrayscalePodNames)
@@ -397,10 +383,8 @@ func (d *Deployer) UpdateInstances(
 		partition = max(0, partition)
 		patches = append(patches, patchBuilder.BuildInplaceUpdatePatch(partition)...)
 	} else if updateStrategy == string(tkex.InPlaceGameDeploymentUpdateStrategyType) {
-		// 全量原地更新，不需要提前设置 DeletionCost，也不需要分区
 		patches = append(patches, patchBuilder.BuildInplaceUpdatePatch(0)...)
 	} else {
-		// 默认设置更新策略为滚动更新
 		updateStrategy = string(tkex.RollingGameDeploymentUpdateStrategyType)
 		patches = append(patches, patchBuilder.BuildRollingUpdatePatch())
 	}
@@ -414,7 +398,7 @@ func (d *Deployer) UpdateInstances(
 	}
 
 	if len(podNames) > 0 {
-		// 灰度更新：仅更新当前部署记录（DeletionCost），灰度部分镜像 Tag 不会影响到部署记录的 ImageTag
+		// 灰度只回写 DeletionCost，不改 ImageTag
 		record.Updater = auth.MustGetUser(ctx).ID
 		record.UpdatedAt = time.Now()
 		if err = d.recordStore.Update(ctx, record); err != nil {
@@ -423,14 +407,28 @@ func (d *Deployer) UpdateInstances(
 		return "", nil
 	}
 
-	// 全量更新（无论 RollingUpdate / InplaceUpdate）：基于当前部署记录新建一条部署记录，
-	// 确保部署历史可见，且 ImageTag 与集群中保持一致
-	// 注：部署记录在 Patch 成功后才创建，避免 Patch 失败时留下失败记录阻塞后续操作
+	// 全量更新：Patch 成功后再建记录，避免 Patch 失败留下失败记录阻塞后续更新
 	replicas := lo.FromPtrOr(gameDeploy.Spec.Replicas, record.Replicas)
 	deployID, err = d.createInstancesUpdateRecord(ctx, record, imageTag, updateStrategy, replicas)
 	if err != nil {
-		return "", errors.Wrap(err, "create instances update deploy record")
+		// 工作负载已 Patch 但记录未创建，重试同一操作即可恢复
+		return "", errors.Wrapf(
+			err, "game deployment %s/%s already patched with image tag %s (strategy %s), "+
+				"but create instances update deploy record failed",
+			namespace, gameDeploy.Name, imageTag, updateStrategy,
+		)
 	}
+	// 资源清单快照沿用上一次部署，并同步主工作负载的镜像与更新策略
+	go copyInstancesUpdateResourceSnapshots(
+		context.WithoutCancel(ctx),
+		d.resourceSnapshotStore,
+		d.app.ID,
+		record.ID.Hex(),
+		deployID,
+		ResourceKey{Kind: k8skind.GameDeploy, Name: gameDeploy.Name},
+		cast.ToString(imagePatch["value"]),
+		updateStrategy,
+	)
 	return deployID, nil
 }
 

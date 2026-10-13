@@ -28,6 +28,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxtest"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"sigs.k8s.io/yaml"
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
@@ -126,6 +127,54 @@ func newPodForTest(name, phase string) unstructured.Unstructured {
 	}}
 }
 
+var _ = Describe("splitPodNamesByStatus", func() {
+	It("should split pod names by terminated status and skip pods without name", func() {
+		terminated, running := (&podManager{}).splitPodNamesByStatus([]unstructured.Unstructured{
+			newPodForTest("pod-1", "Running"),
+			newPodForTest("pod-2", "Succeeded"),
+			newPodForTest("pod-3", "Pending"),
+			newPodForTest("pod-4", "Failed"),
+			newPodForTest("", "Running"),
+		})
+
+		Expect(terminated).To(Equal([]string{"pod-2", "pod-4"}))
+		Expect(running).To(Equal([]string{"pod-1", "pod-3"}))
+	})
+})
+
+// newPodWithImageForTest 创建带容器镜像的测试 Pod
+func newPodWithImageForTest(name, phase string, containers map[string]string) unstructured.Unstructured {
+	po := newPodForTest(name, phase)
+	var cs []any
+	for cName, image := range containers {
+		cs = append(cs, map[string]any{"name": cName, "image": image})
+	}
+	po.Object["spec"] = map[string]any{"containers": cs}
+	return po
+}
+
+var _ = Describe("FilterShouldGrayscalePodNames", func() {
+	It("should only keep specified running pods whose main container image tag differs", func() {
+		workloadPods := []unstructured.Unstructured{
+			newPodWithImageForTest("pod-1", "Running", map[string]string{"main": "app:v1"}),
+			// 已是灰度镜像
+			newPodWithImageForTest("pod-2", "Running", map[string]string{"main": "app:v2"}),
+			// 终止态
+			newPodWithImageForTest("pod-3", "Failed", map[string]string{"main": "app:v1"}),
+			// 未指定
+			newPodWithImageForTest("pod-4", "Running", map[string]string{"main": "app:v1"}),
+			// 仅 sidecar 镜像不同
+			newPodWithImageForTest("pod-5", "Running", map[string]string{"main": "app:v2", "sidecar": "sc:v1"}),
+		}
+
+		names := (&podManager{}).FilterShouldGrayscalePodNames(
+			workloadPods, []string{"pod-1", "pod-2", "pod-3", "pod-5"}, "v2",
+		)
+
+		Expect(names).To(Equal([]string{"pod-1"}))
+	})
+})
+
 var _ = Describe("coversAllRunningPods", func() {
 	m := &podManager{}
 	pods := []unstructured.Unstructured{
@@ -150,5 +199,183 @@ var _ = Describe("coversAllRunningPods", func() {
 		Expect(m.coversAllRunningPods(
 			[]unstructured.Unstructured{newPodForTest("pod-3", "Succeeded")}, []string{"pod-3"},
 		)).To(BeFalse())
+	})
+})
+
+const gameDeployManifestForTest = `apiVersion: tkex.tencent.com/v1alpha1
+kind: GameDeployment
+metadata:
+  name: gd1
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - image: mirrors.example.com/app:v1
+        name: main
+      - image: mirrors.example.com/sidecar:v1
+        name: sidecar
+  updateStrategy:
+    maxUnavailable: 25%
+    type: RollingUpdate
+`
+
+// gameDeploySpecForTest 解析 GameDeployment 清单的 spec，便于断言
+func gameDeploySpecForTest(manifest string) map[string]any {
+	var obj map[string]any
+	Expect(yaml.Unmarshal([]byte(manifest), &obj)).To(Succeed())
+	return obj["spec"].(map[string]any)
+}
+
+// containerImagesForTest 返回 spec 中各容器的镜像
+func containerImagesForTest(spec map[string]any) []any {
+	containers := spec["template"].(map[string]any)["spec"].(map[string]any)["containers"].([]any)
+	images := make([]any, 0, len(containers))
+	for _, c := range containers {
+		images = append(images, c.(map[string]any)["image"])
+	}
+	return images
+}
+
+var _ = Describe("updateWorkloadManifest", func() {
+	It("should update main container image and set inplace update strategy", func() {
+		manifest, truncated, err := updateWorkloadManifest(
+			gameDeployManifestForTest, "mirrors.example.com/app:v2", "InplaceUpdate",
+		)
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(truncated).To(BeFalse())
+		spec := gameDeploySpecForTest(manifest)
+		Expect(containerImagesForTest(spec)).To(Equal([]any{
+			"mirrors.example.com/app:v2", "mirrors.example.com/sidecar:v1",
+		}))
+		Expect(spec["updateStrategy"]).To(Equal(map[string]any{
+			"type": "InplaceUpdate", "partition": float64(0), "maxUnavailable": "25%",
+		}))
+		Expect(spec["replicas"]).To(Equal(float64(3)))
+	})
+
+	It("should only set strategy type for rolling update", func() {
+		manifest, _, err := updateWorkloadManifest(
+			gameDeployManifestForTest, "mirrors.example.com/app:v2", "RollingUpdate",
+		)
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(gameDeploySpecForTest(manifest)["updateStrategy"]).To(Equal(map[string]any{
+			"type": "RollingUpdate", "maxUnavailable": "25%",
+		}))
+	})
+
+	It("should create update strategy when it is missing and keep image when image is empty", func() {
+		manifest, _, err := updateWorkloadManifest(`kind: GameDeployment
+spec:
+  template:
+    spec:
+      containers:
+      - image: app:v1
+        name: main
+`, "", "InplaceUpdate")
+
+		Expect(err).NotTo(HaveOccurred())
+		spec := gameDeploySpecForTest(manifest)
+		Expect(containerImagesForTest(spec)).To(Equal([]any{"app:v1"}))
+		Expect(spec["updateStrategy"]).To(Equal(map[string]any{"type": "InplaceUpdate", "partition": float64(0)}))
+	})
+
+	It("should return error when the manifest is invalid", func() {
+		_, _, err := updateWorkloadManifest("spec: [", "app:v2", "InplaceUpdate")
+
+		Expect(err).To(HaveOccurred())
+	})
+})
+
+var _ = Describe("copyInstancesUpdateResourceSnapshots", func() {
+	var diApp *fxtest.App
+
+	var ctx context.Context
+	var snapStore ResourceSnapshotStore
+	var appID string
+	mainWorkload := ResourceKey{Kind: k8skind.GameDeploy, Name: "gd1"}
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		appID = "inst-update-snap-" + stringx.Random(6)
+
+		diApp = fxtest.New(
+			GinkgoT(),
+			FxModule,
+			fx.Populate(&snapStore),
+		)
+		diApp.RequireStart()
+	})
+
+	AfterEach(func() {
+		diApp.RequireStop()
+	})
+
+	It("should copy snapshots to the new deploy record and update the main workload", func() {
+		srcOID, dstOID := bson.NewObjectID(), bson.NewObjectID()
+		Expect(snapStore.CreateResources(ctx, []ResourceSnapshot{
+			{
+				AppID: appID, DeployRecordID: srcOID, APIVersion: "tkex.tencent.com/v1alpha1",
+				Kind: k8skind.GameDeploy, Name: "gd1", Manifest: gameDeployManifestForTest,
+			},
+			{
+				AppID: appID, DeployRecordID: srcOID, APIVersion: "v1",
+				Kind: "ConfigMap", Name: "cm1", Manifest: "cm1-yaml",
+			},
+		})).To(Succeed())
+
+		copyInstancesUpdateResourceSnapshots(
+			ctx, snapStore, appID, srcOID.Hex(), dstOID.Hex(), mainWorkload,
+			"mirrors.example.com/app:v2", "InplaceUpdate",
+		)
+
+		dst, err := snapStore.ListByDeployRecord(ctx, appID, dstOID.Hex())
+		Expect(err).NotTo(HaveOccurred())
+		Expect(dst).To(HaveLen(2))
+		// 按 kind、name 升序：ConfigMap 在前
+		Expect(dst[0].Kind).To(Equal("ConfigMap"))
+		Expect(dst[0].Manifest).To(Equal("cm1-yaml"))
+		Expect(dst[0].DeployRecordID).To(Equal(dstOID))
+		Expect(dst[1].Kind).To(Equal(k8skind.GameDeploy))
+		Expect(dst[1].APIVersion).To(Equal("tkex.tencent.com/v1alpha1"))
+		Expect(dst[1].DeployRecordID).To(Equal(dstOID))
+		Expect(containerImagesForTest(gameDeploySpecForTest(dst[1].Manifest))).
+			To(ContainElement("mirrors.example.com/app:v2"))
+
+		// 源快照保持不变
+		src, err := snapStore.ListByDeployRecord(ctx, appID, srcOID.Hex())
+		Expect(err).NotTo(HaveOccurred())
+		Expect(src[1].Manifest).To(Equal(gameDeployManifestForTest))
+	})
+
+	It("should copy the main workload as is when the manifest is truncated", func() {
+		srcOID, dstOID := bson.NewObjectID(), bson.NewObjectID()
+		Expect(snapStore.CreateResources(ctx, []ResourceSnapshot{{
+			AppID: appID, DeployRecordID: srcOID, Kind: k8skind.GameDeploy, Name: "gd1",
+			Manifest: "truncated-yaml", IsTruncated: true,
+		}})).To(Succeed())
+
+		copyInstancesUpdateResourceSnapshots(
+			ctx, snapStore, appID, srcOID.Hex(), dstOID.Hex(), mainWorkload, "app:v2", "InplaceUpdate",
+		)
+
+		dst, err := snapStore.ListByDeployRecord(ctx, appID, dstOID.Hex())
+		Expect(err).NotTo(HaveOccurred())
+		Expect(dst).To(HaveLen(1))
+		Expect(dst[0].Manifest).To(Equal("truncated-yaml"))
+		Expect(dst[0].IsTruncated).To(BeTrue())
+	})
+
+	It("should skip when the source deploy record has no snapshots", func() {
+		dstOID := bson.NewObjectID()
+
+		copyInstancesUpdateResourceSnapshots(
+			ctx, snapStore, appID, bson.NewObjectID().Hex(), dstOID.Hex(), mainWorkload, "app:v2", "InplaceUpdate",
+		)
+
+		_, err := snapStore.ListByDeployRecord(ctx, appID, dstOID.Hex())
+		Expect(err).To(MatchError(ErrResourceSnapshotNotFound))
 	})
 })

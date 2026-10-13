@@ -23,6 +23,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	tkex "github.com/Tencent/bk-bcs/bcs-scenarios/kourse/pkg/apis/tkex/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -32,6 +33,7 @@ import (
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	k8smanifest "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/manifest"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
 	envvartypes "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/envvars/types"
 )
 
@@ -85,6 +87,84 @@ func saveResourceSnapshots(
 	if err = store.CreateResources(ctx, snapshots); err != nil {
 		log.Errorf(ctx, "create resource snapshots for app %s deploy %s: %v", appID, deployID, err)
 	}
+}
+
+// copyInstancesUpdateResourceSnapshots 为全量实例更新的部署记录生成资源清单快照
+// 全量实例更新仅 Patch 主工作负载的主容器镜像与更新策略，因此复制源部署记录的快照，
+// 并在主工作负载快照中同步修改这两处；源快照已脱敏，复制不会泄露敏感信息
+func copyInstancesUpdateResourceSnapshots(
+	ctx context.Context,
+	store ResourceSnapshotStore,
+	appID, srcDeployID, dstDeployID string,
+	mainWorkload ResourceKey,
+	image, updateStrategy string,
+) {
+	srcSnapshots, err := store.ListByDeployRecord(ctx, appID, srcDeployID)
+	if err != nil {
+		// 历史部署记录可能没有快照，此时无需复制
+		if errors.Is(err, ErrResourceSnapshotNotFound) {
+			log.Warnf(ctx, "no resource snapshots for app %s deploy %s, skip copy", appID, srcDeployID)
+			return
+		}
+		log.Errorf(ctx, "list resource snapshots for app %s deploy %s: %v", appID, srcDeployID, err)
+		return
+	}
+
+	dstOID, _ := bson.ObjectIDFromHex(dstDeployID)
+	timeNow := time.Now()
+	snapshots := lo.Map(srcSnapshots, func(snap ResourceSnapshot, _ int) ResourceSnapshot {
+		// 截断的清单已不是合法 YAML，原样复制
+		if snap.Kind == mainWorkload.Kind && snap.Name == mainWorkload.Name && !snap.IsTruncated {
+			manifest, truncated, uErr := updateWorkloadManifest(snap.Manifest, image, updateStrategy)
+			if uErr != nil {
+				log.Errorf(ctx, "update %s snapshot for app %s deploy %s: %v", mainWorkload, appID, dstDeployID, uErr)
+			} else {
+				snap.Manifest, snap.IsTruncated = manifest, truncated
+			}
+		}
+		snap.ID = bson.ObjectID{}
+		snap.DeployRecordID = dstOID
+		snap.CreatedAt = timeNow
+		return snap
+	})
+
+	if err = store.CreateResources(ctx, snapshots); err != nil {
+		log.Errorf(ctx, "create resource snapshots for app %s deploy %s: %v", appID, dstDeployID, err)
+	}
+}
+
+// updateWorkloadManifest 修改 GameDeployment 清单中主容器的镜像与更新策略，返回新的清单及是否被截断
+// 与 GameDeploymentJSONPatchBuilder 保持一致：原地更新时 partition 置为 0；image 为空时不修改镜像
+func updateWorkloadManifest(manifest, image, updateStrategy string) (string, bool, error) {
+	var obj map[string]any
+	if err := yaml.Unmarshal([]byte(manifest), &obj); err != nil {
+		return "", false, errors.Wrap(err, "unmarshal manifest")
+	}
+
+	if image != "" {
+		containers, _, err := unstructured.NestedSlice(obj, "spec", "template", "spec", "containers")
+		if err != nil {
+			return "", false, errors.Wrap(err, "get containers")
+		}
+		for _, c := range containers {
+			if container, ok := c.(map[string]any); ok && container["name"] == defaults.WorkloadMainContainerName {
+				container["image"] = image
+			}
+		}
+		if err = unstructured.SetNestedSlice(obj, containers, "spec", "template", "spec", "containers"); err != nil {
+			return "", false, errors.Wrap(err, "set containers")
+		}
+	}
+
+	if err := unstructured.SetNestedField(obj, updateStrategy, "spec", "updateStrategy", "type"); err != nil {
+		return "", false, errors.Wrap(err, "set update strategy type")
+	}
+	if updateStrategy == string(tkex.InPlaceGameDeploymentUpdateStrategyType) {
+		if err := unstructured.SetNestedField(obj, int64(0), "spec", "updateStrategy", "partition"); err != nil {
+			return "", false, errors.Wrap(err, "set update strategy partition")
+		}
+	}
+	return UnstructuredToYaml(unstructured.Unstructured{Object: obj})
 }
 
 // NewResourceSnapshot 通过 Unstructured 创建资源清单快照

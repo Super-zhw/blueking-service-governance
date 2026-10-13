@@ -22,11 +22,13 @@ package handler
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
+	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
@@ -193,8 +195,9 @@ func (h *Handler) UpdateAppInstances(c *gin.Context) {
 	// 全量更新视为一次部署：轮询部署状态 & 更新部署记录
 	// 注：部署成功/失败的操作记录在异步任务中记录
 	if deployID != "" {
+		// 工作负载已 Patch、部署记录已创建，投递不应受请求取消影响
 		err = taskq.Enqueue(
-			ctx,
+			context.WithoutCancel(ctx),
 			appmodeldeploypoll.Task.NewTask(appmodeldeploypoll.Args{
 				WorkspaceID:     app.WorkspaceID,
 				AppID:           app.ID,
@@ -205,8 +208,9 @@ func (h *Handler) UpdateAppInstances(c *gin.Context) {
 			asynq.ProcessIn(appmodeldeploypoll.PollingInterval()),
 		)
 		if err != nil {
-			bkerrs.AbortWithErr(c, bkerrs.Wrap(
-				err, bkerrs.ErrCodeInternalServerError, "enqueue polling deploy status task",
+			h.markDeployPollingBroken(ctx, app.ID, deployID, err)
+			bkerrs.AbortWithErr(c, bkerrs.Wrapf(
+				err, bkerrs.ErrCodeInternalServerError, "enqueue polling deploy %s status task", deployID,
 			))
 			return
 		}
@@ -437,6 +441,25 @@ func (h *Handler) UpdateAppInstancePolaris(c *gin.Context) {
 		audit.WithDataAfter(auditData),
 	)
 	ginutils.OK(c, serializer.EmptyOutput{})
+}
+
+// markDeployPollingBroken 首次轮询任务投递失败时，部署记录无任务推进，将其标记为轮询中断，
+// 避免一直停留在部署中；标记失败只记录日志
+func (h *Handler) markDeployPollingBroken(ctx context.Context, appID, deployID string, enqueueErr error) {
+	ctx = context.WithoutCancel(ctx)
+	record, err := h.registry.AppModelDeployRecordStore.Get(ctx, appID, deployID)
+	if err != nil {
+		log.Errorf(ctx, "mark deploy %s polling broken: get deploy record: %v", deployID, err)
+		return
+	}
+	timeNow := time.Now()
+	record.Status = appmodeldeploy.StatusPollingBroken
+	record.Message = "enqueue polling deploy status task failed: " + enqueueErr.Error()
+	record.EndedAt = timeNow
+	record.UpdatedAt = timeNow
+	if err = h.registry.AppModelDeployRecordStore.Update(ctx, record); err != nil {
+		log.Errorf(ctx, "mark deploy %s polling broken: update deploy record: %v", deployID, err)
+	}
 }
 
 // validateEditableAppModel 校验 App 编辑权限并确认应用类型为 AppModel。
