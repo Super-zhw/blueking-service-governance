@@ -1,0 +1,18 @@
+bkms-cli/pkg/constant/constant.go
+  h_2321bec5d80d15 94-99
+bkms-cli/pkg/handler/deploy/update.go
+  h_2321bec5d80d15 64-66,135,138-142,145,166,172,174,181-183,195,197,209,211,217,220
+bkms-cli/pkg/handler/deploy/update_test.go
+  h_2321bec5d80d15 1-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "910f741cff8f68510da20f570b8ebce94d43cb8f",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
