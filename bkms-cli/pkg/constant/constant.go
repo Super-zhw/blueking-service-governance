@@ -91,3 +91,9 @@ const (
 	// EnvTypeProduction 正式环境类型
 	EnvTypeProduction = "production"
 )
+
+// 部署状态
+const (
+	// DeployStatusUninstalled 已卸载
+	DeployStatusUninstalled = "uninstalled"
+)
