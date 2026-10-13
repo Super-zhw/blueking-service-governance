@@ -26,9 +26,11 @@ import (
 	"github.com/TencentBlueKing/gopkg/collection/set"
 	"github.com/TencentBlueKing/gopkg/mapx"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -190,6 +192,33 @@ func (m *podManager) FilterShouldGrayscalePodNames(
 	}
 
 	return shouldGrayscalePodNames, nil
+}
+
+// IsAllRunningPods 判断指定的 Pod 名称是否覆盖了全部运行态的 Pod（即提交了全量实例）
+func (m *podManager) IsAllRunningPods(
+	ctx context.Context,
+	clusterID, namespace string,
+	podNames []string,
+	labelSelector map[string]string,
+) (bool, error) {
+	// 批量获取所有匹配的 Pod
+	client := k8sclient.NewWithGVR(cluster.NewConfig(clusterID), gvr.Po)
+	pods, err := client.List(ctx, namespace, metav1.ListOptions{
+		LabelSelector: labels.SelectorFromSet(labelSelector).String(),
+	})
+	if err != nil {
+		return false, errors.Wrapf(err, "list pods in namespace %s by label selector [%s]", namespace, labelSelector)
+	}
+	return m.coversAllRunningPods(pods.Items, podNames), nil
+}
+
+// coversAllRunningPods 判断 podNames 是否包含 pods 中全部运行态的 Pod（终止态的 Pod 不参与判断）
+// 不存在运行态的 Pod 时返回 false
+func (m *podManager) coversAllRunningPods(pods []unstructured.Unstructured, podNames []string) bool {
+	runningPodNames := lo.FilterMap(pods, func(po unstructured.Unstructured, _ int) (string, bool) {
+		return mapx.GetStr(po.Object, "metadata.name"), !m.isPodTerminated(po.Object)
+	})
+	return len(runningPodNames) > 0 && lo.Every(podNames, runningPodNames)
 }
 
 // BatchDeleteTerminatedPods 批量直接删除终止态的 Pod

@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
@@ -32,11 +33,13 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/hostport"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/taskq"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	ginperm "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
 	storereg "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/registry"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/taskqtask/appmodeldeploypoll"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload"
 	instanceroute "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/instance"
@@ -172,21 +175,46 @@ func (h *Handler) UpdateAppInstances(c *gin.Context) {
 		return
 	}
 
-	// 获取应用部署器，执行灰度更新操作
+	// 获取应用部署器，执行灰度 / 全量更新操作
 	deployer := h.newDeployer(app)
-	if err = deployer.UpdateInstances(
+	deployID, err := deployer.UpdateInstances(
 		ctx,
 		uriInput.EnvName,
 		input.TrafficLaneName,
 		input.ImageTag,
 		input.UpdateStrategy,
 		input.InstanceIDs,
-	); err != nil {
+	)
+	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "update app %s instances", app.ID))
 		return
 	}
 
-	// 实例更新操作记录
+	// 全量更新视为一次部署：轮询部署状态 & 更新部署记录
+	// 注：部署成功/失败的操作记录在异步任务中记录
+	if deployID != "" {
+		err = taskq.Enqueue(
+			ctx,
+			appmodeldeploypoll.Task.NewTask(appmodeldeploypoll.Args{
+				WorkspaceID:     app.WorkspaceID,
+				AppID:           app.ID,
+				EnvName:         uriInput.EnvName,
+				TrafficLaneName: input.TrafficLaneName,
+				DeployID:        deployID,
+			}),
+			asynq.ProcessIn(appmodeldeploypoll.PollingInterval()),
+		)
+		if err != nil {
+			bkerrs.AbortWithErr(c, bkerrs.Wrap(
+				err, bkerrs.ErrCodeInternalServerError, "enqueue polling deploy status task",
+			))
+			return
+		}
+		ginutils.OK(c, serializer.EmptyOutput{})
+		return
+	}
+
+	// 灰度更新操作记录
 	go audit.AddOperationRecordAsync(
 		context.WithoutCancel(ctx),
 		audit.OperationTypeGray,

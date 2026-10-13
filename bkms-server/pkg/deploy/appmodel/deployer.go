@@ -321,35 +321,48 @@ func (d *Deployer) syncBuildAutoDeployStatus(ctx context.Context, record *Record
 // 使用场景：
 // 1. 灰度更新功能：指定几个 Pod，执行仅镜像更新操作（InplaceUpdate）
 // 2. 全量更新功能：执行全量 Pod 镜像更新操作（RollingUpdate / InplaceUpdate）
+//
+// 全量更新（未指定实例，或指定的实例覆盖了全部运行态的 Pod）无论何种更新策略，都视为一次部署，
+// 会新建部署记录并返回其 ID（状态由调用方投递的轮询任务推进）；灰度更新不新建部署记录，返回的 deployID 为空串
 func (d *Deployer) UpdateInstances(
 	ctx context.Context,
 	envName, trafficLaneName, imageTag, updateStrategy string,
 	podNames []string,
-) error {
+) (deployID string, err error) {
 	// 获取最新的部署记录
 	record, err := d.recordStore.GetLatest(ctx, d.app.ID, envName, trafficLaneName)
 	if err != nil {
-		return errors.Wrap(err, "get latest deploy record")
+		return "", errors.Wrap(err, "get latest deploy record")
 	}
 	// 检查是否为可更新的状态
 	if record.Status != StatusDeployed {
-		return errors.Errorf("deploy record status is %s, cannot update", record.Status)
+		return "", errors.Errorf("deploy record status is %s, cannot update", record.Status)
 	}
 	kind, _ := record.MainWorkload()
 	driver, err := k8sworkload.GetMain(kind)
 	if err != nil {
-		return errors.Wrap(err, "get main workload driver")
+		return "", errors.Wrap(err, "get main workload driver")
 	}
 	if !driver.Capabilities().InplaceUpdate {
-		return errors.Errorf("workload %s does not support inplace or grayscale instance update", kind)
+		return "", errors.Errorf("workload %s does not support inplace or grayscale instance update", kind)
 	}
 
 	// 获取最新的 GameDeployment
 	gameDeploy, err := d.getLatestGameDeployment(ctx, record)
 	if err != nil {
-		return errors.Wrap(err, "get latest game deployment")
+		return "", errors.Wrap(err, "get latest game deployment")
 	}
 	clusterID, namespace := record.ClusterID, record.Namespace
+	// 指定的实例覆盖了全部运行态的 Pod 时，同样视为全量更新
+	if len(podNames) > 0 {
+		isAll, cErr := d.podManager.IsAllRunningPods(ctx, clusterID, namespace, podNames, record.LabelSelector)
+		if cErr != nil {
+			return "", errors.Wrap(cErr, "check whether all running pods are specified")
+		}
+		if isAll {
+			podNames = nil
+		}
+	}
 	// 通过 Patch 的方式更新 GameDeployment 更新策略
 	patchBuilder := NewGameDeploymentJSONPatchBuilder(gameDeploy)
 	patches := []map[string]any{
@@ -362,7 +375,7 @@ func (d *Deployer) UpdateInstances(
 			ctx, record.ClusterID, record.Namespace, imageTag, podNames, record.LabelSelector,
 		)
 		if cErr != nil {
-			return errors.Wrap(cErr, "classify pods by status")
+			return "", errors.Wrap(cErr, "classify pods by status")
 		}
 
 		// 先执行 Pod 的 Patch，设置 deletionCost 为上一次的值 -1 确保这部分 Pods 优先被更新
@@ -370,7 +383,7 @@ func (d *Deployer) UpdateInstances(
 		if err = d.podManager.SetPodDeletionCost(
 			ctx, clusterID, namespace, shouldGrayscalePodNames, record.DeletionCost,
 		); err != nil {
-			return errors.Wrap(err, "set pod deletion cost")
+			return "", errors.Wrap(err, "set pod deletion cost")
 		}
 
 		// 计算分区，即不需要更新的 Pod 数量（本次灰度排除在外的）
@@ -388,6 +401,7 @@ func (d *Deployer) UpdateInstances(
 		patches = append(patches, patchBuilder.BuildInplaceUpdatePatch(0)...)
 	} else {
 		// 默认设置更新策略为滚动更新
+		updateStrategy = string(tkex.RollingGameDeploymentUpdateStrategyType)
 		patches = append(patches, patchBuilder.BuildRollingUpdatePatch())
 	}
 
@@ -396,16 +410,28 @@ func (d *Deployer) UpdateInstances(
 			ctx, "patch record %s game deployment %s with patches %+v failed, err: %v",
 			record.ID.Hex(), gameDeploy.Name, patches, err,
 		)
-		return errors.Wrap(err, "patch game deployment")
+		return "", errors.Wrap(err, "patch game deployment")
 	}
 
-	// 更新部署记录，灰度部分镜像 Tag 不会影响到部署记录的 ImageTag
-	record.Updater = auth.MustGetUser(ctx).ID
-	record.UpdatedAt = time.Now()
-	if err = d.recordStore.Update(ctx, record); err != nil {
-		return errors.Wrap(err, "update deploy record")
+	if len(podNames) > 0 {
+		// 灰度更新：仅更新当前部署记录（DeletionCost），灰度部分镜像 Tag 不会影响到部署记录的 ImageTag
+		record.Updater = auth.MustGetUser(ctx).ID
+		record.UpdatedAt = time.Now()
+		if err = d.recordStore.Update(ctx, record); err != nil {
+			return "", errors.Wrap(err, "update deploy record")
+		}
+		return "", nil
 	}
-	return nil
+
+	// 全量更新（无论 RollingUpdate / InplaceUpdate）：基于当前部署记录新建一条部署记录，
+	// 确保部署历史可见，且 ImageTag 与集群中保持一致
+	// 注：部署记录在 Patch 成功后才创建，避免 Patch 失败时留下失败记录阻塞后续操作
+	replicas := lo.FromPtrOr(gameDeploy.Spec.Replicas, record.Replicas)
+	deployID, err = d.createInstancesUpdateRecord(ctx, record, imageTag, updateStrategy, replicas)
+	if err != nil {
+		return "", errors.Wrap(err, "create instances update deploy record")
+	}
+	return deployID, nil
 }
 
 // Scale 对应用实例进行扩缩容操作
@@ -769,6 +795,46 @@ func (d *Deployer) createDeployRecord(
 	deployID, err := d.recordStore.Create(ctx, &record)
 	if err != nil {
 		return "", errors.Wrapf(err, "create deploy record")
+	}
+	return deployID, nil
+}
+
+// createInstancesUpdateRecord 为全量实例更新创建部署记录
+// 全量更新无论采用何种更新策略（RollingUpdate / InplaceUpdate），都视为一次部署，需写入部署记录；
+// 除镜像 Tag、更新策略、副本数外，其余部署信息均沿用当前部署记录
+func (d *Deployer) createInstancesUpdateRecord(
+	ctx context.Context,
+	base *Record,
+	imageTag, updateStrategy string,
+	replicas int32,
+) (string, error) {
+	timeNow := time.Now()
+	operator := auth.MustGetUser(ctx).ID
+	record := Record{
+		WorkspaceID:     base.WorkspaceID,
+		AppID:           base.AppID,
+		EnvName:         base.EnvName,
+		TrafficLaneName: base.TrafficLaneName,
+		ClusterID:       base.ClusterID,
+		Namespace:       base.Namespace,
+		ImageTag:        imageTag,
+		UpdateStrategy:  updateStrategy,
+		Replicas:        replicas,
+		DeletionCost:    base.DeletionCost,
+		LabelSelector:   base.LabelSelector,
+		WorkloadKind:    base.WorkloadKind,
+		ResourceKeys:    base.ResourceKeys,
+		Message:         "",
+		Status:          StatusDeploying,
+		Creator:         operator,
+		Updater:         operator,
+		StartedAt:       timeNow,
+		CreatedAt:       timeNow,
+		UpdatedAt:       timeNow,
+	}
+	deployID, err := d.recordStore.Create(ctx, &record)
+	if err != nil {
+		return "", errors.Wrapf(err, "create deploy record based on %s", base.ID.Hex())
 	}
 	return deployID, nil
 }
