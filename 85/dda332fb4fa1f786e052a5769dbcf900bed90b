@@ -1,0 +1,70 @@
+bkms-cli/test/e2e-script/README.md
+  h_2321bec5d80d15 23-24,47-49
+bkms-cli/test/e2e-script/cmds.go
+  h_2321bec5d80d15 33-34
+bkms-cli/test/e2e-script/e2e_test.go
+  h_2321bec5d80d15 63
+bkms-cli/test/e2e-script/testdata/app/create-validate.txtar
+  h_2321bec5d80d15 7,10,13,16,19,22,25
+bkms-cli/test/e2e-script/testdata/app/crud.txtar
+  h_2321bec5d80d15 16,19,24
+bkms-cli/test/e2e-script/testdata/app/image.txtar
+  h_2321bec5d80d15 6,8
+bkms-cli/test/e2e-script/testdata/app/instance.txtar
+  h_2321bec5d80d15 6,8,10,12
+bkms-cli/test/e2e-script/testdata/appspec/annotations.txtar
+  h_2321bec5d80d15 1-16
+bkms-cli/test/e2e-script/testdata/appspec/dev-mode.txtar
+  h_2321bec5d80d15 1-18
+bkms-cli/test/e2e-script/testdata/appspec/edge.txtar
+  h_2321bec5d80d15 1-18
+bkms-cli/test/e2e-script/testdata/appspec/labels.txtar
+  h_2321bec5d80d15 1-16
+bkms-cli/test/e2e-script/testdata/appspec/lifecycle.txtar
+  h_2321bec5d80d15 1-16
+bkms-cli/test/e2e-script/testdata/appspec/probe.txtar
+  h_2321bec5d80d15 1-24
+bkms-cli/test/e2e-script/testdata/appspec/resources.txtar
+  h_2321bec5d80d15 1,8-9,17,24,27
+bkms-cli/test/e2e-script/testdata/appspec/start-command.txtar
+  h_2321bec5d80d15 1-19
+bkms-cli/test/e2e-script/testdata/appspec/underlay-ip.txtar
+  h_2321bec5d80d15 1-19
+bkms-cli/test/e2e-script/testdata/appspec/update-strategy.txtar
+  h_2321bec5d80d15 1-17
+bkms-cli/test/e2e-script/testdata/appspec/view.txtar
+  h_2321bec5d80d15 1-26
+bkms-cli/test/e2e-script/testdata/base/auth.txtar
+  h_2321bec5d80d15 9,13
+bkms-cli/test/e2e-script/testdata/base/env.txtar
+  h_2321bec5d80d15 18,20,22,25,27,29,32
+bkms-cli/test/e2e-script/testdata/deploy/build.txtar
+  h_2321bec5d80d15 9,11,13,15
+bkms-cli/test/e2e-script/testdata/deploy/deploy.txtar
+  h_2321bec5d80d15 7,9,17,22,24,26,28,30,32,34,36,38
+bkms-cli/test/e2e-script/testdata/envvar/crud.txtar
+  h_2321bec5d80d15 13,15,22-23,33-34,44-45,60,62,64
+bkms-cli/test/e2e-script/testdata/extension/cfg-file.txtar
+  h_2321bec5d80d15 10,12,14,16,25,27,29,31,33,35,37,39
+bkms-cli/test/e2e-script/testdata/extension/component.txtar
+  h_2321bec5d80d15 9,11,13,15,17,19
+bkms-cli/test/e2e-script/testdata/extension/polaris.txtar
+  h_2321bec5d80d15 9,11,13,15,17,19,21,23,25,27,29,31
+bkms-cli/test/e2e-script/testdata/unauth/app.txtar
+  h_2321bec5d80d15 4
+bkms-cli/test/e2e-script/testdata/unauth/env.txtar
+  h_2321bec5d80d15 4
+bkms-cli/test/e2e-script/testdata/unauth/workspace.txtar
+  h_2321bec5d80d15 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "85dda332fb4fa1f786e052a5769dbcf900bed90b",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

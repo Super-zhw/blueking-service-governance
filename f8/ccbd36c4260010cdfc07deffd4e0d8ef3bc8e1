@@ -1,0 +1,16 @@
+bkms-cli/test/e2e-script/testdata/appspec/annotations.txtar
+  h_2321bec5d80d15 8-9,12-13
+bkms-cli/test/e2e-script/testdata/appspec/labels.txtar
+  h_2321bec5d80d15 8-9,12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f8ccbd36c4260010cdfc07deffd4e0d8ef3bc8e1",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

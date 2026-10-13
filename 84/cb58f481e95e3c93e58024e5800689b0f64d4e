@@ -1,0 +1,14 @@
+bkms-cli/pkg/handler/appspec/edit.go
+  h_2321bec5d80d15 95,105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "84cb58f481e95e3c93e58024e5800689b0f64d4e",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
