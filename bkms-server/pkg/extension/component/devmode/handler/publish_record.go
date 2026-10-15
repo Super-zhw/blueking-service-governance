@@ -73,6 +73,7 @@ func (h *Handler) CreateDevModePublishRecords(c *gin.Context) {
 		return devmode.PublishRecord{
 			AppID:      app.ID,
 			EnvName:    uriInput.EnvName,
+			Action:     devmode.PublishActionPublish,
 			Instance:   result.Instance,
 			BinaryName: input.BinaryName,
 			FileSize:   input.FileSize,

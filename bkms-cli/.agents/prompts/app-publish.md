@@ -60,3 +60,34 @@ bkms-cli app publish --app myapp --env test -f ./bin/server --all
 - `--instance-ids` 和 `--all` 互斥，二选一。
 - 未使用 `--all` 时，必须显式提供 `--instance-ids`。
 - 目标环境必须是已开启 dev mode 的非正式环境。
+
+## publish restart
+
+`publish restart` 只重启开发模式容器内的业务进程，不替换二进制，Pod 不重建。服务端在每个目标实例内停止业务进程，再由 dev mode 的 monitor 重新拉起，等进程起来后才返回结果。多个实例并行执行，耗时取决于最慢的实例。
+
+目标必须且只能用 `--env` 或 `--env-type` 中的一个来指定：
+
+- `--env`：一个或多个环境，重启其中所有 Running 实例。任一环境不满足条件（未开启 dev mode、正式环境、没有 Running 实例等）时整个请求报错，不会执行任何重启。
+- `--env-type`：一个或多个环境类型（development / test / staging），重启匹配环境下的所有 Running 实例。不满足条件的环境会被跳过，并输出跳过原因。
+- `--instance-ids`：只重启指定实例，必须搭配单个 `--env` 使用。
+
+```bash
+# 重启多个环境的全部 Running 实例
+bkms-cli app publish restart --app myapp --env stage,test
+
+# 按环境类型重启
+bkms-cli app publish restart --app myapp --env-type development,test
+
+# 重启指定环境下的指定实例
+bkms-cli app publish restart --app myapp --env stage --instance-ids pod-1,pod-2
+```
+
+只要有实例重启失败，命令就以非 0 退出码结束。
+
+## publish history
+
+`publish history` 查询指定环境的发布和重启记录，每个实例一条，按时间倒序排列。`ACTION` 列用来区分 `publish` 和 `restart`。
+
+```bash
+bkms-cli app publish history --app myapp --env stage
+```

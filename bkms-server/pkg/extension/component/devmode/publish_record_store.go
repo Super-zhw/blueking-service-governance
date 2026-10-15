@@ -45,7 +45,10 @@ type PublishRecordStore interface {
 		page, pageSize int64,
 	) ([]PublishRecord, int64, error)
 
-	// ListLatestByInstance 返回指定实例列表中每个实例的最新一条发布记录
+	// UpdateStatus 更新指定记录的状态和附加信息
+	UpdateStatus(ctx context.Context, id string, status PublishStatus, message string) error
+
+	// ListLatestByInstance 返回指定实例列表中每个实例的最新一条发布记录（不含 restart 记录）
 	ListLatestByInstance(
 		ctx context.Context,
 		appID, envName string,
@@ -138,7 +141,32 @@ func (s *PublishRecordStoreMongo) List(
 	return records, total, nil
 }
 
+// UpdateStatus 更新指定记录的状态和附加信息
+func (s *PublishRecordStoreMongo) UpdateStatus(
+	ctx context.Context, id string, status PublishStatus, message string,
+) error {
+	oid, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.Wrapf(err, "invalid devmode publish record id %s", id)
+	}
+
+	update := bson.M{"$set": bson.M{
+		"status":    status,
+		"message":   message,
+		"updatedAt": time.Now(),
+	}}
+	ret, err := s.collection.UpdateByID(ctx, oid, update)
+	if err != nil {
+		return errors.Wrapf(err, "update devmode publish record %s", id)
+	}
+	if ret.MatchedCount == 0 {
+		return errors.Errorf("devmode publish record %s not found", id)
+	}
+	return nil
+}
+
 // ListLatestByInstance 返回指定实例列表中每个实例的最新一条发布记录
+// restart 记录不涉及二进制变更，不参与「最近一次发布」的计算
 func (s *PublishRecordStoreMongo) ListLatestByInstance(
 	ctx context.Context,
 	appID, envName string,
@@ -153,6 +181,8 @@ func (s *PublishRecordStoreMongo) ListLatestByInstance(
 			"appID":    appID,
 			"envName":  envName,
 			"instance": bson.M{"$in": instanceIDs},
+			// 历史数据无 action 字段，$ne 可同时匹配字段缺失的记录
+			"action": bson.M{"$ne": PublishActionRestart},
 		}},
 		bson.M{"$sort": bson.M{"createdAt": -1}},
 		bson.M{"$group": bson.M{

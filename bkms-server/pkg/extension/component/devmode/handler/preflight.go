@@ -101,7 +101,9 @@ func (h *Handler) DevModePublishPreflight(c *gin.Context) {
 	}
 
 	// 解析实例列表
-	instanceIDs, err := h.resolveInstanceIDs(ctx, uriInput.AppID, uriInput.EnvName, bodyInput)
+	instanceIDs, err := h.resolveInstanceIDs(
+		ctx, uriInput.AppID, uriInput.EnvName, bodyInput.InstanceIDs, bodyInput.PublishAll,
+	)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -131,11 +133,8 @@ func (h *Handler) validateEnv(
 	ctx context.Context, appID, envName string,
 ) (*bkmsapp.Application, *envmodel.Environment, error) {
 	// 检查集群 API 地址是否配置
-	if config.G.BCS.BaseUrl == "" {
-		return nil, nil, bkerrs.New(
-			bkerrs.ErrCodeInvalidRequest,
-			"publish is not supported: cluster API base URL is not configured",
-		)
+	if err := checkClusterAPIConfigured(); err != nil {
+		return nil, nil, err
 	}
 
 	// 校验 app 和 env（包含权限检查）
@@ -144,23 +143,41 @@ func (h *Handler) validateEnv(
 		return nil, nil, err
 	}
 
+	if err = checkEnvSupported(env); err != nil {
+		return nil, nil, err
+	}
+	return app, env, nil
+}
+
+// checkClusterAPIConfigured 检查集群 API 地址是否配置
+func checkClusterAPIConfigured() error {
+	if config.G.BCS.BaseUrl == "" {
+		return bkerrs.New(
+			bkerrs.ErrCodeInvalidRequest,
+			"publish is not supported: cluster API base URL is not configured",
+		)
+	}
+	return nil
+}
+
+// checkEnvSupported 校验环境是否支持 devmode 操作：非 production 且集群信息完整。
+func checkEnvSupported(env *envmodel.Environment) error {
 	// 拒绝 production 环境
 	if bkmsenv.IsProductionType(bkmsenv.Type(env.Type)) {
-		return nil, nil, bkerrs.Errorf(
+		return bkerrs.Errorf(
 			bkerrs.ErrCodeInvalidRequest,
-			"environment %s is a production environment, publish is not allowed", envName,
+			"environment %s is a production environment, publish is not allowed", env.Name,
 		)
 	}
 
 	// 校验集群信息完整性
 	if env.Cluster.ClusterID == "" || env.Cluster.Namespace == "" {
-		return nil, nil, bkerrs.New(
+		return bkerrs.New(
 			bkerrs.ErrCodeInvalidRequest,
 			"publish is not supported: cluster configuration is incomplete (clusterID or namespace is empty)",
 		)
 	}
-
-	return app, env, nil
+	return nil
 }
 
 // getEffectiveDevMode 获取并校验 devmode 生效配置。
@@ -233,9 +250,9 @@ func buildBCSUserTokenURL(bcsProjectCode string) string {
 }
 
 // resolveInstanceIDs 根据请求参数解析目标实例 ID 列表。
-// publishAll=true 时返回所有 Running 状态的 Pod 名称；否则校验指定的 instanceIDs 是否存在。
+// all=true 时返回所有 Running 状态的 Pod 名称；否则校验指定的 instanceIDs 是否存在。
 func (h *Handler) resolveInstanceIDs(
-	ctx context.Context, appID, envName string, input slz.PreflightBodyInput,
+	ctx context.Context, appID, envName string, instanceIDs []string, all bool,
 ) ([]string, error) {
 	// 获取最新部署记录
 	record, err := h.registry.AppModelDeployRecordStore.GetLatest(ctx, appID, envName, "")
@@ -254,10 +271,10 @@ func (h *Handler) resolveInstanceIDs(
 		)
 	}
 
-	if input.PublishAll {
+	if all {
 		return h.getAllRunningInstanceIDs(pods.Items)
 	}
-	return h.validateSpecifiedInstanceIDs(pods.Items, input.InstanceIDs)
+	return h.validateSpecifiedInstanceIDs(pods.Items, instanceIDs)
 }
 
 // getAllRunningInstanceIDs 从 Pod 列表中筛选所有 Running 状态的实例 ID。
@@ -280,7 +297,10 @@ func (h *Handler) validateSpecifiedInstanceIDs(
 	items []unstructured.Unstructured, instanceIDs []string,
 ) ([]string, error) {
 	if len(instanceIDs) == 0 {
-		return nil, bkerrs.New(bkerrs.ErrCodeInvalidRequest, "instanceIDs is required when publishAll is false")
+		return nil, bkerrs.New(
+			bkerrs.ErrCodeInvalidRequest,
+			"instanceIDs is required when not targeting all instances",
+		)
 	}
 
 	podNameSet := make(map[string]struct{}, len(items))
@@ -307,6 +327,11 @@ func (h *Handler) validateSpecifiedInstanceIDs(
 	return instanceIDs, nil
 }
 
+// buildClusterAddress 构造集群 API 完整地址，如 {baseUrl}/clusters/{clusterID}/
+func buildClusterAddress(clusterID string) string {
+	return fmt.Sprintf("%s/clusters/%s/", strings.TrimRight(config.G.BCS.BaseUrl, "/"), clusterID)
+}
+
 // buildPreflightOutput 组装 preflight 响应数据。
 func buildPreflightOutput(
 	env *envmodel.Environment,
@@ -314,7 +339,7 @@ func buildPreflightOutput(
 	token string,
 	instanceIDs []string,
 ) *slz.PreflightOutput {
-	address := fmt.Sprintf("%s/clusters/%s/", strings.TrimRight(config.G.BCS.BaseUrl, "/"), env.Cluster.ClusterID)
+	address := buildClusterAddress(env.Cluster.ClusterID)
 
 	var workPath, mountPath string
 	if devModeSpec.WorkPath != nil {

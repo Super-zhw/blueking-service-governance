@@ -69,6 +69,22 @@ var _ = Describe("ListHistory", func() {
 		Expect(rows[0].MD5).To(Equal("m1"))
 		Expect(rows[0].Status).To(Equal("success"))
 		Expect(rows[0].Operator).To(Equal("admin"))
+		// 历史数据无 action 字段，按 publish 展示
+		Expect(rows[0].Action).To(Equal("publish"))
+	})
+
+	It("shows restart records without file size", func() {
+		cli.EXPECT().
+			ListDevModePublishRecords(mock.Anything, appID, envName, "").
+			Return([]client.DevModePublishRecord{
+				{Action: "restart", Instance: "pod-1", Status: "success", Operator: "admin"},
+			}, nil)
+
+		rows, err := ListHistory(ctx, cli, appID, envName, "")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(rows).To(HaveLen(1))
+		Expect(rows[0].Action).To(Equal("restart"))
+		Expect(rows[0].FileSize).To(BeEmpty())
 	})
 })
 

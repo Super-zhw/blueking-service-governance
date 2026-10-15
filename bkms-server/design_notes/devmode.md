@@ -181,6 +181,62 @@ restart.sh <random_name> <md5>
   8. 清除停止标志
 ```
 
+## 进程重启（publish restart）
+
+不替换二进制，仅「杀死业务进程 → 由 monitor 重新拉起」，过程中 Pod 不重建。入口为 `bkms-cli app publish restart`，
+由 server 同步完成 Pod 内命令执行，不新增脚本，trpc / taf 共用同一流程。
+
+### 接口
+
+`POST /api/v1/devmode/{appID}/restart`（同步接口），请求体按 `targetType` 区分三种目标：
+
+```json
+{"targetType": "envs",      "envNames": ["stage", "test"]}
+{"targetType": "envTypes",  "envTypes": ["development", "test"]}
+{"targetType": "instances", "envName": "stage", "instanceIDs": ["pod1", "pod2"]}
+```
+
+| 类型 | 目标 | 不满足条件时（生产环境 / 集群配置不完整 / 未启用 devmode / 无 Running 实例） |
+|------|------|------|
+| `envs` | 各环境下所有 Running 实例 | 严格模式：整个请求返回错误，不执行任何重启 |
+| `envTypes` | 匹配类型的环境下所有 Running 实例 | 请求中含 `production` 直接拒绝；其余不满足条件的环境跳过，并在 `skipped` 中返回原因 |
+| `instances` | 指定环境下的指定实例 | 严格模式；实例必须属于该环境 |
+
+集群访问使用当前用户的 BCS Token（与 publish preflight 相同方式获取），仅在请求内存中使用。
+
+### 单实例执行流程
+
+所有环境的目标 Pod 汇总后并行执行（并行上限 10），每个 Pod：
+
+```
+a. cat pid.conf                                   记录旧 PID（仅用于展示）
+b. source utils.sh && { bash stop.sh; rm -f "${PID_CONF}"; clear_stop_flag; }
+                                                  ctx 不随请求取消，独立超时
+c. 轮询 pid.conf                                  文件出现即视为成功，内容即新 PID（超时 30s）
+d. 更新发布记录为 success / failed
+```
+
+- 先 `source utils.sh`，失败则不执行 stop，避免「进程已被杀、flag 无法清除」
+- 删除 `pid.conf`：stop.sh 不会删除该文件，不删则 c 步会误判成功；删除后只有 `start.sh` 在确认进程启动后才会重新写入
+- stop.sh 失败也会删除 `pid.conf` 并清除 flag，让 monitor 兜底；该实例直接记为失败，不再轮询
+- 拉起由 monitor 完成（发现进程不在且无 stop flag → 调用 `start.sh`），保证业务进程 stdout 指向容器而非 exec 会话
+
+### 记录
+
+复用发布记录表 `devmode_publish_records`：
+
+- 新增 `action` 字段：`publish` / `restart`，历史数据无该字段，按 `publish` 处理
+- 新增状态 `pending` / `running`：请求开始时为所有实例写入 `pending`，执行时更新为 `running`，结束时更新为 `success` / `failed`
+- `ListLatestByInstance`（实例列表展示最近一次发布信息）排除 `restart` 记录
+- `publish history` 同时展示两类记录，以 Action 列区分
+
+### 已知风险（测试时留意）
+
+- 网关 / ingress 超时；CLI 侧 restart 请求使用独立 client（不重试、超时 90s）
+- server 执行中途重启会导致记录停留在 `running`
+- 同一实例上 publish 与 restart 并发执行时会相互影响 stop flag 与 `pid.conf`
+- 进程空窗期可能触发 liveness probe 导致容器重启
+
 ## 全局错误定义
 
 | 错误变量 | 说明 |

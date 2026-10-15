@@ -13212,6 +13212,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/devmode/{appID}/restart": {
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "devmode"
+                ],
+                "summary": "开发模式进程重启",
+                "operationId": "RestartDevModeProcesses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "进程重启请求体",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.RestartInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.RestartOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/env-var-templates/app": {
             "get": {
                 "security": [
@@ -19242,7 +19303,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "mountedEnvNames": {
-                    "description": "创建时可选设置挂载环境范围；nil = 全环境生效，空数组 = 不挂载任何环境。环境名格式与路径参数 envName 相同。",
+                    "description": "创建时可选设置挂载环境范围；nil = 全环境生效，空数组 = 不挂载任何环境。\n环境名格式与路径参数 envName 相同。",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -30294,6 +30355,9 @@ const docTemplate = `{
         "serializer.PublishRecordOutputObj": {
             "type": "object",
             "properties": {
+                "action": {
+                    "type": "string"
+                },
                 "binaryName": {
                     "type": "string"
                 },
@@ -31014,6 +31078,137 @@ const docTemplate = `{
                 "replicas": {
                     "type": "integer",
                     "minimum": 0
+                }
+            }
+        },
+        "serializer.RestartData": {
+            "type": "object",
+            "properties": {
+                "envs": {
+                    "description": "Envs 按环境分组的实例重启结果",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.RestartEnvResult"
+                    }
+                },
+                "skipped": {
+                    "description": "Skipped 被跳过的环境（仅 targetType=envTypes 时可能出现）",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.RestartSkippedEnv"
+                    }
+                }
+            }
+        },
+        "serializer.RestartEnvResult": {
+            "type": "object",
+            "properties": {
+                "envName": {
+                    "description": "EnvName 环境名称",
+                    "type": "string"
+                },
+                "envType": {
+                    "description": "EnvType 环境类型",
+                    "type": "string"
+                },
+                "instances": {
+                    "description": "Instances 实例重启结果",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.RestartInstanceResult"
+                    }
+                }
+            }
+        },
+        "serializer.RestartInput": {
+            "type": "object",
+            "required": [
+                "targetType"
+            ],
+            "properties": {
+                "envName": {
+                    "description": "EnvName 环境名称（targetType=instances 时必填）",
+                    "type": "string"
+                },
+                "envNames": {
+                    "description": "EnvNames 环境名称列表（targetType=envs 时必填）",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "envTypes": {
+                    "description": "EnvTypes 环境类型列表（targetType=envTypes 时必填，不允许 production）",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "instanceIDs": {
+                    "description": "InstanceIDs 实例 ID 列表（targetType=instances 时必填，须属于 EnvName 环境）",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "targetType": {
+                    "description": "TargetType 目标类型：envs / envTypes / instances",
+                    "type": "string",
+                    "enum": [
+                        "envs",
+                        "envTypes",
+                        "instances"
+                    ]
+                }
+            }
+        },
+        "serializer.RestartInstanceResult": {
+            "type": "object",
+            "properties": {
+                "instance": {
+                    "description": "Instance 实例（pod）名称",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Message 结果说明",
+                    "type": "string"
+                },
+                "newPID": {
+                    "description": "NewPID 重启后的业务进程 PID",
+                    "type": "string"
+                },
+                "oldPID": {
+                    "description": "OldPID 重启前的业务进程 PID",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status 重启结果：success / failed",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.RestartOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.RestartData"
+                }
+            }
+        },
+        "serializer.RestartSkippedEnv": {
+            "type": "object",
+            "properties": {
+                "envName": {
+                    "description": "EnvName 环境名称",
+                    "type": "string"
+                },
+                "envType": {
+                    "description": "EnvType 环境类型",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "Reason 跳过原因",
+                    "type": "string"
                 }
             }
         },

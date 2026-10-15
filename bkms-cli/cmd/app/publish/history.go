@@ -36,8 +36,8 @@ func newHistoryCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "history",
-		Short: "List dev mode publish history records",
-		Long: `List dev mode publish history records for the specified app and environment.
+		Short: "List dev mode publish and restart history records",
+		Long: `List dev mode publish and restart history records for the specified app and environment.
 
 Each record corresponds to one instance (pod). Records are returned in
 reverse-chronological order.`,

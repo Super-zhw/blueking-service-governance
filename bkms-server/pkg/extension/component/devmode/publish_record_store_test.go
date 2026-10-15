@@ -185,5 +185,101 @@ var _ = Describe("PublishRecordStoreMongo", func() {
 			Expect(latest).To(HaveLen(1))
 			Expect(latest).To(HaveKey("pod-1"))
 		})
+
+		It("ignores restart records", func() {
+			appID := "test-app-" + stringx.Random(6)
+			envName := "staging"
+
+			// 历史数据无 action 字段
+			_, err := store.Create(ctx, []devmode.PublishRecord{
+				{
+					AppID: appID, EnvName: envName, Instance: "pod-1",
+					BinaryName: "v1", MD5: "m1",
+					Status: devmode.PublishStatusSuccess, Operator: "admin",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			time.Sleep(10 * time.Millisecond)
+
+			// pod-1 之后进行了 restart；pod-2 只有 restart 记录
+			_, err = store.Create(ctx, []devmode.PublishRecord{
+				{
+					AppID: appID, EnvName: envName, Instance: "pod-1", Action: devmode.PublishActionRestart,
+					Status: devmode.PublishStatusSuccess, Operator: "admin",
+				},
+				{
+					AppID: appID, EnvName: envName, Instance: "pod-2", Action: devmode.PublishActionRestart,
+					Status: devmode.PublishStatusSuccess, Operator: "admin",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			latest, err := store.ListLatestByInstance(ctx, appID, envName, []string{"pod-1", "pod-2"})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(latest).To(HaveLen(1))
+			Expect(latest["pod-1"].BinaryName).To(Equal("v1"))
+			Expect(latest["pod-1"].GetAction()).To(Equal(devmode.PublishActionPublish))
+		})
+	})
+
+	Describe("List with restart records", func() {
+		It("returns both publish and restart records", func() {
+			appID := "test-app-" + stringx.Random(6)
+			envName := "staging"
+
+			_, err := store.Create(ctx, []devmode.PublishRecord{
+				{
+					AppID: appID, EnvName: envName, Instance: "pod-1", Action: devmode.PublishActionPublish,
+					BinaryName: "v1", MD5: "m1", Status: devmode.PublishStatusSuccess, Operator: "admin",
+				},
+				{
+					AppID: appID, EnvName: envName, Instance: "pod-1", Action: devmode.PublishActionRestart,
+					Status: devmode.PublishStatusSuccess, Operator: "admin",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			records, total, err := store.List(ctx, appID, envName, "", 1, 10)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(total).To(Equal(int64(2)))
+			actions := []devmode.PublishAction{records[0].GetAction(), records[1].GetAction()}
+			Expect(actions).To(ConsistOf(devmode.PublishActionPublish, devmode.PublishActionRestart))
+		})
+	})
+
+	Describe("UpdateStatus", func() {
+		It("updates status and message", func() {
+			appID := "test-app-" + stringx.Random(6)
+			envName := "staging"
+
+			ids, err := store.Create(ctx, []devmode.PublishRecord{
+				{
+					AppID: appID, EnvName: envName, Instance: "pod-1", Action: devmode.PublishActionRestart,
+					Status: devmode.PublishStatusPending, Operator: "admin",
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			err = store.UpdateStatus(ctx, ids[0], devmode.PublishStatusFailed, "boom")
+			Expect(err).NotTo(HaveOccurred())
+
+			records, _, err := store.List(ctx, appID, envName, "", 1, 10)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(records).To(HaveLen(1))
+			Expect(records[0].Status).To(Equal(devmode.PublishStatusFailed))
+			Expect(records[0].Message).To(Equal("boom"))
+			Expect(records[0].UpdatedAt).To(BeTemporally(">=", records[0].CreatedAt))
+		})
+
+		It("returns error when record not found", func() {
+			err := store.UpdateStatus(ctx, "000000000000000000000000", devmode.PublishStatusFailed, "")
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("returns error for invalid id", func() {
+			err := store.UpdateStatus(ctx, "invalid", devmode.PublishStatusFailed, "")
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })

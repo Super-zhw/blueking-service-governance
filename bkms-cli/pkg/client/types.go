@@ -50,6 +50,12 @@ type Client interface {
 		ctx context.Context,
 		appID, envName, keyword string,
 	) ([]DevModePublishRecord, error)
+	// RestartDevModeProcesses 开发模式进程重启：stop 业务进程后由 monitor 重新拉起，pod 不重建
+	RestartDevModeProcesses(
+		ctx context.Context,
+		appID string,
+		opts DevModeRestartOptions,
+	) (*DevModeRestartData, error)
 
 	// ---------- 工作空间 ----------
 

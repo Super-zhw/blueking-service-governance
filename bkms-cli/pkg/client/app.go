@@ -100,6 +100,8 @@ type DevModePublishResult struct {
 type DevModePublishRecord struct {
 	// ID 发布记录 ID
 	ID string `json:"id" yaml:"id"`
+	// Action 操作类型：publish / restart
+	Action string `json:"action" yaml:"action"`
 	// Instance 目标实例（pod）名称
 	Instance string `json:"instance" yaml:"instance"`
 	// BinaryName 发布的二进制名称
@@ -118,6 +120,67 @@ type DevModePublishRecord struct {
 	CreatedAt string `json:"createdAt" yaml:"createdAt"`
 	// UpdatedAt 更新时间
 	UpdatedAt string `json:"updatedAt" yaml:"updatedAt"`
+}
+
+// 开发模式进程重启目标类型
+const (
+	// DevModeRestartTargetEnvs 按环境名称重启
+	DevModeRestartTargetEnvs = "envs"
+	// DevModeRestartTargetEnvTypes 按环境类型重启
+	DevModeRestartTargetEnvTypes = "envTypes"
+	// DevModeRestartTargetInstances 重启指定环境下的指定实例
+	DevModeRestartTargetInstances = "instances"
+)
+
+// DevModeRestartOptions 开发模式进程重启请求参数
+type DevModeRestartOptions struct {
+	// TargetType 目标类型：envs / envTypes / instances
+	TargetType string `json:"targetType"`
+	// EnvNames 环境名称列表（targetType=envs）
+	EnvNames []string `json:"envNames,omitempty"`
+	// EnvTypes 环境类型列表（targetType=envTypes）
+	EnvTypes []string `json:"envTypes,omitempty"`
+	// EnvName 环境名称（targetType=instances）
+	EnvName string `json:"envName,omitempty"`
+	// InstanceIDs 实例 ID 列表（targetType=instances）
+	InstanceIDs []string `json:"instanceIDs,omitempty"`
+}
+
+// DevModeRestartRespData 开发模式进程重启响应包装
+type DevModeRestartRespData struct {
+	Data *DevModeRestartData `json:"data"`
+}
+
+// DevModeRestartData 开发模式进程重启结果
+type DevModeRestartData struct {
+	// Envs 按环境分组的实例重启结果
+	Envs []DevModeRestartEnvResult `json:"envs"`
+	// Skipped 被跳过的环境
+	Skipped []DevModeRestartSkippedEnv `json:"skipped"`
+}
+
+// DevModeRestartEnvResult 单个环境的重启结果
+type DevModeRestartEnvResult struct {
+	EnvName   string                         `json:"envName"`
+	EnvType   string                         `json:"envType"`
+	Instances []DevModeRestartInstanceResult `json:"instances"`
+}
+
+// DevModeRestartInstanceResult 单个实例的重启结果
+type DevModeRestartInstanceResult struct {
+	Instance string `json:"instance"`
+	// Status 重启结果：success / failed
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	OldPID  string `json:"oldPID"`
+	NewPID  string `json:"newPID"`
+}
+
+// DevModeRestartSkippedEnv 被跳过的环境
+type DevModeRestartSkippedEnv struct {
+	EnvName string `json:"envName"`
+	EnvType string `json:"envType"`
+	Reason  string `json:"reason"`
 }
 
 // DevModePublishRecordsRespData 开发模式发布记录列表数据
