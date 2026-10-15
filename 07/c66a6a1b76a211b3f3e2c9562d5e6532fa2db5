@@ -1,0 +1,26 @@
+bkms-cli/pkg/handler/publish/handler.go
+  h_2321bec5d80d15 102-109
+bkms-cli/pkg/handler/publish/handler_test.go
+  h_2321bec5d80d15 101-118
+bkms-server/pkg/extension/component/devmode/handler/preflight.go
+  h_2321bec5d80d15 35,90,97,129,132,135,142,144,149,157,163,169,173,182,185
+bkms-server/pkg/workload/appmodelcore/appdefaults/resolve.go
+  h_2321bec5d80d15 24,29,51-57
+bkms-server/pkg/workload/appmodelcore/appdefaults/resolve_test.go
+  h_2321bec5d80d15 14,18,59-61,82-84,109-111,125-148,164-166
+bkms-server/pkg/workload/appmodelcore/taf/taf.go
+  h_2321bec5d80d15 112
+bkms-server/pkg/workload/appmodelcore/trpc/trpc.go
+  h_2321bec5d80d15 114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "07c66a6a1b76a211b3f3e2c9562d5e6532fa2db5",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
