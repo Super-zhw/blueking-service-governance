@@ -20,12 +20,14 @@ package deploy
 
 import (
 	"context"
+	"errors"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client/mocks"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/constant"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/clierr"
 )
 
 var _ = Describe("DeleteDeployBatch", func() {
@@ -48,6 +50,9 @@ var _ = Describe("DeleteDeployBatch", func() {
 		err := DeleteDeployBatch(ctx, cli, constant.AppTypeTrpc, "app-1", []string{"test", "staging"}, "")
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("env test"))
+		// 失败明细已逐环境输出，统一出口不再重复打印
+		var reported *clierr.ReportedError
+		Expect(errors.As(err, &reported)).To(BeTrue())
 	})
 
 	It("requires deploy-id for helm applications", func() {

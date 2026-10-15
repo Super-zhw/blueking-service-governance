@@ -125,6 +125,9 @@ func NewCreateCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&deploySpecFile, "deploy-spec-file", "f", "", "deploy spec file path")
 
 	_ = cmd.MarkFlagRequired("app")
+	// --env 与 --env-type 二选一，在发起请求前校验
+	cmd.MarkFlagsOneRequired("env", "env-type")
+	cmd.MarkFlagsMutuallyExclusive("env", "env-type")
 	_ = cmd.MarkFlagRequired("deploy-spec-file")
 
 	return cmd

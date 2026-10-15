@@ -43,6 +43,7 @@ func DeleteDeployBatch(
 	for _, env := range envNames {
 		if err := deleteDeploy(ctx, cli, appType, appID, env, deployID); err != nil {
 			errs = append(errs, fmt.Sprintf("env %s: %v", env, err))
+			console.Error("✗ Deployment delete failed for env: %s (%v)", env, err)
 		}
 	}
 	if len(errs) > 0 {

@@ -109,6 +109,9 @@ commas (e.g. --env-type test,development). Valid types: development | test | sta
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "skip confirmation prompt")
 
 	_ = cmd.MarkFlagRequired("app")
+	// --env 与 --env-type 二选一，在发起请求前校验
+	cmd.MarkFlagsOneRequired("env", "env-type")
+	cmd.MarkFlagsMutuallyExclusive("env", "env-type")
 
 	return cmd
 }
