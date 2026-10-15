@@ -1,0 +1,22 @@
+bkms-server/cmd/migration/app_bscpcfg_mgr.go
+  h_2321bec5d80d15 174,219-224
+bkms-server/design_notes/bscpcfg.md
+  h_2321bec5d80d15 11,15,54,69-71,75-77,89,93,95-96,98,105,115-116
+bkms-server/docs/apis/docs.go
+  h_2321bec5d80d15 22861-22864,28394-28395,32461
+bkms-server/docs/apis/swagger.json
+  h_2321bec5d80d15 22858-22861,28391-28392,32458
+bkms-server/docs/apis/swagger.yaml
+  h_2321bec5d80d15 2574-2576,6323-6324,9135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b53e4f2ebcd6db2a6b47fbcd6ec5cd4c154a7bf1",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

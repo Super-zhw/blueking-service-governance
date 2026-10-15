@@ -1,0 +1,64 @@
+bkms-cli/AGENTS.md
+  h_2321bec5d80d15 72-75
+bkms-cli/Makefile
+  h_2321bec5d80d15 96,100
+bkms-cli/test/e2e-script/README.md
+  h_2321bec5d80d15 1-47
+bkms-cli/test/e2e-script/cmds.go
+  h_2321bec5d80d15 30,39,62,95-96
+bkms-cli/test/e2e-script/e2e_test.go
+  h_2321bec5d80d15 20,24,30-41,44-52,54-59,61-67
+bkms-cli/test/e2e-script/setup.go
+  h_2321bec5d80d15 37,47,66,69,99-100,136-137,158-159,173-174,177-178,200-201
+bkms-cli/test/e2e-script/testdata/app/appspec.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/app/create-validate.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/app/crud.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/app/image.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/app/instance.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/app/list.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/base/auth.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/base/config.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/base/env.txt
+  h_2321bec5d80d15 1,11-17
+bkms-cli/test/e2e-script/testdata/base/root.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/base/workspace.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/deploy/build.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/deploy/deploy.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/envvar/crud.txt
+  h_2321bec5d80d15 1,11-12,40-48,57-58
+bkms-cli/test/e2e-script/testdata/extension/cfg-file.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/extension/component.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/extension/polaris.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/unauth/app.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/unauth/env.txt
+  h_2321bec5d80d15 1
+bkms-cli/test/e2e-script/testdata/unauth/workspace.txt
+  h_2321bec5d80d15 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9afc773c8e1df9035b9fde1ee7ee84c02a753084",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

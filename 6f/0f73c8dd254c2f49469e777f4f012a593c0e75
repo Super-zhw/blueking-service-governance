@@ -1,0 +1,22 @@
+bkms-server/pkg/deploy/appmodel/deployer.go
+  h_2321bec5d80d15 320-322,352-353,355,356,358-359,364-365,367-368,376,401,410,414,415-419,421,422-431
+bkms-server/pkg/deploy/appmodel/instances_update_test.go
+  h_2321bec5d80d15 31,130-177,204-381
+bkms-server/pkg/deploy/appmodel/pod_manager.go
+  h_2321bec5d80d15 112,119,121,123-125,127-134,137,139,141-142,144-149,152-153,157,163,165,168,170-172,197,199,201-202,204-211
+bkms-server/pkg/deploy/appmodel/resource_snapshot.go
+  h_2321bec5d80d15 26,36,92-169
+bkms-server/pkg/workload/instance/handler/instance.go
+  h_2321bec5d80d15 25,31,198,200,211-213,446-464
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6f0f73c8dd254c2f49469e777f4f012a593c0e75",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

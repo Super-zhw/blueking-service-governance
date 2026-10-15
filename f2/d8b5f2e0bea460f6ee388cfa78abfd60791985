@@ -1,0 +1,16 @@
+bkms-server/pkg/deploy/deploy_precheck_test.go
+  h_2321bec5d80d15 87,125,141-146
+bkms-server/pkg/workload/bscpcfg/builder.go
+  h_2321bec5d80d15 175-176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f2d8b5f2e0bea460f6ee388cfa78abfd60791985",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

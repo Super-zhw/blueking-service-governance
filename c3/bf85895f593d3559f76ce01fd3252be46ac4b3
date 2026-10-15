@@ -1,0 +1,66 @@
+.gitignore
+  h_2321bec5d80d15 72
+bkms-cli/AGENTS.md
+  h_2321bec5d80d15 24,72-79
+bkms-cli/Makefile
+  h_2321bec5d80d15 90-94,96,98,100
+bkms-cli/go.mod
+  h_2321bec5d80d15 23,73
+bkms-cli/test/e2e-script/cmds.go
+  h_2321bec5d80d15 19,26,29-35,39-53,56-63,67-101,105-125
+bkms-cli/test/e2e-script/e2e_test.go
+  h_2321bec5d80d15 19-32,37,40-46,49-56
+bkms-cli/test/e2e-script/setup.go
+  h_2321bec5d80d15 19,24,26-28,30-31,37-46,48-58,60-62,64-65,67-101,103,106-121,123-150,157,159,162-164,166-167,169-206,208-212,215-230,232
+bkms-cli/test/e2e-script/testdata-unauth/unauth-app.txt
+  h_2321bec5d80d15 1-5
+bkms-cli/test/e2e-script/testdata-unauth/unauth-env.txt
+  h_2321bec5d80d15 1-5
+bkms-cli/test/e2e-script/testdata-unauth/unauth-workspace.txt
+  h_2321bec5d80d15 1-2,4-5
+bkms-cli/test/e2e-script/testdata/app-appspec.txt
+  h_2321bec5d80d15 1-199,209-232
+bkms-cli/test/e2e-script/testdata/app-create-validate.txt
+  h_2321bec5d80d15 1-96
+bkms-cli/test/e2e-script/testdata/app-crud.txt
+  h_2321bec5d80d15 1-32
+bkms-cli/test/e2e-script/testdata/app-image.txt
+  h_2321bec5d80d15 1-8
+bkms-cli/test/e2e-script/testdata/app-instance.txt
+  h_2321bec5d80d15 1-11
+bkms-cli/test/e2e-script/testdata/app-list.txt
+  h_2321bec5d80d15 1-10
+bkms-cli/test/e2e-script/testdata/base-auth.txt
+  h_2321bec5d80d15 1-18
+bkms-cli/test/e2e-script/testdata/base-config.txt
+  h_2321bec5d80d15 1-10
+bkms-cli/test/e2e-script/testdata/base-env.txt
+  h_2321bec5d80d15 1-43
+bkms-cli/test/e2e-script/testdata/base-root.txt
+  h_2321bec5d80d15 1-18
+bkms-cli/test/e2e-script/testdata/base-workspace.txt
+  h_2321bec5d80d15 1-10
+bkms-cli/test/e2e-script/testdata/deploy-build.txt
+  h_2321bec5d80d15 1-21
+bkms-cli/test/e2e-script/testdata/deploy.txt
+  h_2321bec5d80d15 1-45
+bkms-cli/test/e2e-script/testdata/envvar.txt
+  h_2321bec5d80d15 1-70
+bkms-cli/test/e2e-script/testdata/extension-cfg-file.txt
+  h_2321bec5d80d15 1-48
+bkms-cli/test/e2e-script/testdata/extension-component.txt
+  h_2321bec5d80d15 1-25
+bkms-cli/test/e2e-script/testdata/extension-polaris.txt
+  h_2321bec5d80d15 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c3bf85895f593d3559f76ce01fd3252be46ac4b3",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

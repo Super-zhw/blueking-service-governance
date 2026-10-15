@@ -1,0 +1,38 @@
+bkms-cli/.agents/prompts/app-deploy.md
+  h_2321bec5d80d15 5,81-83,96-97,125-127,143-144,175-177,219-220,226,228,239-244,252-253
+bkms-cli/cmd/app/deploy/create.go
+  h_2321bec5d80d15 41-44,94-96,102,112,123-124
+bkms-cli/cmd/app/deploy/delete.go
+  h_2321bec5d80d15 22-23,37,43-46,48-51,59-65,68-70,79-90,100,105-107,116,118
+bkms-cli/cmd/app/deploy/list.go
+  h_2321bec5d80d15 35,50-53,72-75,79-81,100-101
+bkms-cli/cmd/app/deploy/update.go
+  h_2321bec5d80d15 38-41,108-110,121,131,142-143
+bkms-cli/pkg/constant/constant.go
+  h_2321bec5d80d15 85-90
+bkms-cli/pkg/handler/deploy/create.go
+  h_2321bec5d80d15 36-40,43-45
+bkms-cli/pkg/handler/deploy/delete.go
+  h_2321bec5d80d15 23-24,30,34-52,54-55
+bkms-cli/pkg/handler/deploy/delete_test.go
+  h_2321bec5d80d15 1-60
+bkms-cli/pkg/handler/deploy/env.go
+  h_2321bec5d80d15 26,29,32,34-39,42,49-51,54-56,64-157
+bkms-cli/pkg/handler/deploy/env_test.go
+  h_2321bec5d80d15 134-263
+bkms-cli/pkg/handler/deploy/list.go
+  h_2321bec5d80d15 32,34-37,40-42
+bkms-cli/pkg/handler/deploy/update.go
+  h_2321bec5d80d15 89-93,96-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bb9a2fd1db1a7ef1b81ed362e4b5f7d0df66ec0d",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}

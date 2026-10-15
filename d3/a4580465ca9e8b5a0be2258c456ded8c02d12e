@@ -1,0 +1,26 @@
+bkms-server/pkg/deploy/deploy_precheck_test.go
+  h_2321bec5d80d15 87,88,126,141,143-145,146-147,148,149,150,165-167
+bkms-server/pkg/workload/bscpcfg/builder.go
+  h_2321bec5d80d15 175-176
+bkms-server/pkg/workload/appmodelcore/workload/builder_test.go
+  h_2321bec5d80d15 89,100-102
+bkms-server/pkg/workload/appmodelcore/workload/taf_test.go
+  h_2321bec5d80d15 89,133,274,311
+bkms-server/pkg/workload/appmodelcore/workload/trpc_test.go
+  h_2321bec5d80d15 101,146,285,330,355,427
+bkms-server/pkg/workload/appmodelcore/workload/wl_suite_test.go
+  h_2321bec5d80d15 22,28-29,33,35,59-89
+bkms-server/pkg/workload/appmodelcore/workload/workload_test.go
+  h_2321bec5d80d15 137-140,156-159,221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d3a4580465ca9e8b5a0be2258c456ded8c02d12e",
+  "prompts": {},
+  "humans": {
+    "h_2321bec5d80d15": {
+      "author": "Super-zhw <1458070668@qq.com>"
+    }
+  }
+}
