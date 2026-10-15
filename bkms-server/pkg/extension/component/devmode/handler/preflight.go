@@ -32,6 +32,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode/serializer"
@@ -86,14 +87,14 @@ func (h *Handler) DevModePublishPreflight(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	// 校验环境配置
-	env, err := h.validateEnv(ctx, uriInput.AppID, uriInput.EnvName)
+	app, env, err := h.validateEnv(ctx, uriInput.AppID, uriInput.EnvName)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
 
 	// 获取 devmode 生效配置
-	devModeSpec, err := h.getEffectiveDevMode(ctx, uriInput.AppID, env.Name)
+	devModeSpec, err := h.getEffectiveDevMode(ctx, app, env.Name)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -125,27 +126,27 @@ func (h *Handler) DevModePublishPreflight(c *gin.Context) {
 }
 
 // validateEnv 校验基础设施配置、应用、环境和集群信息。
-// 返回环境信息，校验失败时返回 bkerrs 错误。
+// 返回应用和环境信息，校验失败时返回 bkerrs 错误。
 func (h *Handler) validateEnv(
 	ctx context.Context, appID, envName string,
-) (*envmodel.Environment, error) {
+) (*bkmsapp.Application, *envmodel.Environment, error) {
 	// 检查集群 API 地址是否配置
 	if config.G.BCS.BaseUrl == "" {
-		return nil, bkerrs.New(
+		return nil, nil, bkerrs.New(
 			bkerrs.ErrCodeInvalidRequest,
 			"publish is not supported: cluster API base URL is not configured",
 		)
 	}
 
 	// 校验 app 和 env（包含权限检查）
-	_, env, err := perm.ValidateAppEnvByName(ctx, h.registry, appID, envName, perm.TypeEdit)
+	app, env, err := perm.ValidateAppEnvByName(ctx, h.registry, appID, envName, perm.TypeEdit)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// 拒绝 production 环境
 	if bkmsenv.IsProductionType(bkmsenv.Type(env.Type)) {
-		return nil, bkerrs.Errorf(
+		return nil, nil, bkerrs.Errorf(
 			bkerrs.ErrCodeInvalidRequest,
 			"environment %s is a production environment, publish is not allowed", envName,
 		)
@@ -153,23 +154,23 @@ func (h *Handler) validateEnv(
 
 	// 校验集群信息完整性
 	if env.Cluster.ClusterID == "" || env.Cluster.Namespace == "" {
-		return nil, bkerrs.New(
+		return nil, nil, bkerrs.New(
 			bkerrs.ErrCodeInvalidRequest,
 			"publish is not supported: cluster configuration is incomplete (clusterID or namespace is empty)",
 		)
 	}
 
-	return env, nil
+	return app, env, nil
 }
 
 // getEffectiveDevMode 获取并校验 devmode 生效配置。
 // 返回 devmode 配置，未启用或获取失败时返回 bkerrs 错误。
 func (h *Handler) getEffectiveDevMode(
-	ctx context.Context, appID, envName string,
+	ctx context.Context, app *bkmsapp.Application, envName string,
 ) (*appspec.DevModeSpec, error) {
 	devModeSpec, err := appspec.GetEnvEffectiveSection(
 		ctx, h.registry.AppSpecStore, h.registry.AppModelStore,
-		appID, envName, appspec.DevModeSection,
+		app.ID, envName, appspec.DevModeSection,
 	)
 	if err != nil {
 		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "failed to get devmode configuration")
@@ -178,9 +179,10 @@ func (h *Handler) getEffectiveDevMode(
 	if devModeSpec == nil || devModeSpec.Enabled == nil || !*devModeSpec.Enabled {
 		return nil, bkerrs.Errorf(
 			bkerrs.ErrCodeInvalidRequest,
-			"devmode is not enabled for app %s in environment %s", appID, envName,
+			"devmode is not enabled for app %s in environment %s", app.ID, envName,
 		)
 	}
+	devModeSpec.SetPathsByAppType(app.Type)
 
 	return devModeSpec, nil
 }

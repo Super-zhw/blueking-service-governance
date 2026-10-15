@@ -11,9 +11,11 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	bkmsworkspace "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
+	componentdevmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appdefaults"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
 )
@@ -54,7 +56,9 @@ var _ = Describe("Application default resolution", func() {
 	})
 
 	It("uses platform defaults without persisting rules", func() {
-		resolved, err := appdefaults.Resolve(ctx, ruleStore, envStore, workspace.ID, "app-without-rules")
+		resolved, err := appdefaults.Resolve(
+			ctx, ruleStore, envStore, workspace.ID, "app-without-rules", bkmsapp.AppTypeTRPC,
+		)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Default.AppID).To(Equal("app-without-rules"))
 		Expect(resolved.Default.EnvName).To(Equal(appspec.DefaultEnvName))
@@ -75,7 +79,9 @@ var _ = Describe("Application default resolution", func() {
 		Expect(ruleStore.Create(ctx, resourcesRule(workspace.ID, "production"))).To(Succeed())
 		Expect(ruleStore.Create(ctx, devModeRule(workspace.ID, "production", true))).To(Succeed())
 
-		resolved, err := appdefaults.Resolve(ctx, ruleStore, envStore, workspace.ID, "app-combined-defaults")
+		resolved, err := appdefaults.Resolve(
+			ctx, ruleStore, envStore, workspace.ID, "app-combined-defaults", bkmsapp.AppTypeTRPC,
+		)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Environments).To(HaveLen(1))
 		spec := resolved.Environments[0]
@@ -100,7 +106,9 @@ var _ = Describe("Application default resolution", func() {
 		})
 		Expect(ruleStore.Create(ctx, devModeRule(workspace.ID, "production", true))).To(Succeed())
 
-		resolved, err := appdefaults.Resolve(ctx, ruleStore, envStore, workspace.ID, "app-matching-envs")
+		resolved, err := appdefaults.Resolve(
+			ctx, ruleStore, envStore, workspace.ID, "app-matching-envs", bkmsapp.AppTypeTRPC,
+		)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Environments).To(HaveLen(2))
 
@@ -112,6 +120,30 @@ var _ = Describe("Application default resolution", func() {
 		Expect(specs).To(HaveKey(productionB.Name))
 		Expect(*specs[productionA.Name].DevMode.Enabled).To(BeTrue())
 		Expect(*specs[productionB.Name].DevMode.Enabled).To(BeTrue())
+	})
+
+	It("derives devMode paths from the app type", func() {
+		development := dbfactory.EnvWithOpts(ctx, envService, &dbfactory.EnvOpts{
+			WorkspaceID: workspace.ID,
+			Type:        "development",
+		})
+		Expect(ruleStore.Create(ctx, devModeRule(workspace.ID, "development", true))).To(Succeed())
+
+		resolved, err := appdefaults.Resolve(
+			ctx, ruleStore, envStore, workspace.ID, "app-taf-dev-mode", bkmsapp.AppTypeTAF,
+		)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(resolved.Environments).To(HaveLen(1))
+		spec := resolved.Environments[0]
+		Expect(spec.EnvName).To(Equal(development.Name))
+		Expect(*spec.DevMode.Enabled).To(BeTrue())
+		Expect(*spec.DevMode.WorkPath).To(Equal(componentdevmode.TafWorkPath))
+		Expect(*spec.DevMode.MountPath).To(Equal(componentdevmode.TafMountPath))
+
+		rules, err := ruleStore.List(ctx, workspace.ID)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(rules).To(HaveLen(1))
+		Expect(rules[0].Spec.DevMode.WorkPath).To(BeNil())
 	})
 
 	It("applies one rule to every environment type it lists", func() {
@@ -129,7 +161,9 @@ var _ = Describe("Application default resolution", func() {
 		})
 		Expect(ruleStore.Create(ctx, resourcesRule(workspace.ID, "production", "staging"))).To(Succeed())
 
-		resolved, err := appdefaults.Resolve(ctx, ruleStore, envStore, workspace.ID, "app-multi-env-types")
+		resolved, err := appdefaults.Resolve(
+			ctx, ruleStore, envStore, workspace.ID, "app-multi-env-types", bkmsapp.AppTypeTRPC,
+		)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Environments).To(HaveLen(2))
 

@@ -21,11 +21,12 @@ type ResolvedAppSpec struct {
 }
 
 // Resolve builds the AppSpecs used to initialize a new AppModel application.
+// appType is used to derive devMode paths, which are not configurable in rules.
 func Resolve(
 	ctx context.Context,
 	ruleStore RuleStore,
 	envStore envmodel.EnvironmentStore,
-	workspaceID, appID string,
+	workspaceID, appID, appType string,
 ) (*ResolvedAppSpec, error) {
 	rules, err := ruleStore.List(ctx, workspaceID)
 	if err != nil {
@@ -46,6 +47,13 @@ func Resolve(
 			if lo.Contains(rule.EnvTypes, env.Type) {
 				rule.applyTo(spec)
 			}
+		}
+		if spec.DevMode != nil {
+			// devMode rules only carry enabled; workPath/mountPath are derived from the app type.
+			// Copy before setting paths because applyTo shares the section pointer with the rule.
+			devMode := *spec.DevMode
+			devMode.SetPathsByAppType(appType)
+			spec.DevMode = &devMode
 		}
 		if spec.HasConfiguredSections() {
 			envSpecs = append(envSpecs, spec)

@@ -111,6 +111,7 @@ func (s *Service) Create(ctx context.Context, app *bkmsapp.Application, params *
 		s.envStore,
 		app.WorkspaceID,
 		app.ID,
+		app.Type,
 	)
 	if err != nil {
 		return errors.Wrap(err, "resolve application defaults")
