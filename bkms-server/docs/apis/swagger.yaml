@@ -8194,35 +8194,44 @@ definitions:
           $ref: '#/definitions/serializer.RestartInstanceResult'
         type: array
     type: object
+  serializer.RestartEnvTypesTarget:
+    properties:
+      types:
+        description: Types 环境类型列表，不允许 production
+        items:
+          type: string
+        minItems: 1
+        type: array
+        uniqueItems: true
+    required:
+    - types
+    type: object
+  serializer.RestartEnvsTarget:
+    properties:
+      names:
+        description: Names 环境名称列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+        uniqueItems: true
+    required:
+    - names
+    type: object
   serializer.RestartInput:
     properties:
-      envName:
-        description: EnvName 环境名称（targetType=instances 时必填）
-        type: string
-      envNames:
-        description: EnvNames 环境名称列表（targetType=envs 时必填）
-        items:
-          type: string
-        type: array
       envTypes:
-        description: EnvTypes 环境类型列表（targetType=envTypes 时必填，不允许 production）
-        items:
-          type: string
-        type: array
-      instanceIDs:
-        description: InstanceIDs 实例 ID 列表（targetType=instances 时必填，须属于 EnvName 环境）
-        items:
-          type: string
-        type: array
-      targetType:
-        description: TargetType 目标类型：envs / envTypes / instances
-        enum:
-        - envs
-        - envTypes
-        - instances
-        type: string
-    required:
-    - targetType
+        allOf:
+        - $ref: '#/definitions/serializer.RestartEnvTypesTarget'
+        description: EnvTypes 按环境类型重启（匹配环境下所有 Running 实例）
+      envs:
+        allOf:
+        - $ref: '#/definitions/serializer.RestartEnvsTarget'
+        description: Envs 按环境名称重启（各环境下所有 Running 实例）
+      instances:
+        allOf:
+        - $ref: '#/definitions/serializer.RestartInstancesTarget'
+        description: Instances 重启指定环境下的指定实例
     type: object
   serializer.RestartInstanceResult:
     properties:
@@ -8241,6 +8250,22 @@ definitions:
       status:
         description: Status 重启结果：success / failed
         type: string
+    type: object
+  serializer.RestartInstancesTarget:
+    properties:
+      envName:
+        description: EnvName 环境名称
+        type: string
+      instanceIDs:
+        description: InstanceIDs 实例 ID 列表，须属于 EnvName 环境
+        items:
+          type: string
+        minItems: 1
+        type: array
+        uniqueItems: true
+    required:
+    - envName
+    - instanceIDs
     type: object
   serializer.RestartOutput:
     properties:
@@ -18247,10 +18272,6 @@ paths:
             $ref: '#/definitions/serializer.RestartOutput'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-        "404":
-          description: Not Found
           schema:
             $ref: '#/definitions/bkerrs.GinErrorOutput'
       security:

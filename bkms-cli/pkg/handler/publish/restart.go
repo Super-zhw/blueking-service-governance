@@ -50,17 +50,16 @@ func BuildRestartOptions(envs, envTypes, instanceIDs string) (client.DevModeRest
 		return client.DevModeRestartOptions{}, clierr.Usagef("--instance-ids can only be used with a single --env")
 	}
 
-	if len(instances) > 0 {
+	switch {
+	case len(instances) > 0:
 		return client.DevModeRestartOptions{
-			TargetType:  client.DevModeRestartTargetInstances,
-			EnvName:     envNames[0],
-			InstanceIDs: instances,
+			Instances: &client.DevModeRestartInstancesTarget{EnvName: envNames[0], InstanceIDs: instances},
 		}, nil
+	case len(envNames) > 0:
+		return client.DevModeRestartOptions{Envs: &client.DevModeRestartEnvsTarget{Names: envNames}}, nil
+	default:
+		return client.DevModeRestartOptions{EnvTypes: &client.DevModeRestartEnvTypesTarget{Types: types}}, nil
 	}
-	if len(envNames) > 0 {
-		return client.DevModeRestartOptions{TargetType: client.DevModeRestartTargetEnvs, EnvNames: envNames}, nil
-	}
-	return client.DevModeRestartOptions{TargetType: client.DevModeRestartTargetEnvTypes, EnvTypes: types}, nil
 }
 
 // Restart 重启开发模式容器内的业务进程（pod 不重建），逐环境输出结果；任一实例失败时返回错误。
@@ -71,12 +70,10 @@ func Restart(ctx context.Context, cli client.Client, appID string, opts client.D
 		return errors.Wrapf(err, "restart dev mode processes for app %s", appID)
 	}
 
-	failed := 0
 	for _, env := range data.Envs {
 		console.Info("\nEnvironment: %s (%s)", env.EnvName, env.EnvType)
 		for _, inst := range env.Instances {
 			if inst.Status == restartStatusFailed {
-				failed++
 				console.Error("  [FAILED]  %s: %s", inst.Instance, inst.Message)
 				continue
 			}
@@ -96,7 +93,16 @@ func Restart(ctx context.Context, cli client.Client, appID string, opts client.D
 		}
 	}
 
-	total := lo.SumBy(data.Envs, func(env client.DevModeRestartEnvResult) int { return len(env.Instances) })
+	instances := lo.FlatMap(
+		data.Envs,
+		func(env client.DevModeRestartEnvResult, _ int) []client.DevModeRestartInstanceResult {
+			return env.Instances
+		},
+	)
+	total := len(instances)
+	failed := lo.CountBy(instances, func(inst client.DevModeRestartInstanceResult) bool {
+		return inst.Status == restartStatusFailed
+	})
 	console.Info("\n==================================================")
 	switch {
 	case total == 0:

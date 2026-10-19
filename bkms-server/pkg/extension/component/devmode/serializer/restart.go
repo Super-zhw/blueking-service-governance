@@ -22,18 +22,8 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
-	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
-)
-
-// 进程重启目标类型
-const (
-	// RestartTargetTypeEnvs 按环境名称重启（各环境下所有 Running 实例）
-	RestartTargetTypeEnvs = "envs"
-	// RestartTargetTypeEnvTypes 按环境类型重启（匹配环境下所有 Running 实例）
-	RestartTargetTypeEnvTypes = "envTypes"
-	// RestartTargetTypeInstances 重启指定环境下的指定实例
-	RestartTargetTypeInstances = "instances"
+	_ "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/validators" // register global validators
 )
 
 // RestartURIInput DevMode 进程重启 URI 路径参数
@@ -42,51 +32,43 @@ type RestartURIInput struct {
 	AppID string `uri:"appID" binding:"required"`
 }
 
-// RestartInput DevMode 进程重启请求体
+// RestartInput DevMode 进程重启请求体，envs / envTypes / instances 必须且只能指定其中一个
 type RestartInput struct {
-	// TargetType 目标类型：envs / envTypes / instances
-	TargetType string `json:"targetType" binding:"required,oneof=envs envTypes instances"`
-	// EnvNames 环境名称列表（targetType=envs 时必填）
-	EnvNames []string `json:"envNames"`
-	// EnvTypes 环境类型列表（targetType=envTypes 时必填，不允许 production）
-	EnvTypes []string `json:"envTypes"`
-	// EnvName 环境名称（targetType=instances 时必填）
-	EnvName string `json:"envName"`
-	// InstanceIDs 实例 ID 列表（targetType=instances 时必填，须属于 EnvName 环境）
-	InstanceIDs []string `json:"instanceIDs"`
+	// Envs 按环境名称重启（各环境下所有 Running 实例）
+	Envs *RestartEnvsTarget `json:"envs"`
+	// EnvTypes 按环境类型重启（匹配环境下所有 Running 实例）
+	EnvTypes *RestartEnvTypesTarget `json:"envTypes"`
+	// Instances 重启指定环境下的指定实例
+	Instances *RestartInstancesTarget `json:"instances"`
 }
 
-// Validate 按目标类型校验必填参数，并对列表参数去重、去空
-// 必须在 Bind 之后单独调用
-func (i *RestartInput) Validate() error {
-	i.EnvNames = lo.Uniq(lo.Compact(i.EnvNames))
-	i.EnvTypes = lo.Uniq(lo.Compact(i.EnvTypes))
-	i.InstanceIDs = lo.Uniq(lo.Compact(i.InstanceIDs))
+// RestartEnvsTarget 按环境名称重启的目标
+type RestartEnvsTarget struct {
+	// Names 环境名称列表
+	Names []string `json:"names" binding:"required,min=1,unique,dive,uri_slug"`
+}
 
-	switch i.TargetType {
-	case RestartTargetTypeEnvs:
-		if len(i.EnvNames) == 0 {
-			return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "envNames is required when targetType is envs")
-		}
-	case RestartTargetTypeEnvTypes:
-		if len(i.EnvTypes) == 0 {
-			return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "envTypes is required when targetType is envTypes")
-		}
-		for _, envType := range i.EnvTypes {
-			if !bkmsenv.IsValidEnvType(envType) {
-				return bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "invalid envType: %s", envType)
-			}
-			if bkmsenv.IsProductionType(bkmsenv.Type(envType)) {
-				return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "restart is not allowed in production environments")
-			}
-		}
-	case RestartTargetTypeInstances:
-		if i.EnvName == "" {
-			return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "envName is required when targetType is instances")
-		}
-		if len(i.InstanceIDs) == 0 {
-			return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "instanceIDs is required when targetType is instances")
-		}
+// RestartEnvTypesTarget 按环境类型重启的目标
+type RestartEnvTypesTarget struct {
+	// Types 环境类型列表，不允许 production
+	Types []string `json:"types" binding:"required,min=1,unique,dive,oneof=development test staging"`
+}
+
+// RestartInstancesTarget 指定实例的重启目标
+type RestartInstancesTarget struct {
+	// EnvName 环境名称
+	EnvName string `json:"envName" binding:"required,uri_slug"`
+	// InstanceIDs 实例 ID 列表，须属于 EnvName 环境
+	InstanceIDs []string `json:"instanceIDs" binding:"required,min=1,unique,dive,required"`
+}
+
+// Validate 校验 envs / envTypes / instances 必须且只能指定其中一个，必须在 Bind 之后单独调用
+func (i *RestartInput) Validate() error {
+	specified := lo.CountBy([]bool{i.Envs != nil, i.EnvTypes != nil, i.Instances != nil}, func(ok bool) bool {
+		return ok
+	})
+	if specified != 1 {
+		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "exactly one of envs, envTypes or instances is required")
 	}
 	return nil
 }

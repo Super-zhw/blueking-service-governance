@@ -66,7 +66,7 @@ func ListLatestByInstance(
 		ByAppEnv(appID, envName),
 		store.Where("instance", bson.M{"$in": instanceIDs}),
 		// 历史数据无 action 字段，$ne 可同时匹配字段缺失的记录
-		store.Where("action", bson.M{"$ne": PublishActionRestart}),
+		store.Where("action", bson.M{"$ne": RecordActionRestart}),
 		store.Asc("instance"), store.Desc("createdAt"),
 	)
 	if err != nil {

@@ -122,28 +122,30 @@ type DevModePublishRecord struct {
 	UpdatedAt string `json:"updatedAt" yaml:"updatedAt"`
 }
 
-// 开发模式进程重启目标类型
-const (
-	// DevModeRestartTargetEnvs 按环境名称重启
-	DevModeRestartTargetEnvs = "envs"
-	// DevModeRestartTargetEnvTypes 按环境类型重启
-	DevModeRestartTargetEnvTypes = "envTypes"
-	// DevModeRestartTargetInstances 重启指定环境下的指定实例
-	DevModeRestartTargetInstances = "instances"
-)
-
-// DevModeRestartOptions 开发模式进程重启请求参数
+// DevModeRestartOptions 开发模式进程重启请求参数，Envs / EnvTypes / Instances 必须且只能指定其中一个
 type DevModeRestartOptions struct {
-	// TargetType 目标类型：envs / envTypes / instances
-	TargetType string `json:"targetType"`
-	// EnvNames 环境名称列表（targetType=envs）
-	EnvNames []string `json:"envNames,omitempty"`
-	// EnvTypes 环境类型列表（targetType=envTypes）
-	EnvTypes []string `json:"envTypes,omitempty"`
-	// EnvName 环境名称（targetType=instances）
-	EnvName string `json:"envName,omitempty"`
-	// InstanceIDs 实例 ID 列表（targetType=instances）
-	InstanceIDs []string `json:"instanceIDs,omitempty"`
+	// Envs 按环境名称重启（各环境下所有 Running 实例）
+	Envs *DevModeRestartEnvsTarget `json:"envs,omitempty"`
+	// EnvTypes 按环境类型重启（匹配环境下所有 Running 实例）
+	EnvTypes *DevModeRestartEnvTypesTarget `json:"envTypes,omitempty"`
+	// Instances 重启指定环境下的指定实例
+	Instances *DevModeRestartInstancesTarget `json:"instances,omitempty"`
+}
+
+// DevModeRestartEnvsTarget 按环境名称重启的目标
+type DevModeRestartEnvsTarget struct {
+	Names []string `json:"names"`
+}
+
+// DevModeRestartEnvTypesTarget 按环境类型重启的目标
+type DevModeRestartEnvTypesTarget struct {
+	Types []string `json:"types"`
+}
+
+// DevModeRestartInstancesTarget 指定实例的重启目标
+type DevModeRestartInstancesTarget struct {
+	EnvName     string   `json:"envName"`
+	InstanceIDs []string `json:"instanceIDs"`
 }
 
 // DevModeRestartRespData 开发模式进程重启响应包装

@@ -84,6 +84,8 @@ bkms-cli app publish restart --app myapp --env stage --instance-ids pod-1,pod-2
 
 只要有实例重启失败，命令就以非 0 退出码结束。
 
+目标实例较多时（多个环境，或单个环境实例数超过 10 个），请求可能超时。超时后服务端仍会把已开始的重启执行完，并如实写入记录，此时以 `publish history` 中的记录为准，不要直接重试，以免重复重启。
+
 ## publish history
 
 `publish history` 查询指定环境的发布和重启记录，每个实例一条，按时间倒序排列。`ACTION` 列用来区分 `publish` 和 `restart`。

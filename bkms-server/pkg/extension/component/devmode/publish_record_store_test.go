@@ -49,7 +49,7 @@ var _ = Describe("PublishRecord store", func() {
 		appID = "test-app-" + stringx.Random(6)
 	})
 
-	newRecord := func(instance, binary string, status devmode.PublishStatus) *devmode.PublishRecord {
+	newRecord := func(instance, binary string, status devmode.RecordStatus) *devmode.PublishRecord {
 		return &devmode.PublishRecord{
 			AppID: appID, EnvName: envName, Instance: instance,
 			BinaryName: binary, MD5: "m-" + binary, Status: status, Operator: "admin",
@@ -63,11 +63,11 @@ var _ = Describe("PublishRecord store", func() {
 	Describe("listing by app and env", func() {
 		BeforeEach(func() {
 			mustCreate(
-				newRecord("pod-1", "alpha", devmode.PublishStatusSuccess),
-				newRecord("pod-2", "beta", devmode.PublishStatusSuccess),
+				newRecord("pod-1", "alpha", devmode.RecordStatusSuccess),
+				newRecord("pod-2", "beta", devmode.RecordStatusSuccess),
 			)
 			// 其它环境的记录不应被列出
-			other := newRecord("pod-1", "alpha", devmode.PublishStatusSuccess)
+			other := newRecord("pod-1", "alpha", devmode.RecordStatusSuccess)
 			other.EnvName = "prod"
 			mustCreate(other)
 		})
@@ -96,23 +96,23 @@ var _ = Describe("PublishRecord store", func() {
 
 	Describe("ListLatestByInstance", func() {
 		It("should return the latest record for each instance", func() {
-			mustCreate(newRecord("pod-1", "v1", devmode.PublishStatusSuccess))
+			mustCreate(newRecord("pod-1", "v1", devmode.RecordStatusSuccess))
 			// 间隔一段时间，确保第二次 push 的 createdAt 更晚
 			time.Sleep(10 * time.Millisecond)
-			failed := newRecord("pod-1", "v2", devmode.PublishStatusFailed)
+			failed := newRecord("pod-1", "v2", devmode.RecordStatusFailed)
 			failed.Message = "boom"
-			mustCreate(failed, newRecord("pod-2", "v1", devmode.PublishStatusSuccess))
+			mustCreate(failed, newRecord("pod-2", "v1", devmode.RecordStatusSuccess))
 
 			latest, err := devmode.ListLatestByInstance(ctx, db, appID, envName, []string{"pod-1", "pod-2"})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(latest).To(HaveLen(2))
-			Expect(latest["pod-1"].Status).To(Equal(devmode.PublishStatusFailed))
+			Expect(latest["pod-1"].Status).To(Equal(devmode.RecordStatusFailed))
 			Expect(latest["pod-1"].BinaryName).To(Equal("v2"))
-			Expect(latest["pod-2"].Status).To(Equal(devmode.PublishStatusSuccess))
+			Expect(latest["pod-2"].Status).To(Equal(devmode.RecordStatusSuccess))
 		})
 
 		It("should omit instances without records", func() {
-			mustCreate(newRecord("pod-1", "v1", devmode.PublishStatusSuccess))
+			mustCreate(newRecord("pod-1", "v1", devmode.RecordStatusSuccess))
 
 			latest, err := devmode.ListLatestByInstance(ctx, db, appID, envName, []string{"pod-1", "pod-2"})
 			Expect(err).NotTo(HaveOccurred())
@@ -128,29 +128,29 @@ var _ = Describe("PublishRecord store", func() {
 
 		It("should ignore restart records", func() {
 			// 历史数据无 action 字段
-			mustCreate(newRecord("pod-1", "v1", devmode.PublishStatusSuccess))
+			mustCreate(newRecord("pod-1", "v1", devmode.RecordStatusSuccess))
 			time.Sleep(10 * time.Millisecond)
 			// pod-1 之后进行了 restart；pod-2 只有 restart 记录
-			restart1 := newRecord("pod-1", "", devmode.PublishStatusSuccess)
-			restart1.Action = devmode.PublishActionRestart
-			restart2 := newRecord("pod-2", "", devmode.PublishStatusSuccess)
-			restart2.Action = devmode.PublishActionRestart
+			restart1 := newRecord("pod-1", "", devmode.RecordStatusSuccess)
+			restart1.Action = devmode.RecordActionRestart
+			restart2 := newRecord("pod-2", "", devmode.RecordStatusSuccess)
+			restart2.Action = devmode.RecordActionRestart
 			mustCreate(restart1, restart2)
 
 			latest, err := devmode.ListLatestByInstance(ctx, db, appID, envName, []string{"pod-1", "pod-2"})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(latest).To(HaveLen(1))
 			Expect(latest["pod-1"].BinaryName).To(Equal("v1"))
-			Expect(latest["pod-1"].GetAction()).To(Equal(devmode.PublishActionPublish))
+			Expect(latest["pod-1"].GetAction()).To(Equal(devmode.RecordActionPublish))
 		})
 	})
 
 	Describe("listing with restart records", func() {
 		It("should return both publish and restart records", func() {
-			publish := newRecord("pod-1", "v1", devmode.PublishStatusSuccess)
-			publish.Action = devmode.PublishActionPublish
-			restart := newRecord("pod-1", "", devmode.PublishStatusSuccess)
-			restart.Action = devmode.PublishActionRestart
+			publish := newRecord("pod-1", "v1", devmode.RecordStatusSuccess)
+			publish.Action = devmode.RecordActionPublish
+			restart := newRecord("pod-1", "", devmode.RecordStatusSuccess)
+			restart.Action = devmode.RecordActionRestart
 			mustCreate(publish, restart)
 
 			page, err := records.ListPage(ctx, 1, 10, devmode.ByAppEnv(appID, envName), devmode.NewestFirst())
@@ -159,10 +159,10 @@ var _ = Describe("PublishRecord store", func() {
 			Expect(
 				lo.Map(
 					page.Items,
-					func(r devmode.PublishRecord, _ int) devmode.PublishAction { return r.GetAction() },
+					func(r devmode.PublishRecord, _ int) devmode.RecordAction { return r.GetAction() },
 				),
 			).
-				To(ConsistOf(devmode.PublishActionPublish, devmode.PublishActionRestart))
+				To(ConsistOf(devmode.RecordActionPublish, devmode.RecordActionRestart))
 		})
 	})
 })

@@ -39,14 +39,18 @@ The current binary is not replaced. The server stops the business process in eac
 target instance and the dev mode monitor starts it again. Dev mode must be enabled
 for the target environments, and production environments are not allowed.
 
-Targets (exactly one of --env / --env-type is required):
-  --env        one or more environments, restarts all Running instances in them
-  --env-type   one or more environment types, restarts all Running instances in
-               matching environments; environments that are not eligible (e.g.
-               dev mode disabled) are skipped
-  --instance-ids  only restart the given instances, requires a single --env
+Targets (exactly one of --env / --env-type is required, multiple values are comma-separated):
+  --env           one or more environments, e.g. stage,test; restarts all Running
+                  instances in them
+  --env-type      one or more environment types, e.g. development,test; restarts all
+                  Running instances in matching environments; environments that are
+                  not eligible (e.g. dev mode disabled) are skipped
+  --instance-ids  one or more instances, e.g. pod1,pod2; only restarts the given
+                  instances, requires a single --env
 
-Restart records can be viewed with 'bkms-cli app publish history'.`,
+Instances are restarted in parallel and the command waits until they are started
+again. When many instances are targeted the request may time out; the restart keeps
+running on the server, so check the actual results with 'bkms-cli app publish history'.`,
 		Example: `  # Restart all Running instances in multiple environments
   bkms-cli app publish restart --app myapp --env stage,test
 

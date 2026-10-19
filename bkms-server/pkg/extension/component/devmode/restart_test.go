@@ -32,7 +32,6 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
 	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 )
 
 // fakePodExecutor 按脚本内容区分「读取 pid.conf」与「stop」两类命令，模拟 pod 内执行结果
@@ -116,13 +115,12 @@ var _ = Describe("Restarter", func() {
 	}
 
 	BeforeEach(func() {
-		db := testutil.NewDB(GinkgoT())
-		records = store.Of(db, devmode.PublishRecordMeta)
+		records = testutil.NewStore(GinkgoT(), devmode.PublishRecordMeta)
 		ctx = context.Background()
 		appID = "test-app-" + stringx.Random(6)
 		executor = newFakePodExecutor()
 		restarter = devmode.NewRestarter(
-			db,
+			records,
 			devmode.WithRestartPollInterval(10*time.Millisecond),
 			devmode.WithRestartWaitStartTimeout(300*time.Millisecond),
 		)
@@ -149,7 +147,7 @@ var _ = Describe("Restarter", func() {
 		Expect(results).To(HaveLen(1))
 		Expect(results[0].EnvName).To(Equal("stag"))
 		Expect(results[0].Instance).To(Equal("pod-1"))
-		Expect(results[0].Status).To(Equal(devmode.PublishStatusSuccess))
+		Expect(results[0].Status).To(Equal(devmode.RecordStatusSuccess))
 		Expect(results[0].OldPID).To(Equal("100"))
 		Expect(results[0].NewPID).To(Equal("200"))
 
@@ -162,8 +160,8 @@ var _ = Describe("Restarter", func() {
 
 		saved := listRecords("stag")
 		Expect(saved).To(HaveLen(1))
-		Expect(saved[0].Action).To(Equal(devmode.PublishActionRestart))
-		Expect(saved[0].Status).To(Equal(devmode.PublishStatusSuccess))
+		Expect(saved[0].Action).To(Equal(devmode.RecordActionRestart))
+		Expect(saved[0].Status).To(Equal(devmode.RecordStatusSuccess))
 		Expect(saved[0].Operator).To(Equal("admin"))
 		Expect(saved[0].Message).To(ContainSubstring("100 -> 200"))
 	})
@@ -178,7 +176,7 @@ var _ = Describe("Restarter", func() {
 
 		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
-		Expect(results[0].Status).To(Equal(devmode.PublishStatusFailed))
+		Expect(results[0].Status).To(Equal(devmode.RecordStatusFailed))
 		Expect(results[0].Message).To(ContainSubstring("code 21"))
 		Expect(results[0].Message).To(ContainSubstring("remaining process"))
 
@@ -186,13 +184,13 @@ var _ = Describe("Restarter", func() {
 		Expect(readCalls).To(Equal(1))
 
 		saved := listRecords("stag")
-		Expect(saved[0].Status).To(Equal(devmode.PublishStatusFailed))
+		Expect(saved[0].Status).To(Equal(devmode.RecordStatusFailed))
 	})
 
 	It("fails when pid.conf is not recreated before timeout", func() {
 		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
-		Expect(results[0].Status).To(Equal(devmode.PublishStatusFailed))
+		Expect(results[0].Status).To(Equal(devmode.RecordStatusFailed))
 		Expect(results[0].OldPID).To(BeEmpty())
 		Expect(results[0].Message).To(ContainSubstring("timed out waiting for monitor"))
 	})
@@ -204,7 +202,7 @@ var _ = Describe("Restarter", func() {
 
 		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
-		Expect(results[0].Status).To(Equal(devmode.PublishStatusFailed))
+		Expect(results[0].Status).To(Equal(devmode.RecordStatusFailed))
 		Expect(results[0].Message).To(ContainSubstring("pod not found"))
 
 		_, stopCalls := executor.counts("pod-1")
@@ -233,15 +231,51 @@ var _ = Describe("Restarter", func() {
 		Expect(results).To(HaveLen(3))
 		Expect([]string{results[0].Instance, results[1].Instance, results[2].Instance}).
 			To(Equal([]string{"pod-a", "pod-b", "pod-c"}))
-		Expect(results[0].Status).To(Equal(devmode.PublishStatusSuccess))
-		Expect(results[1].Status).To(Equal(devmode.PublishStatusFailed))
-		Expect(results[2].Status).To(Equal(devmode.PublishStatusSuccess))
+		Expect(results[0].Status).To(Equal(devmode.RecordStatusSuccess))
+		Expect(results[1].Status).To(Equal(devmode.RecordStatusFailed))
+		Expect(results[2].Status).To(Equal(devmode.RecordStatusSuccess))
 		Expect(results[2].EnvName).To(Equal("test"))
 
 		stagRecords := listRecords("stag")
 		Expect(stagRecords).To(HaveLen(2))
 		testRecords := listRecords("test")
 		Expect(testRecords).To(HaveLen(1))
+	})
+
+	It("keeps waiting for the process to start after the request is cancelled during stop", func() {
+		reqCtx, cancel := context.WithCancel(ctx)
+		defer cancel()
+		executor.readPID = func(_ string, n int) (*k8sclient.ExecResult, error) {
+			if n == 1 {
+				return &k8sclient.ExecResult{Stdout: "100"}, nil
+			}
+			return &k8sclient.ExecResult{Stdout: "200"}, nil
+		}
+		// stop 执行期间请求被取消（如 CLI 超时断开）
+		executor.stop = func(string) (*k8sclient.ExecResult, error) {
+			cancel()
+			return &k8sclient.ExecResult{}, nil
+		}
+
+		results, err := restarter.Restart(reqCtx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(results[0].Status).To(Equal(devmode.RecordStatusSuccess))
+		Expect(results[0].NewPID).To(Equal("200"))
+
+		saved := listRecords("stag")
+		Expect(saved[0].Status).To(Equal(devmode.RecordStatusSuccess))
+	})
+
+	It("returns an error without stopping anything when the request is cancelled before execution", func() {
+		reqCtx, cancel := context.WithCancel(ctx)
+		cancel()
+
+		_, err := restarter.Restart(reqCtx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		Expect(err).To(HaveOccurred())
+
+		readCalls, stopCalls := executor.counts("pod-1")
+		Expect(readCalls).To(BeZero())
+		Expect(stopCalls).To(BeZero())
 	})
 
 	It("does nothing when there are no target instances", func() {

@@ -28,11 +28,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 	"golang.org/x/sync/errgroup"
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/metrics"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 )
 
@@ -95,7 +95,7 @@ type RestartInstanceResult struct {
 	// Instance 实例（pod）名称
 	Instance string
 	// Status 重启结果：success / failed
-	Status PublishStatus
+	Status RecordStatus
 	// Message 结果说明
 	Message string
 	// OldPID 重启前的业务进程 PID（pid.conf 不存在时为空）
@@ -104,8 +104,7 @@ type RestartInstanceResult struct {
 	NewPID string
 }
 
-// Restarter 开发模式业务进程重启器：stop 业务进程后由 monitor 重新拉起，pod 不重建。
-// 重启过程会写入发布记录（PublishRecord）
+// Restarter 开发模式业务进程重启器：stop 业务进程后由 monitor 重新拉起，pod 不重建
 type Restarter struct {
 	records          *PublishRecordStore
 	pollInterval     time.Duration
@@ -125,10 +124,10 @@ func WithRestartWaitStartTimeout(d time.Duration) RestarterOption {
 	return func(r *Restarter) { r.waitStartTimeout = d }
 }
 
-// NewRestarter 创建 Restarter
-func NewRestarter(db *mongo.Database, opts ...RestarterOption) *Restarter {
+// NewRestarter 创建 Restarter，records 用于写入 restart 类型的发布记录
+func NewRestarter(records *PublishRecordStore, opts ...RestarterOption) *Restarter {
 	r := &Restarter{
-		records:          store.Of(db, PublishRecordMeta),
+		records:          records,
 		pollInterval:     defaultRestartPollInterval,
 		waitStartTimeout: defaultRestartWaitStartTimeout,
 	}
@@ -138,11 +137,14 @@ func NewRestarter(db *mongo.Database, opts ...RestarterOption) *Restarter {
 	return r
 }
 
+// errWaitStartTimeout 等待 monitor 拉起进程超时
+var errWaitStartTimeout = errors.New("timed out waiting for monitor to start the process")
+
 // restartTask 单个实例的重启任务
 type restartTask struct {
-	target   *RestartTarget
 	instance string
-	recordID bson.ObjectID
+	record   *PublishRecord
+	target   *RestartTarget
 }
 
 // Restart 同步重启所有目标实例，返回结果按 targets 及其 InstanceIDs 的顺序排列。
@@ -164,9 +166,12 @@ func (r *Restarter) Restart(
 	g.SetLimit(restartConcurrency)
 	for i, task := range tasks {
 		g.Go(func() error {
-			r.updateRecord(recordCtx, task.recordID, PublishStatusRunning, "")
-			results[i] = r.restartInstance(ctx, task.target, task.instance)
-			r.updateRecord(recordCtx, task.recordID, results[i].Status, results[i].Message)
+			r.updateRecord(recordCtx, task.record.ID, RecordStatusRunning, "")
+			startedAt := time.Now()
+			oldPID, newPID, err := r.restartInstance(ctx, task.target, task.instance)
+			results[i] = newRestartInstanceResult(task, oldPID, newPID, err)
+			r.observe(ctx, appID, results[i], err, startedAt)
+			r.updateRecord(recordCtx, task.record.ID, results[i].Status, results[i].Message)
 			return nil
 		})
 	}
@@ -179,38 +184,37 @@ func (r *Restarter) Restart(
 func (r *Restarter) createPendingRecords(
 	ctx context.Context, appID, operator string, targets []RestartTarget,
 ) ([]restartTask, error) {
-	var tasks []restartTask
-	var records []*PublishRecord
-	for i := range targets {
+	tasks := lo.FlatMap(targets, func(_ RestartTarget, i int) []restartTask {
 		target := &targets[i]
-		for _, instance := range target.InstanceIDs {
-			tasks = append(tasks, restartTask{target: target, instance: instance})
-			records = append(records, &PublishRecord{
-				AppID:    appID,
-				EnvName:  target.EnvName,
-				Action:   PublishActionRestart,
-				Instance: instance,
-				Status:   PublishStatusPending,
-				Operator: operator,
-			})
-		}
-	}
-	if len(records) == 0 {
+		return lo.Map(target.InstanceIDs, func(instance string, _ int) restartTask {
+			return restartTask{
+				instance: instance,
+				record: &PublishRecord{
+					AppID:    appID,
+					EnvName:  target.EnvName,
+					Action:   RecordActionRestart,
+					Instance: instance,
+					Status:   RecordStatusPending,
+					Operator: operator,
+				},
+				target: target,
+			}
+		})
+	})
+	if len(tasks) == 0 {
 		return nil, nil
 	}
 
-	// CreateMany 会将生成的 ID 回填到 records 中
+	// CreateMany 会将生成的 ID 回填到各 record 中
+	records := lo.Map(tasks, func(task restartTask, _ int) *PublishRecord { return task.record })
 	if err := r.records.CreateMany(ctx, records); err != nil {
 		return nil, errors.Wrapf(err, "create restart records for app %s", appID)
-	}
-	for i := range tasks {
-		tasks[i].recordID = records[i].ID
 	}
 	return tasks, nil
 }
 
 // updateRecord 更新重启记录状态（best-effort，失败仅记录日志）
-func (r *Restarter) updateRecord(ctx context.Context, id bson.ObjectID, status PublishStatus, message string) {
+func (r *Restarter) updateRecord(ctx context.Context, id bson.ObjectID, status RecordStatus, message string) {
 	update := map[string]any{"status": status, "message": message}
 	if err := r.records.Update(ctx, update, store.ByID(id)); err != nil {
 		log.WarnAttrs(ctx, "update devmode restart record failed",
@@ -221,48 +225,71 @@ func (r *Restarter) updateRecord(ctx context.Context, id bson.ObjectID, status P
 	}
 }
 
-// restartInstance 重启单个实例：读取旧 PID → stop 并清除停止标志 → 等待 monitor 拉起（pid.conf 重新生成）
-func (r *Restarter) restartInstance(
-	ctx context.Context,
-	target *RestartTarget,
-	instance string,
-) RestartInstanceResult {
-	result := RestartInstanceResult{EnvName: target.EnvName, Instance: instance, Status: PublishStatusFailed}
-
-	// a. 读取旧 PID，pid.conf 不存在时为空，仅用于展示
-	oldPID, _, err := r.readPID(ctx, target, instance)
+// observe 上报单实例重启耗时指标并记录日志
+func (r *Restarter) observe(
+	ctx context.Context, appID string, result RestartInstanceResult, err error, startedAt time.Time,
+) {
+	status := metrics.StatusOK
 	if err != nil {
-		result.Message = fmt.Sprintf("failed to read pid.conf: %v", err)
+		status = lo.Ternary(errors.Is(err, errWaitStartTimeout), metrics.StatusTimeout, metrics.StatusErr)
+	}
+	metrics.DevModeRestartFinished(status, startedAt)
+	log.InfoAttrs(ctx, "devmode restart instance finished",
+		slog.String("app_id", appID),
+		slog.String("env_name", result.EnvName),
+		slog.String("instance", result.Instance),
+		slog.String("status", string(result.Status)),
+		slog.Int64("duration_ms", time.Since(startedAt).Milliseconds()),
+		slog.String("old_pid", result.OldPID),
+		slog.String("new_pid", result.NewPID),
+		slog.String("message", result.Message),
+	)
+}
+
+// newRestartInstanceResult 将单实例的执行结果转换为 RestartInstanceResult
+func newRestartInstanceResult(task restartTask, oldPID, newPID string, err error) RestartInstanceResult {
+	result := RestartInstanceResult{EnvName: task.target.EnvName, Instance: task.instance, OldPID: oldPID}
+	if err != nil {
+		result.Status = RecordStatusFailed
+		result.Message = err.Error()
 		return result
 	}
-	result.OldPID = oldPID
+	result.NewPID = newPID
+	result.Status = RecordStatusSuccess
+	result.Message = fmt.Sprintf("process restarted, pid: %s -> %s", lo.CoalesceOrEmpty(oldPID, "none"), newPID)
+	return result
+}
 
-	// b. stop 业务进程并清除停止标志；一旦开始执行必须跑完，不随请求取消
-	stopCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), restartStopTimeout)
+// restartInstance 重启单个实例（pod）：读取旧 PID → stop 并清除停止标志 → 等待 monitor 拉起（pid.conf 重新生成）。
+// 返回旧 PID（pid.conf 不存在时为空，仅用于展示）与新 PID；读取旧 PID 失败时不会执行 stop。
+func (r *Restarter) restartInstance(
+	ctx context.Context, target *RestartTarget, instance string,
+) (oldPID, newPID string, err error) {
+	oldPID, _, err = r.readPID(ctx, target, instance)
+	if err != nil {
+		return "", "", errors.Wrap(err, "read pid.conf")
+	}
+
+	// 一旦开始 stop，后续步骤（stop 与等待拉起）不随请求取消，保证进程状态与记录一致
+	opCtx := context.WithoutCancel(ctx)
+	stopCtx, cancel := context.WithTimeout(opCtx, restartStopTimeout)
 	defer cancel()
 	stopRet, err := r.exec(stopCtx, target, instance, stopProcessScript)
 	if err != nil {
-		result.Message = fmt.Sprintf("failed to stop process: %v", err)
-		return result
+		return oldPID, "", errors.Wrap(err, "stop process")
 	}
 	if stopRet.ExitCode != 0 {
-		result.Message = fmt.Sprintf(
-			"failed to stop process: stop.sh exited with code %d%s", stopRet.ExitCode, formatStderr(stopRet.Stderr),
-		)
-		return result
+		if stderr := strings.TrimSpace(stopRet.Stderr); stderr != "" {
+			return oldPID, "", errors.Errorf("stop process: stop.sh exited with code %d: %s", stopRet.ExitCode, stderr)
+		}
+		return oldPID, "", errors.Errorf("stop process: stop.sh exited with code %d", stopRet.ExitCode)
 	}
 
-	// c. 轮询 pid.conf，文件重新出现即视为 monitor 已拉起进程
-	newPID, err := r.waitProcessStarted(ctx, target, instance)
+	newPID, err = r.waitProcessStarted(opCtx, target, instance)
 	if err != nil {
-		result.Message = fmt.Sprintf("process stopped, but %v", err)
-		return result
+		return oldPID, "", errors.Wrap(err, "process stopped but not started")
 	}
-
-	result.Status = PublishStatusSuccess
-	result.NewPID = newPID
-	result.Message = fmt.Sprintf("process restarted, pid: %s -> %s", lo.Ternary(oldPID == "", "none", oldPID), newPID)
-	return result
+	return oldPID, newPID, nil
 }
 
 // waitProcessStarted 轮询 pid.conf 直到文件出现或超时，返回新 PID
@@ -274,18 +301,14 @@ func (r *Restarter) waitProcessStarted(ctx context.Context, target *RestartTarge
 	defer ticker.Stop()
 	for {
 		select {
-		case <-waitCtx.Done():
-			if errors.Is(waitCtx.Err(), context.DeadlineExceeded) && ctx.Err() == nil {
-				return "", errors.Errorf("timed out waiting for monitor to start it (pid.conf not created within %s)",
-					r.waitStartTimeout)
-			}
-			return "", errors.Wrap(waitCtx.Err(), "waiting for process to start was interrupted")
 		case <-ticker.C:
 			// exec 异常（如网络抖动）不中断轮询，直到超时
 			pid, exists, err := r.readPID(waitCtx, target, instance)
 			if err == nil && exists {
 				return pid, nil
 			}
+		case <-waitCtx.Done():
+			return "", errors.Wrapf(errWaitStartTimeout, "pid.conf not created within %s", r.waitStartTimeout)
 		}
 	}
 }
@@ -315,13 +338,4 @@ func (r *Restarter) exec(
 		return nil, errors.Wrapf(err, "exec in instance %s of env %s", instance, target.EnvName)
 	}
 	return ret, nil
-}
-
-// formatStderr 将 stderr 格式化为错误信息后缀
-func formatStderr(stderr string) string {
-	stderr = strings.TrimSpace(stderr)
-	if stderr == "" {
-		return ""
-	}
-	return ": " + stderr
 }

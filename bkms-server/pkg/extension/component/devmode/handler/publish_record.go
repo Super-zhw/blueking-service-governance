@@ -74,12 +74,12 @@ func (h *Handler) CreateDevModePublishRecords(c *gin.Context) {
 		return &devmode.PublishRecord{
 			AppID:      app.ID,
 			EnvName:    uriInput.EnvName,
-			Action:     devmode.PublishActionPublish,
+			Action:     devmode.RecordActionPublish,
 			Instance:   result.Instance,
 			BinaryName: input.BinaryName,
 			FileSize:   input.FileSize,
 			MD5:        input.MD5,
-			Status:     devmode.PublishStatus(result.Status),
+			Status:     devmode.RecordStatus(result.Status),
 			Message:    result.Message,
 			Operator:   operator,
 		}
@@ -171,7 +171,7 @@ func (h *Handler) ListDevModePublishRecords(c *gin.Context) {
 
 // publishAuditResult 将单个实例的发布状态映射为审计结果。
 func publishAuditResult(result slz.PublishInstanceResult) audit.Result {
-	if result.Status == string(devmode.PublishStatusFailed) {
+	if result.Status == string(devmode.RecordStatusFailed) {
 		return audit.ResultFailed
 	}
 	return audit.ResultSuccess

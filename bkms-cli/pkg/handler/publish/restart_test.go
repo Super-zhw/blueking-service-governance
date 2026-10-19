@@ -36,8 +36,7 @@ var _ = Describe("BuildRestartOptions", func() {
 		opts, err := BuildRestartOptions("stage, test,stage", "", "")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(opts).To(Equal(client.DevModeRestartOptions{
-			TargetType: client.DevModeRestartTargetEnvs,
-			EnvNames:   []string{"stage", "test"},
+			Envs: &client.DevModeRestartEnvsTarget{Names: []string{"stage", "test"}},
 		}))
 	})
 
@@ -45,8 +44,7 @@ var _ = Describe("BuildRestartOptions", func() {
 		opts, err := BuildRestartOptions("", "development,test", "")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(opts).To(Equal(client.DevModeRestartOptions{
-			TargetType: client.DevModeRestartTargetEnvTypes,
-			EnvTypes:   []string{"development", "test"},
+			EnvTypes: &client.DevModeRestartEnvTypesTarget{Types: []string{"development", "test"}},
 		}))
 	})
 
@@ -54,9 +52,10 @@ var _ = Describe("BuildRestartOptions", func() {
 		opts, err := BuildRestartOptions("stage", "", "pod-1,pod-2")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(opts).To(Equal(client.DevModeRestartOptions{
-			TargetType:  client.DevModeRestartTargetInstances,
-			EnvName:     "stage",
-			InstanceIDs: []string{"pod-1", "pod-2"},
+			Instances: &client.DevModeRestartInstancesTarget{
+				EnvName:     "stage",
+				InstanceIDs: []string{"pod-1", "pod-2"},
+			},
 		}))
 	})
 
@@ -88,7 +87,7 @@ var _ = Describe("Restart", func() {
 	BeforeEach(func() {
 		ctx = context.Background()
 		cli = mocks.NewMockClient(GinkgoT())
-		opts = client.DevModeRestartOptions{TargetType: client.DevModeRestartTargetEnvs, EnvNames: []string{"stage"}}
+		opts = client.DevModeRestartOptions{Envs: &client.DevModeRestartEnvsTarget{Names: []string{"stage"}}}
 	})
 
 	It("succeeds when all instances are restarted", func() {

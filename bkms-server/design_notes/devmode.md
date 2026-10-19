@@ -188,18 +188,18 @@ restart.sh <random_name> <md5>
 
 ### 接口
 
-`POST /api/v1/devmode/{appID}/restart`（同步接口），请求体按 `targetType` 区分三种目标：
+`POST /api/v1/devmode/{appID}/restart`（同步接口），请求体中 `envs` / `envTypes` / `instances` 必须且只能指定其中一个：
 
 ```json
-{"targetType": "envs",      "envNames": ["stage", "test"]}
-{"targetType": "envTypes",  "envTypes": ["development", "test"]}
-{"targetType": "instances", "envName": "stage", "instanceIDs": ["pod1", "pod2"]}
+{"envs":      {"names": ["stage", "test"]}}
+{"envTypes":  {"types": ["development", "test"]}}
+{"instances": {"envName": "stage", "instanceIDs": ["pod1", "pod2"]}}
 ```
 
 | 类型 | 目标 | 不满足条件时（生产环境 / 集群配置不完整 / 未启用 devmode / 无 Running 实例） |
 |------|------|------|
 | `envs` | 各环境下所有 Running 实例 | 严格模式：整个请求返回错误，不执行任何重启 |
-| `envTypes` | 匹配类型的环境下所有 Running 实例 | 请求中含 `production` 直接拒绝；其余不满足条件的环境跳过，并在 `skipped` 中返回原因 |
+| `envTypes` | 匹配类型的环境下所有 Running 实例 | 仅允许 development / test / staging，含 `production` 直接拒绝；其余不满足条件的环境跳过，并在 `skipped` 中返回原因 |
 | `instances` | 指定环境下的指定实例 | 严格模式；实例必须属于该环境 |
 
 集群访问使用当前用户的 BCS Token（与 publish preflight 相同方式获取），仅在请求内存中使用。
@@ -209,12 +209,14 @@ restart.sh <random_name> <md5>
 所有环境的目标 Pod 汇总后并行执行（并行上限 10），每个 Pod：
 
 ```
-a. cat pid.conf                                   记录旧 PID（仅用于展示）
+a. cat pid.conf                                   记录旧 PID（仅用于展示）；失败则不执行后续步骤
 b. source utils.sh && { bash stop.sh; rm -f "${PID_CONF}"; clear_stop_flag; }
-                                                  ctx 不随请求取消，独立超时
 c. 轮询 pid.conf                                  文件出现即视为成功，内容即新 PID（超时 30s）
 d. 更新发布记录为 success / failed
 ```
+
+- 从 b 开始的步骤不随请求取消（`context.WithoutCancel` + 独立超时）：请求超时断开后仍会等待进程拉起，记录反映真实结果
+- 每个实例结束时上报 `bkms_devmode_restart_duration_seconds{status=ok|err|timeout}`，并输出一条带耗时的结构化日志
 
 - 先 `source utils.sh`，失败则不执行 stop，避免「进程已被杀、flag 无法清除」
 - 删除 `pid.conf`：stop.sh 不会删除该文件，不删则 c 步会误判成功；删除后只有 `start.sh` 在确认进程启动后才会重新写入
@@ -229,10 +231,11 @@ d. 更新发布记录为 success / failed
 - 新增状态 `pending` / `running`：请求开始时为所有实例写入 `pending`，执行时更新为 `running`，结束时更新为 `success` / `failed`
 - `ListLatestByInstance`（实例列表展示最近一次发布信息）排除 `restart` 记录
 - `publish history` 同时展示两类记录，以 Action 列区分
+- 审计记录按实例写入（`OperationTypeRestart`），每个实例一条
 
 ### 已知风险（测试时留意）
 
-- 网关 / ingress 超时；CLI 侧 restart 请求使用独立 client（不重试、超时 90s）
+- 同步接口超时：server `WriteTimeout` 为 65s，实例数超过并行上限时需分批执行，容易超时；CLI 侧 restart 请求使用独立 client（不重试、超时 90s）。超时后以 `publish history` 中的记录为准
 - server 执行中途重启会导致记录停留在 `running`
 - 同一实例上 publish 与 restart 并发执行时会相互影响 stop flag 与 `pid.conf`
 - 进程空窗期可能触发 liveness probe 导致容器重启

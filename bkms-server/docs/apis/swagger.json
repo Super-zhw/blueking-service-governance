@@ -13260,12 +13260,6 @@
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
-                        }
                     }
                 }
             }
@@ -31133,44 +31127,65 @@
                 }
             }
         },
-        "serializer.RestartInput": {
+        "serializer.RestartEnvTypesTarget": {
             "type": "object",
             "required": [
-                "targetType"
+                "types"
             ],
             "properties": {
-                "envName": {
-                    "description": "EnvName 环境名称（targetType=instances 时必填）",
-                    "type": "string"
-                },
-                "envNames": {
-                    "description": "EnvNames 环境名称列表（targetType=envs 时必填）",
+                "types": {
+                    "description": "Types 环境类型列表，不允许 production",
                     "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
                     "items": {
                         "type": "string"
                     }
-                },
+                }
+            }
+        },
+        "serializer.RestartEnvsTarget": {
+            "type": "object",
+            "required": [
+                "names"
+            ],
+            "properties": {
+                "names": {
+                    "description": "Names 环境名称列表",
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "serializer.RestartInput": {
+            "type": "object",
+            "properties": {
                 "envTypes": {
-                    "description": "EnvTypes 环境类型列表（targetType=envTypes 时必填，不允许 production）",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "description": "EnvTypes 按环境类型重启（匹配环境下所有 Running 实例）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.RestartEnvTypesTarget"
+                        }
+                    ]
                 },
-                "instanceIDs": {
-                    "description": "InstanceIDs 实例 ID 列表（targetType=instances 时必填，须属于 EnvName 环境）",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "envs": {
+                    "description": "Envs 按环境名称重启（各环境下所有 Running 实例）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.RestartEnvsTarget"
+                        }
+                    ]
                 },
-                "targetType": {
-                    "description": "TargetType 目标类型：envs / envTypes / instances",
-                    "type": "string",
-                    "enum": [
-                        "envs",
-                        "envTypes",
-                        "instances"
+                "instances": {
+                    "description": "Instances 重启指定环境下的指定实例",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.RestartInstancesTarget"
+                        }
                     ]
                 }
             }
@@ -31197,6 +31212,28 @@
                 "status": {
                     "description": "Status 重启结果：success / failed",
                     "type": "string"
+                }
+            }
+        },
+        "serializer.RestartInstancesTarget": {
+            "type": "object",
+            "required": [
+                "envName",
+                "instanceIDs"
+            ],
+            "properties": {
+                "envName": {
+                    "description": "EnvName 环境名称",
+                    "type": "string"
+                },
+                "instanceIDs": {
+                    "description": "InstanceIDs 实例 ID 列表，须属于 EnvName 环境",
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

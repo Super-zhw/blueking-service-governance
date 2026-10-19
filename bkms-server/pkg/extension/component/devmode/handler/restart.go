@@ -63,7 +63,6 @@ type restartEnvTarget struct {
 //	@Param		body	body		slz.RestartInput	true	"进程重启请求体"
 //	@Success	200		{object}	slz.RestartOutput
 //	@Failure	400		{object}	bkerrs.GinErrorOutput
-//	@Failure	404		{object}	bkerrs.GinErrorOutput
 //	@Router		/devmode/{appID}/restart [post]
 func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 	var uriInput slz.RestartURIInput
@@ -86,7 +85,7 @@ func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
-	app, err := perm.ValidateAppByID(ctx, h.registry, uriInput.AppID, perm.TypeEdit)
+	app, err := perm.ValidateAppByID(ctx, h.registry, uriInput.AppID, perm.TypeDeploy)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -115,7 +114,7 @@ func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 		return
 	}
 
-	results, err := devmode.NewRestarter(h.registry.DB).
+	results, err := devmode.NewRestarter(store.Of(h.registry.DB, devmode.PublishRecordMeta)).
 		Restart(ctx, app.ID, auth.MustGetUser(ctx).ID, buildRestartTargets(envTargets, token))
 	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "restart devmode processes"))
@@ -132,53 +131,58 @@ func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 func (h *Handler) resolveRestartTargets(
 	ctx context.Context, app *bkmsapp.Application, input slz.RestartInput,
 ) ([]*restartEnvTarget, []*slz.RestartSkippedEnv, error) {
-	switch input.TargetType {
-	case slz.RestartTargetTypeEnvs:
-		targets := make([]*restartEnvTarget, 0, len(input.EnvNames))
-		for _, envName := range input.EnvNames {
-			target, err := h.resolveRestartTargetByEnvName(ctx, app, envName, nil)
-			if err != nil {
-				return nil, nil, err
-			}
-			targets = append(targets, target)
-		}
-		return targets, nil, nil
+	switch {
+	case input.Envs != nil:
+		targets, err := lo.MapErr(input.Envs.Names, func(envName string, _ int) (*restartEnvTarget, error) {
+			return h.resolveRestartTargetByEnvName(ctx, app, envName, nil)
+		})
+		return targets, nil, err
 
-	case slz.RestartTargetTypeInstances:
-		target, err := h.resolveRestartTargetByEnvName(ctx, app, input.EnvName, input.InstanceIDs)
+	case input.Instances != nil:
+		target, err := h.resolveRestartTargetByEnvName(
+			ctx, app, input.Instances.EnvName, input.Instances.InstanceIDs,
+		)
 		if err != nil {
 			return nil, nil, err
 		}
 		return []*restartEnvTarget{target}, nil, nil
 
-	case slz.RestartTargetTypeEnvTypes:
-		envs, err := store.Of(h.registry.DB, envmodel.EnvMeta).
-			List(ctx, envmodel.InWorkspace(app.WorkspaceID), envmodel.VisibleToApp(app.ID), envmodel.NewestFirst())
-		if err != nil {
-			return nil, nil, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "list envs of app %s", app.ID)
-		}
-
-		var targets []*restartEnvTarget
-		var skipped []*slz.RestartSkippedEnv
-		for i := range envs {
-			env := &envs[i]
-			if !lo.Contains(input.EnvTypes, env.Type) {
-				continue
-			}
-			target, err := h.resolveRestartTarget(ctx, app, env, nil)
-			if err != nil {
-				skipped = append(skipped, &slz.RestartSkippedEnv{
-					EnvName: env.Name, EnvType: env.Type, Reason: err.Error(),
-				})
-				continue
-			}
-			targets = append(targets, target)
-		}
-		return targets, skipped, nil
+	case input.EnvTypes != nil:
+		return h.resolveRestartTargetsByEnvTypes(ctx, app, input.EnvTypes.Types)
 
 	default:
-		return nil, nil, bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "invalid targetType: %s", input.TargetType)
+		return nil, nil, bkerrs.New(bkerrs.ErrCodeInvalidArgument, "no restart target specified")
 	}
+}
+
+// resolveRestartTargetsByEnvTypes 解析匹配环境类型的所有环境，不满足条件的环境被跳过并返回跳过原因
+func (h *Handler) resolveRestartTargetsByEnvTypes(
+	ctx context.Context, app *bkmsapp.Application, envTypes []string,
+) ([]*restartEnvTarget, []*slz.RestartSkippedEnv, error) {
+	envs, err := store.Of(h.registry.DB, envmodel.EnvMeta).
+		List(ctx, envmodel.InWorkspace(app.WorkspaceID), envmodel.VisibleToApp(app.ID), envmodel.NewestFirst())
+	if err != nil {
+		return nil, nil, bkerrs.Wrapf(err, bkerrs.ErrCodeInternalServerError, "list envs of app %s", app.ID)
+	}
+	matched := lo.Filter(envs, func(env envmodel.Environment, _ int) bool {
+		return lo.Contains(envTypes, env.Type)
+	})
+
+	var targets []*restartEnvTarget
+	var skipped []*slz.RestartSkippedEnv
+	for i := range matched {
+		env := &matched[i]
+		target, err := h.resolveRestartTarget(ctx, app, env, nil)
+		if err != nil {
+			skipped = append(
+				skipped,
+				&slz.RestartSkippedEnv{EnvName: env.Name, EnvType: env.Type, Reason: err.Error()},
+			)
+			continue
+		}
+		targets = append(targets, target)
+	}
+	return targets, skipped, nil
 }
 
 // resolveRestartTargetByEnvName 按环境名称解析重启目标
@@ -228,8 +232,8 @@ func buildRestartTargets(envTargets []*restartEnvTarget, token string) []devmode
 		if !ok {
 			executor = k8sclient.NewPodClient(&cluster.Config{
 				Rest: &rest.Config{
-					Host:            buildClusterAddress(clusterID),
 					BearerToken:     token,
+					Host:            buildClusterAddress(clusterID),
 					TLSClientConfig: rest.TLSClientConfig{Insecure: true},
 				},
 				ClusterID: clusterID,
@@ -257,7 +261,7 @@ func addRestartAuditRecords(ctx context.Context, app *bkmsapp.Application, resul
 			audit.ResourceTypeInstance,
 			result.Instance,
 			audit.WithResult(lo.Ternary(
-				result.Status == devmode.PublishStatusSuccess, audit.ResultSuccess, audit.ResultFailed,
+				result.Status == devmode.RecordStatusSuccess, audit.ResultSuccess, audit.ResultFailed,
 			)),
 			audit.WithDataAfter(map[string]any{
 				"oldPID":  result.OldPID,
@@ -271,28 +275,25 @@ func addRestartAuditRecords(ctx context.Context, app *bkmsapp.Application, resul
 	}
 }
 
-// buildRestartOutput 按环境分组组装重启响应，results 与 envTargets 中实例的顺序一致
+// buildRestartOutput 按环境分组组装重启响应
 func buildRestartOutput(
 	envTargets []*restartEnvTarget,
 	results []devmode.RestartInstanceResult,
 	skipped []*slz.RestartSkippedEnv,
 ) *slz.RestartOutput {
-	envs := make([]*slz.RestartEnvResult, 0, len(envTargets))
-	offset := 0
-	for _, target := range envTargets {
-		envResults := results[offset : offset+len(target.instanceIDs)]
-		offset += len(target.instanceIDs)
-		envs = append(envs, &slz.RestartEnvResult{
+	resultsByEnv := lo.GroupBy(results, func(result devmode.RestartInstanceResult) string { return result.EnvName })
+	envs := lo.Map(envTargets, func(target *restartEnvTarget, _ int) *slz.RestartEnvResult {
+		return &slz.RestartEnvResult{
 			EnvName: target.env.Name,
 			EnvType: target.env.Type,
 			Instances: lo.Map(
-				envResults,
+				resultsByEnv[target.env.Name],
 				func(result devmode.RestartInstanceResult, _ int) *slz.RestartInstanceResult {
 					return new(slz.RestartInstanceResult).FromModel(result)
 				},
 			),
-		})
-	}
+		}
+	})
 	return &slz.RestartOutput{
 		Data: &slz.RestartData{Envs: envs, Skipped: lo.Ternary(skipped == nil, []*slz.RestartSkippedEnv{}, skipped)},
 	}
