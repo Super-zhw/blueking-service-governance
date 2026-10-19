@@ -54,7 +54,8 @@ func NewestFirst() store.Opt {
 	return store.Combine(store.Desc("createdAt"), store.Desc("_id"))
 }
 
-// ListLatestByInstance 返回指定实例中每个实例最新的一条发布记录，key 为实例名，没有记录的实例不在其中
+// ListLatestByInstance 返回指定实例中每个实例最新的一条发布记录，key 为实例名，没有记录的实例不在其中。
+// restart 记录不涉及二进制变更，不参与「最近一次发布」的计算
 func ListLatestByInstance(
 	ctx context.Context, db *mongo.Database, appID, envName string, instanceIDs []string,
 ) (map[string]*PublishRecord, error) {
@@ -64,6 +65,8 @@ func ListLatestByInstance(
 	records, err := store.Of(db, PublishRecordMeta).ListLatestBy(ctx, []string{"instance"},
 		ByAppEnv(appID, envName),
 		store.Where("instance", bson.M{"$in": instanceIDs}),
+		// 历史数据无 action 字段，$ne 可同时匹配字段缺失的记录
+		store.Where("action", bson.M{"$ne": PublishActionRestart}),
 		store.Asc("instance"), store.Desc("createdAt"),
 	)
 	if err != nil {

@@ -28,8 +28,13 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 )
 
+// actionRestart 进程重启记录的操作类型
+const actionRestart = "restart"
+
 // PublishRecordRow 发布记录展示行
 type PublishRecordRow struct {
+	// Action 操作类型：publish / restart
+	Action     string `json:"action"`
 	Instance   string `json:"instance"`
 	BinaryName string `json:"binaryName"`
 	FileSize   string `json:"fileSize"`
@@ -53,10 +58,13 @@ func ListHistory(
 	}
 
 	rows := lo.Map(records, func(record client.DevModePublishRecord, _ int) PublishRecordRow {
+		// restart 记录不涉及二进制文件，不展示文件大小
+		fileSize := lo.Ternary(record.Action == actionRestart, "", formatFileSize(record.FileSize))
 		return PublishRecordRow{
+			Action:     lo.CoalesceOrEmpty(record.Action, "publish"),
 			Instance:   record.Instance,
 			BinaryName: record.BinaryName,
-			FileSize:   formatFileSize(record.FileSize),
+			FileSize:   fileSize,
 			MD5:        record.MD5,
 			Status:     record.Status,
 			Message:    record.Message,

@@ -125,5 +125,44 @@ var _ = Describe("PublishRecord store", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(latest).To(BeEmpty())
 		})
+
+		It("should ignore restart records", func() {
+			// 历史数据无 action 字段
+			mustCreate(newRecord("pod-1", "v1", devmode.PublishStatusSuccess))
+			time.Sleep(10 * time.Millisecond)
+			// pod-1 之后进行了 restart；pod-2 只有 restart 记录
+			restart1 := newRecord("pod-1", "", devmode.PublishStatusSuccess)
+			restart1.Action = devmode.PublishActionRestart
+			restart2 := newRecord("pod-2", "", devmode.PublishStatusSuccess)
+			restart2.Action = devmode.PublishActionRestart
+			mustCreate(restart1, restart2)
+
+			latest, err := devmode.ListLatestByInstance(ctx, db, appID, envName, []string{"pod-1", "pod-2"})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(latest).To(HaveLen(1))
+			Expect(latest["pod-1"].BinaryName).To(Equal("v1"))
+			Expect(latest["pod-1"].GetAction()).To(Equal(devmode.PublishActionPublish))
+		})
+	})
+
+	Describe("listing with restart records", func() {
+		It("should return both publish and restart records", func() {
+			publish := newRecord("pod-1", "v1", devmode.PublishStatusSuccess)
+			publish.Action = devmode.PublishActionPublish
+			restart := newRecord("pod-1", "", devmode.PublishStatusSuccess)
+			restart.Action = devmode.PublishActionRestart
+			mustCreate(publish, restart)
+
+			page, err := records.ListPage(ctx, 1, 10, devmode.ByAppEnv(appID, envName), devmode.NewestFirst())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(page.Total).To(Equal(int64(2)))
+			Expect(
+				lo.Map(
+					page.Items,
+					func(r devmode.PublishRecord, _ int) devmode.PublishAction { return r.GetAction() },
+				),
+			).
+				To(ConsistOf(devmode.PublishActionPublish, devmode.PublishActionRestart))
+		})
 	})
 })

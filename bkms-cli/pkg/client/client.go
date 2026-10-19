@@ -42,6 +42,8 @@ const (
 	DefaultListAppConfigFileVersionsPageSize = 100
 	// DefaultListAppInstancesPageSize 获取应用实例列表时的每页默认数量。
 	DefaultListAppInstancesPageSize = 100
+	// longRunningRequestTimeout 同步长耗时请求（如开发模式进程重启）的超时时间
+	longRunningRequestTimeout = 90 * time.Second
 )
 
 // 接口兼容性断言
@@ -54,6 +56,8 @@ var ErrTokenExpiredOrInvalid = errors.New("access token expired or invalid")
 type SvcBasedClient struct {
 	cli     *resty.Client
 	authCli *resty.Client
+	// longCli 用于非幂等的同步长耗时请求：超时更长且不自动重试（重试会导致操作被重复执行）
+	longCli *resty.Client
 }
 
 // New 新建 SvcBasedClient 实例
@@ -96,7 +100,17 @@ func New() Client {
 		SetTimeout(10*time.Second).
 		SetHeader("User-Agent", version.UserAgent())
 
-	return &SvcBasedClient{cli: bizCli, authCli: authCli}
+	longCli := resty.New().
+		SetTransport(transport).
+		SetBaseURL(config.G.BkmsBaseURL).
+		SetTimeout(longRunningRequestTimeout).
+		SetHeaders(map[string]string{
+			"Content-Type":  "application/json",
+			"Authorization": fmt.Sprintf("Bearer %s", config.G.AccessToken),
+			"User-Agent":    version.UserAgent(),
+		})
+
+	return &SvcBasedClient{cli: bizCli, authCli: authCli, longCli: longCli}
 }
 
 // ValidateAccessToken 通过 AccessToken 获取用户名信息
@@ -231,6 +245,29 @@ func (c *SvcBasedClient) ListDevModePublishRecords(
 	}
 
 	return respData.Data.Results, nil
+}
+
+// RestartDevModeProcesses 开发模式进程重启（同步接口，耗时较长且非幂等，使用不重试的 longCli）
+func (c *SvcBasedClient) RestartDevModeProcesses(
+	ctx context.Context,
+	appID string,
+	opts DevModeRestartOptions,
+) (*DevModeRestartData, error) {
+	path := fmt.Sprintf("/bkms/v1/bkms-server/devmode/%s/restart", url.PathEscape(appID))
+
+	var respData DevModeRestartRespData
+	resp, err := c.longCli.R().SetContext(ctx).SetBody(opts).SetResult(&respData).Post(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "restart devmode processes request failed")
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return nil, formatAPIError(resp, "restart devmode processes")
+	}
+	if respData.Data == nil {
+		return nil, errors.New("restart devmode processes returned empty data")
+	}
+
+	return respData.Data, nil
 }
 
 // ListWorkspaces 获取工作空间列表

@@ -32,6 +32,20 @@ const (
 	PublishStatusSuccess PublishStatus = "success"
 	// PublishStatusFailed 发布失败
 	PublishStatusFailed PublishStatus = "failed"
+	// PublishStatusPending 等待执行
+	PublishStatusPending PublishStatus = "pending"
+	// PublishStatusRunning 执行中
+	PublishStatusRunning PublishStatus = "running"
+)
+
+// PublishAction 开发模式发布记录的操作类型
+type PublishAction string
+
+const (
+	// PublishActionPublish 发布二进制并热重启
+	PublishActionPublish PublishAction = "publish"
+	// PublishActionRestart 仅重启业务进程（不替换二进制）
+	PublishActionRestart PublishAction = "restart"
 )
 
 // PublishRecord 开发模式发布记录（每个实例/pod 一条）
@@ -44,6 +58,8 @@ type PublishRecord struct {
 	// EnvName 环境名称
 	EnvName string `bson:"envName"`
 
+	// Action 操作类型：publish / restart，历史数据为空，按 publish 处理
+	Action PublishAction `bson:"action,omitempty"`
 	// Instance 目标实例（pod）名称
 	Instance string `bson:"instance"`
 	// BinaryName 发布的二进制名称
@@ -52,7 +68,7 @@ type PublishRecord struct {
 	FileSize int64 `bson:"fileSize"`
 	// MD5 文件 MD5 值
 	MD5 string `bson:"md5"`
-	// Status 发布状态：success / failed
+	// Status 发布状态：pending / running / success / failed
 	Status PublishStatus `bson:"status"`
 	// Message 失败原因等附加信息
 	Message string `bson:"message"`
@@ -63,4 +79,12 @@ type PublishRecord struct {
 	CreatedAt time.Time `bson:"createdAt"`
 	// UpdatedAt 更新时间
 	UpdatedAt time.Time `bson:"updatedAt"`
+}
+
+// GetAction 获取操作类型，历史数据未设置时按 publish 处理
+func (r *PublishRecord) GetAction() PublishAction {
+	if r.Action == "" {
+		return PublishActionPublish
+	}
+	return r.Action
 }

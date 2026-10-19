@@ -25,6 +25,7 @@ type DevModeHandler interface {
 	DevModePublishPreflight(c *gin.Context)
 	CreateDevModePublishRecords(c *gin.Context)
 	ListDevModePublishRecords(c *gin.Context)
+	RestartDevModeProcesses(c *gin.Context)
 }
 
 // RegisterRoutes registers Gin devmode routes.
@@ -35,4 +36,6 @@ func RegisterRoutes(rg *gin.RouterGroup, h DevModeHandler) {
 	rg.POST("/devmode/:appID/envs/:envName/publish-records", h.CreateDevModePublishRecords)
 	// 查询开发模式发布记录列表
 	rg.GET("/devmode/:appID/envs/:envName/publish-records", h.ListDevModePublishRecords)
+	// 开发模式进程重启（同步：stop 业务进程后由 monitor 重新拉起）
+	rg.POST("/devmode/:appID/restart", h.RestartDevModeProcesses)
 }

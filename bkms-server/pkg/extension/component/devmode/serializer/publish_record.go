@@ -89,6 +89,7 @@ type PaginatedPublishRecords struct {
 // PublishRecordOutputObj 单条发布记录
 type PublishRecordOutputObj struct {
 	ID         string    `json:"id"`
+	Action     string    `json:"action"`
 	Instance   string    `json:"instance"`
 	BinaryName string    `json:"binaryName"`
 	FileSize   int64     `json:"fileSize"`
@@ -103,6 +104,7 @@ type PublishRecordOutputObj struct {
 // FromModel 将领域模型转换为输出对象
 func (o *PublishRecordOutputObj) FromModel(record devmode.PublishRecord) *PublishRecordOutputObj {
 	o.ID = record.ID.Hex()
+	o.Action = string(record.GetAction())
 	o.Instance = record.Instance
 	o.BinaryName = record.BinaryName
 	o.FileSize = record.FileSize
