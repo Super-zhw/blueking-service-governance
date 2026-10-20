@@ -35,9 +35,13 @@ func newRestartCmd() *cobra.Command {
 		Short: "Restart business processes in dev mode containers (pods are not recreated)",
 		Long: `Restart business processes in dev mode containers without recreating pods.
 
-The current binary is not replaced. The server stops the business process in each
-target instance and the dev mode monitor starts it again. Dev mode must be enabled
-for the target environments, and production environments are not allowed.
+The current binary is not replaced. The request is accepted asynchronously: the
+server queues the restart tasks and returns immediately. The CLI then keeps
+querying the restart records of the same target condition until every instance
+reaches a terminal state (success / failed), then prints the result and exits.
+
+Dev mode must be enabled for the target environments, and production environments
+are not allowed.
 
 Targets (exactly one of --env / --env-type is required, multiple values are comma-separated):
   --env           one or more environments, e.g. stage,test; restarts all Running
@@ -48,9 +52,8 @@ Targets (exactly one of --env / --env-type is required, multiple values are comm
   --instance-ids  one or more instances, e.g. pod1,pod2; only restarts the given
                   instances, requires a single --env
 
-Instances are restarted in parallel and the command waits until they are started
-again. When many instances are targeted the request may time out; the restart keeps
-running on the server, so check the actual results with 'bkms-cli app publish history'.`,
+The restart keeps running on the server even if the CLI is interrupted or the wait
+times out (10 minutes). Use 'bkms-cli app publish history' to check the final result.`,
 		Example: `  # Restart all Running instances in multiple environments
   bkms-cli app publish restart --app myapp --env stage,test
 

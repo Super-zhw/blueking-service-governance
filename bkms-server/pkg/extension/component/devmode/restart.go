@@ -28,7 +28,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"golang.org/x/sync/errgroup"
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
@@ -37,8 +36,6 @@ import (
 )
 
 const (
-	// restartConcurrency 单次重启请求内并行执行的实例数上限
-	restartConcurrency = 10
 	// restartExecTimeout 单次读取 pid.conf 的 exec 超时时间
 	restartExecTimeout = 10 * time.Second
 	// restartStopTimeout 执行 stop.sh 并清除停止标志的超时时间（taf 优雅退出最长约 15s）
@@ -76,6 +73,10 @@ type PodExecutor interface {
 type RestartTarget struct {
 	// EnvName 环境名称
 	EnvName string
+	// ClusterID 实例所在集群 ID
+	ClusterID string
+	// Address 集群 API 完整地址
+	Address string
 	// Namespace 实例所在命名空间
 	Namespace string
 	// Container 业务容器名称
@@ -84,8 +85,6 @@ type RestartTarget struct {
 	MountPath string
 	// InstanceIDs 目标实例（pod）名称列表
 	InstanceIDs []string
-	// Executor 访问该环境所在集群的 pod 命令执行器
-	Executor PodExecutor
 }
 
 // RestartInstanceResult 单个实例的重启结果
@@ -140,77 +139,75 @@ func NewRestarter(records *PublishRecordStore, opts ...RestarterOption) *Restart
 // errWaitStartTimeout 等待 monitor 拉起进程超时
 var errWaitStartTimeout = errors.New("timed out waiting for monitor to start the process")
 
-// restartTask 单个实例的重启任务
-type restartTask struct {
-	instance string
-	record   *PublishRecord
-	target   *RestartTarget
+// PreparedInstance 已写入 pending 记录、等待异步执行的实例
+type PreparedInstance struct {
+	// RecordID 发布记录 ID
+	RecordID bson.ObjectID
+	// Target 实例所属环境的重启目标
+	Target *RestartTarget
+	// Instance 实例（pod）名称
+	Instance string
 }
 
-// Restart 同步重启所有目标实例，返回结果按 targets 及其 InstanceIDs 的顺序排列。
-// 所有实例并行执行（上限 restartConcurrency），单个实例失败不影响其他实例；
-// 仅写入发布记录失败时返回 error。
-func (r *Restarter) Restart(
+// Prepare 为所有目标实例写入 pending 状态的 restart 记录，返回待执行实例列表。
+// 记录先于任务创建，异步执行时按记录 ID 更新状态。
+func (r *Restarter) Prepare(
 	ctx context.Context, appID, operator string, targets []RestartTarget,
-) ([]RestartInstanceResult, error) {
-	tasks, err := r.createPendingRecords(ctx, appID, operator, targets)
-	if err != nil {
-		return nil, err
-	}
-
-	// 记录更新不随请求取消，避免记录停留在 running
-	recordCtx := context.WithoutCancel(ctx)
-	results := make([]RestartInstanceResult, len(tasks))
-
-	var g errgroup.Group
-	g.SetLimit(restartConcurrency)
-	for i, task := range tasks {
-		g.Go(func() error {
-			r.updateRecord(recordCtx, task.record.ID, RecordStatusRunning, "")
-			startedAt := time.Now()
-			oldPID, newPID, err := r.restartInstance(ctx, task.target, task.instance)
-			results[i] = newRestartInstanceResult(task, oldPID, newPID, err)
-			r.observe(ctx, appID, results[i], err, startedAt)
-			r.updateRecord(recordCtx, task.record.ID, results[i].Status, results[i].Message)
-			return nil
-		})
-	}
-	_ = g.Wait()
-
-	return results, nil
-}
-
-// createPendingRecords 为所有目标实例写入 pending 状态的 restart 记录
-func (r *Restarter) createPendingRecords(
-	ctx context.Context, appID, operator string, targets []RestartTarget,
-) ([]restartTask, error) {
-	tasks := lo.FlatMap(targets, func(_ RestartTarget, i int) []restartTask {
-		target := &targets[i]
-		return lo.Map(target.InstanceIDs, func(instance string, _ int) restartTask {
-			return restartTask{
-				instance: instance,
-				record: &PublishRecord{
-					AppID:    appID,
-					EnvName:  target.EnvName,
-					Action:   RecordActionRestart,
-					Instance: instance,
-					Status:   RecordStatusPending,
-					Operator: operator,
-				},
-				target: target,
-			}
+) ([]PreparedInstance, error) {
+	prepared := lo.FlatMap(targets, func(target RestartTarget, i int) []PreparedInstance {
+		return lo.Map(targets[i].InstanceIDs, func(instance string, _ int) PreparedInstance {
+			return PreparedInstance{Target: &targets[i], Instance: instance}
 		})
 	})
-	if len(tasks) == 0 {
+	if len(prepared) == 0 {
 		return nil, nil
 	}
 
+	records := lo.Map(prepared, func(_ PreparedInstance, i int) *PublishRecord {
+		return &PublishRecord{
+			AppID:    appID,
+			EnvName:  prepared[i].Target.EnvName,
+			Action:   RecordActionRestart,
+			Instance: prepared[i].Instance,
+			Status:   RecordStatusPending,
+			Operator: operator,
+		}
+	})
 	// CreateMany 会将生成的 ID 回填到各 record 中
-	records := lo.Map(tasks, func(task restartTask, _ int) *PublishRecord { return task.record })
 	if err := r.records.CreateMany(ctx, records); err != nil {
 		return nil, errors.Wrapf(err, "create restart records for app %s", appID)
 	}
-	return tasks, nil
+	for i := range prepared {
+		prepared[i].RecordID = records[i].ID
+	}
+	return prepared, nil
+}
+
+// Execute 执行单个实例的重启并更新记录状态，返回执行结果。
+// executor 由调用方按环境所在集群构建（异步任务中在执行时获取用户 Token 后构建）。
+func (r *Restarter) Execute(
+	ctx context.Context,
+	appID string,
+	recordID bson.ObjectID,
+	target *RestartTarget,
+	instance string,
+	executor PodExecutor,
+) RestartInstanceResult {
+	// 记录更新不随请求取消，避免记录停留在 running
+	recordCtx := context.WithoutCancel(ctx)
+	r.updateRecord(recordCtx, recordID, RecordStatusRunning, "")
+
+	startedAt := time.Now()
+	oldPID, newPID, err := r.restartInstance(ctx, target, instance, executor)
+	result := newRestartInstanceResult(target.EnvName, instance, oldPID, newPID, err)
+	r.observe(ctx, appID, result, err, startedAt)
+	r.updateRecord(recordCtx, recordID, result.Status, result.Message)
+	return result
+}
+
+// MarkFailed 将 pending 状态的记录直接标记为失败（如任务投递失败）
+func (r *Restarter) MarkFailed(ctx context.Context, recordID bson.ObjectID, message string) {
+	r.updateRecord(context.WithoutCancel(ctx), recordID, RecordStatusFailed, message)
 }
 
 // updateRecord 更新重启记录状态（best-effort，失败仅记录日志）
@@ -247,8 +244,8 @@ func (r *Restarter) observe(
 }
 
 // newRestartInstanceResult 将单实例的执行结果转换为 RestartInstanceResult
-func newRestartInstanceResult(task restartTask, oldPID, newPID string, err error) RestartInstanceResult {
-	result := RestartInstanceResult{EnvName: task.target.EnvName, Instance: task.instance, OldPID: oldPID}
+func newRestartInstanceResult(envName, instance, oldPID, newPID string, err error) RestartInstanceResult {
+	result := RestartInstanceResult{EnvName: envName, Instance: instance, OldPID: oldPID}
 	if err != nil {
 		result.Status = RecordStatusFailed
 		result.Message = err.Error()
@@ -263,9 +260,9 @@ func newRestartInstanceResult(task restartTask, oldPID, newPID string, err error
 // restartInstance 重启单个实例（pod）：读取旧 PID → stop 并清除停止标志 → 等待 monitor 拉起（pid.conf 重新生成）。
 // 返回旧 PID（pid.conf 不存在时为空，仅用于展示）与新 PID；读取旧 PID 失败时不会执行 stop。
 func (r *Restarter) restartInstance(
-	ctx context.Context, target *RestartTarget, instance string,
+	ctx context.Context, target *RestartTarget, instance string, executor PodExecutor,
 ) (oldPID, newPID string, err error) {
-	oldPID, _, err = r.readPID(ctx, target, instance)
+	oldPID, _, err = r.readPID(ctx, target, instance, executor)
 	if err != nil {
 		return "", "", errors.Wrap(err, "read pid.conf")
 	}
@@ -274,7 +271,7 @@ func (r *Restarter) restartInstance(
 	opCtx := context.WithoutCancel(ctx)
 	stopCtx, cancel := context.WithTimeout(opCtx, restartStopTimeout)
 	defer cancel()
-	stopRet, err := r.exec(stopCtx, target, instance, stopProcessScript)
+	stopRet, err := r.exec(stopCtx, target, instance, stopProcessScript, executor)
 	if err != nil {
 		return oldPID, "", errors.Wrap(err, "stop process")
 	}
@@ -285,7 +282,7 @@ func (r *Restarter) restartInstance(
 		return oldPID, "", errors.Errorf("stop process: stop.sh exited with code %d", stopRet.ExitCode)
 	}
 
-	newPID, err = r.waitProcessStarted(opCtx, target, instance)
+	newPID, err = r.waitProcessStarted(opCtx, target, instance, executor)
 	if err != nil {
 		return oldPID, "", errors.Wrap(err, "process stopped but not started")
 	}
@@ -293,7 +290,9 @@ func (r *Restarter) restartInstance(
 }
 
 // waitProcessStarted 轮询 pid.conf 直到文件出现或超时，返回新 PID
-func (r *Restarter) waitProcessStarted(ctx context.Context, target *RestartTarget, instance string) (string, error) {
+func (r *Restarter) waitProcessStarted(
+	ctx context.Context, target *RestartTarget, instance string, executor PodExecutor,
+) (string, error) {
 	waitCtx, cancel := context.WithTimeout(ctx, r.waitStartTimeout)
 	defer cancel()
 
@@ -303,7 +302,7 @@ func (r *Restarter) waitProcessStarted(ctx context.Context, target *RestartTarge
 		select {
 		case <-ticker.C:
 			// exec 异常（如网络抖动）不中断轮询，直到超时
-			pid, exists, err := r.readPID(waitCtx, target, instance)
+			pid, exists, err := r.readPID(waitCtx, target, instance, executor)
 			if err == nil && exists {
 				return pid, nil
 			}
@@ -314,11 +313,13 @@ func (r *Restarter) waitProcessStarted(ctx context.Context, target *RestartTarge
 }
 
 // readPID 读取 pid.conf，返回 PID 及文件是否存在
-func (r *Restarter) readPID(ctx context.Context, target *RestartTarget, instance string) (string, bool, error) {
+func (r *Restarter) readPID(
+	ctx context.Context, target *RestartTarget, instance string, executor PodExecutor,
+) (string, bool, error) {
 	execCtx, cancel := context.WithTimeout(ctx, restartExecTimeout)
 	defer cancel()
 
-	ret, err := r.exec(execCtx, target, instance, readPIDScript)
+	ret, err := r.exec(execCtx, target, instance, readPIDScript, executor)
 	if err != nil {
 		return "", false, err
 	}
@@ -330,10 +331,10 @@ func (r *Restarter) readPID(ctx context.Context, target *RestartTarget, instance
 
 // exec 在目标实例内执行脚本，$1 为脚本挂载路径
 func (r *Restarter) exec(
-	ctx context.Context, target *RestartTarget, instance, script string,
+	ctx context.Context, target *RestartTarget, instance, script string, executor PodExecutor,
 ) (*k8sclient.ExecResult, error) {
 	cmd := []string{"bash", "-c", script, "bash", target.MountPath}
-	ret, err := target.Executor.Exec(ctx, target.Namespace, instance, target.Container, cmd)
+	ret, err := executor.Exec(ctx, target.Namespace, instance, target.Container, cmd)
 	if err != nil {
 		return nil, errors.Wrapf(err, "exec in instance %s of env %s", instance, target.EnvName)
 	}

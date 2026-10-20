@@ -7664,6 +7664,8 @@ definitions:
         type: string
       createdAt:
         type: string
+      envName:
+        type: string
       fileSize:
         type: integer
       id:
@@ -8169,29 +8171,16 @@ definitions:
     type: object
   serializer.RestartData:
     properties:
-      envs:
-        description: Envs 按环境分组的实例重启结果
-        items:
-          $ref: '#/definitions/serializer.RestartEnvResult'
-        type: array
+      queued:
+        description: Queued 已投递到任务队列的实例数
+        type: integer
+      requestedAt:
+        description: RequestedAt 服务端受理时间，用于按条件轮询本次提交产生的记录
+        type: string
       skipped:
-        description: Skipped 被跳过的环境（仅 targetType=envTypes 时可能出现）
+        description: Skipped 被跳过的环境（仅按环境类型指定时可能出现）
         items:
           $ref: '#/definitions/serializer.RestartSkippedEnv'
-        type: array
-    type: object
-  serializer.RestartEnvResult:
-    properties:
-      envName:
-        description: EnvName 环境名称
-        type: string
-      envType:
-        description: EnvType 环境类型
-        type: string
-      instances:
-        description: Instances 实例重启结果
-        items:
-          $ref: '#/definitions/serializer.RestartInstanceResult'
         type: array
     type: object
   serializer.RestartEnvTypesTarget:
@@ -8232,24 +8221,6 @@ definitions:
         allOf:
         - $ref: '#/definitions/serializer.RestartInstancesTarget'
         description: Instances 重启指定环境下的指定实例
-    type: object
-  serializer.RestartInstanceResult:
-    properties:
-      instance:
-        description: Instance 实例（pod）名称
-        type: string
-      message:
-        description: Message 结果说明
-        type: string
-      newPID:
-        description: NewPID 重启后的业务进程 PID
-        type: string
-      oldPID:
-        description: OldPID 重启前的业务进程 PID
-        type: string
-      status:
-        description: Status 重启结果：success / failed
-        type: string
     type: object
   serializer.RestartInstancesTarget:
     properties:
@@ -18156,54 +18127,6 @@ paths:
       tags:
       - devmode
   /devmode/{appID}/envs/{envName}/publish-records:
-    get:
-      operationId: ListDevModePublishRecords
-      parameters:
-      - description: 应用 ID
-        in: path
-        name: appID
-        required: true
-        type: string
-      - description: 环境名称
-        in: path
-        name: envName
-        required: true
-        type: string
-      - description: 搜索关键字
-        in: query
-        name: keyword
-        type: string
-      - description: 分页页码（从 1 开始）
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: 分页大小
-        in: query
-        name: pageSize
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/serializer.ListPublishRecordsOutput'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/bkerrs.GinErrorOutput'
-      security:
-      - BkUserInfo: []
-      - BkUserCredential: []
-      summary: 获取开发模式发布记录列表
-      tags:
-      - devmode
     post:
       consumes:
       - application/json
@@ -18246,6 +18169,64 @@ paths:
       summary: 上报开发模式发布结果
       tags:
       - devmode
+  /devmode/{appID}/publish-records:
+    get:
+      operationId: ListDevModePublishRecords
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: 环境名称，多个用逗号分隔；与 envTypes 二选一
+        in: query
+        items:
+          type: string
+        name: envNames
+        type: array
+      - collectionFormat: csv
+        description: 环境类型，多个用逗号分隔；与 envNames 二选一
+        in: query
+        items:
+          type: string
+        name: envTypes
+        type: array
+      - description: 搜索关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 分页页码（从 1 开始）
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: 只返回创建时间不早于该时间的记录（RFC3339）
+        in: query
+        name: since
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListPublishRecordsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取开发模式发布记录列表
+      tags:
+      - devmode
   /devmode/{appID}/restart:
     post:
       consumes:
@@ -18266,8 +18247,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "202":
+          description: Accepted
           schema:
             $ref: '#/definitions/serializer.RestartOutput'
         "400":

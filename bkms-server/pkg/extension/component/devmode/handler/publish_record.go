@@ -20,11 +20,13 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
+	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode/serializer"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
@@ -118,7 +120,7 @@ func (h *Handler) CreateDevModePublishRecords(c *gin.Context) {
 }
 
 // ListDevModePublishRecords 获取开发模式发布记录列表。
-// 每个实例（pod）对应一条记录，按创建时间倒序返回。
+// envNames 与 envTypes 二选一，跨环境统一分页，按创建时间倒序返回。
 //
 //	@ID			ListDevModePublishRecords
 //	@Summary	获取开发模式发布记录列表
@@ -126,37 +128,88 @@ func (h *Handler) CreateDevModePublishRecords(c *gin.Context) {
 //	@Produce	json
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential
-//	@Param		appID		path		string	true	"应用 ID"
-//	@Param		envName		path		string	true	"环境名称"
-//	@Param		keyword		query		string	false	"搜索关键字"
-//	@Param		page		query		int		true	"分页页码（从 1 开始）"
-//	@Param		pageSize	query		int		true	"分页大小"
+//	@Param		appID		path		string									true	"应用 ID"
+//	@Param		envNames	query		[]string								false	"环境名称，多个用逗号分隔；与 envTypes 二选一"
+//	@Param		envTypes	query		[]string								false	"环境类型，多个用逗号分隔；与 envNames 二选一"
+//
+//	@Param		keyword		query		string									false	"搜索关键字"
+//	@Param		page		query		int										true	"分页页码（从 1 开始）"
+//	@Param		pageSize	query		int										true	"分页大小"
+//	@Param		since		query		string									false	"只返回创建时间不早于该时间的记录（RFC3339）"
 //	@Success	200			{object}	slz.ListPublishRecordsOutput
 //	@Failure	400			{object}	bkerrs.GinErrorOutput
-//	@Failure	404			{object}	bkerrs.GinErrorOutput
-//	@Router		/devmode/{appID}/envs/{envName}/publish-records [get]
+//	@Router		/devmode/{appID}/publish-records [get]
 func (h *Handler) ListDevModePublishRecords(c *gin.Context) {
-	var uriInput slz.PublishRecordURIInput
-	var input slz.ListPublishRecordsInput
+	var uriInput slz.PublishRecordAppURIInput
+	var input slz.ListPublishRecordsByScopeInput
 	if err := ginutils.BindURIQuery(c, &uriInput, &input); err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+	if err := input.Validate(); err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
 	ctx := c.Request.Context()
 
-	app, _, err := perm.ValidateAppEnvByName(ctx, h.registry, uriInput.AppID, uriInput.EnvName, perm.TypeView)
+	app, err := perm.ValidateAppByID(ctx, h.registry, uriInput.AppID, perm.TypeView)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
 
-	page, err := store.Of(h.registry.DB, devmode.PublishRecordMeta).ListPage(ctx, input.Page, input.PageSize,
-		devmode.ByAppEnv(app.ID, uriInput.EnvName), devmode.KeywordMatches(input.Keyword), devmode.NewestFirst(),
-	)
+	envs, err := store.Of(h.registry.DB, envmodel.EnvMeta).
+		List(ctx, envmodel.InWorkspace(app.WorkspaceID), envmodel.VisibleToApp(app.ID), envmodel.NewestFirst())
 	if err != nil {
 		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
-			err, bkerrs.ErrCodeInternalServerError, "list devmode publish records for app %s env %s",
-			app.ID, uriInput.EnvName,
+			err, bkerrs.ErrCodeInternalServerError, "list envs of app %s", app.ID,
+		))
+		return
+	}
+	var envNames []string
+	if len(input.EnvNames) > 0 {
+		visible := lo.SliceToMap(envs, func(env envmodel.Environment) (string, struct{}) {
+			return env.Name, struct{}{}
+		})
+		notFound := lo.Filter(input.EnvNames, func(name string, _ int) bool {
+			_, ok := visible[name]
+			return !ok
+		})
+		if len(notFound) > 0 {
+			bkerrs.AbortWithErr(c, bkerrs.Errorf(
+				bkerrs.ErrCodeNotFound, "environments not found: %v", notFound,
+			))
+			return
+		}
+		envNames = input.EnvNames
+	} else {
+		envNames = lo.FilterMap(envs, func(env envmodel.Environment, _ int) (string, bool) {
+			return env.Name, lo.Contains(input.EnvTypes, env.Type)
+		})
+	}
+	if len(envNames) == 0 {
+		ginutils.OK(c, slz.ListPublishRecordsOutput{
+			Data: slz.PaginatedPublishRecords{Results: []*slz.PublishRecordOutputObj{}},
+		})
+		return
+	}
+
+	since, err := parseSince(input.Since)
+	if err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+	opts := []store.Opt{
+		devmode.ByAppEnvs(app.ID, envNames), devmode.KeywordMatches(input.Keyword), devmode.NewestFirst(),
+	}
+	if since != nil {
+		opts = append(opts, devmode.CreatedSince(*since))
+	}
+	page, err := store.Of(h.registry.DB, devmode.PublishRecordMeta).ListPage(ctx, input.Page, input.PageSize, opts...)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
+			err, bkerrs.ErrCodeInternalServerError, "list devmode publish records for app %s envs %v",
+			app.ID, envNames,
 		))
 		return
 	}
@@ -167,6 +220,20 @@ func (h *Handler) ListDevModePublishRecords(c *gin.Context) {
 	ginutils.OK(c, slz.ListPublishRecordsOutput{
 		Data: slz.PaginatedPublishRecords{Count: page.Total, Results: outputRecords},
 	})
+}
+
+// parseSince 解析 since 查询参数（RFC3339），为空时返回 nil
+func parseSince(raw string) (*time.Time, error) {
+	if raw == "" {
+		return nil, nil
+	}
+	since, err := time.Parse(time.RFC3339, raw)
+	if err != nil {
+		return nil, bkerrs.Errorf(
+			bkerrs.ErrCodeInvalidArgument, "invalid since %q, expect RFC3339 format", raw,
+		)
+	}
+	return &since, nil
 }
 
 // publishAuditResult 将单个实例的发布状态映射为审计结果。

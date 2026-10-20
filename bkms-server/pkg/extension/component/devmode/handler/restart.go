@@ -20,11 +20,13 @@ package handler
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"k8s.io/client-go/rest"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
@@ -32,11 +34,9 @@ import (
 	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode/serializer"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
-	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/perm"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/taskqtask/devmoderestart"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
@@ -49,8 +49,8 @@ type restartEnvTarget struct {
 	instanceIDs []string
 }
 
-// RestartDevModeProcesses 开发模式进程重启接口。
-// 同步完成：stop 业务进程并清除停止标志，由 monitor 重新拉起，pod 不重建。
+// RestartDevModeProcesses 开发模式进程重启接口（异步）。
+// 同步创建 pending 记录并投递任务后立即返回，由 worker 逐个实例执行 stop → 等待 monitor 拉起。
 //
 //	@ID			RestartDevModeProcesses
 //	@Summary	开发模式进程重启
@@ -61,7 +61,7 @@ type restartEnvTarget struct {
 //	@Security	BkUserCredential
 //	@Param		appID	path		string				true	"应用 ID"
 //	@Param		body	body		slz.RestartInput	true	"进程重启请求体"
-//	@Success	200		{object}	slz.RestartOutput
+//	@Success	202		{object}	slz.RestartOutput
 //	@Failure	400		{object}	bkerrs.GinErrorOutput
 //	@Router		/devmode/{appID}/restart [post]
 func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
@@ -85,7 +85,7 @@ func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
-	app, err := perm.ValidateAppByID(ctx, h.registry, uriInput.AppID, perm.TypeDeploy)
+	app, err := perm.ValidateAppByID(ctx, h.registry, uriInput.AppID, perm.TypeEdit)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -98,31 +98,54 @@ func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 		return
 	}
 	if len(envTargets) == 0 {
-		ginutils.OK(c, buildRestartOutput(nil, nil, skipped))
+		ginutils.JSON(c, http.StatusAccepted, buildRestartOutput(time.Now(), 0, skipped))
 		return
 	}
 
-	// 获取用户 Token，用于访问各环境所在集群
+	// 获取 BCS 项目 Code，worker 执行时按用户身份重新获取 Token
 	bcsProjectCode, err := h.getBCSProjectCode(ctx, app.WorkspaceID)
 	if err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
-	token, err := h.fetchActiveToken(ctx, bcsProjectCode)
+
+	requestedAt := time.Now()
+	restarter := devmode.NewRestarter(store.Of(h.registry.DB, devmode.PublishRecordMeta))
+	prepared, err := restarter.Prepare(
+		ctx, app.ID, auth.MustGetUser(ctx).ID, buildRestartTargets(envTargets),
+	)
 	if err != nil {
-		bkerrs.AbortWithErr(c, err)
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "prepare devmode restart records"))
 		return
 	}
 
-	results, err := devmode.NewRestarter(store.Of(h.registry.DB, devmode.PublishRecordMeta)).
-		Restart(ctx, app.ID, auth.MustGetUser(ctx).ID, buildRestartTargets(envTargets, token))
-	if err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "restart devmode processes"))
+	// 一次请求只投递一条任务消息，本次所有实例都在该消息中，由 worker 按最大 10 并发执行
+	instances := lo.Map(prepared, func(item devmode.PreparedInstance, _ int) devmoderestart.Instance {
+		return devmoderestart.Instance{
+			RecordID:  item.RecordID.Hex(),
+			EnvName:   item.Target.EnvName,
+			Instance:  item.Instance,
+			ClusterID: item.Target.ClusterID,
+			Address:   item.Target.Address,
+			Namespace: item.Target.Namespace,
+			Container: item.Target.Container,
+			MountPath: item.Target.MountPath,
+		}
+	})
+	if err = devmoderestart.Enqueue(ctx, devmoderestart.Args{
+		AppID:          app.ID,
+		WorkspaceID:    app.WorkspaceID,
+		BCSProjectCode: bcsProjectCode,
+		Instances:      instances,
+	}); err != nil {
+		for _, item := range prepared {
+			restarter.MarkFailed(ctx, item.RecordID, fmt.Sprintf("failed to enqueue restart task: %v", err))
+		}
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "enqueue devmode restart task"))
 		return
 	}
 
-	addRestartAuditRecords(ctx, app, results)
-	ginutils.OK(c, buildRestartOutput(envTargets, results, skipped))
+	ginutils.JSON(c, http.StatusAccepted, buildRestartOutput(requestedAt, len(prepared), skipped))
 }
 
 // resolveRestartTargets 按目标类型解析重启目标。
@@ -223,78 +246,31 @@ func (h *Handler) resolveRestartTarget(
 	return &restartEnvTarget{env: env, devModeSpec: devModeSpec, instanceIDs: ids}, nil
 }
 
-// buildRestartTargets 构造 Restarter 所需的重启目标，同一集群共用一个 pod 命令执行器
-func buildRestartTargets(envTargets []*restartEnvTarget, token string) []devmode.RestartTarget {
-	executors := make(map[string]devmode.PodExecutor)
+// buildRestartTargets 构造 Restarter 所需的重启目标
+func buildRestartTargets(envTargets []*restartEnvTarget) []devmode.RestartTarget {
 	return lo.Map(envTargets, func(target *restartEnvTarget, _ int) devmode.RestartTarget {
 		clusterID := target.env.Cluster.ClusterID
-		executor, ok := executors[clusterID]
-		if !ok {
-			executor = k8sclient.NewPodClient(&cluster.Config{
-				Rest: &rest.Config{
-					BearerToken:     token,
-					Host:            buildClusterAddress(clusterID),
-					TLSClientConfig: rest.TLSClientConfig{Insecure: true},
-				},
-				ClusterID: clusterID,
-			})
-			executors[clusterID] = executor
-		}
 		return devmode.RestartTarget{
 			EnvName:     target.env.Name,
+			ClusterID:   clusterID,
+			Address:     buildClusterAddress(clusterID),
 			Namespace:   target.env.Cluster.Namespace,
 			Container:   defaults.WorkloadMainContainerName,
 			MountPath:   lo.FromPtr(target.devModeSpec.MountPath),
 			InstanceIDs: target.instanceIDs,
-			Executor:    executor,
 		}
 	})
 }
 
-// addRestartAuditRecords 为每个实例写入操作审计记录
-func addRestartAuditRecords(ctx context.Context, app *bkmsapp.Application, results []devmode.RestartInstanceResult) {
-	recordCtx := context.WithoutCancel(ctx)
-	for _, result := range results {
-		go audit.AddOperationRecordAsync(
-			recordCtx,
-			audit.OperationTypeRestart,
-			audit.ResourceTypeInstance,
-			result.Instance,
-			audit.WithResult(lo.Ternary(
-				result.Status == devmode.RecordStatusSuccess, audit.ResultSuccess, audit.ResultFailed,
-			)),
-			audit.WithDataAfter(map[string]any{
-				"oldPID":  result.OldPID,
-				"newPID":  result.NewPID,
-				"message": result.Message,
-			}),
-			audit.WithWorkspaceID(app.WorkspaceID),
-			audit.WithAppID(app.ID),
-			audit.WithEnvName(result.EnvName),
-		)
-	}
-}
-
-// buildRestartOutput 按环境分组组装重启响应
+// buildRestartOutput 组装异步重启的提交结果
 func buildRestartOutput(
-	envTargets []*restartEnvTarget,
-	results []devmode.RestartInstanceResult,
-	skipped []*slz.RestartSkippedEnv,
+	requestedAt time.Time, queued int, skipped []*slz.RestartSkippedEnv,
 ) *slz.RestartOutput {
-	resultsByEnv := lo.GroupBy(results, func(result devmode.RestartInstanceResult) string { return result.EnvName })
-	envs := lo.Map(envTargets, func(target *restartEnvTarget, _ int) *slz.RestartEnvResult {
-		return &slz.RestartEnvResult{
-			EnvName: target.env.Name,
-			EnvType: target.env.Type,
-			Instances: lo.Map(
-				resultsByEnv[target.env.Name],
-				func(result devmode.RestartInstanceResult, _ int) *slz.RestartInstanceResult {
-					return new(slz.RestartInstanceResult).FromModel(result)
-				},
-			),
-		}
-	})
 	return &slz.RestartOutput{
-		Data: &slz.RestartData{Envs: envs, Skipped: lo.Ternary(skipped == nil, []*slz.RestartSkippedEnv{}, skipped)},
+		Data: &slz.RestartData{
+			RequestedAt: requestedAt,
+			Queued:      queued,
+			Skipped:     lo.Ternary(skipped == nil, []*slz.RestartSkippedEnv{}, skipped),
+		},
 	}
 }

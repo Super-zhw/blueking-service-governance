@@ -103,7 +103,6 @@ var _ = Describe("Restarter", func() {
 			Container:   "main",
 			MountPath:   "/data/bkms/dev-mode/trpc/configmap-scripts",
 			InstanceIDs: instances,
-			Executor:    executor,
 		}
 	}
 
@@ -126,6 +125,23 @@ var _ = Describe("Restarter", func() {
 		)
 	})
 
+	// executeAll 依次创建记录并执行，模拟异步任务逐个执行
+	executeAll := func(
+		reqCtx context.Context, targets []devmode.RestartTarget,
+	) ([]devmode.RestartInstanceResult, error) {
+		prepared, err := restarter.Prepare(reqCtx, appID, "admin", targets)
+		if err != nil {
+			return nil, err
+		}
+		results := make([]devmode.RestartInstanceResult, 0, len(prepared))
+		for _, item := range prepared {
+			results = append(results, restarter.Execute(
+				reqCtx, appID, item.RecordID, item.Target, item.Instance, executor,
+			))
+		}
+		return results, nil
+	}
+
 	It("restarts the process and waits until pid.conf is recreated", func() {
 		executor.readPID = func(_ string, n int) (*k8sclient.ExecResult, error) {
 			switch n {
@@ -142,7 +158,7 @@ var _ = Describe("Restarter", func() {
 			}
 		}
 
-		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		results, err := executeAll(ctx, []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(results).To(HaveLen(1))
 		Expect(results[0].EnvName).To(Equal("stag"))
@@ -174,7 +190,7 @@ var _ = Describe("Restarter", func() {
 			return &k8sclient.ExecResult{ExitCode: 21, Stderr: "remaining process\n"}, nil
 		}
 
-		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		results, err := executeAll(ctx, []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(results[0].Status).To(Equal(devmode.RecordStatusFailed))
 		Expect(results[0].Message).To(ContainSubstring("code 21"))
@@ -188,7 +204,7 @@ var _ = Describe("Restarter", func() {
 	})
 
 	It("fails when pid.conf is not recreated before timeout", func() {
-		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		results, err := executeAll(ctx, []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(results[0].Status).To(Equal(devmode.RecordStatusFailed))
 		Expect(results[0].OldPID).To(BeEmpty())
@@ -200,7 +216,7 @@ var _ = Describe("Restarter", func() {
 			return nil, errors.New("pod not found")
 		}
 
-		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		results, err := executeAll(ctx, []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(results[0].Status).To(Equal(devmode.RecordStatusFailed))
 		Expect(results[0].Message).To(ContainSubstring("pod not found"))
@@ -223,7 +239,7 @@ var _ = Describe("Restarter", func() {
 			return &k8sclient.ExecResult{}, nil
 		}
 
-		results, err := restarter.Restart(ctx, appID, "admin", []devmode.RestartTarget{
+		results, err := executeAll(ctx, []devmode.RestartTarget{
 			newTarget("stag", "pod-a", "pod-b"),
 			newTarget("test", "pod-c"),
 		})
@@ -257,7 +273,7 @@ var _ = Describe("Restarter", func() {
 			return &k8sclient.ExecResult{}, nil
 		}
 
-		results, err := restarter.Restart(reqCtx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		results, err := executeAll(reqCtx, []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(results[0].Status).To(Equal(devmode.RecordStatusSuccess))
 		Expect(results[0].NewPID).To(Equal("200"))
@@ -270,7 +286,7 @@ var _ = Describe("Restarter", func() {
 		reqCtx, cancel := context.WithCancel(ctx)
 		cancel()
 
-		_, err := restarter.Restart(reqCtx, appID, "admin", []devmode.RestartTarget{newTarget("stag", "pod-1")})
+		_, err := executeAll(reqCtx, []devmode.RestartTarget{newTarget("stag", "pod-1")})
 		Expect(err).To(HaveOccurred())
 
 		readCalls, stopCalls := executor.counts("pod-1")
@@ -279,7 +295,7 @@ var _ = Describe("Restarter", func() {
 	})
 
 	It("does nothing when there are no target instances", func() {
-		results, err := restarter.Restart(ctx, appID, "admin", nil)
+		results, err := executeAll(ctx, nil)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(results).To(BeEmpty())
 	})

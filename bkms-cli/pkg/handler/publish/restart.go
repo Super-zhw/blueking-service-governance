@@ -20,6 +20,8 @@ package publish
 
 import (
 	"context"
+	"sort"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -30,8 +32,21 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/params"
 )
 
-// restartStatusFailed 实例重启失败状态
-const restartStatusFailed = "failed"
+const (
+	// restartAction 重启记录的操作类型
+	restartAction = "restart"
+	// recordStatusSuccess 记录成功状态
+	recordStatusSuccess = "success"
+	// recordStatusFailed 记录失败状态
+	recordStatusFailed = "failed"
+
+	// defaultRestartPollInterval 轮询重启记录的间隔
+	defaultRestartPollInterval = 2 * time.Second
+	// defaultRestartWaitTimeout 等待重启完成的最长时间
+	defaultRestartWaitTimeout = 10 * time.Minute
+	// restartRecordPageSize 轮询时每页拉取的记录数
+	restartRecordPageSize = int64(100)
+)
 
 // BuildRestartOptions 根据命令行参数（逗号分隔）构造进程重启请求参数：
 //   - --env 与 --env-type 互斥，必须且只能指定其中一个
@@ -62,55 +77,146 @@ func BuildRestartOptions(envs, envTypes, instanceIDs string) (client.DevModeRest
 	}
 }
 
-// Restart 重启开发模式容器内的业务进程（pod 不重建），逐环境输出结果；任一实例失败时返回错误。
+// Restart 提交开发模式进程重启（异步），并按同一条件轮询记录直到全部实例进入终态。
+// 服务端受理后立即返回，重启任务在队列中执行；Ctrl+C 只停止等待，不影响服务端任务。
 func Restart(ctx context.Context, cli client.Client, appID string, opts client.DevModeRestartOptions) error {
-	console.Info("Restarting dev mode processes, this may take a while...")
+	return restartAndWait(ctx, cli, appID, opts, defaultRestartPollInterval, defaultRestartWaitTimeout)
+}
+
+// restartAndWait 提交重启并轮询，pollInterval / waitTimeout 便于测试注入
+func restartAndWait(
+	ctx context.Context,
+	cli client.Client,
+	appID string,
+	opts client.DevModeRestartOptions,
+	pollInterval, waitTimeout time.Duration,
+) error {
 	data, err := cli.RestartDevModeProcesses(ctx, appID, opts)
 	if err != nil {
 		return errors.Wrapf(err, "restart dev mode processes for app %s", appID)
 	}
+	requestedAt, err := time.Parse(time.RFC3339, data.RequestedAt)
+	if err != nil {
+		return errors.Wrapf(err, "invalid requestedAt %q returned by server", data.RequestedAt)
+	}
 
-	for _, env := range data.Envs {
-		console.Info("\nEnvironment: %s (%s)", env.EnvName, env.EnvType)
-		for _, inst := range env.Instances {
-			if inst.Status == restartStatusFailed {
-				console.Error("  [FAILED]  %s: %s", inst.Instance, inst.Message)
-				continue
-			}
-			console.Info(
-				"  [SUCCESS] %s: pid %s -> %s",
-				inst.Instance,
-				lo.CoalesceOrEmpty(inst.OldPID, "none"),
-				inst.NewPID,
+	console.Info("Restart request submitted, %d instance(s) queued.", data.Queued)
+	for _, env := range data.Skipped {
+		console.Warn("  - skipped %s (%s): %s", env.EnvName, env.EnvType, env.Reason)
+	}
+	if data.Queued == 0 {
+		return errors.New("no instances were queued for restart")
+	}
+
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+	deadline := time.Now().Add(waitTimeout)
+	lastTerminal := -1
+	for {
+		records, err := listRestartRecords(ctx, cli, appID, opts, requestedAt)
+		if err != nil {
+			return err
+		}
+		terminal := lo.CountBy(records, func(record client.DevModePublishRecord) bool {
+			return isTerminalStatus(record.Status)
+		})
+		if terminal != lastTerminal {
+			console.Info("Waiting for instances to finish: %d/%d", terminal, len(records))
+			lastTerminal = terminal
+		}
+		if len(records) >= data.Queued && terminal == len(records) {
+			return printRestartResult(records)
+		}
+
+		if time.Now().After(deadline) {
+			return errors.Errorf(
+				"timed out after %s waiting for restart to finish; the task is still running on the server, "+
+					"check 'bkms-cli app publish history --app %s' for the final result",
+				waitTimeout, appID,
 			)
 		}
+		select {
+		case <-ctx.Done():
+			return errors.Wrap(
+				ctx.Err(),
+				"stopped watching; the restart keeps running on the server, "+
+					"check 'bkms-cli app publish history' for the final result",
+			)
+		case <-ticker.C:
+		}
 	}
+}
 
-	if len(data.Skipped) > 0 {
-		console.Warn("\nSkipped environments:")
-		for _, env := range data.Skipped {
-			console.Warn("  - %s (%s): %s", env.EnvName, env.EnvType, env.Reason)
+// listRestartRecords 按提交时的条件拉取本次受理之后产生的 restart 记录（含分页）
+func listRestartRecords(
+	ctx context.Context,
+	cli client.Client,
+	appID string,
+	opts client.DevModeRestartOptions,
+	since time.Time,
+) ([]client.DevModePublishRecord, error) {
+	var records []client.DevModePublishRecord
+	for page := int64(1); ; page++ {
+		var (
+			batch []client.DevModePublishRecord
+			total int64
+			err   error
+		)
+		switch {
+		case opts.Instances != nil:
+			batch, total, err = cli.ListDevModePublishRecords(
+				ctx, appID, []string{opts.Instances.EnvName}, nil, "", since, page, restartRecordPageSize,
+			)
+		case opts.Envs != nil:
+			batch, total, err = cli.ListDevModePublishRecords(
+				ctx, appID, opts.Envs.Names, nil, "", since, page, restartRecordPageSize,
+			)
+		case opts.EnvTypes != nil:
+			batch, total, err = cli.ListDevModePublishRecords(
+				ctx, appID, nil, opts.EnvTypes.Types, "", since, page, restartRecordPageSize,
+			)
+		}
+		if err != nil {
+			return nil, errors.Wrap(err, "list restart records")
+		}
+		records = append(records, lo.Filter(batch, func(record client.DevModePublishRecord, _ int) bool {
+			return record.Action == restartAction
+		})...)
+		if int64(len(batch)) < restartRecordPageSize || page*restartRecordPageSize >= total {
+			return records, nil
+		}
+	}
+}
+
+// isTerminalStatus 判断记录是否已进入终态
+func isTerminalStatus(status string) bool {
+	return status == recordStatusSuccess || status == recordStatusFailed
+}
+
+// printRestartResult 按环境输出重启结果，任一实例失败时返回错误
+func printRestartResult(records []client.DevModePublishRecord) error {
+	byEnv := lo.GroupBy(records, func(record client.DevModePublishRecord) string { return record.EnvName })
+	envNames := lo.Keys(byEnv)
+	sort.Strings(envNames)
+
+	failed := 0
+	for _, envName := range envNames {
+		console.Info("\nEnvironment: %s", envName)
+		for _, record := range byEnv[envName] {
+			if record.Status == recordStatusFailed {
+				failed++
+				console.Error("  [FAILED]  %s: %s", record.Instance, record.Message)
+				continue
+			}
+			console.Info("  [SUCCESS] %s: %s", record.Instance, record.Message)
 		}
 	}
 
-	instances := lo.FlatMap(
-		data.Envs,
-		func(env client.DevModeRestartEnvResult, _ int) []client.DevModeRestartInstanceResult {
-			return env.Instances
-		},
-	)
-	total := len(instances)
-	failed := lo.CountBy(instances, func(inst client.DevModeRestartInstanceResult) bool {
-		return inst.Status == restartStatusFailed
-	})
 	console.Info("\n==================================================")
-	switch {
-	case total == 0:
-		console.Warn("No instances were restarted.")
-	case failed == 0:
-		console.Info("All %d instance(s) restarted successfully!", total)
-	default:
-		console.Error("Restart finished with %d/%d failed instance(s).", failed, total)
+	if failed == 0 {
+		console.Info("All %d instance(s) restarted successfully!", len(records))
+	} else {
+		console.Error("Restart finished with %d/%d failed instance(s).", failed, len(records))
 	}
 	console.Info("==================================================")
 

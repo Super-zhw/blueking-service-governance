@@ -20,6 +20,7 @@ package devmode
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -42,6 +43,16 @@ var PublishRecordMeta = store.Meta[PublishRecord]{Collection: "devmode_publish_r
 // ByAppEnv 按应用与环境匹配
 func ByAppEnv(appID, envName string) store.Opt {
 	return store.Combine(store.Where("appID", appID), store.Where("envName", envName))
+}
+
+// CreatedSince 按创建时间下限匹配（含）
+func CreatedSince(t time.Time) store.Opt {
+	return store.Where("createdAt", bson.M{"$gte": t})
+}
+
+// ByAppEnvs 按应用与多个环境匹配
+func ByAppEnvs(appID string, envNames []string) store.Opt {
+	return store.Combine(store.Where("appID", appID), store.Where("envName", bson.M{"$in": envNames}))
 }
 
 // KeywordMatches 按二进制名称、操作人或实例名模糊匹配（不区分大小写），keyword 为空白时不过滤

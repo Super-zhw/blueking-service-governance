@@ -21,6 +21,7 @@ package serializer
 import (
 	"time"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
 
@@ -30,6 +31,12 @@ type PublishRecordURIInput struct {
 	AppID string `uri:"appID" binding:"required"`
 	// EnvName 环境名称
 	EnvName string `uri:"envName" binding:"required"`
+}
+
+// PublishRecordAppURIInput DevMode 发布记录应用级接口 URI 路径参数
+type PublishRecordAppURIInput struct {
+	// AppID 应用 ID
+	AppID string `uri:"appID" binding:"required"`
 }
 
 // CreatePublishRecordsInput DevMode 发布记录上报请求体
@@ -73,6 +80,33 @@ type ListPublishRecordsInput struct {
 	Page int64 `form:"page" binding:"required,gte=1"`
 	// PageSize 分页大小
 	PageSize int64 `form:"pageSize" binding:"required,oneof=1 5 10 20 50 100"`
+	// Since 只返回创建时间不早于该时间的记录（RFC3339）
+	Since string `form:"since"`
+}
+
+// ListPublishRecordsByScopeInput DevMode 按环境名称或环境类型查询发布记录的参数，
+// envNames 与 envTypes 必须且只能指定其中一个。
+type ListPublishRecordsByScopeInput struct {
+	// EnvNames 环境名称列表，多个值以逗号分隔
+	EnvNames []string `form:"envNames" binding:"omitempty,unique,dive,uri_slug"`
+	// EnvTypes 环境类型列表，多个值以逗号分隔：development / test / staging
+	EnvTypes []string `form:"envTypes" binding:"omitempty,unique,dive,oneof=development test staging"`
+	// Keyword 搜索关键字
+	Keyword string `form:"keyword"`
+	// Page 分页页码
+	Page int64 `form:"page" binding:"required,gte=1"`
+	// PageSize 分页大小
+	PageSize int64 `form:"pageSize" binding:"required,oneof=1 5 10 20 50 100"`
+	// Since 只返回创建时间不早于该时间的记录（RFC3339）
+	Since string `form:"since"`
+}
+
+// Validate 校验 envNames 与 envTypes 必须且只能指定其中一个，必须在 Bind 之后单独调用
+func (i *ListPublishRecordsByScopeInput) Validate() error {
+	if (len(i.EnvNames) == 0) == (len(i.EnvTypes) == 0) {
+		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "exactly one of envNames or envTypes is required")
+	}
+	return nil
 }
 
 // ListPublishRecordsOutput DevMode 发布记录列表成功响应
@@ -90,6 +124,7 @@ type PaginatedPublishRecords struct {
 type PublishRecordOutputObj struct {
 	ID         string    `json:"id"`
 	Action     string    `json:"action"`
+	EnvName    string    `json:"envName"`
 	Instance   string    `json:"instance"`
 	BinaryName string    `json:"binaryName"`
 	FileSize   int64     `json:"fileSize"`
@@ -105,6 +140,7 @@ type PublishRecordOutputObj struct {
 func (o *PublishRecordOutputObj) FromModel(record devmode.PublishRecord) *PublishRecordOutputObj {
 	o.ID = record.ID.Hex()
 	o.Action = string(record.GetAction())
+	o.EnvName = record.EnvName
 	o.Instance = record.Instance
 	o.BinaryName = record.BinaryName
 	o.FileSize = record.FileSize

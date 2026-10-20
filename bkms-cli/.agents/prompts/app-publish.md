@@ -63,7 +63,9 @@ bkms-cli app publish --app myapp --env test -f ./bin/server --all
 
 ## publish restart
 
-`publish restart` 只重启开发模式容器内的业务进程，不替换二进制，Pod 不重建。服务端在每个目标实例内停止业务进程，再由 dev mode 的 monitor 重新拉起，等进程起来后才返回结果。多个实例并行执行，耗时取决于最慢的实例。
+`publish restart` 只重启开发模式容器内的业务进程，不替换二进制，Pod 不重建。接口是异步的：服务端校验目标、创建 pending 记录并把**本次请求的所有实例放进同一条队列消息**后立即返回；worker 在消息内按最大 10 个实例并行执行 stop → 等待 monitor 拉起。
+
+CLI 提交成功后会按**同一组目标条件**周期性查询重启记录（每 2 秒一次），直到所有实例进入 `success` / `failed` 终态才打印结果并退出；最长等待 10 分钟。等待超时或按 Ctrl+C 只影响 CLI 的展示，服务端任务会继续执行，最终结果以 `publish history` 为准。
 
 目标必须且只能用 `--env` 或 `--env-type` 中的一个来指定：
 
@@ -84,12 +86,18 @@ bkms-cli app publish restart --app myapp --env stage --instance-ids pod-1,pod-2
 
 只要有实例重启失败，命令就以非 0 退出码结束。
 
-目标实例较多时（多个环境，或单个环境实例数超过 10 个），请求可能超时。超时后服务端仍会把已开始的重启执行完，并如实写入记录，此时以 `publish history` 中的记录为准，不要直接重试，以免重复重启。
+目标实例较多时（多个环境，或单个环境实例数超过 10 个），等待时间会更长；若超过 10 分钟仍未完成，CLI 会提示仍在执行，此时以 `publish history` 中的记录为准，不要直接重复提交。
 
 ## publish history
 
-`publish history` 查询指定环境的发布和重启记录，每个实例一条，按时间倒序排列。`ACTION` 列用来区分 `publish` 和 `restart`。
+`publish history` 查询发布和重启记录，每个实例一条，按时间倒序排列。`ACTION` 列用来区分 `publish` 和 `restart`，`ENVNAME` 列标明记录所属环境。
+
+查询范围必须且只能用 `--env` 或 `--env-type` 中的一个来指定：`--env` 只查单个环境；`--env-type` 跨该应用所有匹配类型的环境查询，并在服务端统一分页（多个类型用逗号分隔）。
 
 ```bash
+# 单个环境
 bkms-cli app publish history --app myapp --env stage
+
+# 按环境类型跨环境查询
+bkms-cli app publish history --app myapp --env-type development,test
 ```

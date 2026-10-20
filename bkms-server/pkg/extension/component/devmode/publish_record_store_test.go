@@ -145,6 +145,25 @@ var _ = Describe("PublishRecord store", func() {
 		})
 	})
 
+	Describe("listing across envs", func() {
+		It("should list records of the given envs", func() {
+			other := newRecord("pod-1", "alpha", devmode.RecordStatusSuccess)
+			other.EnvName = "prod"
+			mustCreate(newRecord("pod-1", "alpha", devmode.RecordStatusSuccess), other)
+			// 其它环境不在查询范围内
+			ignored := newRecord("pod-1", "alpha", devmode.RecordStatusSuccess)
+			ignored.EnvName = "dev"
+			mustCreate(ignored)
+
+			page, err := records.ListPage(ctx, 1, 10,
+				devmode.ByAppEnvs(appID, []string{envName, "prod"}), devmode.NewestFirst())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(page.Total).To(Equal(int64(2)))
+			Expect(lo.Map(page.Items, func(r devmode.PublishRecord, _ int) string { return r.EnvName })).
+				To(ConsistOf(envName, "prod"))
+		})
+	})
+
 	Describe("listing with restart records", func() {
 		It("should return both publish and restart records", func() {
 			publish := newRecord("pod-1", "v1", devmode.RecordStatusSuccess)

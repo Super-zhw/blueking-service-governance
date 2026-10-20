@@ -102,6 +102,8 @@ type DevModePublishRecord struct {
 	ID string `json:"id" yaml:"id"`
 	// Action 操作类型：publish / restart
 	Action string `json:"action" yaml:"action"`
+	// EnvName 环境名称
+	EnvName string `json:"envName" yaml:"envName"`
 	// Instance 目标实例（pod）名称
 	Instance string `json:"instance" yaml:"instance"`
 	// BinaryName 发布的二进制名称
@@ -153,29 +155,14 @@ type DevModeRestartRespData struct {
 	Data *DevModeRestartData `json:"data"`
 }
 
-// DevModeRestartData 开发模式进程重启结果
+// DevModeRestartData 开发模式进程重启提交结果
 type DevModeRestartData struct {
-	// Envs 按环境分组的实例重启结果
-	Envs []DevModeRestartEnvResult `json:"envs"`
+	// RequestedAt 服务端受理时间（RFC3339），用于轮询本次提交产生的记录
+	RequestedAt string `json:"requestedAt"`
+	// Queued 已投递到任务队列的实例数
+	Queued int `json:"queued"`
 	// Skipped 被跳过的环境
 	Skipped []DevModeRestartSkippedEnv `json:"skipped"`
-}
-
-// DevModeRestartEnvResult 单个环境的重启结果
-type DevModeRestartEnvResult struct {
-	EnvName   string                         `json:"envName"`
-	EnvType   string                         `json:"envType"`
-	Instances []DevModeRestartInstanceResult `json:"instances"`
-}
-
-// DevModeRestartInstanceResult 单个实例的重启结果
-type DevModeRestartInstanceResult struct {
-	Instance string `json:"instance"`
-	// Status 重启结果：success / failed
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	OldPID  string `json:"oldPID"`
-	NewPID  string `json:"newPID"`
 }
 
 // DevModeRestartSkippedEnv 被跳过的环境

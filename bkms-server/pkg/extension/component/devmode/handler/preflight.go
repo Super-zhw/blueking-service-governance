@@ -37,9 +37,8 @@ import (
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
+	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode/serializer"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bcs"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
@@ -218,38 +217,7 @@ func (h *Handler) getBCSProjectCode(ctx context.Context, workspaceID string) (st
 
 // fetchActiveToken 获取当前用户的有效 Token。
 func (h *Handler) fetchActiveToken(ctx context.Context, bcsProjectCode string) (string, error) {
-	user := auth.MustGetUser(ctx)
-	bcsClient, err := bcs.New(user, bcs.ClientOption{UserMode: true})
-	if err != nil {
-		return "", bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "failed to initialize token client")
-	}
-
-	tokens, err := bcsClient.ListUserTokens(ctx)
-	if err != nil {
-		return "", bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "failed to retrieve token")
-	}
-
-	activeToken, found := lo.Find(tokens, func(item bcs.UserToken) bool {
-		return item.Status == bcs.UserTokenStatusActive
-	})
-	if !found {
-		return "", bkerrs.Errorf(
-			bkerrs.ErrCodeNotFound,
-			"no active token found, please create a token in BCS at %s",
-			buildBCSUserTokenURL(bcsProjectCode),
-		)
-	}
-
-	return activeToken.Token, nil
-}
-
-// buildBCSUserTokenURL 构造 BCS 用户 Token 创建页地址。
-func buildBCSUserTokenURL(bcsProjectCode string) string {
-	return fmt.Sprintf(
-		"%s/bcs/projects/%s/user-token",
-		strings.TrimRight(config.G.BCS.BaseUrl, "/"),
-		bcsProjectCode,
-	)
+	return devmode.FetchActiveToken(ctx, bcsProjectCode)
 }
 
 // resolveInstanceIDs 根据请求参数解析目标实例 ID 列表。

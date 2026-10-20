@@ -19,10 +19,11 @@
 package serializer
 
 import (
+	"time"
+
 	"github.com/samber/lo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
-	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	_ "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils/validators" // register global validators
 )
 
@@ -73,51 +74,19 @@ func (i *RestartInput) Validate() error {
 	return nil
 }
 
-// RestartOutput DevMode 进程重启成功响应
+// RestartOutput DevMode 进程重启提交响应
 type RestartOutput struct {
 	Data *RestartData `json:"data"`
 }
 
-// RestartData DevMode 进程重启结果
+// RestartData DevMode 进程重启提交结果。请求已受理，实例执行结果需通过发布记录查询。
 type RestartData struct {
-	// Envs 按环境分组的实例重启结果
-	Envs []*RestartEnvResult `json:"envs"`
-	// Skipped 被跳过的环境（仅 targetType=envTypes 时可能出现）
+	// RequestedAt 服务端受理时间，用于按条件轮询本次提交产生的记录
+	RequestedAt time.Time `json:"requestedAt"`
+	// Queued 已投递到任务队列的实例数
+	Queued int `json:"queued"`
+	// Skipped 被跳过的环境（仅按环境类型指定时可能出现）
 	Skipped []*RestartSkippedEnv `json:"skipped"`
-}
-
-// RestartEnvResult 单个环境的重启结果
-type RestartEnvResult struct {
-	// EnvName 环境名称
-	EnvName string `json:"envName"`
-	// EnvType 环境类型
-	EnvType string `json:"envType"`
-	// Instances 实例重启结果
-	Instances []*RestartInstanceResult `json:"instances"`
-}
-
-// RestartInstanceResult 单个实例的重启结果
-type RestartInstanceResult struct {
-	// Instance 实例（pod）名称
-	Instance string `json:"instance"`
-	// Status 重启结果：success / failed
-	Status string `json:"status"`
-	// Message 结果说明
-	Message string `json:"message"`
-	// OldPID 重启前的业务进程 PID
-	OldPID string `json:"oldPID"`
-	// NewPID 重启后的业务进程 PID
-	NewPID string `json:"newPID"`
-}
-
-// FromModel 将领域模型转换为输出对象
-func (o *RestartInstanceResult) FromModel(result devmode.RestartInstanceResult) *RestartInstanceResult {
-	o.Instance = result.Instance
-	o.Status = string(result.Status)
-	o.Message = result.Message
-	o.OldPID = result.OldPID
-	o.NewPID = result.NewPID
-	return o
 }
 
 // RestartSkippedEnv 被跳过的环境

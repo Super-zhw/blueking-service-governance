@@ -20,6 +20,7 @@ package publish
 
 import (
 	"context"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -79,63 +80,78 @@ var _ = Describe("Restart", func() {
 	const appID = "demo-app"
 
 	var (
-		ctx  context.Context
-		cli  *mocks.MockClient
-		opts client.DevModeRestartOptions
+		ctx         context.Context
+		cli         *mocks.MockClient
+		opts        client.DevModeRestartOptions
+		requestedAt time.Time
 	)
 
 	BeforeEach(func() {
 		ctx = context.Background()
 		cli = mocks.NewMockClient(GinkgoT())
 		opts = client.DevModeRestartOptions{Envs: &client.DevModeRestartEnvsTarget{Names: []string{"stage"}}}
+		requestedAt = time.Now().Add(-time.Second)
 	})
 
-	It("succeeds when all instances are restarted", func() {
-		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(&client.DevModeRestartData{
-			Envs: []client.DevModeRestartEnvResult{{
-				EnvName: "stage", EnvType: "staging",
-				Instances: []client.DevModeRestartInstanceResult{
-					{Instance: "pod-1", Status: "success", OldPID: "1", NewPID: "2"},
-				},
-			}},
-		}, nil)
+	queued := func(count int) *client.DevModeRestartData {
+		return &client.DevModeRestartData{RequestedAt: requestedAt.Format(time.RFC3339), Queued: count}
+	}
+	newRecord := func(instance, status string) client.DevModePublishRecord {
+		return client.DevModePublishRecord{
+			Action: "restart", EnvName: "stage", Instance: instance, Status: status,
+			Message: "message of " + instance,
+		}
+	}
+	expectList := func() *mocks.MockClient_ListDevModePublishRecords_Call {
+		return cli.EXPECT().ListDevModePublishRecords(
+			mock.Anything, appID, []string{"stage"}, mock.Anything, "", mock.Anything, int64(1), int64(100),
+		)
+	}
 
-		Expect(Restart(ctx, cli, appID, opts)).To(Succeed())
+	It("submits the request and waits until all instances are terminal", func() {
+		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(queued(2), nil)
+		expectList().Return(
+			[]client.DevModePublishRecord{newRecord("pod-1", "pending"), newRecord("pod-2", "running")}, int64(2), nil,
+		).Once()
+		expectList().Return(
+			[]client.DevModePublishRecord{newRecord("pod-1", "success"), newRecord("pod-2", "success")}, int64(2), nil,
+		)
+
+		Expect(restartAndWait(ctx, cli, appID, opts, 10*time.Millisecond, time.Second)).To(Succeed())
 	})
 
-	It("returns an error when any instance fails", func() {
-		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(&client.DevModeRestartData{
-			Envs: []client.DevModeRestartEnvResult{{
-				EnvName: "stage", EnvType: "staging",
-				Instances: []client.DevModeRestartInstanceResult{
-					{Instance: "pod-1", Status: "success", OldPID: "1", NewPID: "2"},
-					{Instance: "pod-2", Status: "failed", Message: "boom"},
-				},
-			}},
-			Skipped: []client.DevModeRestartSkippedEnv{
-				{EnvName: "dev", EnvType: "development", Reason: "devmode disabled"},
-			},
-		}, nil)
+	It("returns an error when any instance failed", func() {
+		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(queued(2), nil)
+		expectList().Return([]client.DevModePublishRecord{
+			newRecord("pod-1", "success"), newRecord("pod-2", "failed"),
+		}, int64(2), nil)
 
-		err := Restart(ctx, cli, appID, opts)
+		err := restartAndWait(ctx, cli, appID, opts, 10*time.Millisecond, time.Second)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("restart failed on 1 instance(s)"))
 	})
 
-	It("succeeds when all environments are skipped", func() {
-		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(&client.DevModeRestartData{
-			Skipped: []client.DevModeRestartSkippedEnv{
-				{EnvName: "dev", EnvType: "development", Reason: "devmode disabled"},
-			},
-		}, nil)
+	It("times out when records never reach a terminal state", func() {
+		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(queued(1), nil)
+		expectList().Return([]client.DevModePublishRecord{newRecord("pod-1", "pending")}, int64(1), nil)
 
-		Expect(Restart(ctx, cli, appID, opts)).To(Succeed())
+		err := restartAndWait(ctx, cli, appID, opts, 10*time.Millisecond, 50*time.Millisecond)
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("timed out"))
+	})
+
+	It("returns an error when nothing was queued", func() {
+		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(queued(0), nil)
+
+		err := restartAndWait(ctx, cli, appID, opts, 10*time.Millisecond, time.Second)
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("no instances were queued"))
 	})
 
 	It("wraps the client error", func() {
 		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(nil, errors.New("server down"))
 
-		err := Restart(ctx, cli, appID, opts)
+		err := restartAndWait(ctx, cli, appID, opts, 10*time.Millisecond, time.Second)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("server down"))
 	})

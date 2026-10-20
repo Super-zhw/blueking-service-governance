@@ -219,35 +219,7 @@ func (c *SvcBasedClient) ReportDevModePublish(
 	return nil
 }
 
-// ListDevModePublishRecords 获取开发模式发布记录列表
-func (c *SvcBasedClient) ListDevModePublishRecords(
-	ctx context.Context,
-	appID, envName, keyword string,
-) ([]DevModePublishRecord, error) {
-	path := fmt.Sprintf(
-		"/bkms/v1/bkms-server/devmode/%s/envs/%s/publish-records",
-		url.PathEscape(appID),
-		url.PathEscape(envName),
-	)
-	queryParams := map[string]string{
-		"keyword":  keyword,
-		"page":     "1",
-		"pageSize": "100",
-	}
-
-	var respData DevModePublishRecordsResp
-	resp, err := c.cli.R().SetContext(ctx).SetQueryParams(queryParams).SetResult(&respData).Get(path)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode() != http.StatusOK {
-		return nil, formatAPIError(resp, "list devmode publish records")
-	}
-
-	return respData.Data.Results, nil
-}
-
-// RestartDevModeProcesses 开发模式进程重启（同步接口，耗时较长且非幂等，使用不重试的 longCli）
+// RestartDevModeProcesses 开发模式进程重启（异步接口，受理后立即返回，使用不重试的 longCli）
 func (c *SvcBasedClient) RestartDevModeProcesses(
 	ctx context.Context,
 	appID string,
@@ -260,7 +232,7 @@ func (c *SvcBasedClient) RestartDevModeProcesses(
 	if err != nil {
 		return nil, errors.Wrap(err, "restart devmode processes request failed")
 	}
-	if resp.StatusCode() != http.StatusOK {
+	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusAccepted {
 		return nil, formatAPIError(resp, "restart devmode processes")
 	}
 	if respData.Data == nil {
@@ -268,6 +240,55 @@ func (c *SvcBasedClient) RestartDevModeProcesses(
 	}
 
 	return respData.Data, nil
+}
+
+// ListDevModePublishRecords 获取开发模式发布记录列表（按环境名称或环境类型，跨环境统一分页）
+func (c *SvcBasedClient) ListDevModePublishRecords(
+	ctx context.Context,
+	appID string, envNames, envTypes []string, keyword string,
+	since time.Time, page, pageSize int64,
+) ([]DevModePublishRecord, int64, error) {
+	path := fmt.Sprintf("/bkms/v1/bkms-server/devmode/%s/publish-records", url.PathEscape(appID))
+	queryParams := publishRecordsQueryParams(keyword, since, page, pageSize)
+	if len(envNames) > 0 {
+		queryParams["envNames"] = strings.Join(envNames, ",")
+	}
+	if len(envTypes) > 0 {
+		queryParams["envTypes"] = strings.Join(envTypes, ",")
+	}
+
+	var respData DevModePublishRecordsResp
+	resp, err := c.cli.R().SetContext(ctx).SetQueryParams(queryParams).SetResult(&respData).Get(path)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "list devmode publish records by scope request failed")
+	}
+	if resp.StatusCode() != http.StatusOK {
+		return nil, 0, formatAPIError(resp, "list devmode publish records by scope")
+	}
+
+	return respData.Data.Results, parseRecordCount(respData.Data.Count), nil
+}
+
+// parseRecordCount 解析记录总数（服务端以字符串返回大整数）
+func parseRecordCount(raw string) int64 {
+	count, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return count
+}
+
+// publishRecordsQueryParams 构造发布记录查询参数
+func publishRecordsQueryParams(keyword string, since time.Time, page, pageSize int64) map[string]string {
+	params := map[string]string{
+		"keyword":  keyword,
+		"page":     strconv.FormatInt(page, 10),
+		"pageSize": strconv.FormatInt(pageSize, 10),
+	}
+	if !since.IsZero() {
+		params["since"] = since.Format(time.RFC3339Nano)
+	}
+	return params
 }
 
 // ListWorkspaces 获取工作空间列表

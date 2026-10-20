@@ -21,6 +21,7 @@ package publish
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -35,6 +36,7 @@ const actionRestart = "restart"
 type PublishRecordRow struct {
 	// Action 操作类型：publish / restart
 	Action     string `json:"action"`
+	EnvName    string `json:"envName"`
 	Instance   string `json:"instance"`
 	BinaryName string `json:"binaryName"`
 	FileSize   string `json:"fileSize"`
@@ -47,14 +49,15 @@ type PublishRecordRow struct {
 }
 
 // ListHistory 获取开发模式发布历史记录（展示格式）。
+// envName 与 envTypes 二选一：指定 envName 时只查该环境，否则按环境类型跨环境查询。
 func ListHistory(
 	ctx context.Context,
 	cli client.Client,
-	appID, envName, keyword string,
+	appID, envName string, envTypes []string, keyword string,
 ) ([]PublishRecordRow, error) {
-	records, err := cli.ListDevModePublishRecords(ctx, appID, envName, keyword)
+	records, err := listRecords(ctx, cli, appID, envName, envTypes, keyword)
 	if err != nil {
-		return nil, errors.Wrap(err, "list dev mode publish records")
+		return nil, err
 	}
 
 	rows := lo.Map(records, func(record client.DevModePublishRecord, _ int) PublishRecordRow {
@@ -62,6 +65,7 @@ func ListHistory(
 		fileSize := lo.Ternary(record.Action == actionRestart, "", formatFileSize(record.FileSize))
 		return PublishRecordRow{
 			Action:     lo.CoalesceOrEmpty(record.Action, "publish"),
+			EnvName:    record.EnvName,
 			Instance:   record.Instance,
 			BinaryName: record.BinaryName,
 			FileSize:   fileSize,
@@ -73,6 +77,22 @@ func ListHistory(
 		}
 	})
 	return rows, nil
+}
+
+// listRecords 按环境或环境类型查询发布记录
+func listRecords(
+	ctx context.Context,
+	cli client.Client,
+	appID, envName string, envTypes []string, keyword string,
+) ([]client.DevModePublishRecord, error) {
+	var envNames []string
+	if envName != "" {
+		envNames = []string{envName}
+	}
+	records, _, err := cli.ListDevModePublishRecords(
+		ctx, appID, envNames, envTypes, keyword, time.Time{}, 1, 100,
+	)
+	return records, errors.Wrapf(err, "list dev mode publish records (env %q, env types %v)", envName, envTypes)
 }
 
 // formatFileSize 将字节数格式化为人类可读字符串（B / KB / MB / GB ...）。
