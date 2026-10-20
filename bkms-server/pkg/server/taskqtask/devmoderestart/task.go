@@ -17,7 +17,7 @@
  */
 
 // Package devmoderestart 实现开发模式进程重启的异步任务。
-// 一条消息对应一次请求的全部实例，消息内按最大 10 个实例并行执行。
+// 一条消息对应一次请求的全部实例，消息内按最大 20 个实例并行执行。
 package devmoderestart
 
 import (
@@ -44,7 +44,7 @@ import (
 const (
 	taskName = "devmode.restart"
 	// maxConcurrency 单次重启任务内并行执行的实例数上限
-	maxConcurrency = 10
+	maxConcurrency = 20
 )
 
 // Instance 单个实例的重启参数

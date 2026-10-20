@@ -63,7 +63,7 @@ bkms-cli app publish --app myapp --env test -f ./bin/server --all
 
 ## publish restart
 
-`publish restart` 只重启开发模式容器内的业务进程，不替换二进制，Pod 不重建。接口是异步的：服务端校验目标、创建 pending 记录并把**本次请求的所有实例放进同一条队列消息**后立即返回；worker 在消息内按最大 10 个实例并行执行 stop → 等待 monitor 拉起。
+`publish restart` 只重启开发模式容器内的业务进程，不替换二进制，Pod 不重建。接口是异步的：服务端校验目标、创建 pending 记录并把**本次请求的所有实例放进同一条队列消息**后立即返回；worker 在消息内按最大 20 个实例并行执行 stop → 等待 monitor 拉起。
 
 CLI 提交成功后会按**本次返回的记录 ID**周期性查询重启进度（每 2 秒查询一次 `pending` / `running` 记录数），全部进入 `success` / `failed` 终态后拉取完整记录并打印结果；最长等待 3 分钟。等待超时或按 Ctrl+C 只影响 CLI 的展示，服务端任务会继续执行，最终结果以 `publish history` 为准。
 

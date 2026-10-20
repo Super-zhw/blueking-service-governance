@@ -216,7 +216,7 @@ CLI 拿到 `recordIDs` 后按记录 ID 精确轮询：先按 `statuses=pending&s
 
 ### 队列与单实例执行流程
 
-一次请求对应一条 asynq 消息，消息 payload 包含本次所有实例的记录 ID 与集群信息。worker 内按最大 10 个实例并行执行，每个实例：
+一次请求对应一条 asynq 消息，消息 payload 包含本次所有实例的记录 ID 与集群信息。worker 内按最大 20 个实例并行执行，每个实例：
 
 ```
 a. cat pid.conf                                   记录旧 PID（仅用于展示）；失败则不执行后续步骤

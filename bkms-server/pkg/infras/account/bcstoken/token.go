@@ -35,8 +35,8 @@ import (
 // ErrNoActiveUserToken 用户没有有效的 BCS Token
 var ErrNoActiveUserToken = errors.New("no active BCS user token")
 
-// FetchActiveUserToken 获取当前用户在指定 BCS 项目下状态为 active 的 Token
-func FetchActiveUserToken(ctx context.Context, bcsProjectCode string) (string, error) {
+// GetActiveUserToken 获取当前用户状态为 active 的 BCS Token
+func GetActiveUserToken(ctx context.Context) (string, error) {
 	user, err := auth.GetUser(ctx)
 	if err != nil {
 		return "", errors.Wrap(err, "get auth user")
@@ -55,11 +55,20 @@ func FetchActiveUserToken(ctx context.Context, bcsProjectCode string) (string, e
 		return token.Status == bcs.UserTokenStatusActive
 	})
 	if !found {
+		return "", ErrNoActiveUserToken
+	}
+	return active.Token, nil
+}
+
+// FetchActiveUserToken 获取当前用户的 active BCS Token，并在缺失时提示创建地址
+func FetchActiveUserToken(ctx context.Context, bcsProjectCode string) (string, error) {
+	token, err := GetActiveUserToken(ctx)
+	if errors.Is(err, ErrNoActiveUserToken) {
 		return "", errors.Wrapf(
 			ErrNoActiveUserToken, "please create a token in BCS at %s", UserTokenURL(bcsProjectCode),
 		)
 	}
-	return active.Token, nil
+	return token, err
 }
 
 // UserTokenURL 返回 BCS 用户 Token 创建页地址
