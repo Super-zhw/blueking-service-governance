@@ -49,7 +49,7 @@ var _ = Describe("ListHistory", func() {
 	It("converts records into display rows with human-readable file size", func() {
 		cli.EXPECT().
 			ListDevModePublishRecords(
-				mock.Anything, appID, []string{envName}, mock.Anything, "", time.Time{}, int64(1), int64(100),
+				mock.Anything, appID, []string{envName}, mock.Anything, mock.Anything, "", time.Time{}, int64(1), int64(100),
 			).
 			Return([]client.DevModePublishRecord{
 				{
@@ -79,7 +79,7 @@ var _ = Describe("ListHistory", func() {
 	It("queries by env types when no env is given", func() {
 		cli.EXPECT().
 			ListDevModePublishRecords(
-				mock.Anything, appID, mock.Anything, []string{"development", "test"}, "", time.Time{}, int64(1), int64(100),
+				mock.Anything, appID, mock.Anything, []string{"development", "test"}, mock.Anything, "", time.Time{}, int64(1), int64(100),
 			).
 			Return([]client.DevModePublishRecord{
 				{Action: "restart", EnvName: "dev-a", Instance: "pod-1", Status: "success"},
@@ -97,7 +97,7 @@ var _ = Describe("ListHistory", func() {
 	It("shows restart records without file size", func() {
 		cli.EXPECT().
 			ListDevModePublishRecords(
-				mock.Anything, appID, []string{envName}, mock.Anything, "", time.Time{}, int64(1), int64(100),
+				mock.Anything, appID, []string{envName}, mock.Anything, mock.Anything, "", time.Time{}, int64(1), int64(100),
 			).
 			Return([]client.DevModePublishRecord{
 				{Action: "restart", Instance: "pod-1", Status: "success", Operator: "admin"},

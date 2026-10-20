@@ -13209,6 +13209,16 @@ const docTemplate = `{
                         "description": "只返回创建时间不早于该时间的记录（RFC3339）",
                         "name": "since",
                         "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "状态过滤，多个用逗号分隔",
+                        "name": "statuses",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -31112,8 +31122,8 @@ const docTemplate = `{
         "serializer.RestartData": {
             "type": "object",
             "properties": {
-                "queued": {
-                    "description": "Queued 已投递到任务队列的实例数",
+                "instanceCount": {
+                    "description": "InstanceCount 本次受理的实例数",
                     "type": "integer"
                 },
                 "requestedAt": {

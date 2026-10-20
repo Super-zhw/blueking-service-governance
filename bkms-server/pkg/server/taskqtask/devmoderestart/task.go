@@ -17,10 +17,7 @@
  */
 
 // Package devmoderestart 实现开发模式进程重启的异步任务。
-//
-// 一条消息对应一个实例（pod）的重启：记录由接口同步创建为 pending，
-// 任务执行 stop → 等待 monitor 拉起，并把记录更新为 running / success / failed。
-// 用户 Token 在 worker 执行时按 ctx 中的用户身份重新获取，不写入队列。
+// 一条消息对应一次请求的全部实例，消息内按最大 10 个实例并行执行。
 package devmoderestart
 
 import (
@@ -35,6 +32,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/bcstoken"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/taskq"
@@ -69,8 +67,7 @@ type Instance struct {
 	MountPath string `json:"mountPath"`
 }
 
-// Args 一次重启请求的任务参数：一次请求只投递一条消息，消息内包含本次所有实例。
-// 只携带执行所需的主键与集群信息，不携带凭据。
+// Args 一次重启请求的任务参数，只携带主键与集群信息，不携带凭据。
 type Args struct {
 	// AppID 应用 ID
 	AppID string `json:"appID"`
@@ -110,7 +107,7 @@ func (r *runner) run(ctx context.Context, args Args) error {
 	}
 
 	restarter := devmode.NewRestarter(r.records)
-	token, err := devmode.FetchActiveToken(ctx, args.BCSProjectCode)
+	token, err := bcstoken.FetchActiveUserToken(ctx, args.BCSProjectCode)
 	if err != nil {
 		for i := range args.Instances {
 			r.markFailed(ctx, restarter, args.Instances[i].RecordID, err.Error())

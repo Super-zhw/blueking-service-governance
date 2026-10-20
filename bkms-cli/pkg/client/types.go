@@ -49,10 +49,10 @@ type Client interface {
 	// ListDevModePublishRecords 获取开发模式发布记录列表（按环境名称或环境类型，跨环境统一分页）
 	ListDevModePublishRecords(
 		ctx context.Context,
-		appID string, envNames, envTypes []string, keyword string,
+		appID string, envNames, envTypes, statuses []string, keyword string,
 		since time.Time, page, pageSize int64,
 	) ([]DevModePublishRecord, int64, error)
-	// RestartDevModeProcesses 开发模式进程重启：stop 业务进程后由 monitor 重新拉起，pod 不重建
+	// RestartDevModeProcesses 开发模式进程重启
 	RestartDevModeProcesses(
 		ctx context.Context,
 		appID string,

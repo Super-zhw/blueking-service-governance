@@ -46,16 +46,15 @@ const (
 	defaultRestartPollInterval = time.Second
 )
 
-// 以下脚本通过 `bash -c <script> bash <mountPath>` 执行，$1 为脚本挂载路径。
-// source utils.sh 时屏蔽其输出（会 source /etc/profile），避免污染 stdout。
+// 脚本通过 `bash -c <script> bash <mountPath>` 执行，$1 为脚本挂载路径；
+// source utils.sh 时屏蔽输出，避免污染 stdout。
 const (
 	// readPIDScript 读取 pid.conf，文件不存在时以非 0 退出码结束
 	readPIDScript = `source "$1/utils.sh" >/dev/null 2>&1 && cat "${PID_CONF}" 2>/dev/null`
 
-	// stopProcessScript 停止业务进程，随后删除 pid.conf 并清除停止标志，交由 monitor 重新拉起。
-	// - source 失败时不执行 stop，避免出现「进程已被杀、停止标志无法清除」
-	// - stop.sh 失败也会删除 pid.conf 并清除停止标志，让 monitor 兜底，退出码透传 stop.sh 的结果
-	// - 删除 pid.conf：start.sh 确认进程启动后才会重新写入，以此判断进程已被拉起
+	// stopProcessScript 停止业务进程并清除停止标志，交由 monitor 重新拉起。
+	// source 失败则不 stop；stop 失败也删除 pid.conf 并清 flag，退出码透传 stop.sh。
+	// 删除 pid.conf 是因为只有 start.sh 在进程启动后才会重新写入，以此判断已拉起。
 	stopProcessScript = `source "$1/utils.sh" >/dev/null 2>&1 || { echo "failed to source $1/utils.sh" >&2; exit 1; }
 bash "$1/stop.sh"
 rc=$?
@@ -149,8 +148,7 @@ type PreparedInstance struct {
 	Instance string
 }
 
-// Prepare 为所有目标实例写入 pending 状态的 restart 记录，返回待执行实例列表。
-// 记录先于任务创建，异步执行时按记录 ID 更新状态。
+// Prepare 为所有目标实例写入 pending 记录，返回待执行实例列表。
 func (r *Restarter) Prepare(
 	ctx context.Context, appID, operator string, targets []RestartTarget,
 ) ([]PreparedInstance, error) {
@@ -183,8 +181,7 @@ func (r *Restarter) Prepare(
 	return prepared, nil
 }
 
-// Execute 执行单个实例的重启并更新记录状态，返回执行结果。
-// executor 由调用方按环境所在集群构建（异步任务中在执行时获取用户 Token 后构建）。
+// Execute 执行单个实例的重启并更新记录状态，executor 由调用方按集群构建。
 func (r *Restarter) Execute(
 	ctx context.Context,
 	appID string,
@@ -257,8 +254,7 @@ func newRestartInstanceResult(envName, instance, oldPID, newPID string, err erro
 	return result
 }
 
-// restartInstance 重启单个实例（pod）：读取旧 PID → stop 并清除停止标志 → 等待 monitor 拉起（pid.conf 重新生成）。
-// 返回旧 PID（pid.conf 不存在时为空，仅用于展示）与新 PID；读取旧 PID 失败时不会执行 stop。
+// restartInstance 读取旧 PID → stop → 等待 monitor 拉起；读旧 PID 失败时不执行 stop。
 func (r *Restarter) restartInstance(
 	ctx context.Context, target *RestartTarget, instance string, executor PodExecutor,
 ) (oldPID, newPID string, err error) {

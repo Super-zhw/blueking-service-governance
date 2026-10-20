@@ -72,18 +72,6 @@ type CreatePublishRecordsData struct {
 	RecordIDs []string `json:"recordIDs"`
 }
 
-// ListPublishRecordsInput DevMode 发布记录列表查询参数
-type ListPublishRecordsInput struct {
-	// Keyword 搜索关键字
-	Keyword string `form:"keyword"`
-	// Page 分页页码
-	Page int64 `form:"page" binding:"required,gte=1"`
-	// PageSize 分页大小
-	PageSize int64 `form:"pageSize" binding:"required,oneof=1 5 10 20 50 100"`
-	// Since 只返回创建时间不早于该时间的记录（RFC3339）
-	Since string `form:"since"`
-}
-
 // ListPublishRecordsByScopeInput DevMode 按环境名称或环境类型查询发布记录的参数，
 // envNames 与 envTypes 必须且只能指定其中一个。
 type ListPublishRecordsByScopeInput struct {
@@ -99,6 +87,8 @@ type ListPublishRecordsByScopeInput struct {
 	PageSize int64 `form:"pageSize" binding:"required,oneof=1 5 10 20 50 100"`
 	// Since 只返回创建时间不早于该时间的记录（RFC3339）
 	Since string `form:"since"`
+	// Statuses 状态过滤，多个值以逗号分隔：pending / running / success / failed
+	Statuses []string `form:"statuses" binding:"omitempty,unique,dive,oneof=pending running success failed"`
 }
 
 // Validate 校验 envNames 与 envTypes 必须且只能指定其中一个，必须在 Bind 之后单独调用

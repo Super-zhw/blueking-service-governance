@@ -8171,8 +8171,8 @@ definitions:
     type: object
   serializer.RestartData:
     properties:
-      queued:
-        description: Queued 已投递到任务队列的实例数
+      instanceCount:
+        description: InstanceCount 本次受理的实例数
         type: integer
       requestedAt:
         description: RequestedAt 服务端受理时间，用于按条件轮询本次提交产生的记录
@@ -18210,6 +18210,13 @@ paths:
         in: query
         name: since
         type: string
+      - collectionFormat: csv
+        description: 状态过滤，多个用逗号分隔
+        in: query
+        items:
+          type: string
+        name: statuses
+        type: array
       produces:
       - application/json
       responses:

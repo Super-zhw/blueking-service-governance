@@ -90,7 +90,7 @@ func listRecords(
 		envNames = []string{envName}
 	}
 	records, _, err := cli.ListDevModePublishRecords(
-		ctx, appID, envNames, envTypes, keyword, time.Time{}, 1, 100,
+		ctx, appID, envNames, envTypes, nil, keyword, time.Time{}, 1, 100,
 	)
 	return records, errors.Wrapf(err, "list dev mode publish records (env %q, env types %v)", envName, envTypes)
 }

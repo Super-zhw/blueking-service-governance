@@ -75,7 +75,7 @@ func Setup(mux *asynq.ServeMux) error {
 	// 告警策略同步/清理 tasks
 	mux.Handle(alertstrategysync.SyncTask.Name(), alertstrategysync.SyncTask.Handler())
 	mux.Handle(alertstrategysync.CleanupTask.Name(), alertstrategysync.CleanupTask.Handler())
-	// 开发模式进程重启（单实例任务）
+	// 开发模式进程重启
 	mux.Handle(devmoderestart.Task.Name(), devmoderestart.Task.Handler())
 	// 示例任务
 	mux.Handle(example.ExampleTask.Name(), example.ExampleTask.Handler())

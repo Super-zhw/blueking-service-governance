@@ -24,6 +24,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
@@ -136,6 +137,8 @@ func (h *Handler) CreateDevModePublishRecords(c *gin.Context) {
 //	@Param		page		query		int										true	"分页页码（从 1 开始）"
 //	@Param		pageSize	query		int										true	"分页大小"
 //	@Param		since		query		string									false	"只返回创建时间不早于该时间的记录（RFC3339）"
+//	@Param		statuses	query		[]string								false	"状态过滤，多个用逗号分隔"
+//
 //	@Success	200			{object}	slz.ListPublishRecordsOutput
 //	@Failure	400			{object}	bkerrs.GinErrorOutput
 //	@Router		/devmode/{appID}/publish-records [get]
@@ -204,6 +207,9 @@ func (h *Handler) ListDevModePublishRecords(c *gin.Context) {
 	}
 	if since != nil {
 		opts = append(opts, devmode.CreatedSince(*since))
+	}
+	if len(input.Statuses) > 0 {
+		opts = append(opts, store.Where("status", bson.M{"$in": input.Statuses}))
 	}
 	page, err := store.Of(h.registry.DB, devmode.PublishRecordMeta).ListPage(ctx, input.Page, input.PageSize, opts...)
 	if err != nil {

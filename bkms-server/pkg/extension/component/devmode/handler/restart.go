@@ -264,13 +264,13 @@ func buildRestartTargets(envTargets []*restartEnvTarget) []devmode.RestartTarget
 
 // buildRestartOutput 组装异步重启的提交结果
 func buildRestartOutput(
-	requestedAt time.Time, queued int, skipped []*slz.RestartSkippedEnv,
+	requestedAt time.Time, instanceCount int, skipped []*slz.RestartSkippedEnv,
 ) *slz.RestartOutput {
 	return &slz.RestartOutput{
 		Data: &slz.RestartData{
-			RequestedAt: requestedAt,
-			Queued:      queued,
-			Skipped:     lo.Ternary(skipped == nil, []*slz.RestartSkippedEnv{}, skipped),
+			RequestedAt:   requestedAt,
+			InstanceCount: instanceCount,
+			Skipped:       lo.Ternary(skipped == nil, []*slz.RestartSkippedEnv{}, skipped),
 		},
 	}
 }

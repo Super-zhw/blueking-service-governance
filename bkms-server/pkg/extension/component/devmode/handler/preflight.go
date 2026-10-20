@@ -25,6 +25,7 @@ import (
 
 	"github.com/TencentBlueKing/gopkg/mapx"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -37,8 +38,8 @@ import (
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
-	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode/serializer"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/bcstoken"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/cluster"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
@@ -215,9 +216,16 @@ func (h *Handler) getBCSProjectCode(ctx context.Context, workspaceID string) (st
 	return ws.BkSystems.BkBCSProjectCode, nil
 }
 
-// fetchActiveToken 获取当前用户的有效 Token。
+// fetchActiveToken 获取当前用户的有效 BCS Token
 func (h *Handler) fetchActiveToken(ctx context.Context, bcsProjectCode string) (string, error) {
-	return devmode.FetchActiveToken(ctx, bcsProjectCode)
+	token, err := bcstoken.FetchActiveUserToken(ctx, bcsProjectCode)
+	if err != nil {
+		if errors.Is(err, bcstoken.ErrNoActiveUserToken) {
+			return "", bkerrs.Wrap(err, bkerrs.ErrCodeNotFound, "fetch active BCS user token")
+		}
+		return "", bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "fetch active BCS user token")
+	}
+	return token, nil
 }
 
 // resolveInstanceIDs 根据请求参数解析目标实例 ID 列表。

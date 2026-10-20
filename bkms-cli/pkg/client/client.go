@@ -42,8 +42,8 @@ const (
 	DefaultListAppConfigFileVersionsPageSize = 100
 	// DefaultListAppInstancesPageSize 获取应用实例列表时的每页默认数量。
 	DefaultListAppInstancesPageSize = 100
-	// longRunningRequestTimeout 同步长耗时请求（如开发模式进程重启）的超时时间
-	longRunningRequestTimeout = 90 * time.Second
+	// writeRequestTimeout 非幂等写请求（如提交异步重启）的超时时间
+	writeRequestTimeout = 30 * time.Second
 )
 
 // 接口兼容性断言
@@ -56,8 +56,8 @@ var ErrTokenExpiredOrInvalid = errors.New("access token expired or invalid")
 type SvcBasedClient struct {
 	cli     *resty.Client
 	authCli *resty.Client
-	// longCli 用于非幂等的同步长耗时请求：超时更长且不自动重试（重试会导致操作被重复执行）
-	longCli *resty.Client
+	// noRetryCli 用于非幂等写请求：不自动重试，避免请求被重复提交
+	noRetryCli *resty.Client
 }
 
 // New 新建 SvcBasedClient 实例
@@ -100,17 +100,17 @@ func New() Client {
 		SetTimeout(10*time.Second).
 		SetHeader("User-Agent", version.UserAgent())
 
-	longCli := resty.New().
+	noRetryCli := resty.New().
 		SetTransport(transport).
 		SetBaseURL(config.G.BkmsBaseURL).
-		SetTimeout(longRunningRequestTimeout).
+		SetTimeout(writeRequestTimeout).
 		SetHeaders(map[string]string{
 			"Content-Type":  "application/json",
 			"Authorization": fmt.Sprintf("Bearer %s", config.G.AccessToken),
 			"User-Agent":    version.UserAgent(),
 		})
 
-	return &SvcBasedClient{cli: bizCli, authCli: authCli, longCli: longCli}
+	return &SvcBasedClient{cli: bizCli, authCli: authCli, noRetryCli: noRetryCli}
 }
 
 // ValidateAccessToken 通过 AccessToken 获取用户名信息
@@ -219,7 +219,7 @@ func (c *SvcBasedClient) ReportDevModePublish(
 	return nil
 }
 
-// RestartDevModeProcesses 开发模式进程重启（异步接口，受理后立即返回，使用不重试的 longCli）
+// RestartDevModeProcesses 开发模式进程重启（异步接口，受理后立即返回；不自动重试）
 func (c *SvcBasedClient) RestartDevModeProcesses(
 	ctx context.Context,
 	appID string,
@@ -228,7 +228,7 @@ func (c *SvcBasedClient) RestartDevModeProcesses(
 	path := fmt.Sprintf("/bkms/v1/bkms-server/devmode/%s/restart", url.PathEscape(appID))
 
 	var respData DevModeRestartRespData
-	resp, err := c.longCli.R().SetContext(ctx).SetBody(opts).SetResult(&respData).Post(path)
+	resp, err := c.noRetryCli.R().SetContext(ctx).SetBody(opts).SetResult(&respData).Post(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "restart devmode processes request failed")
 	}
@@ -245,11 +245,14 @@ func (c *SvcBasedClient) RestartDevModeProcesses(
 // ListDevModePublishRecords 获取开发模式发布记录列表（按环境名称或环境类型，跨环境统一分页）
 func (c *SvcBasedClient) ListDevModePublishRecords(
 	ctx context.Context,
-	appID string, envNames, envTypes []string, keyword string,
+	appID string, envNames, envTypes, statuses []string, keyword string,
 	since time.Time, page, pageSize int64,
 ) ([]DevModePublishRecord, int64, error) {
 	path := fmt.Sprintf("/bkms/v1/bkms-server/devmode/%s/publish-records", url.PathEscape(appID))
 	queryParams := publishRecordsQueryParams(keyword, since, page, pageSize)
+	if len(statuses) > 0 {
+		queryParams["statuses"] = strings.Join(statuses, ",")
+	}
 	if len(envNames) > 0 {
 		queryParams["envNames"] = strings.Join(envNames, ",")
 	}

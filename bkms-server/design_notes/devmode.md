@@ -205,11 +205,11 @@ restart.sh <random_name> <md5>
 接口同步创建 pending 记录、把**本次请求的所有实例放进同一条任务消息**投递到 asynq 后立即返回 `202`：
 
 ```json
-{"data": {"requestedAt": "2026-10-20T06:34:16Z", "queued": 100, "skipped": []}}
+{"data": {"requestedAt": "2026-10-20T06:34:16Z", "instanceCount": 100, "skipped": []}}
 ```
 
-CLI 拿到 `requestedAt` 后，用同一组目标条件轮询记录（`GET .../publish-records?envNames=...|envTypes=...&since=<requestedAt>`），
-直到所有实例进入终态。查询接口支持 `envNames` / `envTypes`（二选一）与 `since`，跨环境统一分页。
+CLI 拿到 `requestedAt` 后，用同一组目标条件轮询：先按 `statuses=pending,running` 只取 1 条拿到未完成数量，
+数量归零后再拉取全部记录做汇总。查询接口支持 `envNames` / `envTypes`（二选一）、`since`、`statuses`，跨环境统一分页。
 
 集群访问使用当前用户的 BCS Token：任务执行时由 worker 按 ctx 中的用户身份重新获取，不写入队列。
 

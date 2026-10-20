@@ -16,53 +16,54 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package devmode
+// Package bcstoken 提供 BCS 用户 Token 的获取能力
+package bcstoken
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bcs"
 )
 
-// FetchActiveToken 以当前登录用户身份获取 BCS 项目下状态为 active 的 Token。
-// 同步接口与异步任务都用它获取用户 Token；任务在 worker 中调用，可避免把 Token 写入队列。
-func FetchActiveToken(ctx context.Context, bcsProjectCode string) (string, error) {
+// ErrNoActiveUserToken 用户没有有效的 BCS Token
+var ErrNoActiveUserToken = errors.New("no active BCS user token")
+
+// FetchActiveUserToken 获取当前用户在指定 BCS 项目下状态为 active 的 Token
+func FetchActiveUserToken(ctx context.Context, bcsProjectCode string) (string, error) {
 	user, err := auth.GetUser(ctx)
 	if err != nil {
-		return "", bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "get auth user")
+		return "", errors.Wrap(err, "get auth user")
 	}
 
-	bcsClient, err := bcs.New(user, bcs.ClientOption{UserMode: true})
+	client, err := bcs.New(user, bcs.ClientOption{UserMode: true})
 	if err != nil {
-		return "", bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "failed to initialize token client")
+		return "", errors.Wrap(err, "init BCS client")
 	}
-	tokens, err := bcsClient.ListUserTokens(ctx)
+	tokens, err := client.ListUserTokens(ctx)
 	if err != nil {
-		return "", bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "failed to retrieve token")
+		return "", errors.Wrap(err, "list BCS user tokens")
 	}
 
-	activeToken, found := lo.Find(tokens, func(item bcs.UserToken) bool {
-		return item.Status == bcs.UserTokenStatusActive
+	active, found := lo.Find(tokens, func(token bcs.UserToken) bool {
+		return token.Status == bcs.UserTokenStatusActive
 	})
 	if !found {
-		return "", bkerrs.Errorf(
-			bkerrs.ErrCodeNotFound,
-			"no active token found, please create a token in BCS at %s",
-			buildBCSUserTokenURL(bcsProjectCode),
+		return "", errors.Wrapf(
+			ErrNoActiveUserToken, "please create a token in BCS at %s", UserTokenURL(bcsProjectCode),
 		)
 	}
-	return activeToken.Token, nil
+	return active.Token, nil
 }
 
-// buildBCSUserTokenURL 构造 BCS 用户 Token 创建页地址
-func buildBCSUserTokenURL(bcsProjectCode string) string {
+// UserTokenURL 返回 BCS 用户 Token 创建页地址
+func UserTokenURL(bcsProjectCode string) string {
 	return fmt.Sprintf(
 		"%s/bcs/projects/%s/user-token",
 		strings.TrimRight(config.G.BCS.BaseUrl, "/"),

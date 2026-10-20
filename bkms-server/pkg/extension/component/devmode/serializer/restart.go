@@ -83,8 +83,8 @@ type RestartOutput struct {
 type RestartData struct {
 	// RequestedAt 服务端受理时间，用于按条件轮询本次提交产生的记录
 	RequestedAt time.Time `json:"requestedAt"`
-	// Queued 已投递到任务队列的实例数
-	Queued int `json:"queued"`
+	// InstanceCount 本次受理的实例数
+	InstanceCount int `json:"instanceCount"`
 	// Skipped 被跳过的环境（仅按环境类型指定时可能出现）
 	Skipped []*RestartSkippedEnv `json:"skipped"`
 }
