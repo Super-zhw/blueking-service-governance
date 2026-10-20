@@ -21,6 +21,7 @@ package serializer
 
 import (
 	"fmt"
+	"net"
 	"slices"
 	"time"
 
@@ -89,11 +90,23 @@ type ListAppInstancesQueryInput struct {
 	Page *int64 `form:"page"`
 	// 每页数量，仅支持固定枚举值；分页模式必填，all=true 时禁止出现
 	PageSize *int64 `form:"pageSize"`
+	// 按 Pod IP 精确过滤，可重复传入多个值
+	PodIPs []string `form:"podIP"`
+	// 按 Node IP 精确过滤，可重复传入多个值
+	NodeIPs []string `form:"nodeIP"`
 }
 
 // Validate 校验全量与分页参数互斥，以及分页模式下的必填与取值
 // 必须在 Bind 之后单独调用：Bind 只做解析，条件校验放这里才能让 all=true 不带分页通过
 func (q *ListAppInstancesQueryInput) Validate() error {
+	// IP 过滤与全量/分页两种模式都能组合，先于模式分支校验
+	if err := validateIPs("podIP", q.PodIPs); err != nil {
+		return err
+	}
+	if err := validateIPs("nodeIP", q.NodeIPs); err != nil {
+		return err
+	}
+
 	if q.All {
 		if q.Page != nil || q.PageSize != nil {
 			return bkerrs.New(
@@ -119,6 +132,31 @@ func (q *ListAppInstancesQueryInput) Validate() error {
 		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "pageSize must be one of 5, 10, 20, 50, 100")
 	}
 	return nil
+}
+
+// validateIPs 校验 IP 过滤值均为合法 IP；精确匹配下非法值不可能命中，直接 400 比静默返回空列表更明确
+func validateIPs(field string, ips []string) error {
+	for _, ip := range ips {
+		if net.ParseIP(ip) == nil {
+			return bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "%s %q is not a valid IP address", field, ip)
+		}
+	}
+	return nil
+}
+
+// HasIPFilter 是否带了 Pod IP 或 Node IP 过滤条件
+func (q *ListAppInstancesQueryInput) HasIPFilter() bool {
+	return len(q.PodIPs) > 0 || len(q.NodeIPs) > 0
+}
+
+// MatchIPFilter 判断实例的 Pod IP / Node IP 是否命中过滤条件
+// 同类多值、Pod IP 与 Node IP 之间均取 OR；未带过滤条件时恒为 true
+// 目前是精确匹配，后续若改模糊匹配只需调整这里
+func (q *ListAppInstancesQueryInput) MatchIPFilter(podIP, nodeIP string) bool {
+	if !q.HasIPFilter() {
+		return true
+	}
+	return slices.Contains(q.PodIPs, podIP) || slices.Contains(q.NodeIPs, nodeIP)
 }
 
 // ProjectionRange 返回需要投影的 [start, end) 下标

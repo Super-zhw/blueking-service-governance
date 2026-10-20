@@ -70,6 +70,10 @@ type ListAppInstancesOptions struct {
 	Page int
 	// PageSize 每页数量。
 	PageSize int
+	// PodIPs 按 Pod IP 精确过滤，多值取 OR。
+	PodIPs []string
+	// NodeIPs 按 Node IP 精确过滤，多值取 OR；与 PodIPs 之间也取 OR。
+	NodeIPs []string
 }
 
 // PaginatedInstances 分页查询实例结果

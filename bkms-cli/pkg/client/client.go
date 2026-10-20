@@ -1131,11 +1131,16 @@ func (c *SvcBasedClient) ListAppInstances(
 		pageSize = DefaultListAppInstancesPageSize
 	}
 
+	// podIP / nodeIP 以重复参数传递，后端按多值 OR 过滤
+	query := url.Values{
+		"page":     {strconv.Itoa(page)},
+		"pageSize": {strconv.Itoa(pageSize)},
+		"podIP":    opts.PodIPs,
+		"nodeIP":   opts.NodeIPs,
+	}
+
 	var respData ListAppInstancesRespData
-	resp, err := c.cli.R().SetContext(ctx).SetQueryParams(map[string]string{
-		"page":     strconv.Itoa(page),
-		"pageSize": strconv.Itoa(pageSize),
-	}).SetResult(&respData).Get(path)
+	resp, err := c.cli.R().SetContext(ctx).SetQueryParamsFromValues(query).SetResult(&respData).Get(path)
 	if err != nil {
 		return nil, err
 	}
