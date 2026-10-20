@@ -43,9 +43,11 @@ const (
 	// defaultRestartPollInterval 轮询重启记录的间隔
 	defaultRestartPollInterval = 2 * time.Second
 	// defaultRestartWaitTimeout 等待重启完成的最长时间
-	defaultRestartWaitTimeout = 10 * time.Minute
+	defaultRestartWaitTimeout = 3 * time.Minute
 	// restartRecordPageSize 轮询时每页拉取的记录数
 	restartRecordPageSize = int64(100)
+	// restartRecordChunkSize 按记录 ID 查询时单次携带的 ID 数量
+	restartRecordChunkSize = 100
 )
 
 // BuildRestartOptions 根据命令行参数（逗号分隔）构造进程重启请求参数：
@@ -95,17 +97,12 @@ func restartAndWait(
 	if err != nil {
 		return errors.Wrapf(err, "restart dev mode processes for app %s", appID)
 	}
-	requestedAt, err := time.Parse(time.RFC3339, data.RequestedAt)
-	if err != nil {
-		return errors.Wrapf(err, "invalid requestedAt %q returned by server", data.RequestedAt)
-	}
-
 	console.Info("Restart request submitted, %d instance(s) accepted.", data.InstanceCount)
 	for _, env := range data.Skipped {
 		console.Warn("  - skipped %s (%s): %s", env.EnvName, env.EnvType, env.Reason)
 	}
-	if data.InstanceCount == 0 {
-		return errors.New("no instances were accepted for restart")
+	if len(data.RecordIDs) == 0 {
+		return errors.New("server returned no restart records")
 	}
 
 	ticker := time.NewTicker(pollInterval)
@@ -114,25 +111,25 @@ func restartAndWait(
 	lastFinished := -1
 	for {
 		// 只需知道还有多少实例未完成，按状态过滤并只取 1 条，避免每次拉取全部分页
-		inProgress, err := countRestartInProgress(ctx, cli, appID, opts, requestedAt)
+		inProgress, err := countRestartInProgress(ctx, cli, appID, data.RecordIDs)
 		if err != nil {
 			return err
 		}
-		finished := lo.Max([]int{data.InstanceCount - int(inProgress), 0})
+		finished := lo.Max([]int{len(data.RecordIDs) - int(inProgress), 0})
 		if finished != lastFinished {
-			console.Info("Waiting for instances to finish: %d/%d", finished, data.InstanceCount)
+			console.Info("Waiting for instances to finish: %d/%d", finished, len(data.RecordIDs))
 			lastFinished = finished
 		}
 
 		if inProgress == 0 {
-			records, listErr := listRestartRecords(ctx, cli, appID, opts, requestedAt)
+			records, listErr := listRestartRecords(ctx, cli, appID, data.RecordIDs)
 			if listErr != nil {
 				return listErr
 			}
 			terminal := lo.CountBy(records, func(record client.DevModePublishRecord) bool {
 				return isTerminalStatus(record.Status)
 			})
-			if len(records) >= data.InstanceCount && terminal == len(records) {
+			if len(records) >= len(data.RecordIDs) && terminal == len(records) {
 				return printRestartResult(records)
 			}
 		}
@@ -156,57 +153,51 @@ func restartAndWait(
 	}
 }
 
-// countRestartInProgress 统计本次条件下仍处于 pending / running 的记录数
+// countRestartInProgress 统计本次提交仍处于 pending / running 的记录数
 func countRestartInProgress(
 	ctx context.Context,
 	cli client.Client,
 	appID string,
-	opts client.DevModeRestartOptions,
-	since time.Time,
+	recordIDs []string,
 ) (int64, error) {
-	envNames, envTypes := restartScope(opts)
-	_, total, err := cli.ListDevModePublishRecords(
-		ctx, appID, envNames, envTypes, []string{"pending", "running"}, "", since, 1, 1,
-	)
-	return total, errors.Wrap(err, "query restart progress")
-}
-
-// restartScope 将重启目标转换为查询条件
-func restartScope(opts client.DevModeRestartOptions) (envNames, envTypes []string) {
-	switch {
-	case opts.Instances != nil:
-		return []string{opts.Instances.EnvName}, nil
-	case opts.Envs != nil:
-		return opts.Envs.Names, nil
-	default:
-		return nil, opts.EnvTypes.Types
+	var total int64
+	for _, chunk := range lo.Chunk(recordIDs, restartRecordChunkSize) {
+		_, count, err := cli.ListDevModePublishRecords(ctx, appID, client.DevModePublishRecordsQuery{
+			RecordIDs: chunk,
+			Statuses:  []string{"pending", "running"},
+			Page:      1,
+			PageSize:  1,
+		})
+		if err != nil {
+			return 0, errors.Wrap(err, "query restart progress")
+		}
+		total += count
 	}
+	return total, nil
 }
 
-// listRestartRecords 按提交时的条件拉取本次受理之后产生的 restart 记录（含分页）
+// listRestartRecords 按本次提交的记录 ID 拉取完整记录
 func listRestartRecords(
 	ctx context.Context,
 	cli client.Client,
 	appID string,
-	opts client.DevModeRestartOptions,
-	since time.Time,
+	recordIDs []string,
 ) ([]client.DevModePublishRecord, error) {
 	var records []client.DevModePublishRecord
-	for page := int64(1); ; page++ {
-		envNames, envTypes := restartScope(opts)
-		batch, total, err := cli.ListDevModePublishRecords(
-			ctx, appID, envNames, envTypes, nil, "", since, page, restartRecordPageSize,
-		)
+	for _, chunk := range lo.Chunk(recordIDs, restartRecordChunkSize) {
+		batch, _, err := cli.ListDevModePublishRecords(ctx, appID, client.DevModePublishRecordsQuery{
+			RecordIDs: chunk,
+			Page:      1,
+			PageSize:  restartRecordPageSize,
+		})
 		if err != nil {
 			return nil, errors.Wrap(err, "list restart records")
 		}
 		records = append(records, lo.Filter(batch, func(record client.DevModePublishRecord, _ int) bool {
 			return record.Action == restartAction
 		})...)
-		if int64(len(batch)) < restartRecordPageSize || page*restartRecordPageSize >= total {
-			return records, nil
-		}
 	}
+	return records, nil
 }
 
 // isTerminalStatus 判断记录是否已进入终态

@@ -98,7 +98,7 @@ func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 		return
 	}
 	if len(envTargets) == 0 {
-		ginutils.JSON(c, http.StatusAccepted, buildRestartOutput(time.Now(), 0, skipped))
+		ginutils.JSON(c, http.StatusAccepted, buildRestartOutput(time.Now(), nil, skipped))
 		return
 	}
 
@@ -145,7 +145,10 @@ func (h *Handler) RestartDevModeProcesses(c *gin.Context) {
 		return
 	}
 
-	ginutils.JSON(c, http.StatusAccepted, buildRestartOutput(requestedAt, len(prepared), skipped))
+	recordIDs := lo.Map(prepared, func(item devmode.PreparedInstance, _ int) string {
+		return item.RecordID.Hex()
+	})
+	ginutils.JSON(c, http.StatusAccepted, buildRestartOutput(requestedAt, recordIDs, skipped))
 }
 
 // resolveRestartTargets 按目标类型解析重启目标。
@@ -197,6 +200,9 @@ func (h *Handler) resolveRestartTargetsByEnvTypes(
 		env := &matched[i]
 		target, err := h.resolveRestartTarget(ctx, app, env, nil)
 		if err != nil {
+			if !isSkippableRestartErr(err) {
+				return nil, nil, err
+			}
 			skipped = append(
 				skipped,
 				&slz.RestartSkippedEnv{EnvName: env.Name, EnvType: env.Type, Reason: err.Error()},
@@ -206,6 +212,20 @@ func (h *Handler) resolveRestartTargetsByEnvTypes(
 		targets = append(targets, target)
 	}
 	return targets, skipped, nil
+}
+
+// isSkippableRestartErr 判断错误是否只是环境不适用；系统错误需直接返回
+func isSkippableRestartErr(err error) bool {
+	var bkErr *bkerrs.Error
+	if !errors.As(err, &bkErr) {
+		return false
+	}
+	switch bkErr.Code() {
+	case bkerrs.ErrCodeInvalidArgument, bkerrs.ErrCodeInvalidRequest, bkerrs.ErrCodeNotFound:
+		return true
+	default:
+		return false
+	}
 }
 
 // resolveRestartTargetByEnvName 按环境名称解析重启目标
@@ -264,12 +284,13 @@ func buildRestartTargets(envTargets []*restartEnvTarget) []devmode.RestartTarget
 
 // buildRestartOutput 组装异步重启的提交结果
 func buildRestartOutput(
-	requestedAt time.Time, instanceCount int, skipped []*slz.RestartSkippedEnv,
+	requestedAt time.Time, recordIDs []string, skipped []*slz.RestartSkippedEnv,
 ) *slz.RestartOutput {
 	return &slz.RestartOutput{
 		Data: &slz.RestartData{
 			RequestedAt:   requestedAt,
-			InstanceCount: instanceCount,
+			InstanceCount: len(recordIDs),
+			RecordIDs:     lo.Ternary(recordIDs == nil, []string{}, recordIDs),
 			Skipped:       lo.Ternary(skipped == nil, []*slz.RestartSkippedEnv{}, skipped),
 		},
 	}

@@ -205,11 +205,11 @@ restart.sh <random_name> <md5>
 接口同步创建 pending 记录、把**本次请求的所有实例放进同一条任务消息**投递到 asynq 后立即返回 `202`：
 
 ```json
-{"data": {"requestedAt": "2026-10-20T06:34:16Z", "instanceCount": 100, "skipped": []}}
+{"data": {"requestedAt": "2026-10-20T06:34:16Z", "instanceCount": 100, "recordIDs": ["..."], "skipped": []}}
 ```
 
-CLI 拿到 `requestedAt` 后，用同一组目标条件轮询：先按 `statuses=pending,running` 只取 1 条拿到未完成数量，
-数量归零后再拉取全部记录做汇总。查询接口支持 `envNames` / `envTypes`（二选一）、`since`、`statuses`，跨环境统一分页。
+CLI 拿到 `recordIDs` 后按记录 ID 精确轮询：先按 `statuses=pending,running` 只取 1 条拿到未完成数量，
+数量归零后再按 ID 拉取全部记录做汇总。查询接口支持 `envNames` / `envTypes` / `recordIDs`（三选一）、`since`、`statuses`。
 
 集群访问使用当前用户的 BCS Token：任务执行时由 worker 按 ctx 中的用户身份重新获取，不写入队列。
 
@@ -245,7 +245,7 @@ d. 更新发布记录为 success / failed
 
 ### 已知风险（测试时留意）
 
-- CLI 等待超时（固定 10 分钟）或用户 Ctrl+C 时任务仍在服务端执行，以 `publish history` 为准
+- CLI 等待超时（固定 3 分钟）或用户 Ctrl+C 时任务仍在服务端执行，以 `publish history` 为准
 - worker 进程异常退出时，记录可能停留在 `running`，任务不自动重试，需要手动重新发起
 - 不区分调用来源，同一用户、同一条件并发提交两次时，轮询会同时看到两次的记录（不引入 batchID 的已知限制）
 - 同一实例上 publish 与 restart 并发执行时会相互影响 stop flag 与 `pid.conf`

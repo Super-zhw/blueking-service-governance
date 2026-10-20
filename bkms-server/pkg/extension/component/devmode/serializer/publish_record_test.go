@@ -51,8 +51,8 @@ var _ = Describe("ListPublishRecordsByScopeInput", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring(msg))
 		},
-		Entry("no scope", nil, nil, "exactly one of envNames or envTypes"),
-		Entry("both scopes", []string{"stag"}, []string{"test"}, "exactly one of envNames or envTypes"),
+		Entry("no scope", nil, nil, "exactly one of envNames, envTypes or recordIDs"),
+		Entry("both scopes", []string{"stag"}, []string{"test"}, "exactly one of envNames, envTypes or recordIDs"),
 		Entry("production", nil, []string{"production"}, "'oneof' tag"),
 		Entry("unknown type", nil, []string{"dev"}, "'oneof' tag"),
 		Entry("invalid env name", []string{"stag/1"}, nil, "'uri_slug' tag"),

@@ -7,7 +7,6 @@ package mocks
 import (
 	"context"
 	"io"
-	"time"
 
 	mock "github.com/stretchr/testify/mock"
 
@@ -4391,8 +4390,8 @@ func (_c *MockClient_ListDashboardDirectoryTree_Call) RunAndReturn(run func(ctx 
 }
 
 // ListDevModePublishRecords provides a mock function for the type MockClient
-func (_mock *MockClient) ListDevModePublishRecords(ctx context.Context, appID string, envNames []string, envTypes []string, statuses []string, keyword string, since time.Time, page int64, pageSize int64) ([]client.DevModePublishRecord, int64, error) {
-	ret := _mock.Called(ctx, appID, envNames, envTypes, statuses, keyword, since, page, pageSize)
+func (_mock *MockClient) ListDevModePublishRecords(ctx context.Context, appID string, query client.DevModePublishRecordsQuery) ([]client.DevModePublishRecord, int64, error) {
+	ret := _mock.Called(ctx, appID, query)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListDevModePublishRecords")
@@ -4401,23 +4400,23 @@ func (_mock *MockClient) ListDevModePublishRecords(ctx context.Context, appID st
 	var r0 []client.DevModePublishRecord
 	var r1 int64
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, []string, []string, string, time.Time, int64, int64) ([]client.DevModePublishRecord, int64, error)); ok {
-		return returnFunc(ctx, appID, envNames, envTypes, statuses, keyword, since, page, pageSize)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, client.DevModePublishRecordsQuery) ([]client.DevModePublishRecord, int64, error)); ok {
+		return returnFunc(ctx, appID, query)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []string, []string, []string, string, time.Time, int64, int64) []client.DevModePublishRecord); ok {
-		r0 = returnFunc(ctx, appID, envNames, envTypes, statuses, keyword, since, page, pageSize)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, client.DevModePublishRecordsQuery) []client.DevModePublishRecord); ok {
+		r0 = returnFunc(ctx, appID, query)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]client.DevModePublishRecord)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []string, []string, []string, string, time.Time, int64, int64) int64); ok {
-		r1 = returnFunc(ctx, appID, envNames, envTypes, statuses, keyword, since, page, pageSize)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, client.DevModePublishRecordsQuery) int64); ok {
+		r1 = returnFunc(ctx, appID, query)
 	} else {
 		r1 = ret.Get(1).(int64)
 	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, []string, []string, []string, string, time.Time, int64, int64) error); ok {
-		r2 = returnFunc(ctx, appID, envNames, envTypes, statuses, keyword, since, page, pageSize)
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, client.DevModePublishRecordsQuery) error); ok {
+		r2 = returnFunc(ctx, appID, query)
 	} else {
 		r2 = ret.Error(2)
 	}
@@ -4432,18 +4431,12 @@ type MockClient_ListDevModePublishRecords_Call struct {
 // ListDevModePublishRecords is a helper method to define mock.On call
 //   - ctx context.Context
 //   - appID string
-//   - envNames []string
-//   - envTypes []string
-//   - statuses []string
-//   - keyword string
-//   - since time.Time
-//   - page int64
-//   - pageSize int64
-func (_e *MockClient_Expecter) ListDevModePublishRecords(ctx any, appID any, envNames any, envTypes any, statuses any, keyword any, since any, page any, pageSize any) *MockClient_ListDevModePublishRecords_Call {
-	return &MockClient_ListDevModePublishRecords_Call{Call: _e.mock.On("ListDevModePublishRecords", ctx, appID, envNames, envTypes, statuses, keyword, since, page, pageSize)}
+//   - query client.DevModePublishRecordsQuery
+func (_e *MockClient_Expecter) ListDevModePublishRecords(ctx any, appID any, query any) *MockClient_ListDevModePublishRecords_Call {
+	return &MockClient_ListDevModePublishRecords_Call{Call: _e.mock.On("ListDevModePublishRecords", ctx, appID, query)}
 }
 
-func (_c *MockClient_ListDevModePublishRecords_Call) Run(run func(ctx context.Context, appID string, envNames []string, envTypes []string, statuses []string, keyword string, since time.Time, page int64, pageSize int64)) *MockClient_ListDevModePublishRecords_Call {
+func (_c *MockClient_ListDevModePublishRecords_Call) Run(run func(ctx context.Context, appID string, query client.DevModePublishRecordsQuery)) *MockClient_ListDevModePublishRecords_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -4453,44 +4446,14 @@ func (_c *MockClient_ListDevModePublishRecords_Call) Run(run func(ctx context.Co
 		if args[1] != nil {
 			arg1 = args[1].(string)
 		}
-		var arg2 []string
+		var arg2 client.DevModePublishRecordsQuery
 		if args[2] != nil {
-			arg2 = args[2].([]string)
-		}
-		var arg3 []string
-		if args[3] != nil {
-			arg3 = args[3].([]string)
-		}
-		var arg4 []string
-		if args[4] != nil {
-			arg4 = args[4].([]string)
-		}
-		var arg5 string
-		if args[5] != nil {
-			arg5 = args[5].(string)
-		}
-		var arg6 time.Time
-		if args[6] != nil {
-			arg6 = args[6].(time.Time)
-		}
-		var arg7 int64
-		if args[7] != nil {
-			arg7 = args[7].(int64)
-		}
-		var arg8 int64
-		if args[8] != nil {
-			arg8 = args[8].(int64)
+			arg2 = args[2].(client.DevModePublishRecordsQuery)
 		}
 		run(
 			arg0,
 			arg1,
 			arg2,
-			arg3,
-			arg4,
-			arg5,
-			arg6,
-			arg7,
-			arg8,
 		)
 	})
 	return _c
@@ -4501,7 +4464,7 @@ func (_c *MockClient_ListDevModePublishRecords_Call) Return(devModePublishRecord
 	return _c
 }
 
-func (_c *MockClient_ListDevModePublishRecords_Call) RunAndReturn(run func(ctx context.Context, appID string, envNames []string, envTypes []string, statuses []string, keyword string, since time.Time, page int64, pageSize int64) ([]client.DevModePublishRecord, int64, error)) *MockClient_ListDevModePublishRecords_Call {
+func (_c *MockClient_ListDevModePublishRecords_Call) RunAndReturn(run func(ctx context.Context, appID string, query client.DevModePublishRecordsQuery) ([]client.DevModePublishRecord, int64, error)) *MockClient_ListDevModePublishRecords_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -26,7 +26,6 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/client"
 	publishhandler "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/handler/publish"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/clierr"
 	cmdutil "github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/cmd"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/output"
@@ -60,12 +59,6 @@ and records are returned in reverse-chronological order.`,
 		PreRunE: cmdutil.ResolveAppPreRunE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			types := lo.Uniq(params.NormalizeInstIDs(envTypes, ","))
-			switch {
-			case envName != "" && len(types) > 0:
-				return clierr.Usagef("--env and --env-type cannot be used together")
-			case envName == "" && len(types) == 0:
-				return clierr.Usagef("one of --env or --env-type is required")
-			}
 
 			rows, err := publishhandler.ListHistory(cmd.Context(), client.New(), appID, envName, types, keyword)
 			if err != nil {
@@ -87,6 +80,9 @@ and records are returned in reverse-chronological order.`,
 		StringVar(&envTypes, "env-type", "", "Environment types, comma-separated: development | test | staging")
 	cmd.Flags().StringVar(&keyword, "keyword", "", "Filter by keyword (binary name / operator / instance)")
 	output.AddFormatFlag(cmd, &outputFormat)
+
+	cmd.MarkFlagsMutuallyExclusive("env", "env-type")
+	cmd.MarkFlagsOneRequired("env", "env-type")
 
 	_ = cmd.MarkFlagRequired("app")
 

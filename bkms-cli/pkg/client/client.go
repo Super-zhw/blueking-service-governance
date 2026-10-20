@@ -242,31 +242,35 @@ func (c *SvcBasedClient) RestartDevModeProcesses(
 	return respData.Data, nil
 }
 
-// ListDevModePublishRecords 获取开发模式发布记录列表（按环境名称或环境类型，跨环境统一分页）
+// ListDevModePublishRecords 获取开发模式发布记录列表
 func (c *SvcBasedClient) ListDevModePublishRecords(
 	ctx context.Context,
-	appID string, envNames, envTypes, statuses []string, keyword string,
-	since time.Time, page, pageSize int64,
+	appID string, query DevModePublishRecordsQuery,
 ) ([]DevModePublishRecord, int64, error) {
 	path := fmt.Sprintf("/bkms/v1/bkms-server/devmode/%s/publish-records", url.PathEscape(appID))
-	queryParams := publishRecordsQueryParams(keyword, since, page, pageSize)
-	if len(statuses) > 0 {
-		queryParams["statuses"] = strings.Join(statuses, ",")
+	params := map[string]string{
+		"keyword":  query.Keyword,
+		"page":     strconv.FormatInt(query.Page, 10),
+		"pageSize": strconv.FormatInt(query.PageSize, 10),
 	}
-	if len(envNames) > 0 {
-		queryParams["envNames"] = strings.Join(envNames, ",")
-	}
-	if len(envTypes) > 0 {
-		queryParams["envTypes"] = strings.Join(envTypes, ",")
+	for key, values := range map[string][]string{
+		"envNames":  query.EnvNames,
+		"envTypes":  query.EnvTypes,
+		"recordIDs": query.RecordIDs,
+		"statuses":  query.Statuses,
+	} {
+		if len(values) > 0 {
+			params[key] = strings.Join(values, ",")
+		}
 	}
 
 	var respData DevModePublishRecordsResp
-	resp, err := c.cli.R().SetContext(ctx).SetQueryParams(queryParams).SetResult(&respData).Get(path)
+	resp, err := c.cli.R().SetContext(ctx).SetQueryParams(params).SetResult(&respData).Get(path)
 	if err != nil {
-		return nil, 0, errors.Wrap(err, "list devmode publish records by scope request failed")
+		return nil, 0, errors.Wrap(err, "list devmode publish records request failed")
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, 0, formatAPIError(resp, "list devmode publish records by scope")
+		return nil, 0, formatAPIError(resp, "list devmode publish records")
 	}
 
 	return respData.Data.Results, parseRecordCount(respData.Data.Count), nil
@@ -279,19 +283,6 @@ func parseRecordCount(raw string) int64 {
 		return 0
 	}
 	return count
-}
-
-// publishRecordsQueryParams 构造发布记录查询参数
-func publishRecordsQueryParams(keyword string, since time.Time, page, pageSize int64) map[string]string {
-	params := map[string]string{
-		"keyword":  keyword,
-		"page":     strconv.FormatInt(page, 10),
-		"pageSize": strconv.FormatInt(pageSize, 10),
-	}
-	if !since.IsZero() {
-		params["since"] = since.Format(time.RFC3339Nano)
-	}
-	return params
 }
 
 // ListWorkspaces 获取工作空间列表

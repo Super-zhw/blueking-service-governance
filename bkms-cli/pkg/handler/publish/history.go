@@ -21,7 +21,6 @@ package publish
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -85,13 +84,13 @@ func listRecords(
 	cli client.Client,
 	appID, envName string, envTypes []string, keyword string,
 ) ([]client.DevModePublishRecord, error) {
-	var envNames []string
+	query := client.DevModePublishRecordsQuery{Keyword: keyword, Page: 1, PageSize: 100}
 	if envName != "" {
-		envNames = []string{envName}
+		query.EnvNames = []string{envName}
+	} else {
+		query.EnvTypes = envTypes
 	}
-	records, _, err := cli.ListDevModePublishRecords(
-		ctx, appID, envNames, envTypes, nil, keyword, time.Time{}, 1, 100,
-	)
+	records, _, err := cli.ListDevModePublishRecords(ctx, appID, query)
 	return records, errors.Wrapf(err, "list dev mode publish records (env %q, env types %v)", envName, envTypes)
 }
 

@@ -20,6 +20,7 @@ package publish
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -80,21 +81,26 @@ var _ = Describe("Restart", func() {
 	const appID = "demo-app"
 
 	var (
-		ctx         context.Context
-		cli         *mocks.MockClient
-		opts        client.DevModeRestartOptions
-		requestedAt time.Time
+		ctx  context.Context
+		cli  *mocks.MockClient
+		opts client.DevModeRestartOptions
 	)
 
 	BeforeEach(func() {
 		ctx = context.Background()
 		cli = mocks.NewMockClient(GinkgoT())
 		opts = client.DevModeRestartOptions{Envs: &client.DevModeRestartEnvsTarget{Names: []string{"stage"}}}
-		requestedAt = time.Now().Add(-time.Second)
 	})
 
+	recordIDs := func(count int) []string {
+		ids := make([]string, 0, count)
+		for i := 0; i < count; i++ {
+			ids = append(ids, fmt.Sprintf("%024d", i))
+		}
+		return ids
+	}
 	accepted := func(count int) *client.DevModeRestartData {
-		return &client.DevModeRestartData{RequestedAt: requestedAt.Format(time.RFC3339), InstanceCount: count}
+		return &client.DevModeRestartData{InstanceCount: count, RecordIDs: recordIDs(count)}
 	}
 	newRecord := func(instance, status string) client.DevModePublishRecord {
 		return client.DevModePublishRecord{
@@ -102,24 +108,26 @@ var _ = Describe("Restart", func() {
 			Message: "message of " + instance,
 		}
 	}
-	expectProgress := func() *mocks.MockClient_ListDevModePublishRecords_Call {
+	expectProgress := func(count int) *mocks.MockClient_ListDevModePublishRecords_Call {
 		return cli.EXPECT().ListDevModePublishRecords(
-			mock.Anything, appID, []string{"stage"}, mock.Anything, []string{"pending", "running"},
-			"", mock.Anything, int64(1), int64(1),
+			mock.Anything, appID, client.DevModePublishRecordsQuery{
+				RecordIDs: recordIDs(count), Statuses: []string{"pending", "running"}, Page: 1, PageSize: 1,
+			},
 		)
 	}
-	expectFinal := func() *mocks.MockClient_ListDevModePublishRecords_Call {
+	expectFinal := func(count int) *mocks.MockClient_ListDevModePublishRecords_Call {
 		return cli.EXPECT().ListDevModePublishRecords(
-			mock.Anything, appID, []string{"stage"}, mock.Anything, mock.Anything,
-			"", mock.Anything, int64(1), int64(100),
+			mock.Anything, appID, client.DevModePublishRecordsQuery{
+				RecordIDs: recordIDs(count), Page: 1, PageSize: 100,
+			},
 		)
 	}
 
 	It("submits the request and waits until all instances are terminal", func() {
 		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(accepted(2), nil)
-		expectProgress().Return([]client.DevModePublishRecord{}, int64(2), nil).Once()
-		expectProgress().Return([]client.DevModePublishRecord{}, int64(0), nil).Once()
-		expectFinal().Return(
+		expectProgress(2).Return([]client.DevModePublishRecord{}, int64(2), nil).Once()
+		expectProgress(2).Return([]client.DevModePublishRecord{}, int64(0), nil).Once()
+		expectFinal(2).Return(
 			[]client.DevModePublishRecord{newRecord("pod-1", "success"), newRecord("pod-2", "success")}, int64(2), nil,
 		)
 
@@ -128,8 +136,8 @@ var _ = Describe("Restart", func() {
 
 	It("returns an error when any instance failed", func() {
 		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(accepted(2), nil)
-		expectProgress().Return([]client.DevModePublishRecord{}, int64(0), nil)
-		expectFinal().Return([]client.DevModePublishRecord{
+		expectProgress(2).Return([]client.DevModePublishRecord{}, int64(0), nil)
+		expectFinal(2).Return([]client.DevModePublishRecord{
 			newRecord("pod-1", "success"), newRecord("pod-2", "failed"),
 		}, int64(2), nil)
 
@@ -140,19 +148,19 @@ var _ = Describe("Restart", func() {
 
 	It("times out when records never reach a terminal state", func() {
 		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(accepted(1), nil)
-		expectProgress().Return([]client.DevModePublishRecord{newRecord("pod-1", "pending")}, int64(1), nil)
+		expectProgress(1).Return([]client.DevModePublishRecord{newRecord("pod-1", "pending")}, int64(1), nil)
 
 		err := restartAndWait(ctx, cli, appID, opts, 10*time.Millisecond, 50*time.Millisecond)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("timed out"))
 	})
 
-	It("returns an error when nothing was accepted", func() {
+	It("returns an error when the server returns no records", func() {
 		cli.EXPECT().RestartDevModeProcesses(mock.Anything, appID, opts).Return(accepted(0), nil)
 
 		err := restartAndWait(ctx, cli, appID, opts, 10*time.Millisecond, time.Second)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring("no instances were accepted"))
+		Expect(err.Error()).To(ContainSubstring("server returned no restart records"))
 	})
 
 	It("wraps the client error", func() {

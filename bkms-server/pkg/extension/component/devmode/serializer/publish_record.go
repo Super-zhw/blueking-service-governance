@@ -21,6 +21,8 @@ package serializer
 import (
 	"time"
 
+	"github.com/samber/lo"
+
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	devmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
@@ -72,13 +74,15 @@ type CreatePublishRecordsData struct {
 	RecordIDs []string `json:"recordIDs"`
 }
 
-// ListPublishRecordsByScopeInput DevMode 按环境名称或环境类型查询发布记录的参数，
-// envNames 与 envTypes 必须且只能指定其中一个。
+// ListPublishRecordsByScopeInput DevMode 按环境名称、环境类型或记录 ID 查询发布记录的参数，
+// 三者必须且只能指定其中一个。
 type ListPublishRecordsByScopeInput struct {
 	// EnvNames 环境名称列表，多个值以逗号分隔
 	EnvNames []string `form:"envNames" binding:"omitempty,unique,dive,uri_slug"`
 	// EnvTypes 环境类型列表，多个值以逗号分隔：development / test / staging
 	EnvTypes []string `form:"envTypes" binding:"omitempty,unique,dive,oneof=development test staging"`
+	// RecordIDs 发布记录 ID 列表，多个值以逗号分隔
+	RecordIDs []string `form:"recordIDs" binding:"omitempty,unique,dive,required"`
 	// Keyword 搜索关键字
 	Keyword string `form:"keyword"`
 	// Page 分页页码
@@ -91,10 +95,15 @@ type ListPublishRecordsByScopeInput struct {
 	Statuses []string `form:"statuses" binding:"omitempty,unique,dive,oneof=pending running success failed"`
 }
 
-// Validate 校验 envNames 与 envTypes 必须且只能指定其中一个，必须在 Bind 之后单独调用
+// Validate 校验 envNames / envTypes / recordIDs 必须且只能指定其中一个，必须在 Bind 之后单独调用
 func (i *ListPublishRecordsByScopeInput) Validate() error {
-	if (len(i.EnvNames) == 0) == (len(i.EnvTypes) == 0) {
-		return bkerrs.New(bkerrs.ErrCodeInvalidArgument, "exactly one of envNames or envTypes is required")
+	specified := lo.CountBy([]bool{
+		len(i.EnvNames) > 0, len(i.EnvTypes) > 0, len(i.RecordIDs) > 0,
+	}, func(ok bool) bool { return ok })
+	if specified != 1 {
+		return bkerrs.New(
+			bkerrs.ErrCodeInvalidArgument, "exactly one of envNames, envTypes or recordIDs is required",
+		)
 	}
 	return nil
 }

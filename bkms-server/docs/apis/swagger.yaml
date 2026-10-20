@@ -8174,6 +8174,11 @@ definitions:
       instanceCount:
         description: InstanceCount 本次受理的实例数
         type: integer
+      recordIDs:
+        description: RecordIDs 本次创建的发布记录 ID，用于精确轮询执行结果
+        items:
+          type: string
+        type: array
       requestedAt:
         description: RequestedAt 服务端受理时间，用于按条件轮询本次提交产生的记录
         type: string

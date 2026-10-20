@@ -161,6 +161,37 @@ func (h *Handler) ListDevModePublishRecords(c *gin.Context) {
 		return
 	}
 
+	since, err := parseSince(input.Since)
+	if err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+	opts := []store.Opt{devmode.KeywordMatches(input.Keyword), devmode.NewestFirst()}
+	if since != nil {
+		opts = append(opts, devmode.CreatedSince(*since))
+	}
+	if len(input.Statuses) > 0 {
+		opts = append(opts, store.Where("status", bson.M{"$in": input.Statuses}))
+	}
+
+	// 按记录 ID 查询时无需解析环境，直接限定 appID + _id
+	if len(input.RecordIDs) > 0 {
+		ids := make([]bson.ObjectID, 0, len(input.RecordIDs))
+		for _, raw := range input.RecordIDs {
+			id, parseErr := bson.ObjectIDFromHex(raw)
+			if parseErr != nil {
+				bkerrs.AbortWithErr(c, bkerrs.Errorf(
+					bkerrs.ErrCodeInvalidArgument, "invalid record id %q", raw,
+				))
+				return
+			}
+			ids = append(ids, id)
+		}
+		opts = append(opts, store.Where("appID", app.ID), store.Where("_id", bson.M{"$in": ids}))
+		h.respondPublishRecords(c, ctx, opts, input.Page, input.PageSize)
+		return
+	}
+
 	envs, err := store.Of(h.registry.DB, envmodel.EnvMeta).
 		List(ctx, envmodel.InWorkspace(app.WorkspaceID), envmodel.VisibleToApp(app.ID), envmodel.NewestFirst())
 	if err != nil {
@@ -197,34 +228,25 @@ func (h *Handler) ListDevModePublishRecords(c *gin.Context) {
 		return
 	}
 
-	since, err := parseSince(input.Since)
+	opts = append(opts, devmode.ByAppEnvs(app.ID, envNames))
+	h.respondPublishRecords(c, ctx, opts, input.Page, input.PageSize)
+}
+
+// respondPublishRecords 按条件分页查询并输出发布记录
+func (h *Handler) respondPublishRecords(
+	c *gin.Context, ctx context.Context, opts []store.Opt, page, pageSize int64,
+) {
+	result, err := store.Of(h.registry.DB, devmode.PublishRecordMeta).ListPage(ctx, page, pageSize, opts...)
 	if err != nil {
-		bkerrs.AbortWithErr(c, err)
-		return
-	}
-	opts := []store.Opt{
-		devmode.ByAppEnvs(app.ID, envNames), devmode.KeywordMatches(input.Keyword), devmode.NewestFirst(),
-	}
-	if since != nil {
-		opts = append(opts, devmode.CreatedSince(*since))
-	}
-	if len(input.Statuses) > 0 {
-		opts = append(opts, store.Where("status", bson.M{"$in": input.Statuses}))
-	}
-	page, err := store.Of(h.registry.DB, devmode.PublishRecordMeta).ListPage(ctx, input.Page, input.PageSize, opts...)
-	if err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrapf(
-			err, bkerrs.ErrCodeInternalServerError, "list devmode publish records for app %s envs %v",
-			app.ID, envNames,
-		))
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "list devmode publish records"))
 		return
 	}
 
-	outputRecords := lo.Map(page.Items, func(record devmode.PublishRecord, _ int) *slz.PublishRecordOutputObj {
+	outputRecords := lo.Map(result.Items, func(record devmode.PublishRecord, _ int) *slz.PublishRecordOutputObj {
 		return new(slz.PublishRecordOutputObj).FromModel(record)
 	})
 	ginutils.OK(c, slz.ListPublishRecordsOutput{
-		Data: slz.PaginatedPublishRecords{Count: page.Total, Results: outputRecords},
+		Data: slz.PaginatedPublishRecords{Count: result.Total, Results: outputRecords},
 	})
 }
 

@@ -96,6 +96,24 @@ type DevModePublishResult struct {
 	Message string `json:"message"`
 }
 
+// DevModePublishRecordsQuery 发布记录查询条件，envNames / envTypes / recordIDs 三选一
+type DevModePublishRecordsQuery struct {
+	// EnvNames 环境名称列表
+	EnvNames []string
+	// EnvTypes 环境类型列表
+	EnvTypes []string
+	// RecordIDs 发布记录 ID 列表
+	RecordIDs []string
+	// Statuses 状态过滤
+	Statuses []string
+	// Keyword 搜索关键字
+	Keyword string
+	// Page 分页页码
+	Page int64
+	// PageSize 分页大小
+	PageSize int64
+}
+
 // DevModePublishRecord 开发模式发布记录
 type DevModePublishRecord struct {
 	// ID 发布记录 ID
@@ -161,6 +179,8 @@ type DevModeRestartData struct {
 	RequestedAt string `json:"requestedAt"`
 	// InstanceCount 本次受理的实例数
 	InstanceCount int `json:"instanceCount"`
+	// RecordIDs 本次创建的发布记录 ID，用于精确轮询执行结果
+	RecordIDs []string `json:"recordIDs"`
 	// Skipped 被跳过的环境
 	Skipped []DevModeRestartSkippedEnv `json:"skipped"`
 }

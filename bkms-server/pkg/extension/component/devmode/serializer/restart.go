@@ -85,6 +85,8 @@ type RestartData struct {
 	RequestedAt time.Time `json:"requestedAt"`
 	// InstanceCount 本次受理的实例数
 	InstanceCount int `json:"instanceCount"`
+	// RecordIDs 本次创建的发布记录 ID，用于精确轮询执行结果
+	RecordIDs []string `json:"recordIDs"`
 	// Skipped 被跳过的环境（仅按环境类型指定时可能出现）
 	Skipped []*RestartSkippedEnv `json:"skipped"`
 }

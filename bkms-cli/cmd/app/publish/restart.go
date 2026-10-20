@@ -53,7 +53,7 @@ Targets (exactly one of --env / --env-type is required, multiple values are comm
                   instances, requires a single --env
 
 The restart keeps running on the server even if the CLI is interrupted or the wait
-times out (10 minutes). Use 'bkms-cli app publish history' to check the final result.`,
+times out (3 minutes). Use 'bkms-cli app publish history' to check the final result.`,
 		Example: `  # Restart all Running instances in multiple environments
   bkms-cli app publish restart --app myapp --env stage,test
 
@@ -78,6 +78,9 @@ times out (10 minutes). Use 'bkms-cli app publish history' to check the final re
 		StringVar(&envTypes, "env-type", "", "Environment types, comma-separated: development | test | staging")
 	cmd.Flags().
 		StringVar(&instances, "instance-ids", "", "Instance IDs (pod names) to restart, comma-separated; requires a single --env")
+
+	cmd.MarkFlagsMutuallyExclusive("env", "env-type")
+	cmd.MarkFlagsOneRequired("env", "env-type")
 
 	_ = cmd.MarkFlagRequired("app")
 
