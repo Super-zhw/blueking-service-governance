@@ -248,24 +248,24 @@ func (c *SvcBasedClient) ListDevModePublishRecords(
 	appID string, query DevModePublishRecordsQuery,
 ) ([]DevModePublishRecord, int64, error) {
 	path := fmt.Sprintf("/bkms/v1/bkms-server/devmode/%s/publish-records", url.PathEscape(appID))
-	params := map[string]string{
-		"keyword":  query.Keyword,
-		"page":     strconv.FormatInt(query.Page, 10),
-		"pageSize": strconv.FormatInt(query.PageSize, 10),
-	}
+	// 切片参数使用重复 query 参数（?statuses=pending&statuses=running）
+	params := url.Values{}
+	params.Set("keyword", query.Keyword)
+	params.Set("page", strconv.FormatInt(query.Page, 10))
+	params.Set("pageSize", strconv.FormatInt(query.PageSize, 10))
 	for key, values := range map[string][]string{
 		"envNames":  query.EnvNames,
 		"envTypes":  query.EnvTypes,
 		"recordIDs": query.RecordIDs,
 		"statuses":  query.Statuses,
 	} {
-		if len(values) > 0 {
-			params[key] = strings.Join(values, ",")
+		for _, value := range values {
+			params.Add(key, value)
 		}
 	}
 
 	var respData DevModePublishRecordsResp
-	resp, err := c.cli.R().SetContext(ctx).SetQueryParams(params).SetResult(&respData).Get(path)
+	resp, err := c.cli.R().SetContext(ctx).SetQueryParamsFromValues(params).SetResult(&respData).Get(path)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "list devmode publish records request failed")
 	}

@@ -130,14 +130,14 @@ func (h *Handler) CreateDevModePublishRecords(c *gin.Context) {
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential
 //	@Param		appID		path		string									true	"应用 ID"
-//	@Param		envNames	query		[]string								false	"环境名称，多个用逗号分隔；与 envTypes 二选一"
-//	@Param		envTypes	query		[]string								false	"环境类型，多个用逗号分隔；与 envNames 二选一"
+//	@Param		envNames	query		[]string								false	"环境名称，与 envTypes 二选一"
+//	@Param		envTypes	query		[]string								false	"环境类型，与 envNames 二选一"
 //
 //	@Param		keyword		query		string									false	"搜索关键字"
 //	@Param		page		query		int										true	"分页页码（从 1 开始）"
 //	@Param		pageSize	query		int										true	"分页大小"
 //	@Param		since		query		string									false	"只返回创建时间不早于该时间的记录（RFC3339）"
-//	@Param		statuses	query		[]string								false	"状态过滤，多个用逗号分隔"
+//	@Param		statuses	query		[]string								false	"状态过滤"
 //
 //	@Success	200			{object}	slz.ListPublishRecordsOutput
 //	@Failure	400			{object}	bkerrs.GinErrorOutput

@@ -77,11 +77,11 @@ type CreatePublishRecordsData struct {
 // ListPublishRecordsByScopeInput DevMode 按环境名称、环境类型或记录 ID 查询发布记录的参数，
 // 三者必须且只能指定其中一个。
 type ListPublishRecordsByScopeInput struct {
-	// EnvNames 环境名称列表，多个值以逗号分隔
+	// EnvNames 环境名称列表
 	EnvNames []string `form:"envNames" binding:"omitempty,unique,dive,uri_slug"`
-	// EnvTypes 环境类型列表，多个值以逗号分隔：development / test / staging
+	// EnvTypes 环境类型列表development / test / staging
 	EnvTypes []string `form:"envTypes" binding:"omitempty,unique,dive,oneof=development test staging"`
-	// RecordIDs 发布记录 ID 列表，多个值以逗号分隔
+	// RecordIDs 发布记录 ID 列表
 	RecordIDs []string `form:"recordIDs" binding:"omitempty,unique,dive,required"`
 	// Keyword 搜索关键字
 	Keyword string `form:"keyword"`
@@ -91,7 +91,7 @@ type ListPublishRecordsByScopeInput struct {
 	PageSize int64 `form:"pageSize" binding:"required,oneof=1 5 10 20 50 100"`
 	// Since 只返回创建时间不早于该时间的记录（RFC3339）
 	Since string `form:"since"`
-	// Statuses 状态过滤，多个值以逗号分隔：pending / running / success / failed
+	// Statuses 状态过滤 pending / running / success / failed
 	Statuses []string `form:"statuses" binding:"omitempty,unique,dive,oneof=pending running success failed"`
 }
 

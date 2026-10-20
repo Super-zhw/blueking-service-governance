@@ -13170,7 +13170,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "description": "环境名称，多个用逗号分隔；与 envTypes 二选一",
+                        "description": "环境名称，与 envTypes 二选一",
                         "name": "envNames",
                         "in": "query"
                     },
@@ -13180,7 +13180,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "description": "环境类型，多个用逗号分隔；与 envNames 二选一",
+                        "description": "环境类型，与 envNames 二选一",
                         "name": "envTypes",
                         "in": "query"
                     },
@@ -13216,7 +13216,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "csv",
-                        "description": "状态过滤，多个用逗号分隔",
+                        "description": "状态过滤",
                         "name": "statuses",
                         "in": "query"
                     }

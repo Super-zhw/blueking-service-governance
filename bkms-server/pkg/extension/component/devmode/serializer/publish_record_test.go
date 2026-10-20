@@ -19,6 +19,9 @@
 package serializer_test
 
 import (
+	"net/http"
+	"net/http/httptest"
+
 	"github.com/gin-gonic/gin/binding"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -36,6 +39,17 @@ var _ = Describe("ListPublishRecordsByScopeInput", func() {
 		}
 		return input.Validate()
 	}
+
+	It("binds repeated query values", func() {
+		req := httptest.NewRequest(
+			http.MethodGet,
+			"/?envNames=stag&envNames=test&statuses=pending&statuses=running&page=1&pageSize=10", nil,
+		)
+		var input slz.ListPublishRecordsByScopeInput
+		Expect(binding.Query.Bind(req, &input)).To(Succeed())
+		Expect(input.EnvNames).To(Equal([]string{"stag", "test"}))
+		Expect(input.Statuses).To(Equal([]string{"pending", "running"}))
+	})
 
 	It("accepts env names", func() {
 		Expect(validate([]string{"stag", "test"}, nil)).To(Succeed())

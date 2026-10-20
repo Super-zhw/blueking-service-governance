@@ -208,8 +208,9 @@ restart.sh <random_name> <md5>
 {"data": {"requestedAt": "2026-10-20T06:34:16Z", "instanceCount": 100, "recordIDs": ["..."], "skipped": []}}
 ```
 
-CLI 拿到 `recordIDs` 后按记录 ID 精确轮询：先按 `statuses=pending,running` 只取 1 条拿到未完成数量，
-数量归零后再按 ID 拉取全部记录做汇总。查询接口支持 `envNames` / `envTypes` / `recordIDs`（三选一）、`since`、`statuses`。
+CLI 拿到 `recordIDs` 后按记录 ID 精确轮询：先按 `statuses=pending&statuses=running` 只取 1 条拿到未完成数量，
+数量归零后再按 ID 拉取全部记录做汇总。查询接口支持 `envNames` / `envTypes` / `recordIDs`（三选一）、`since`、`statuses`；
+列表类参数通过重复 query 参数传递（如 `statuses=pending&statuses=running`）。
 
 集群访问使用当前用户的 BCS Token：任务执行时由 worker 按 ctx 中的用户身份重新获取，不写入队列。
 
