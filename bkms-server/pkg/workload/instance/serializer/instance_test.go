@@ -99,9 +99,9 @@ var _ = Describe("Instance serializer", func() {
 		)
 	})
 
-	DescribeTable("ListAppInstancesQueryInput.MatchIPFilter",
+	DescribeTable("ListAppInstancesQueryInput.IPMatcher",
 		func(query serializer.ListAppInstancesQueryInput, podIP, nodeIP string, want bool) {
-			Expect(query.MatchIPFilter(podIP, nodeIP)).To(Equal(want))
+			Expect(query.IPMatcher()(podIP, nodeIP)).To(Equal(want))
 		},
 		Entry("no filter matches everything",
 			serializer.ListAppInstancesQueryInput{}, "10.0.0.1", "192.168.0.1", true),

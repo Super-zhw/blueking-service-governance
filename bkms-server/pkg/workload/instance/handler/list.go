@@ -126,8 +126,9 @@ func (h *Handler) filterAppInstancePodsByIP(
 		return items
 	}
 
+	match := queryInput.IPMatcher()
 	return lo.Filter(items, func(p unstructured.Unstructured, _ int) bool {
-		return queryInput.MatchIPFilter(
+		return match(
 			mapx.GetStr(p.Object, "status.podIP"),
 			mapx.GetStr(p.Object, "status.hostIP"),
 		)

@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/TencentBlueKing/gopkg/mapx"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
@@ -149,14 +150,18 @@ func (q *ListAppInstancesQueryInput) HasIPFilter() bool {
 	return len(q.PodIPs) > 0 || len(q.NodeIPs) > 0
 }
 
-// MatchIPFilter 判断实例的 Pod IP / Node IP 是否命中过滤条件
-// 同类多值、Pod IP 与 Node IP 之间均取 OR；未带过滤条件时恒为 true
-// 目前是精确匹配，后续若改模糊匹配只需调整这里
-func (q *ListAppInstancesQueryInput) MatchIPFilter(podIP, nodeIP string) bool {
+// IPMatcher 返回 IP 精确匹配函数，所有过滤值之间取 OR，未带过滤条件时恒为 true
+func (q *ListAppInstancesQueryInput) IPMatcher() func(podIP, nodeIP string) bool {
 	if !q.HasIPFilter() {
-		return true
+		return func(string, string) bool { return true }
 	}
-	return slices.Contains(q.PodIPs, podIP) || slices.Contains(q.NodeIPs, nodeIP)
+
+	podIPSet, nodeIPSet := lo.Keyify(q.PodIPs), lo.Keyify(q.NodeIPs)
+	return func(podIP, nodeIP string) bool {
+		_, podHit := podIPSet[podIP]
+		_, nodeHit := nodeIPSet[nodeIP]
+		return podHit || nodeHit
+	}
 }
 
 // ProjectionRange 返回需要投影的 [start, end) 下标
