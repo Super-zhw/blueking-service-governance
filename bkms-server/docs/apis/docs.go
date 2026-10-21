@@ -8692,6 +8692,26 @@ const docTemplate = `{
                         "description": "每页数量；分页模式必填，all=true 时禁止出现",
                         "name": "pageSize",
                         "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Pod IP 精确过滤，多值取 OR",
+                        "name": "podIP",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Node IP 精确过滤，多值取 OR",
+                        "name": "nodeIP",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -19598,6 +19618,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "envContentStrategy": {
+                    "description": "EnvContentStrategy: overlay 表示环境内容按补丁与默认配置合并；overwrite 表示环境内容独立生效，不再继承默认配置变更。",
                     "type": "string",
                     "enum": [
                         "overlay",

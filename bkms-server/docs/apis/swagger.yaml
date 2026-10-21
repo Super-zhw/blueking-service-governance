@@ -278,6 +278,7 @@ definitions:
       enableEnvVarRender:
         type: boolean
       envContentStrategy:
+        description: 'EnvContentStrategy: overlay 表示环境内容按补丁与默认配置合并；overwrite 表示环境内容独立生效，不再继承默认配置变更。'
         enum:
         - overlay
         - overwrite
@@ -15364,6 +15365,20 @@ paths:
         in: query
         name: pageSize
         type: integer
+      - collectionFormat: multi
+        description: Pod IP 精确过滤，多值取 OR
+        in: query
+        items:
+          type: string
+        name: podIP
+        type: array
+      - collectionFormat: multi
+        description: Node IP 精确过滤，多值取 OR
+        in: query
+        items:
+          type: string
+        name: nodeIP
+        type: array
       produces:
       - application/json
       responses:
