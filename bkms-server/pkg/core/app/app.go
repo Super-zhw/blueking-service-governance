@@ -23,8 +23,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/utils/credentials"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
 
 const (
@@ -208,6 +211,23 @@ func (a *Application) RuntimeSnapshot() appruntime.Snapshot {
 		Framework:        a.Framework,
 		TrpcSpecLanguage: trpcSpecLanguage,
 	}
+}
+
+// RuntimeMods resolves the capabilities supported by this application's tech stack.
+// It reads Application fields only and never loads the AppModel.
+func (a *Application) RuntimeMods() (runtimemod.ModSet, error) {
+	if a == nil {
+		return runtimemod.ModSet{}, errors.New("application is nil")
+	}
+	stack, err := appruntime.CapabilityStack(a.RuntimeSnapshot())
+	if err != nil {
+		return runtimemod.ModSet{}, errors.Wrapf(err, "resolve tech stack of app %s", a.ID)
+	}
+	mods, err := runtimemod.Resolve(stack)
+	if err != nil {
+		return runtimemod.ModSet{}, errors.Wrapf(err, "app %s", a.ID)
+	}
+	return mods, nil
 }
 
 func (a *Application) displayStack() (language, framework string) {

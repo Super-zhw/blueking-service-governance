@@ -28,13 +28,14 @@
 | 管理方式 AppModel | 是 | 是 | 是 | 目标 | 否 | 否 |
 | `appModelDeploy` 部署/状态/实例 | 是 | 是 | 是 | 阶段 3 | Helm 独立链路 | Agones 独立链路 |
 | `plainConfigFiles` | 是 | 是 | 是 | 目标 | n/a | n/a |
-| `frameworkConfig` 文件 | YAML | YAML | XML | 无伪框架文件 | n/a | n/a |
+| `frameworkFile`（框架配置文件） | YAML | YAML | XML | 无伪框架文件 | n/a | n/a |
 | `devMode` | 是 | 是 | 是（按 TAF 路径） | 否 | 否 | 否 |
 | `platformBuild` | 是 | 否 | 否 | 否 | 否 | 否 |
-| `adminCommands` | go/cpp（另有 java/node/python **读配置** 分支，非创建语言） | 同左 | 是 | 否 | 否 | 否 |
+| `adminCommand` | go/cpp（另有 java/node/python **读配置** 分支，非创建语言） | 同左 | 是 | 否 | 否 | 否 |
 | `apmServiceName` | YAML 解析 | YAML 解析 | XML 解析 | 否 | 否 | 否 |
+| `polarisServiceCheck` | 是 | 是 | 否 | 否 | 否 | 否 |
 | `polarisFrameworkPatch` | 是 | 是 | 否 | 否 | 否 | 否 |
-| BSCP workload 元信息 | 仅 `type=trpc` | 同左 | **未接** | 否 | 否 | 否 |
+| `bscpWorkloadMeta` | 仅 `type=trpc` | 同左 | **未接** | 否 | 否 | 否 |
 | 组件引用查询 | 仅 `type=trpc` | 同左 | **未查** | 否 | 否 | 否 |
 | 集群 addon `requiredForAppTypes` | `trpc`,`taf` | 同左 | 同左 | 阶段 3E | 部分 addon 含 helm/agones | 同左 |
 
