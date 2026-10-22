@@ -110,7 +110,7 @@ var _ = Describe("Public", func() {
 			}`))
 	})
 
-	It("renders blank with framework capabilities unsupported and plain files supported", func() {
+	It("renders blank with framework capabilities unsupported and stack independent ones supported", func() {
 		Expect(toJSON(mustResolve(bkmsStack(appruntime.FrameworkBlank, appruntime.LanguageGo)).Public())).
 			To(MatchJSON(`{
 				"schemaVersion": 1,
@@ -127,7 +127,7 @@ var _ = Describe("Public", func() {
 					"polarisServiceCheck": {"supported": false, "reasonCode": "unsupported_stack"},
 					"polarisFrameworkPatch": {"supported": false, "reasonCode": "unsupported_stack"},
 					"bscpWorkloadMeta":    {"supported": false, "reasonCode": "unsupported_stack"},
-					"autoDeploy":          {"supported": false, "reasonCode": "unsupported_stack"}
+					"autoDeploy":          {"supported": true}
 				}
 			}`))
 	})

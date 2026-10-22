@@ -86,11 +86,11 @@ var _ = Describe("Resolve", func() {
 			To(Equal(runtimemod.ReasonUnsupportedAppType))
 	})
 
-	It("treats blank as a framework with no framework capabilities", func() {
+	It("treats blank as a framework with only stack independent capabilities", func() {
 		mods := mustResolve(bkmsStack(appruntime.FrameworkBlank, appruntime.LanguageGo))
 		Expect(mods.FrameworkFile.Supported).To(BeFalse())
 		Expect(mods.DevMode.Supported).To(BeFalse())
-		Expect(mods.AutoDeploy.Supported).To(BeFalse())
+		Expect(mods.AutoDeploy.Supported).To(BeTrue())
 		Expect(mods.FrameworkFile.ReasonCode).To(Equal(runtimemod.ReasonUnsupportedStack))
 	})
 

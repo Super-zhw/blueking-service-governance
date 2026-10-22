@@ -20,21 +20,18 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// BSCPWorkloadMetaProps BSCP 元信息自动填充的参数。
-type BSCPWorkloadMetaProps struct {
-	// WorkloadKind 自动填入的工作负载类型。
-	WorkloadKind string
-}
+// BSCPWorkloadMetaProps 工作负载类型取决于实际渲染结果，由 BSCP 模块按渲染结果填写，不在此声明。
+type BSCPWorkloadMetaProps struct{}
 
 // Public 无对外内容。
 func (p BSCPWorkloadMetaProps) Public() any { return nil }
 
 // BSCPWorkloadMetaDef BSCP 元信息自动填充：初始化 BSCP 元信息时，自动填入工作负载名称与类型。
-// 仅 tRPC 支持，其他框架需用户手动填写。
+// 目前仅 tRPC 支持，TAF 尚未接入，Helm 需用户手动填写。
 var BSCPWorkloadMetaDef = Def[BSCPWorkloadMetaProps]{
 	ID:        "bscpWorkloadMeta",
 	Dimension: ByFramework,
 	Framework: FrameworkTable[BSCPWorkloadMetaProps]{
-		appruntime.FrameworkTRPC: {WorkloadKind: "GameDeployment"},
+		appruntime.FrameworkTRPC: {},
 	},
 }

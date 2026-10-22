@@ -18,21 +18,16 @@
 
 package runtimemod
 
-import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
-
 // AutoDeployProps 无参数。
 type AutoDeployProps struct{}
 
 // Public 无对外内容。
 func (p AutoDeployProps) Public() any { return nil }
 
-// AutoDeployDef 一键构建部署：tRPC、TAF 支持。
-// 目前两个框架各有一套实现，M5 合并后才会读取本声明。
+// AutoDeployDef 一键构建部署：构建成功后自动部署到指定环境，与技术栈无关，所有 bkmsApp 应用都支持。
+// 现有的 trpc、taf 两个接口走同一套实现，只在路由层校验应用类型，M6 合并为一个接口。
 var AutoDeployDef = Def[AutoDeployProps]{
 	ID:        "autoDeploy",
-	Dimension: ByFramework,
-	Framework: FrameworkTable[AutoDeployProps]{
-		appruntime.FrameworkTRPC: {},
-		appruntime.FrameworkTAF:  {},
-	},
+	Dimension: StackIndependent,
+	Universal: &AutoDeployProps{},
 }
