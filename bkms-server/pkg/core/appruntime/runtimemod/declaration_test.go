@@ -108,9 +108,10 @@ var _ = Describe("Declarations", func() {
 	})
 
 	It("does not import domain packages", func() {
-		// 只允许标准库、github.com/pkg/errors 与 appruntime，保证各能力 owner 包都能引用本包而不产生循环
+		// 只允许标准库、通用工具库与 appruntime，保证各能力所在的业务包都能引用本包而不产生循环依赖
 		allowed := []string{
 			"github.com/pkg/errors",
+			"github.com/samber/lo",
 			"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime",
 		}
 		entries, err := os.ReadDir(".")

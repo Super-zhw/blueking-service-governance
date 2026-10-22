@@ -20,43 +20,45 @@ package runtimemod
 
 import (
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 )
 
-// PublicView 单个应用的对外能力描述。
+// PublicView 一个应用的能力集合对外输出的 JSON 结构。
 //
-// 这里只包含静态能力。依赖环境、配置、集群或权限的可用性，属于环境维度的视图。
+// 只描述技术栈决定的静态能力。某能力在具体环境下是否可用（如生产环境禁用 devMode、
+// 集群未安装依赖组件）不在这里体现，需要结合环境另行判断。
 type PublicView struct {
-	SchemaVersion int                  `json:"schemaVersion"`
-	Type          string               `json:"type"`
-	Framework     string               `json:"framework,omitempty"`
-	Language      string               `json:"language,omitempty"`
-	Mods          map[ID]PublicModView `json:"mods"`
+	// SchemaVersion 结构版本号，见 SchemaVersion 常量。
+	SchemaVersion int `json:"schemaVersion"`
+	// Type 应用类型，如 bkmsApp、helm。
+	Type string `json:"type"`
+	// Framework 应用框架，helm / agones 应用为空并省略。
+	Framework string `json:"framework,omitempty"`
+	// Language 应用语言，未记录时为空并省略。
+	Language string `json:"language,omitempty"`
+	// Mods 能力 ID 到能力视图的映射。使用 map 是因为 encoding/json 会按 key 排序输出，结果稳定。
+	Mods map[ID]PublicModView `json:"mods"`
 }
 
-// Public 投影能力集合。使用 map 作为 mods，encoding/json 会按 key 排序，输出稳定。
+// Public 把能力集合转换为对外 JSON 结构。
 func (s ModSet) Public() PublicView {
-	mods := s.all()
-	out := make(map[ID]PublicModView, len(mods))
-	for id, mod := range mods {
-		out[id] = mod.view()
-	}
 	return PublicView{
 		SchemaVersion: SchemaVersion,
 		Type:          s.Stack.Type,
 		Framework:     s.Stack.Framework,
 		Language:      s.Stack.Language,
-		Mods:          out,
+		Mods:          lo.MapValues(s.all(), func(mod view, _ ID) PublicModView { return mod.view() }),
 	}
 }
 
-// Matrix 基于框架目录生成所有合法技术栈的支持矩阵，顺序稳定。客户端可直接用它构建创建表单，
-// 无需再维护一份规则副本。
+// Matrix 组合约定 (framework, language) 的能力集合，按顺序返回。
+//
+// 用于前端创建应用时展示各技术栈支持哪些能力，前端无需自行维护一份支持规则。
 func Matrix() ([]PublicView, error) {
-	frameworks := appruntime.Catalog()
-	out := make([]PublicView, 0, len(frameworks))
-	for _, def := range frameworks {
+	var out []PublicView
+	for _, def := range appruntime.Catalog() {
 		for _, language := range def.SupportedLanguages {
 			set, err := Resolve(appruntime.Stack{
 				Type:      appruntime.AppTypeBKMSApp,
