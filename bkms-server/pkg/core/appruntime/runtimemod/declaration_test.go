@@ -44,8 +44,7 @@ var _ = Describe("Declarations", func() {
 		ids := lo.Map(declarations, func(d runtimemod.DefMeta, _ int) runtimemod.ID { return d.ID })
 		Expect(lo.Uniq(ids)).To(HaveLen(len(ids)))
 
-		// 对外投影必须暴露同一组能力：若新增能力只加进 ModSet 却漏了 all()，
-		// 所有客户端都会看不到它。
+		// 新增能力若漏加到 all()，对外输出中会缺少该能力
 		mods := mustResolve(bkmsStack(appruntime.FrameworkTRPC, appruntime.LanguageGo)).Public()
 		Expect(lo.Keys(mods.Mods)).To(ConsistOf(ids))
 	})
@@ -63,8 +62,8 @@ var _ = Describe("Declarations", func() {
 				Expect(frameworks).To(HaveKey(framework), "unknown framework %q in %s", framework, declaration.ID)
 			}
 			for _, language := range declaration.Languages {
+				// 目录外语言只允许出现在 adminCommand 中
 				if lo.Contains(outOfCatalogLanguages, language) {
-					// 目录外语言只允许作为 adminCommand 的配置布局预登记
 					Expect(declaration.ID).To(Equal(runtimemod.AdminCommandDef.ID),
 						"out-of-catalog language %q in %s", language, declaration.ID)
 					continue
@@ -90,7 +89,7 @@ var _ = Describe("Declarations", func() {
 	})
 
 	It("keeps every ModSet field in declarations and the public projection", func() {
-		// 通过反射收集 ModSet 中所有 Mod 字段的 ID：新增字段若漏登记 Declarations() 或 all()，这里会失败
+		// 用反射取出 ModSet 中每个能力的 ID，与 Declarations()、对外输出逐一比对
 		mods := mustResolve(bkmsStack(appruntime.FrameworkTRPC, appruntime.LanguageGo))
 		value := reflect.ValueOf(mods)
 		fieldIDs := make([]runtimemod.ID, 0, value.NumField())
@@ -108,7 +107,7 @@ var _ = Describe("Declarations", func() {
 	})
 
 	It("does not import domain packages", func() {
-		// 只允许标准库、通用工具库与 appruntime，保证各能力所在的业务包都能引用本包而不产生循环依赖
+		// 只允许依赖标准库、pkg/errors、lo 与 appruntime
 		allowed := []string{
 			"github.com/pkg/errors",
 			"github.com/samber/lo",

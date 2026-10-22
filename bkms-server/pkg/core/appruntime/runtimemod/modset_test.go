@@ -124,7 +124,7 @@ var _ = Describe("Resolve", func() {
 		Expect(pairs[runtimemod.Pair{Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguageJava}].
 			ConfigLayout).To(Equal(runtimemod.TrpcAdminLayoutNestedPrefixed))
 
-		// 目录外语言仍然无法通过技术栈校验，预登记不等于开放
+		// 目录外语言仍会被技术栈校验拒绝
 		for _, language := range []string{
 			appruntime.LanguageJava, appruntime.LanguageNode, appruntime.LanguagePython,
 		} {

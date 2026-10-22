@@ -25,24 +25,21 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 )
 
-// PublicView 一个应用的能力集合对外输出的 JSON 结构。
+// PublicView 应用能力的对外结构。
 //
-// 只描述技术栈决定的静态能力。某能力在具体环境下是否可用（如生产环境禁用 devMode、
-// 集群未安装依赖组件）不在这里体现，需要结合环境另行判断。
+// 只反映技术栈决定的支持情况，不包含环境、集群等运行时条件。
 type PublicView struct {
-	// SchemaVersion 结构版本号，见 SchemaVersion 常量。
-	SchemaVersion int `json:"schemaVersion"`
-	// Type 应用类型，如 bkmsApp、helm。
-	Type string `json:"type"`
-	// Framework 应用框架，helm / agones 应用为空并省略。
+	SchemaVersion int    `json:"schemaVersion"`
+	Type          string `json:"type"`
+	// Framework 框架，helm、agones 应用为空。
 	Framework string `json:"framework,omitempty"`
-	// Language 应用语言，未记录时为空并省略。
+	// Language 语言，未记录时为空。
 	Language string `json:"language,omitempty"`
-	// Mods 能力 ID 到能力视图的映射。使用 map 是因为 encoding/json 会按 key 排序输出，结果稳定。
+	// Mods 能力 ID 到能力的映射，包含全部能力；新增能力只会增加 key。
 	Mods map[ID]PublicModView `json:"mods"`
 }
 
-// Public 把能力集合转换为对外 JSON 结构。
+// Public 转为对外结构。
 func (s ModSet) Public() PublicView {
 	return PublicView{
 		SchemaVersion: SchemaVersion,
@@ -53,9 +50,7 @@ func (s ModSet) Public() PublicView {
 	}
 }
 
-// Matrix 组合约定 (framework, language) 的能力集合，按顺序返回。
-//
-// 用于前端创建应用时展示各技术栈支持哪些能力，前端无需自行维护一份支持规则。
+// Matrix 返回框架目录中每个合法组合的能力，供前端创建应用时展示。
 func Matrix() ([]PublicView, error) {
 	var out []PublicView
 	for _, def := range appruntime.Catalog() {

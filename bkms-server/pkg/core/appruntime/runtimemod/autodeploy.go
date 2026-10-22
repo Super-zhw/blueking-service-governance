@@ -20,15 +20,14 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// AutoDeployProps 无参数。构建与部署是两个独立步骤，技术栈可部署后两者的组合方式是统一的。
+// AutoDeployProps 无参数。
 type AutoDeployProps struct{}
 
-// Public 不对外暴露任何字段。
+// Public 无对外内容。
 func (p AutoDeployProps) Public() any { return nil }
 
-// AutoDeployDef 一键构建部署能力声明。
-//
-// 目前 tRPC 与 TAF 各有一套实现，阶段 3D 合并。在此之前该声明只表达目标范围，没有执行器读取它。
+// AutoDeployDef 一键构建部署：tRPC、TAF 支持。
+// 目前两个框架各有一套实现，M5 合并后才会读取本声明。
 var AutoDeployDef = Def[AutoDeployProps]{
 	ID:        "autoDeploy",
 	Dimension: ByFramework,

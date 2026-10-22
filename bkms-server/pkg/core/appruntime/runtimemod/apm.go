@@ -20,25 +20,25 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// APMConfigParser 选择从框架配置文件中读取 APM 服务名的解析器。
+// APMConfigParser 读取 APM 服务名的解析方式。
 type APMConfigParser string
 
 const (
-	// APMConfigParserTrpcYAML 读取 tRPC YAML 的 telemetry 配置。
+	// APMConfigParserTrpcYAML 解析 tRPC 的 YAML 配置。
 	APMConfigParserTrpcYAML APMConfigParser = "trpcYAML"
-	// APMConfigParserTafXML 读取 TAF XML 配置。
+	// APMConfigParserTafXML 解析 TAF 的 XML 配置。
 	APMConfigParserTafXML APMConfigParser = "tafXML"
 )
 
-// APMServiceNameProps 选择配置解析器。
+// APMServiceNameProps APM 服务名提取的执行参数。
 type APMServiceNameProps struct {
 	Parser APMConfigParser
 }
 
-// Public 不对外暴露任何字段：解析器是执行器 key。
+// Public 无对外内容。
 func (p APMServiceNameProps) Public() any { return nil }
 
-// APMServiceNameDef APM 服务名提取能力声明。这里只是解析器能力，监控功能整体仍对所有应用类型开放。
+// APMServiceNameDef APM 服务名提取：从框架配置文件中读取 APM 服务名。tRPC、TAF 支持。
 var APMServiceNameDef = Def[APMServiceNameProps]{
 	ID:        "apmServiceName",
 	Dimension: ByFramework,

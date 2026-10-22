@@ -20,43 +20,42 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// AdminProtocol 选择 admin 命令的实现。
+// AdminProtocol admin 命令的协议。
 type AdminProtocol string
 
 const (
-	// AdminProtocolTRPC tRPC HTTP admin 服务。
+	// AdminProtocolTRPC tRPC admin，基于 HTTP。
 	AdminProtocolTRPC AdminProtocol = "trpc"
 	// AdminProtocolTAF TAF 私有协议。
 	AdminProtocolTAF AdminProtocol = "taf"
 )
 
-// TrpcAdminConfigLayout 描述 admin IP 与端口在 tRPC 配置文件中的位置。
-// 不同语言的 tRPC 配置格式不同，布局按语言选择。
+// TrpcAdminConfigLayout tRPC 配置文件中 admin 地址的写法，不同语言写法不同。
 type TrpcAdminConfigLayout string
 
 const (
-	// TrpcAdminLayoutNested 读取 server.admin.ip / server.admin.port（go、python）。
+	// TrpcAdminLayoutNested server.admin.ip / server.admin.port，go、python 使用。
 	TrpcAdminLayoutNested TrpcAdminConfigLayout = "nested"
-	// TrpcAdminLayoutFlat 读取 server.admin_ip / server.admin_port（cpp、node）。
+	// TrpcAdminLayoutFlat server.admin_ip / server.admin_port，cpp、node 使用。
 	TrpcAdminLayoutFlat TrpcAdminConfigLayout = "flat"
-	// TrpcAdminLayoutNestedPrefixed 读取 server.admin.admin_ip / server.admin.admin_port（java）。
+	// TrpcAdminLayoutNestedPrefixed server.admin.admin_ip / server.admin.admin_port，java 使用。
 	TrpcAdminLayoutNestedPrefixed TrpcAdminConfigLayout = "nestedPrefixed"
 )
 
-// AdminCommandProps 选择协议；tRPC 下还选择配置键布局。
+// AdminCommandProps admin 命令的执行参数。
 type AdminCommandProps struct {
 	Protocol AdminProtocol
-	// ConfigLayout 仅在 tRPC 协议下有值。
+	// ConfigLayout admin 地址的写法，仅 tRPC 使用。
 	ConfigLayout TrpcAdminConfigLayout
 }
 
-// Public 不对外暴露任何字段：布局是从配置文件推导的执行器 key。
+// Public 无对外内容。
 func (p AdminCommandProps) Public() any { return nil }
 
-// AdminCommandDef admin 命令能力声明。
+// AdminCommandDef admin 命令：tRPC、TAF 支持。
 //
-// tRPC 的配置布局随语言变化，TAF 只有一种私有协议，因此语言差异按组合表达，
-// 而不是对整个能力做语言限制。Pair 只登记框架目录中的语言；目录新增语言时在此补对应布局。
+// tRPC 按语言区分 admin 地址的写法。java、node、python 不在框架目录中，对应条目暂不生效，
+// 纳入目录后自动生效。
 var AdminCommandDef = Def[AdminCommandProps]{
 	ID:        "adminCommand",
 	Dimension: ByFramework,

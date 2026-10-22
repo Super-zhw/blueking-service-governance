@@ -28,7 +28,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
 
-// toJSON 将视图序列化为 JSON，使下面的 golden 字符串锁定的是线上传输格式，而不是 Go 类型。
+// toJSON 序列化为 JSON，golden 比对的是对外输出格式
 func toJSON(view any) string {
 	raw, err := json.Marshal(view)
 	Expect(err).NotTo(HaveOccurred())

@@ -18,12 +18,11 @@
 
 package appruntime
 
-// CapabilityStack 为能力解析规范化快照。
+// CapabilityStack 从存量快照得出用于能力查表的技术栈。
 //
-// 与 Normalize 只有一处不同：language 缺失不视为致命错误。存量 TAF 记录从未保存 language，
-// 部分 tRPC 记录只在 workload 上保存 language，若视为阻断，会收回这些应用当前正在使用的能力。
-//
-// BRIDGE-ONLY：阶段 5 回填 language 之后，调用方可直接使用 ValidateStack，本函数随 Inspect 一并删除。
+// 与 Normalize 的区别是缺少语言不算错误，其他冲突照常报错。存量 TAF 应用都未记录语言，
+// 部分 tRPC 应用的语言只记录在 workload 上，若报错，这些应用会失去现有能力。
+// BRIDGE-ONLY：存量语言回填后删除，改用 ValidateStack。
 func CapabilityStack(s Snapshot) (Stack, error) {
 	report := Inspect(s)
 	for _, issue := range report.Issues {

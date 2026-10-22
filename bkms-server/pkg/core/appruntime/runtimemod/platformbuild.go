@@ -20,17 +20,16 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// PlatformBuildProps 平台生成 Dockerfile 构建所需的参数。
+// PlatformBuildProps 平台构建的执行参数。
 type PlatformBuildProps struct {
-	// DockerfileLanguage 作为 Dockerfile 生成器语言传给流水线。
+	// DockerfileLanguage 传给流水线的 Dockerfile 生成语言。
 	DockerfileLanguage string
 }
 
-// Public 不对外暴露任何字段：客户端只需要知道该构建方式是否可用，语言是流水线内部参数。
+// Public 无对外内容。
 func (p PlatformBuildProps) Public() any { return nil }
 
-// PlatformBuildDef 平台生成 Dockerfile 构建能力声明。目前仅限 tRPC 且仅限 Go，
-// 两个限制都在这里表达，不再写在构建服务里。
+// PlatformBuildDef 平台构建：由平台生成 Dockerfile 并构建镜像。仅 tRPC + go 支持。
 var PlatformBuildDef = Def[PlatformBuildProps]{
 	ID:        "platformBuild",
 	Dimension: ByFramework,

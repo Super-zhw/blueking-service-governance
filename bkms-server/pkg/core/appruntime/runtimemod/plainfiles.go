@@ -18,14 +18,14 @@
 
 package runtimemod
 
-// PlainConfigFilesProps 无参数：plain 文件由 workload 构建的公共步骤挂载，不随框架变化。
+// PlainConfigFilesProps 无参数。
 type PlainConfigFilesProps struct{}
 
-// Public 不对外暴露任何字段。
+// Public 无对外内容。
 func (p PlainConfigFilesProps) Public() any { return nil }
 
-// PlainConfigFilesDef plain 配置文件能力声明，即用户自定义、挂载到 workload 的文本文件。
-// 它的渲染不经过任何框架插件，因此是 blank 的主要配置途径，tRPC 与 TAF 同样可用。
+// PlainConfigFilesDef plain 配置文件：用户自定义、挂载到容器的配置文件。
+// 不经过框架插件，所有 bkmsApp 应用都支持。
 var PlainConfigFilesDef = Def[PlainConfigFilesProps]{
 	ID:        "plainConfigFiles",
 	Dimension: StackIndependent,

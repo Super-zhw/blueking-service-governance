@@ -20,47 +20,46 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// DevModeScriptSet 选择注入容器的管理脚本集。
+// DevModeScriptSet 开发模式注入的脚本集。
 type DevModeScriptSet string
 
 const (
-	// DevModeScriptSetTRPC 注入 tRPC 脚本集。
+	// DevModeScriptSetTRPC tRPC 脚本集。
 	DevModeScriptSetTRPC DevModeScriptSet = "trpc"
-	// DevModeScriptSetTAF 注入 TAF 脚本集。
+	// DevModeScriptSetTAF TAF 脚本集。
 	DevModeScriptSetTAF DevModeScriptSet = "taf"
 )
 
-// DevModePathScriptsSubDir 存放管理脚本的子目录。
+// DevModePathScriptsSubDir 脚本所在的子目录。
 const DevModePathScriptsSubDir = "configmap-scripts"
 
-// 开发模式工作路径。这些是平台策略而非用户配置：AppSpec 中的 workPath/mountPath
-// 仅为兼容现有 API 而保留。
+// 开发模式的容器内路径，由平台决定，用户不能修改。
 const (
 	// DevModeTrpcWorkPath tRPC 开发模式根目录。
 	DevModeTrpcWorkPath = "/data/bkms/dev-mode/trpc"
-	// DevModeTrpcMountPath tRPC 脚本挂载路径。
+	// DevModeTrpcMountPath tRPC 脚本挂载目录。
 	DevModeTrpcMountPath = DevModeTrpcWorkPath + "/" + DevModePathScriptsSubDir
-	// DevModeTrpcBinaryPath tRPC 脚本操作的二进制目录。
+	// DevModeTrpcBinaryPath tRPC 二进制所在目录。
 	DevModeTrpcBinaryPath = "/usr/local/trpc/bin"
 	// DevModeTafWorkPath TAF 开发模式根目录。
 	DevModeTafWorkPath = "/data/bkms/dev-mode/taf"
-	// DevModeTafMountPath TAF 脚本挂载路径。
+	// DevModeTafMountPath TAF 脚本挂载目录。
 	DevModeTafMountPath = DevModeTafWorkPath + "/" + DevModePathScriptsSubDir
 )
 
-// DevModeProps 开发模式脚本的平台策略。
+// DevModeProps 开发模式的执行参数。
 type DevModeProps struct {
-	// ScriptSet 选择脚本模板。
+	// ScriptSet 脚本集。
 	ScriptSet DevModeScriptSet
-	// WorkPath 容器内开发模式根目录。
+	// WorkPath 开发模式根目录。
 	WorkPath string
-	// MountPath 脚本 ConfigMap 的挂载路径。
+	// MountPath 脚本挂载目录。
 	MountPath string
-	// BinaryPath 脚本替换的二进制目录。脚本集不需要时为空，目前 TAF 脚本集即如此。
+	// BinaryPath 二进制所在目录，TAF 不需要，为空。
 	BinaryPath string
 }
 
-// Public 对外暴露路径，因为 AppSpec API 已经在返回这两个字段。
+// Public 对外展示根目录与挂载目录，与 AppSpec 接口返回的一致。
 func (p DevModeProps) Public() any {
 	return struct {
 		WorkPath  string `json:"workPath"`
@@ -68,7 +67,7 @@ func (p DevModeProps) Public() any {
 	}{p.WorkPath, p.MountPath}
 }
 
-// DevModeDef 开发模式能力声明。是否启用、所在环境是否允许，属于运行时检查，仍由 devmode 模块负责。
+// DevModeDef 开发模式：tRPC、TAF 支持。是否开启、当前环境是否允许，由 devmode 模块在运行时判断。
 var DevModeDef = Def[DevModeProps]{
 	ID:        "devMode",
 	Dimension: ByFramework,

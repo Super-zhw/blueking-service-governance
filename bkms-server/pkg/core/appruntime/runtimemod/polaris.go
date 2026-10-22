@@ -20,13 +20,13 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// PolarisServiceCheckProps 无参数：该能力是将北极星服务名与 tRPC 配置文件比对的配置校验。
+// PolarisServiceCheckProps 无参数。
 type PolarisServiceCheckProps struct{}
 
-// Public 不对外暴露任何字段。
+// Public 无对外内容。
 func (p PolarisServiceCheckProps) Public() any { return nil }
 
-// PolarisServiceCheckDef 北极星服务名校验能力声明。不限制北极星注册本身，只限制基于 tRPC 配置的校验。
+// PolarisServiceCheckDef 北极星服务名校验：北极星配置的服务名不在 tRPC 配置文件中时给出警告。仅 tRPC 支持。
 var PolarisServiceCheckDef = Def[PolarisServiceCheckProps]{
 	ID:        "polarisServiceCheck",
 	Dimension: ByFramework,

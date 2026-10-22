@@ -30,19 +30,19 @@ const (
 	FrameworkFileXML FrameworkFileFormat = "xml"
 )
 
-// FrameworkFileProps 描述技术栈是否有框架配置文件及其格式。blank 没有框架配置文件。
+// FrameworkFileProps 框架配置文件的参数。
 type FrameworkFileProps struct {
 	Format FrameworkFileFormat
 }
 
-// Public 对外暴露格式，因为前端目前是根据应用类型推导格式的。
+// Public 对外展示文件格式，前端据此选择编辑器的语法。
 func (p FrameworkFileProps) Public() any {
 	return struct {
 		Format FrameworkFileFormat `json:"format"`
 	}{p.Format}
 }
 
-// FrameworkFileDef 框架配置文件能力声明。
+// FrameworkFileDef 框架配置文件：tRPC、TAF 支持；blank 没有框架配置文件。
 var FrameworkFileDef = Def[FrameworkFileProps]{
 	ID:        "frameworkFile",
 	Dimension: ByFramework,

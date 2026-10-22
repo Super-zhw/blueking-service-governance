@@ -20,20 +20,14 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// PolarisFrameworkPatchProps 无参数。注入的内容来自应用在当前环境的北极星配置，
-// 不随技术栈变化。
+// PolarisFrameworkPatchProps 无参数。
 type PolarisFrameworkPatchProps struct{}
 
-// Public 无对外字段。
+// Public 无对外内容。
 func (p PolarisFrameworkPatchProps) Public() any { return nil }
 
-// PolarisFrameworkPatchDef 北极星注册信息注入能力。
-//
-// 渲染框架配置文件时，若应用在该环境启用了北极星健康检查，就把注册信息写入配置的
-// plugins.registry.polaris.service 路径（原配置已有该路径时不覆盖）。
-//
-// 目前只有 tRPC 插件挂载了对应的补丁器（trpc/patcher.PolarisRegistryPatcher），
-// 其他 framework 不会注入。本能力只指"写入框架配置"这一步，北极星注册本身对所有应用可用。
+// PolarisFrameworkPatchDef 北极星注册信息注入：渲染框架配置文件时，把北极星注册信息写入
+// plugins.registry.polaris.service，已有该配置时不覆盖。仅 tRPC 支持。
 var PolarisFrameworkPatchDef = Def[PolarisFrameworkPatchProps]{
 	ID:        "polarisFrameworkPatch",
 	Dimension: ByFramework,
