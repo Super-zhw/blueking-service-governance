@@ -89,7 +89,7 @@ UI 的技术栈分支分布在应用类型 composable、store、表单、部署�
 | Application | `type` | 新创建请求缺省为 bkmsApp；未知值报错。数据库旧记录缺 type 不按新建默认值自动补齐 |
 | Application | `language` | BKMSApp 必填：go/cpp；Helm/Agones 暂不要求填写，不自动填 go |
 | Application | `framework` | BKMSApp 必填：trpc/taf/blank；blank 是显式字面值，不是空字符串 |
-| AppModel.Workload | `frameworkConfig` | `map[string]any`，只保存框架扩展设置；新建时规范化为对象，blank 第一版只接受 `{}` |
+| AppModel.Workload | `frameworkConfig` | `map[string]any`，只保存框架专属配置（目前无）；不存放配置文件挂载信息，见 §3.4 |
 | AppModel.Workload | `frameworkConfigVersion` | 初始为 1，描述该框架 map 的 schema 版本；不等于框架软件版本 |
 
 `Application.TrpcSpec`、`Workload.TrpcConfig`、`Workload.TafConfig` 最终删除。`Workload.Type` 最终也删除：当前该字段实际用于选择框架插件，不能让它成为第二个 framework。未来若需要 Deployment/GameDeployment 等工作负载后端差异，应独立设计 backend 字段；本期不借机新增。
@@ -148,13 +148,29 @@ TAF 若有 Go 存量，不静默标为 cpp：补齐 taf+go 的测试与声明，
 | 旧来源 | 新来源/去向 |
 | --- | --- |
 | `Application.TrpcSpec.Language`、`Workload.TrpcConfig.Language` | `Application.Language`；一致才自动合并，冲突进入迁移报告 |
-| trpcConfig / tafConfig 的 fileName、filePath | `Workload.FrameworkConfig` 的同名键，由框架配置类型解释 |
+| trpcConfig / tafConfig 的 fileName、filePath | 框架 def 的 `Name` / `MountDir`，与 plain 一致，见 §3.4 |
 | 框架 fileContent | AppConfigFile / 配置版本体系；渲染结果仅存会话中的 MountableFile |
 | Workload.Type | 迁移阶段辅助识别/冲突检查；最终由 Application.Framework 选择适配器 |
 
-保留 fileName/filePath 在 map 是为了首先保证挂载行为不变。现有插件明确记录了 def 的名字/路径尚不能直接替代 AppModel 值。后续如收敛到 AppConfigFileDef，必须作为独立迁移核对每个实际挂载目标，不能夹带进本轮字段替换。
-
 第一版新 API 中，framework/language 创建后不可通过普通配置更新改变：修改技术栈会同时影响配置格式、脚本、镜像构建和历史部署。原 tRPC 更新输入允许填写 language，因此兼容窗口必须显式处理：旧入口若收到不同 language，返回明确的“不支持切换技术栈”错误，并在调用方迁移前核对是否有人依赖此能力。若必须保留，应另做具备完整校验与审计的技术栈转换操作，不能继续只改 AppModel。此项是提案中的行为收紧，需要阶段 0 决策。
+
+### 3.4 框架配置文件挂载信息收敛到 def
+
+决策（替代阶段 0 的“fileName/filePath 首期放 frameworkConfig”）：框架配置文件的挂载文件名、挂载目录改由框架 def 的 `Name`、`MountDir` 表达，与 plain 文件同一模型；`Workload.TrpcConfig/TafConfig` 的 `FileName`、`FilePath` 在兼容窗口内作为旧投影双写，M9 删除。
+
+现状与风险：
+
+| 现状 | 风险 | 处理 |
+| --- | --- | --- |
+| 框架 def 创建时不写 `MountDir`，挂载目录只在 `Workload.FilePath` | 直接改读 def 会挂到空目录 | 回填 `MountDir` 前，渲染继续读 Workload |
+| `trpc-spec` / `taf-spec` 改文件名只写 Workload，不改 def | `def.Name` 与实际挂载名可能不一致；未传文件名时 def 名为 `default` | 回填逐应用比对，不一致列入冲突清单，人工确认后再改 |
+| 旧接口曾把环境 overlay 拆成多条框架 def | 渲染只认一条框架 def，多条直接报错 | 回填前先跑 `repair_trpc_taf_framework_defs` 并确认无残留 |
+| 框架 def 的 `MountDir` 为空，不受 `appID + mountDir + name` 唯一索引约束 | 回填后可能与已有 plain 文件的挂载路径冲突，写入失败 | 回填前先检查挂载路径冲突，冲突应用单独处理 |
+| 容器内路径 = `Join(MountDir, Name)` | 与旧路径在斜杠、相对路径上不完全一致，导致挂载目标变化 | 回填前按旧值规范化，并做渲染清单比对 |
+| 旧二进制只读 Workload | 回滚后读不到新值 | 窗口内保持双写，不清理旧字段 |
+| Helm 的框架 def 存 values 文件，不挂载 | 误把规则套到 Helm | 只对 AppModel 应用生效 |
+
+切换顺序：M5 起新建与更新同时写 def 与 Workload；M8 回填历史数据并核对一致后，渲染改读 def；M9 删除 Workload 上的旧字段。阶段 1 中按原方案设计的代码（`trpc/taf.DecodeConfig`、`appruntime` 中对 frameworkConfig 文件元信息的比对）随之改为比对 def，或删除。
 
 ## 4. RuntimeModSet：统一声明与消费规范
 
@@ -195,8 +211,8 @@ flowchart LR
 | `apmServiceName` | trpc、taf | 配置解析器；不等于整个监控功能只支持这些应用 |
 | `polarisServiceCheck` | trpc | 无参数；仅指基于 tRPC 配置的服务名校验 |
 | `polarisFrameworkPatch` | trpc | 无参数；仅指配置注入，不等于 Polaris 注册本身 |
-| `bscpWorkloadMeta` | trpc | 登记的 workload kind；TAF 尚未接入 |
-| `autoDeploy` | trpc、taf | 无参数；阶段 5 合并两套实现后接入 |
+| `bscpWorkloadMeta` | trpc | 无参数；工作负载类型取实际渲染结果；TAF 尚未接入 |
+| `autoDeploy` | 所有 bkmsApp 框架 | 无参数；现有两个接口本是同一实现 |
 
 完整定义、维度与对外契约见 [能力集合方案](./bkms_app_runtime_model_phase1.md) §3，此处不再维护第二份清单。判定标准：功能会因技术栈不同而不支持才建 Mod；管理方式相关（部署、渲染、实例、AppSpec、组件）与环境/集群相关（GPA、HostPort、端口池、集群 addon）不建 Mod；完全通用的显示名称、权限、审计也无需包装。
 
@@ -249,7 +265,7 @@ AppSpec.DevMode 保留 Enabled 等用户配置；模块 props 为平台定义的
 | `/apps/:appID/envs/:envName/appmodel-deploys[...]` | 承接部署、预检查、状态、快照、下架等原两套路由的等价功能 |
 | `/apps/:appID/envs/:envName/appmodel-build-deploys` | 承接原 trpc/taf-build-deploys |
 
-框架配置文件内容继续通过现有配置文件 API 编辑/版本化。创建如需一并初始化内容，使用独立 `frameworkConfigFile` 输入（暂定名），由同一编排流程写入 AppConfigFile；不把内容藏进 frameworkConfig。原创建接口必填 buildConfig 等约束仍然保留，直到另有明确设计。
+框架配置文件内容继续通过现有配置文件 API 编辑/版本化。创建时通过独立的 `frameworkConfigFile` 输入（暂定名）提供文件名、挂载目录与初始内容，由同一编排流程写入框架 def 与 AppConfigFile（§3.4）；不把这些放进 frameworkConfig。原创建接口必填 buildConfig 等约束仍然保留，直到另有明确设计。
 
 统一更新接口要写清 omitted/null/空对象语义：缺省不修改，null 默认拒绝，`{}` 是显式替换并重新校验（例如 trpc 缺必填文件路径应失败）。并发写采用版本条件或等价冲突检查，冲突返回明确错误，不能丢失另一位用户的配置。
 
@@ -377,8 +393,8 @@ Application 与 AppModel 跨集合更新：上线前验证当前 MongoDB 部署�
 
 | 批次 | 工作 | 验收重点 |
 | --- | --- | --- |
-| 3A 渲染与配置 | 按 Framework/Mod 选择插件；通用 AppModel 配置 map；框架内容仍走 provider/patcher；会话存渲染结果 | 新旧 trpc/taf 资源清单等价；保留名称、挂载目标、ConfigMap、init container 和环境变量语义 |
-| 3B 应用生命周期 | 合并 trpc/taf Create/Update 编排；框架适配器提供差异；完成跨集合失败恢复与审计 | 创建/更新失败可恢复；无半成品可部署应用；环境变量/文件版本 API 行为不变 |
+| 3A 渲染与配置 | 按 Framework/Mod 选择插件；框架内容仍走 provider/patcher；挂载信息仍读 Workload，改读 def 见 §3.4；会话存渲染结果 | 新旧 trpc/taf 资源清单等价；保留名称、挂载目标、ConfigMap、init container 和环境变量语义 |
+| 3B 应用生命周期 | 合并 trpc/taf Create/Update 编排；框架适配器提供差异；框架 def 与 Workload 双写挂载信息（§3.4）；完成跨集合失败恢复与审计 | 创建/更新失败可恢复；无半成品可部署应用；环境变量/文件版本 API 行为不变 |
 | 3C 通用 AppModel 功能 | 部署状态、预检查、实例、拓扑、WebConsole、环境变量、引用查询、异步轮询、镜像清理 | BKMSApp 被完整识别；旧任务仍能处理；查询/统计无遗漏；Helm/Agones 无回归 |
 | 3D 框架特性 | admincmd、APM、Polaris、BSCP 等消费 Mods 和类型化配置 | 不支持组合返回明确错误；不把框架专用限制错误施加到整个通用集成 |
 | 3E 集群依赖 | addon 的管理方式筛选与能力依赖分开；同步内置定义和数据库；更新调用接口 | blank 获得通用部署所需依赖，不自动要求框架专用依赖；required/optional 语义一致 |
@@ -456,7 +472,7 @@ rg -n 'requiredForAppTypes|optionalForAppTypes|"trpc"|"taf"' pkg/core/env/cluste
 | 技术栈可变性 | 普通修改不可变；旧入口提交不同 language 须明确报错（写路径收拢批次落地） |
 | 兼容发布 | 桥接读 → 客户端双识别 → 数据切换 → 删旧入口；窗口内不输出 type=bkmsApp、不开放 blank |
 | blank 首期能力 | 仅目录声明；创建关闭 |
-| fileName/filePath 归属 | 首期放 `frameworkConfig` |
+| fileName/filePath 归属 | 收敛到框架 def 的 `Name` / `MountDir`（替代原“首期放 frameworkConfig”），见 §3.4 |
 
 阶段 2（能力层）的组织方式、能力目录与 pkg 划分已确定，见 [bkms_app_runtime_model_phase1.md](./bkms_app_runtime_model_phase1.md)。整体进度与 PR 拆分见 [bkms_app_runtime_model_milestones.md](./bkms_app_runtime_model_milestones.md)。
 

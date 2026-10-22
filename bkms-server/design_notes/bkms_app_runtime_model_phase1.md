@@ -101,11 +101,11 @@ return runtimemod.Resolve(stack)
 
 ## 3. 能力目录
 
-首期 10 个，均已声明（`runtimemod` 内各文件）。执行端在 M2 统一切换，autoDeploy 随 M5 接入。
+首期 10 个，均已声明（`runtimemod` 内各文件）。执行端在 M2 统一切换。
 
 | ID | 维度 | trpc+go | trpc+cpp | taf | blank | props（执行器用） |
 | --- | --- | --- | --- | --- | --- | --- |
-| `frameworkFile` | ByFramework | yaml | yaml | xml | — | format |
+| `frameworkFile` | ByFramework | yaml | yaml | taf | — | format（取值同 `appcfg.FileFormat`） |
 | `plainConfigFiles` | StackIndependent | ✓ | ✓ | ✓ | ✓ | — |
 | `devMode` | ByFramework | trpc 脚本集 | trpc 脚本集 | taf 脚本集 | — | scriptSet、workPath、mountPath、binaryPath |
 | `platformBuild` | ByFramework + `Only(go)` | ✓ | — | — | — | dockerfileLanguage |
@@ -113,8 +113,8 @@ return runtimemod.Resolve(stack)
 | `apmServiceName` | ByFramework | trpcYAML | trpcYAML | tafXML | — | parser |
 | `polarisServiceCheck` | ByFramework | ✓ | ✓ | — | — | — |
 | `polarisFrameworkPatch` | ByFramework | ✓ | ✓ | — | — | — |
-| `bscpWorkloadMeta` | ByFramework | ✓ | ✓ | — | — | workloadKind |
-| `autoDeploy` | ByFramework | ✓ | ✓ | ✓ | — | —（M5 合并两套实现后接入） |
+| `bscpWorkloadMeta` | ByFramework | ✓ | ✓ | — | — | —（工作负载类型取实际渲染结果） |
+| `autoDeploy` | StackIndependent | ✓ | ✓ | ✓ | ✓ | —（两个接口本是同一实现，M6 合并） |
 
 解析时 `Pair` 优先于 `Framework`，`Framework` 优先于 `Language`。`adminCommand` 的 tRPC 两种配置键布局用 `Pair` 表达，因此不写 `Framework[trpc]`，否则会掩盖"该语言未声明"的情况。
 
@@ -142,9 +142,9 @@ return runtimemod.Resolve(stack)
 | APM 服务名解析器 | 技术栈能力 | `apmServiceName` |
 | 北极星服务名校验 | 技术栈能力 | `polarisServiceCheck` |
 | 北极星注册信息注入 | 技术栈能力 | `polarisFrameworkPatch` |
-| BSCP 自动推导 workload name/kind | 技术栈能力 | `bscpWorkloadMeta` |
+| BSCP 自动填充工作负载名称与类型 | 技术栈能力 | `bscpWorkloadMeta`；仅 tRPC，TAF 尚未接入 |
 | plain 配置文件 | 技术栈能力（全体支持） | `plainConfigFiles` |
-| 一键构建部署 | 技术栈能力 | `autoDeploy`，M5 接入 |
+| 一键构建部署 | 技术栈能力（全体支持） | `autoDeploy` |
 | 渲染插件选择、空 `Workload.Type` 兜底 | 技术栈能力 | M4 改为按 framework 分派，不单独建 Mod |
 | 组件引用仅统计 trpc | 历史缺陷 | phase0 已定单独立项 |
 | 容器名内置变量仅 trpc/taf | 管理方式 | M4 改为按 `IsAppModelType` |
@@ -159,7 +159,7 @@ return runtimemod.Resolve(stack)
 
 1. **adminCommand 的语言覆盖。** 执行端支持 go/cpp/java/node/python 五种布局，已全部登记进 `Pair`。java/node/python 为目录外语言（`appruntime.LanguageJava` 等常量，不在 `KnownLanguages`），技术栈校验会拒绝，条目当前不可达；存量扫描确认后再决定是否纳入目录。
 2. **平台构建判定重复。** `build/service.go` 与 `PlatformBuildDef` 各写一份，M2 只保留后者。
-3. **未被引用的桥接代码。** `trpc/config.go`、`taf/config.go` 的 `DecodeConfig` 与 `pkg/core/render/migrate` 目前没有生产调用方，M2 决定接入框架适配器或删除。
+3. **未被引用的桥接代码。** `trpc/config.go`、`taf/config.go` 的 `DecodeConfig` 按"挂载信息放 frameworkConfig"设计，框架配置文件挂载信息改为收敛到 def（总体方案 §3.4）后不再需要，M5 删除；`pkg/core/render/migrate` 没有生产调用方，M9 一并清理。
 
 ### 3.1 语言维度的真实占比
 
@@ -169,7 +169,7 @@ return runtimemod.Resolve(stack)
 
 - `devMode`：`WorkPath` / `MountPath` 由 props 给出，不再由 `app.Type` / `Workload.Type` 推导。`taf-start.sh` 与 `TrpcBinaryPath` 属于 `scriptSet` 差异，保留在 props。
 - `platformBuild`：`DockerfileLanguage` 替代 `Application.TrpcSpec.Language` 的读取。
-- 执行器内部 key（scriptSet、parser、configLayout、workloadKind、dockerfileLanguage）**不对外暴露**。
+- 执行器内部 key（scriptSet、parser、configLayout、dockerfileLanguage）**不对外暴露**。
 
 ### 3.3 命名统一
 

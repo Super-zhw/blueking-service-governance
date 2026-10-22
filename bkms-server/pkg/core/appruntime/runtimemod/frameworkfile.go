@@ -20,14 +20,14 @@ package runtimemod
 
 import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 
-// FrameworkFileFormat 框架配置文件的格式。
+// FrameworkFileFormat 框架配置文件的格式，取值与配置文件存储的 appcfg.FileFormat 一致。
 type FrameworkFileFormat string
 
 const (
-	// FrameworkFileYAML tRPC 使用。
+	// FrameworkFileYAML YAML 格式，tRPC 使用。
 	FrameworkFileYAML FrameworkFileFormat = "yaml"
-	// FrameworkFileXML TAF 使用。
-	FrameworkFileXML FrameworkFileFormat = "xml"
+	// FrameworkFileTAF TAF conf 格式（标签加 key=value，不是标准 XML），TAF 使用。
+	FrameworkFileTAF FrameworkFileFormat = "taf"
 )
 
 // FrameworkFileProps 框架配置文件的参数。
@@ -35,7 +35,7 @@ type FrameworkFileProps struct {
 	Format FrameworkFileFormat
 }
 
-// Public 对外展示文件格式，前端据此选择编辑器的语法。
+// Public 对外展示文件格式，前端据此选择编辑器的语法（taf 按 xml 高亮）。
 func (p FrameworkFileProps) Public() any {
 	return struct {
 		Format FrameworkFileFormat `json:"format"`
@@ -48,6 +48,6 @@ var FrameworkFileDef = Def[FrameworkFileProps]{
 	Dimension: ByFramework,
 	Framework: FrameworkTable[FrameworkFileProps]{
 		appruntime.FrameworkTRPC: {Format: FrameworkFileYAML},
-		appruntime.FrameworkTAF:  {Format: FrameworkFileXML},
+		appruntime.FrameworkTAF:  {Format: FrameworkFileTAF},
 	},
 }

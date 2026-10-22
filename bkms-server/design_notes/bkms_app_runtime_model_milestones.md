@@ -18,8 +18,8 @@
 | M1 | 能力集合新路径（只新增，不接入） | 2 | 1 | 🚧 |
 | M2 | 能力执行端切换到 ModSet | 2、3D | 1 | ⬜ |
 | M3 | 能力 pkg 划分（纯移动） | — | 1 | ⬜ |
-| M4 | 读路径统一：渲染分派、通用功能、集群依赖 | 3A、3C、3E | 2 | ⬜ |
-| M5 | 写路径统一：编排、双写、blank 后端闭环 | 3B、3F | 2 | ⬜ |
+| M4 | 运行链路识别 bkmsApp：渲染分派、部署预检、集群依赖等 | 3A、3C、3E | 2 | ⬜ |
+| M5 | 创建与修改流程统一：编排合并、新旧字段双写、blank 后端闭环 | 3B、3F | 2 | ⬜ |
 | M6 | 新 API 上线，旧 API 改薄适配层 | 4（服务端） | 2 | ⬜ |
 | M7 | 前端接入，切换响应 type | 4（客户端） | 3 | ⬜ |
 | M8 | 存量回填，切换主读写 | 5 | 4 | ⬜ |
@@ -51,10 +51,10 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 | apmServiceName | 解析器来自 props |
 | polarisServiceCheck | 判断依据由 `Workload.Type` 改为 Application |
 | polarisFrameworkPatch | 渲染 patch 链按能力判断；trpc 专用 |
-| bscpWorkloadMeta | workloadKind 来自 props |
+| bscpWorkloadMeta | 是否自动填充按能力判断；工作负载类型取实际渲染结果，不再写死 GameDeployment |
 | frameworkFile | 内容校验按 props.format 选择解析器；Helm 仍按 YAML |
 | plainConfigFiles | 现网在用的通用路径，trpc / taf / blank 均支持；构建步骤与创建入口经 `ModSet` 判断 |
-| autoDeploy | 只声明，执行端随 M5 合并 |
+| autoDeploy | 与技术栈无关，所有 bkmsApp 支持；两个接口的合并随 M6 |
 
 **行为变化：**
 
@@ -83,25 +83,44 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ---
 
-## M4 读路径统一
+## M4 运行链路识别 bkmsApp
 
-**范围：** 总体方案阶段 3 的 3A（按 framework 分派渲染）、3C（通用 AppModel 功能识别 bkmsApp）、3E（集群依赖拆分管理方式与能力，同步内置 YAML 与库内记录）。
+**目标：** 部署、渲染等运行链路改为按管理方式（`IsAppModelType`）或 framework 判断，不再比较 `type == "trpc"` 这类字面值。只改判断逻辑，不改数据。
 
-**行为变化：** 无。新旧渲染清单比对测试保证等价。
+**为什么需要：** 今天应用 type 只有 trpc / taf，字面值比较都能命中；blank 只能是 `bkmsApp`，M7 后所有应用也都是 `bkmsApp`，这些比较会全部落空。
 
-**范围补充（按能力核对结论）：** 容器名内置变量改为按 `IsAppModelType`；集群 addon 需求改为按 workload kind 与 CRD 表达，不再比较旧 type 字面量。
+| 事项 | 现状 | 改为 |
+| --- | --- | --- |
+| 渲染插件选择 | 按 `Workload.Type` 选插件，空值默认 trpc（`workload/builder.go`、`plugin/plugin.go`） | 按 `Application.Framework` 选；blank 对应 standard 插件；去掉空值兜底 |
+| 部署预检 | 只认 trpc / taf，bkmsApp 落入 default 报错（`deploy/pre_checker.go`） | 按 `IsAppModelType` |
+| 部署接口类型校验 | 严格比较 expectedAppType（`appmodel_deploy_steps.go`） | 按 framework 核对 |
+| 容器名内置变量 | 只给 trpc / taf 注入（`envvars/listers.go`） | 按 `IsAppModelType` |
+| 集群 addon 依赖 | 比较 type 字面值，YAML 只写 trpc / taf（`clusteraddon/query.go`） | 按管理方式与工作负载形态表达；同步内置 YAML 与库内记录 |
+| 其余字面值比较 | 组件引用查询、监控指标类型归一等 | 同上 |
 
-**退出条件：** 渲染不再依赖空 `Workload.Type` 兜底；通用功能对 bkmsApp 完整识别；Helm / Agones 无回归。
+框架配置文件的挂载信息仍读 Workload，改读 def 在 M8（见总体方案 §3.4）。
+
+**行为变化：** 无。
+
+**退出条件：** trpc / taf 新旧渲染清单逐项一致（含 `trpc-init`、`/taf-config-template` 等资源名）；不再有对 trpc / taf 字面值的运行时判断；Helm / Agones 无回归。
 
 ---
 
-## M5 写路径统一
+## M5 创建与修改流程统一
 
-**范围：** 总体方案 3B（合并 trpc / taf 创建与更新编排）、3F（blank 后端闭环）；一键构建部署合并并接入 `autoDeploy`；写路径双写新字段与旧投影；旧 `trpc-spec` 提交不同 language 时报"不支持切换技术栈"；旧路由调用量埋点。
+**目标：** 合并 trpc / taf 两套创建与修改流程，写入时同时写新字段与旧投影。
 
-跨集合写入使用 MongoDB 事务保护（Application、AppModel、AppSpec、配置文件）。
+| 事项 | 现状 | 改为 |
+| --- | --- | --- |
+| 创建编排 | 按类型分派到 `trpc.go`、`taf.go` 两套几乎相同的流程（解析默认值、建框架 def、初始化 AppModel、写 AppSpec） | 合并为一个编排服务，差异（配置格式、旧投影）由框架适配器提供，并读取 ModSet 声明 |
+| 新字段写入 | 生产代码从未写过 `Application.Language/Framework` | 与旧字段同时写 |
+| 框架配置文件挂载信息 | 只写 `Workload.FileName/FilePath`；改名不同步 def | 同时写框架 def 的 `Name` / `MountDir` 与 Workload（方案见总体方案 §3.4） |
+| 技术栈不可变 | `trpc-spec` 更新会改 `TrpcConfig.Language` | 提交不同 language 时报"不支持切换技术栈" |
+| 跨集合写入 | Application、配置文件、AppModel、AppSpec 分别写，中途失败留下半成品 | MongoDB 事务保护 |
+| blank 后端闭环 | 无 | 端到端测试：已有镜像 → plain 配置 → 渲染 → 部署 → 状态 → 下架；创建入口仍关闭 |
+| 旧路由调用量 | 无统计 | 埋点，作为 M9 下线依据 |
 
-**行为变化：** 技术栈切换被拒绝；其余对外行为不变，blank 创建入口仍关闭。
+**行为变化：** 技术栈切换被拒绝；其余对外行为不变。
 
 **退出条件：** 新旧字段写入一致；blank 后端端到端通过；创建失败不留半成品应用。
 
@@ -135,9 +154,11 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 | --- | --- |
 | scan | 只读统计，填写阶段 0 文档 §7.3 |
 | backup | 导出待改字段与记录级清单 |
-| backfill | 幂等、按原值条件更新，可分批执行 |
+| backfill | 幂等、按原值条件更新，可分批执行；含框架 def 的 `Name` / `MountDir` 回填 |
 | verify | 核对目标数与完成数、冲突清单 |
 | restore | 按备份条件回滚，不覆盖迁移后的用户编辑 |
+
+**框架 def 回填（总体方案 §3.4）：** 先执行 `repair_trpc_taf_framework_defs` 清理多余的框架 def；再逐应用比对 Workload 与 def 的文件名、挂载目录，并检查与 plain 文件的挂载路径冲突；冲突列入清单人工处理，不自动覆盖。核对一致后，渲染改读 def。
 
 **行为变化：** 新字段成为主读写来源；旧投影继续写一个窗口。
 
@@ -145,6 +166,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 - [ ] 复核 M2 为存量兼容补入目录的语言：确认对应应用已迁移或已处理，再决定从目录移除，或经产品确认后转为正式支持。
 - [ ] `verify` 脚本结果中无目录外 language。
+- [ ] 每个 AppModel 应用只有一条框架 def，且 `Join(MountDir, Name)` 与回填前的挂载路径一致。
 
 **退出条件：** 冲突为零；历史部署与文件版本回放正确；恢复演练通过；迁移后检查项全部完成。
 
@@ -152,7 +174,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M9 下线与清理
 
-**范围：** 总体方案阶段 6：删除旧路由、旧字段、旧类型常量、BRIDGE-ONLY 代码与扫描命令；清理测试工厂、Bruno、Swagger、UI 类型；提供库内旧字段清理的 mongosh 脚本。
+**范围：** 总体方案阶段 6：删除旧路由、旧字段（含 `Workload.TrpcConfig/TafConfig`）、旧类型常量、BRIDGE-ONLY 代码与扫描命令；清理测试工厂、Bruno、Swagger、UI 类型；提供库内旧字段清理的 mongosh 脚本。
 
 **门槛：** 旧路由调用量在完整发布周期内归零；CLI 旧版本已淘汰。
 

@@ -93,7 +93,7 @@ var _ = Describe("Public", func() {
 				"type": "bkmsApp",
 				"framework": "taf",
 				"mods": {
-					"frameworkFile":       {"supported": true, "props": {"format": "xml"}},
+					"frameworkFile":       {"supported": true, "props": {"format": "taf"}},
 					"plainConfigFiles":    {"supported": true},
 					"devMode":             {"supported": true, "props": {
 						"workPath": "/data/bkms/dev-mode/taf",

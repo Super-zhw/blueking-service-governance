@@ -9,7 +9,7 @@
 | 决策 | 冻结值 | 理由与安全边界 |
 | --- | --- | --- |
 | BKMSApp 持久化字面值 | `bkmsApp` | JSON/BSON/API 第一份新字段起使用该值，不再讨论驼峰或连字符变体 |
-| 框架配置字段 | `frameworkConfig`（对象）、`frameworkConfigVersion`（int，初始 1） | 只存框架扩展；`fileName` / `filePath` 首期放 map；`fileContent` 不进 map |
+| 框架配置字段 | `frameworkConfig`（对象）、`frameworkConfigVersion`（int，初始 1） | 只存框架扩展；`fileContent` 不进 map。`fileName` / `filePath` 原定首期放 map，**已改为收敛到框架 def**，见总体方案 §3.4 |
 | TAF 支持语言 | 目录声明 **仅 cpp** | 现有模型/API/Bruno 均无 TAF language 字段。存量未扫描前 **不得** 批量写 `language=cpp`。兼容读取可将 framework 投影为 `taf`，language 留空并记 `incomplete_language` |
 | 技术栈可变性 | 普通更新 **不可变** | `PUT /trpc-spec` 今日会改 `Workload.TrpcConfig.Language` 但不改 `Application.TrpcSpec`。兼容窗口内：旧入口若提交与当前生效 language **不同** 的值，返回明确的“不支持切换技术栈”错误（该校验落在后续写路径收拢批次，不在阶段 1 读模型里改写行为） |
 | 兼容发布 | 桥接版本 → 客户端同时识别新旧 → 数据切换 → 删旧入口 | 窗口内详情/列表 **继续输出存量 `type=trpc\|taf`**；只增量返回 `language` / `framework`。窗口内 **不开放 blank 创建**，不把 type 切成 `bkmsApp` |
