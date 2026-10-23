@@ -39,11 +39,11 @@ const (
 	LanguageGo = "go"
 	// LanguageCpp C++ 技术栈。
 	LanguageCpp = "cpp"
-	// LanguageJava Java 技术栈。不在框架目录中，暂不可创建，仅用于能力声明。
+	// LanguageJava Java 技术栈。
 	LanguageJava = "java"
-	// LanguageNodeJS Node.js 技术栈。不在框架目录中，暂不可创建，仅用于能力声明。
+	// LanguageNodeJS Node.js 技术栈。
 	LanguageNodeJS = "nodejs"
-	// LanguagePython Python 技术栈。不在框架目录中，暂不可创建，仅用于能力声明。
+	// LanguagePython Python 技术栈。
 	LanguagePython = "python"
 )
 
