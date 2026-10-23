@@ -15,8 +15,8 @@
 | 里程碑 | 目标 | 总体方案阶段 | 原规划步骤 | 状态 |
 | --- | --- | --- | --- | --- |
 | M0 | 新模型字段、框架目录、兼容读取、扫描工具 | 0、1 | — | ✅ #225 |
-| M1 | 能力集合新路径（只新增，不接入） | 2 | 1 | 🚧 |
-| M2 | 能力执行端切换到 ModSet | 2、3D | 1 | ⬜ |
+| M1 | 能力集合新路径（只新增，不接入） | 2 | 1 | ✅ |
+| M2 | 能力执行端切换到能力集合 | 2、3D | 1 | 🚧 |
 | M3 | 能力 pkg 划分（纯移动） | — | 1 | ⬜ |
 | M4 | 运行链路识别 bkmsApp：渲染分派、部署预检、集群依赖等 | 3A、3C、3E | 2 | ⬜ |
 | M5 | 创建与修改流程统一：编排合并、新旧字段双写、blank 后端闭环 | 3B、3F | 2 | ⬜ |
@@ -31,7 +31,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M1 能力集合新路径
 
-**范围：** `runtimemod` 声明规范、10 个能力声明、`Resolve` / `Public` / `Matrix`、`CapabilityStack`、`Application.RuntimeMods()`；补齐 taf / blank 完整 golden、`ModSet` 字段反射对齐、import 约束测试。
+**范围：** `runtimemod` 基础包（Spec 与查表工厂）、8 个能力声明、`Set` 与 `Of(app)`、`Public` / `Matrix`、`CapabilityStack`；taf / blank 完整 golden、`Set` 字段反射对齐、import 约束测试。
 
 **行为变化：** 无。生产代码不调用新路径。
 
@@ -41,7 +41,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M2 能力执行端切换
 
-**范围：** 10 个能力的消费点改读 `ModSet`，删除对应的类型分支。
+**范围：** 8 个能力的消费点改读 `mods.Of(app)`，删除对应的类型分支。
 
 | 能力 | 切换要点 |
 | --- | --- |
@@ -53,8 +53,6 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 | polarisFrameworkPatch | 渲染 patch 链按能力判断；trpc 专用 |
 | bscpWorkloadMeta | 是否自动填充按能力判断；工作负载类型取实际渲染结果，不再写死 GameDeployment |
 | frameworkFile | 内容校验按 props.format 选择解析器；Helm 仍按 YAML |
-| plainConfigFiles | 现网在用的通用路径，trpc / taf / blank 均支持；构建步骤与创建入口经 `ModSet` 判断 |
-| autoDeploy | 与技术栈无关，所有 bkmsApp 支持；两个接口的合并随 M6 |
 
 **行为变化：**
 
@@ -63,7 +61,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 - blank 开启 devMode 返回能力错误。
 - platformBuild 不支持时返回统一能力错误。
 - `Workload.Type` 为空的 tRPC 应用开始收到 Polaris 校验警告。
-- Helm 应用不能再通过 API 创建 plain 文件（UI 本就不暴露）。
+- Helm 应用不能再通过 API 创建 plain 文件（UI 本就不暴露）。plain 与一键构建部署按基座处理，改判 `IsAppModelType`，不走能力集合。
 
 **上线前：** 只读副本执行 `scan_app_runtime_model`，确认受影响记录数与未知 language。存量若有目录外语言，先补入目录（只做存量兼容，不开放创建），再上线。
 
@@ -75,7 +73,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M3 能力 pkg 划分
 
-**范围：** 按总体方案 §4.5 与能力集合方案 §6 移动目录：能力进 `pkg/capability/*`，框架协议实现进 `pkg/framework/*`，`ModSet` 组装独立成薄包。
+**范围：** 按总体方案 §4.5 与能力集合方案 §6 移动目录：能力进 `pkg/capability/*`，框架协议实现进 `pkg/framework/*`，`Set` 的组装独立成薄包。
 
 **行为变化：** 无，零逻辑 diff。
 
@@ -112,7 +110,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 | 事项 | 现状 | 改为 |
 | --- | --- | --- |
-| 创建编排 | 按类型分派到 `trpc.go`、`taf.go` 两套几乎相同的流程（解析默认值、建框架 def、初始化 AppModel、写 AppSpec） | 合并为一个编排服务，差异（配置格式、旧投影）由框架适配器提供，并读取 ModSet 声明 |
+| 创建编排 | 按类型分派到 `trpc.go`、`taf.go` 两套几乎相同的流程（解析默认值、建框架 def、初始化 AppModel、写 AppSpec） | 合并为一个编排服务，差异（配置格式、旧投影）由框架适配器提供，并读取能力声明 |
 | 新字段写入 | 生产代码从未写过 `Application.Language/Framework` | 与旧字段同时写 |
 | 框架配置文件挂载信息 | 只写 `Workload.FileName/FilePath`；改名不同步 def | 同时写框架 def 的 `Name` / `MountDir` 与 Workload（方案见总体方案 §3.4） |
 | 技术栈不可变 | `trpc-spec` 更新会改 `TrpcConfig.Language` | 提交不同 language 时报"不支持切换技术栈" |
@@ -128,7 +126,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M6 新 API 上线
 
-**范围：** 总体方案 §5.1 的全部新接口；旧接口改为调用同一领域服务的薄适配层并强制核对 framework；详情 / 列表增量返回 `framework` / `language`；Swagger 与 Bruno。
+**范围：** 总体方案 §5.1 的全部新接口；旧接口改为调用同一领域服务的薄适配层并强制核对 framework；详情 / 列表增量返回 `framework` / `language`；合并 `trpc-build-deploys` / `taf-build-deploys` 为一键构建部署接口；Swagger 与 Bruno。
 
 **行为变化：** 只新增接口；旧接口业务效果不变，响应 `type` 仍为 `trpc|taf`。
 

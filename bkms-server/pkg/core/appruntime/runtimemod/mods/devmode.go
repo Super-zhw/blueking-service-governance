@@ -16,9 +16,12 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package runtimemod
+package mods
 
-import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+import (
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
+)
 
 // DevModeScriptSet 开发模式注入的脚本集。
 type DevModeScriptSet string
@@ -41,6 +44,7 @@ const (
 	DevModeTrpcMountPath = DevModeTrpcWorkPath + "/" + DevModePathScriptsSubDir
 	// DevModeTrpcBinaryPath tRPC 二进制所在目录。
 	DevModeTrpcBinaryPath = "/usr/local/trpc/bin"
+
 	// DevModeTafWorkPath TAF 开发模式根目录。
 	DevModeTafWorkPath = "/data/bkms/dev-mode/taf"
 	// DevModeTafMountPath TAF 脚本挂载目录。
@@ -67,21 +71,21 @@ func (p DevModeProps) Public() any {
 	}{p.WorkPath, p.MountPath}
 }
 
-// DevModeDef 开发模式：tRPC、TAF 支持。是否开启、当前环境是否允许，由 devmode 模块在运行时判断。
-var DevModeDef = Def[DevModeProps]{
-	ID:        "devMode",
-	Dimension: ByFramework,
-	Framework: FrameworkTable[DevModeProps]{
+// DevMode 开发模式：tRPC、TAF 支持。是否开启、当前环境是否允许，由 devmode 模块在运行时判断。
+var DevMode = runtimemod.Spec[DevModeProps]{
+	ID: runtimemod.ModDevMode,
+	Resolve: runtimemod.ByFramework(map[string]DevModeProps{
 		appruntime.FrameworkTRPC: {
 			ScriptSet:  DevModeScriptSetTRPC,
 			WorkPath:   DevModeTrpcWorkPath,
 			MountPath:  DevModeTrpcMountPath,
 			BinaryPath: DevModeTrpcBinaryPath,
 		},
+
 		appruntime.FrameworkTAF: {
 			ScriptSet: DevModeScriptSetTAF,
 			WorkPath:  DevModeTafWorkPath,
 			MountPath: DevModeTafMountPath,
 		},
-	},
+	}),
 }

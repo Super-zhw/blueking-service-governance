@@ -195,16 +195,15 @@ flowchart LR
 
 ### 4.2 Mod 规范与 props
 
-统一使用 `RuntimeModSet` / `Mod` 命名，不混用 ModeSet。每个 Mod 至少包含稳定 ID、Supported、Props；不支持时提供机器可读 reasonCode，props 为空。
+统一使用 `Mod` 命名。每个 Mod 至少包含稳定 ID、Supported、Props；不支持时提供机器可读 reasonCode，props 为空。
 
-内部建议使用泛型 `Mod[T]` 和类型化字段，如 `mods.DevMode`、`mods.PlatformBuild`。汇总时使用公共只读描述接口；只有 API 边界投影成 JSON 对象，不让领域执行器拿 `map[string]any` 四处解码 props。
+内部使用泛型 `Mod[T]` 和强类型字段，如 `mods.DevMode`、`mods.PlatformBuild`。只有 API 边界投影成 JSON 对象，领域执行器不拿 `map[string]any` 四处解码 props。
 
-每个 Mod owner 定义 props 类型和支持规则，组装层汇总注册。初期用显式 registry/FX 注入即可：不引入动态加载、脚本条件表达式或多层继承 DSL。
+每个 Mod 用一个解析函数声明：`func(framework, language) Mod[P]`。只按框架或只按语言变化的能力用现成工厂函数，参数随组合变化的能力自行实现，不引入规则表、优先级和多层继承。
 
 | Mod ID | 支持条件 | props 职责 |
 | --- | --- | --- |
 | `frameworkFile` | trpc、taf | 配置文件格式；blank 不创建伪框架文件 |
-| `plainConfigFiles` | 所有 bkmsApp 框架 | 无参数；与技术栈无关 |
 | `devMode` | trpc、taf | 脚本集、工作目录、挂载目录、二进制目录 |
 | `platformBuild` | trpc+go | 生成器策略、Dockerfile 语言；不限制其他既有构建模式 |
 | `adminCommand` | trpc、taf | 协议、配置键布局（按语言） |
@@ -212,17 +211,17 @@ flowchart LR
 | `polarisServiceCheck` | trpc | 无参数；仅指基于 tRPC 配置的服务名校验 |
 | `polarisFrameworkPatch` | trpc | 无参数；仅指配置注入，不等于 Polaris 注册本身 |
 | `bscpWorkloadMeta` | trpc | 无参数；工作负载类型取实际渲染结果；TAF 尚未接入 |
-| `autoDeploy` | 所有 bkmsApp 框架 | 无参数；现有两个接口本是同一实现 |
 
-完整定义、维度与对外契约见 [能力集合方案](./bkms_app_runtime_model_phase1.md) §3，此处不再维护第二份清单。判定标准：功能会因技术栈不同而不支持才建 Mod；管理方式相关（部署、渲染、实例、AppSpec、组件）与环境/集群相关（GPA、HostPort、端口池、集群 addon）不建 Mod；完全通用的显示名称、权限、审计也无需包装。
+完整定义与对外契约见 [能力集合方案](./bkms_app_runtime_model_phase1.md) §3，此处不再维护第二份清单。判定标准：**支持与否或参数因技术栈不同而变化**才建 Mod。对所有技术栈一致的功能（plain 配置文件、一键构建部署、构建、监控等）、管理方式相关（部署、渲染、实例、AppSpec、组件）、环境/集群相关（GPA、HostPort、端口池、集群 addon）都不建 Mod。
 
-### 4.3 匹配与解析规则
+### 4.3 解析规则
 
-1. 声明按维度表组织：`framework` 为主维度，`language` 仅用于少数语言敏感能力，"任意"与"限定"必须显式表达。
-2. 先校验组合合法性，再解析能力；未知 framework 是技术栈错误，能力不支持返回 unsupported，两者必须区分。
-3. 不设隐式覆盖优先级：同一技术栈在同一能力上只能命中一条声明，冲突由声明期测试发现。
-4. 启动期不做校验；ID 唯一、声明覆盖框架目录、props 合法、supported 组合有执行器，全部由测试保证。
-5. 结果只读且确定性：相同输入与代码版本得到相同结果，调用方不得通过返回对象修改全局声明。
+1. 每个能力是一个解析函数，输入框架与语言，输出是否支持及参数；简单的按框架或按语言查表，复杂的自行实现。
+2. 先校验技术栈，再解析能力；未知框架、未知语言、非法组合是技术栈错误，能力不支持返回 unsupported，两者必须区分。
+3. 非 bkmsApp 应用的解析结果统一为 `unsupported_app_type`。
+4. 语言为空时：按框架声明的能力照常支持；按语言声明的能力返回 `incomplete_language`。
+5. 启动期不做校验；ID 唯一、能力覆盖框架目录、supported 组合有执行器，全部由测试保证。
+6. 结果只读且确定性：相同输入与代码版本得到相同结果，调用方不得通过返回对象修改全局声明。
 
 ### 4.4 devmode 的完整调用例子
 
@@ -241,12 +240,12 @@ AppSpec.DevMode 保留 Enabled 等用户配置；模块 props 为平台定义的
 
 | 包 | 职责 | 依赖约束 |
 | --- | --- | --- |
-| `pkg/core/appruntime` | 技术栈值类型、FrameworkDef、选择器、Mod 规范、纯 resolver | 不 import appmodel、component、具体框架或 handler |
-| 各功能的 runtime 定义文件 | props 类型、支持规则、公开 props 投影 | 只依赖规范定义与必要基础类型，不拉入实际服务的数据库依赖 |
-| 应用运行时组装服务 | Application → 技术栈输入、组装 ModSet、按需加载模型 | 在 FX/应用服务层注入 registry；避免 core/app 反向依赖 workload |
+| `pkg/core/appruntime/runtimemod` | ModID、ReasonCode、Mod、Spec、查表工厂、对外结构 | 只依赖 `appruntime` 与标准库 |
+| `pkg/core/appruntime/runtimemod/mods` | 各能力的声明、props 类型、公开投影、`Set` 与 `Of(app)` | 只依赖 `appruntime`、`runtimemod`、`core/app` |
+| 应用运行时组装 | `mods.Of(app)`：Application → 技术栈 → 能力集合 | 不放在 `core/app` 方法里，避免 core/app 反向依赖 |
 | `appmodelcore/trpc`、`taf`、blank 适配器 | 框架配置解码、校验、默认值、渲染/初始化差异 | 保留框架知识；通用业务通过 Mod/适配器接口调用 |
 
-不要求第一版把各领域包搬家。若 props 定义与执行器同包造成循环引用，先拆出纯定义子包，再注入实现；禁止让 core/app 直接 import devmode/build/admincmd 来拼能力集合。
+不要求第一版把各领域包搬家。M3 再把各能力连同声明搬到 `pkg/capability/<能力>/`，届时 `Set` 的组装独立成薄包；禁止让 core/app 直接 import devmode/build/admincmd 来拼能力集合。
 
 ## 5. API 与产品契约
 

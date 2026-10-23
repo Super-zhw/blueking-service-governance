@@ -16,9 +16,12 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package runtimemod
+package mods
 
-import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+import (
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
+)
 
 // FrameworkFileFormat 框架配置文件的格式，取值与配置文件存储的 appcfg.FileFormat 一致。
 type FrameworkFileFormat string
@@ -32,6 +35,7 @@ const (
 
 // FrameworkFileProps 框架配置文件的参数。
 type FrameworkFileProps struct {
+	// Format 配置文件格式。
 	Format FrameworkFileFormat
 }
 
@@ -42,12 +46,12 @@ func (p FrameworkFileProps) Public() any {
 	}{p.Format}
 }
 
-// FrameworkFileDef 框架配置文件：tRPC、TAF 支持；blank 没有框架配置文件。
-var FrameworkFileDef = Def[FrameworkFileProps]{
-	ID:        "frameworkFile",
-	Dimension: ByFramework,
-	Framework: FrameworkTable[FrameworkFileProps]{
+// FrameworkFile 框架配置文件：tRPC、TAF 支持；blank 没有框架配置文件。
+var FrameworkFile = runtimemod.Spec[FrameworkFileProps]{
+	ID: runtimemod.ModFrameworkFile,
+	Resolve: runtimemod.ByFramework(map[string]FrameworkFileProps{
 		appruntime.FrameworkTRPC: {Format: FrameworkFileYAML},
-		appruntime.FrameworkTAF:  {Format: FrameworkFileTAF},
-	},
+
+		appruntime.FrameworkTAF: {Format: FrameworkFileTAF},
+	}),
 }

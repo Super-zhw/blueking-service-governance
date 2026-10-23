@@ -16,18 +16,23 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package runtimemod
+package mods
 
-// PlainConfigFilesProps 无参数。
-type PlainConfigFilesProps struct{}
+import (
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
+)
+
+// PolarisServiceCheckProps 无参数。
+type PolarisServiceCheckProps struct{}
 
 // Public 无对外内容。
-func (p PlainConfigFilesProps) Public() any { return nil }
+func (p PolarisServiceCheckProps) Public() any { return nil }
 
-// PlainConfigFilesDef plain 配置文件：用户自定义、挂载到容器的配置文件。
-// 不经过框架插件，所有 bkmsApp 应用都支持。
-var PlainConfigFilesDef = Def[PlainConfigFilesProps]{
-	ID:        "plainConfigFiles",
-	Dimension: StackIndependent,
-	Universal: &PlainConfigFilesProps{},
+// PolarisServiceCheck 北极星服务名校验：北极星配置的服务名不在 tRPC 配置文件中时给出警告。仅 tRPC 支持。
+var PolarisServiceCheck = runtimemod.Spec[PolarisServiceCheckProps]{
+	ID: runtimemod.ModPolarisServiceCheck,
+	Resolve: runtimemod.ByFramework(map[string]PolarisServiceCheckProps{
+		appruntime.FrameworkTRPC: {},
+	}),
 }

@@ -16,9 +16,12 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package runtimemod
+package mods
 
-import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+import (
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
+)
 
 // AdminProtocol admin 命令的协议。
 type AdminProtocol string
@@ -36,14 +39,28 @@ type TrpcAdminConfigLayout string
 const (
 	// TrpcAdminLayoutNested server.admin.ip / server.admin.port，go、python 使用。
 	TrpcAdminLayoutNested TrpcAdminConfigLayout = "nested"
-	// TrpcAdminLayoutFlat server.admin_ip / server.admin_port，cpp、node 使用。
+	// TrpcAdminLayoutFlat server.admin_ip / server.admin_port，cpp、nodejs 使用。
 	TrpcAdminLayoutFlat TrpcAdminConfigLayout = "flat"
 	// TrpcAdminLayoutNestedPrefixed server.admin.admin_ip / server.admin.admin_port，java 使用。
 	TrpcAdminLayoutNestedPrefixed TrpcAdminConfigLayout = "nestedPrefixed"
 )
 
+// trpcAdminLayouts 各语言下 admin 地址的写法。
+//
+// java、nodejs、python 不在框架目录中，暂不可达；纳入目录后自动生效。
+var trpcAdminLayouts = map[string]TrpcAdminConfigLayout{
+	appruntime.LanguageGo:     TrpcAdminLayoutNested,
+	appruntime.LanguagePython: TrpcAdminLayoutNested,
+
+	appruntime.LanguageCpp:    TrpcAdminLayoutFlat,
+	appruntime.LanguageNodeJS: TrpcAdminLayoutFlat,
+
+	appruntime.LanguageJava: TrpcAdminLayoutNestedPrefixed,
+}
+
 // AdminCommandProps admin 命令的执行参数。
 type AdminCommandProps struct {
+	// Protocol 协议。
 	Protocol AdminProtocol
 	// ConfigLayout admin 地址的写法，仅 tRPC 使用。
 	ConfigLayout TrpcAdminConfigLayout
@@ -52,36 +69,24 @@ type AdminCommandProps struct {
 // Public 无对外内容。
 func (p AdminCommandProps) Public() any { return nil }
 
-// AdminCommandDef admin 命令：tRPC、TAF 支持。
-//
-// tRPC 按语言区分 admin 地址的写法。java、node、python 不在框架目录中，对应条目暂不生效，
-// 纳入目录后自动生效。
-var AdminCommandDef = Def[AdminCommandProps]{
-	ID:        "adminCommand",
-	Dimension: ByFramework,
-	Framework: FrameworkTable[AdminCommandProps]{
-		appruntime.FrameworkTAF: {Protocol: AdminProtocolTAF},
-	},
-	Pair: PairTable[AdminCommandProps]{
-		{Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguageGo}: {
-			Protocol:     AdminProtocolTRPC,
-			ConfigLayout: TrpcAdminLayoutNested,
-		},
-		{Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguageCpp}: {
-			Protocol:     AdminProtocolTRPC,
-			ConfigLayout: TrpcAdminLayoutFlat,
-		},
-		{Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguagePython}: {
-			Protocol:     AdminProtocolTRPC,
-			ConfigLayout: TrpcAdminLayoutNested,
-		},
-		{Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguageNode}: {
-			Protocol:     AdminProtocolTRPC,
-			ConfigLayout: TrpcAdminLayoutFlat,
-		},
-		{Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguageJava}: {
-			Protocol:     AdminProtocolTRPC,
-			ConfigLayout: TrpcAdminLayoutNestedPrefixed,
-		},
+// AdminCommand admin 命令：tRPC、TAF 支持。
+var AdminCommand = runtimemod.Spec[AdminCommandProps]{
+	ID: runtimemod.ModAdminCommand,
+	Resolve: func(framework, language string) runtimemod.Mod[AdminCommandProps] {
+		switch framework {
+		case appruntime.FrameworkTAF:
+			return runtimemod.Supported(AdminCommandProps{Protocol: AdminProtocolTAF})
+
+		case appruntime.FrameworkTRPC:
+			if language == "" {
+				return runtimemod.Incomplete[AdminCommandProps]()
+			}
+			layout, ok := trpcAdminLayouts[language]
+			if !ok {
+				return runtimemod.Unsupported[AdminCommandProps]()
+			}
+			return runtimemod.Supported(AdminCommandProps{Protocol: AdminProtocolTRPC, ConfigLayout: layout})
+		}
+		return runtimemod.Unsupported[AdminCommandProps]()
 	},
 }

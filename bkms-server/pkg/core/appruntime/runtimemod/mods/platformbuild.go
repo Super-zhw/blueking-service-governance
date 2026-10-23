@@ -16,9 +16,12 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package runtimemod
+package mods
 
-import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+import (
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
+)
 
 // PlatformBuildProps 平台构建的执行参数。
 type PlatformBuildProps struct {
@@ -29,12 +32,20 @@ type PlatformBuildProps struct {
 // Public 无对外内容。
 func (p PlatformBuildProps) Public() any { return nil }
 
-// PlatformBuildDef 平台构建：由平台生成 Dockerfile 并构建镜像。仅 tRPC + go 支持。
-var PlatformBuildDef = Def[PlatformBuildProps]{
-	ID:        "platformBuild",
-	Dimension: ByFramework,
-	Framework: FrameworkTable[PlatformBuildProps]{
-		appruntime.FrameworkTRPC: {DockerfileLanguage: appruntime.LanguageGo},
+// PlatformBuild 平台构建：由平台生成 Dockerfile 并构建镜像。仅 tRPC + go 支持。
+var PlatformBuild = runtimemod.Spec[PlatformBuildProps]{
+	ID: runtimemod.ModPlatformBuild,
+	Resolve: func(framework, language string) runtimemod.Mod[PlatformBuildProps] {
+		if framework != appruntime.FrameworkTRPC {
+			return runtimemod.Unsupported[PlatformBuildProps]()
+		}
+		switch language {
+		case appruntime.LanguageGo:
+			return runtimemod.Supported(PlatformBuildProps{DockerfileLanguage: appruntime.LanguageGo})
+		case "":
+			return runtimemod.Incomplete[PlatformBuildProps]()
+		default:
+			return runtimemod.Unsupported[PlatformBuildProps]()
+		}
 	},
-	Languages: Only(appruntime.LanguageGo),
 }

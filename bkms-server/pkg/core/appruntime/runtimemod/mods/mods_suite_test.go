@@ -16,21 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package runtimemod
+package mods_test
 
-import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+import (
+	"testing"
 
-// PolarisServiceCheckProps 无参数。
-type PolarisServiceCheckProps struct{}
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
 
-// Public 无对外内容。
-func (p PolarisServiceCheckProps) Public() any { return nil }
-
-// PolarisServiceCheckDef 北极星服务名校验：北极星配置的服务名不在 tRPC 配置文件中时给出警告。仅 tRPC 支持。
-var PolarisServiceCheckDef = Def[PolarisServiceCheckProps]{
-	ID:        "polarisServiceCheck",
-	Dimension: ByFramework,
-	Framework: FrameworkTable[PolarisServiceCheckProps]{
-		appruntime.FrameworkTRPC: {},
-	},
+func TestMods(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Runtime Mods Suite")
 }
