@@ -108,7 +108,7 @@ func (h *Handler) GetApmServiceName(c *gin.Context) {
 		return
 	}
 
-	serviceName, svcErr := bkmmodel.GetApmServiceName(app.Type, frameworkFile.Content, appEnvVars.ToMap())
+	serviceName, svcErr := bkmmodel.GetApmServiceName(app, frameworkFile.Content, appEnvVars.ToMap())
 	if svcErr != nil {
 		log.Errorf(ctx, "get apm service name error for app %s env %s: %v", app.ID, env.Name, svcErr)
 		if errors.Is(svcErr, bkmmodel.ErrAPMConfigMissing) {

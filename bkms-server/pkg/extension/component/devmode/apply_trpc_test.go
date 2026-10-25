@@ -26,7 +26,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
 )
@@ -81,10 +80,9 @@ var _ = Describe("PatchGameDeployment TRPC", func() {
 			validConfig = &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTRPC,
+				Props:          trpcProps(),
 				AppName:        "test-app",
 				StartupCommand: "./test-app",
-				TrpcBinaryPath: "/usr/local/trpc/bin",
 			}
 		})
 
@@ -123,10 +121,8 @@ var _ = Describe("PatchGameDeployment TRPC", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTRPC,
+				Props:          trpcProps(),
 				AppName:        "my-service",
-				TrpcBinaryPath: "/usr/local/trpc/bin",
-				WorkPath:       "/data/bkms/dev-mode/trpc",
 				StartupCommand: "./my-service --config=/etc/config.yaml",
 			}
 
@@ -177,9 +173,8 @@ var _ = Describe("PatchGameDeployment TRPC", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeStaging,
-				AppType:        bkmsapp.AppTypeTRPC,
+				Props:          trpcProps(),
 				AppName:        "my-service",
-				TrpcBinaryPath: "/usr/local/trpc/bin",
 				StartupCommand: "./my-service --config=/etc/config.yaml",
 			}
 
@@ -209,10 +204,9 @@ var _ = Describe("PatchGameDeployment TRPC", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTRPC,
+				Props:          trpcProps(),
 				AppName:        "my-service",
 				StartupCommand: "./my-service",
-				TrpcBinaryPath: "/usr/local/trpc/bin",
 			}
 
 			result, _, err := devmode.PatchGameDeployment(baseGD, config)

@@ -91,9 +91,15 @@ func (p FrameworkPolicy) ValidateCreateParams(params CreateCfgFileParams) error 
 	return nil
 }
 
-// ValidateContent 校验内容为合法 YAML。
-func (FrameworkPolicy) ValidateContent(content string, _ FileFormat) error {
+// ValidateContent 按格式校验内容：YAML 用 YAML 解析器，TAF 用 TAF 解析器。
+func (FrameworkPolicy) ValidateContent(content string, format FileFormat) error {
 	if content == "" {
+		return nil
+	}
+	if format == FileFormatTAF {
+		if err := validateTAFContent(content); err != nil {
+			return errors.Wrapf(ErrInvalidConfigSpec, "content is not valid TAF config: %v", err)
+		}
 		return nil
 	}
 	var out any

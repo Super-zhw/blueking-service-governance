@@ -41,6 +41,8 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M2 能力执行端切换
 
+状态：已实现，待合并。实现说明见 [阶段 2 实现](./bkms_app_runtime_model_phase2.md)。
+
 **范围：** 8 个能力的消费点改读 `mods.Of(app)`，删除对应的类型分支。
 
 | 能力 | 切换要点 |
@@ -96,7 +98,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 | 集群 addon 依赖 | 比较 type 字面值，YAML 只写 trpc / taf（`clusteraddon/query.go`） | 按管理方式与工作负载形态表达；同步内置 YAML 与库内记录 |
 | 其余字面值比较 | 组件引用查询、监控指标类型归一等 | 同上 |
 
-框架配置文件的挂载信息仍读 Workload，改读 def 在 M8（见总体方案 §3.4）。
+框架配置文件的挂载信息已由 #274 收敛到 def（含迁移 000021），M4 不再处理。
 
 **行为变化：** 无。
 
@@ -112,7 +114,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 | --- | --- | --- |
 | 创建编排 | 按类型分派到 `trpc.go`、`taf.go` 两套几乎相同的流程（解析默认值、建框架 def、初始化 AppModel、写 AppSpec） | 合并为一个编排服务，差异（配置格式、旧投影）由框架适配器提供，并读取能力声明 |
 | 新字段写入 | 生产代码从未写过 `Application.Language/Framework` | 与旧字段同时写 |
-| 框架配置文件挂载信息 | 只写 `Workload.FileName/FilePath`；改名不同步 def | 同时写框架 def 的 `Name` / `MountDir` 与 Workload（方案见总体方案 §3.4） |
+| 框架配置文件挂载信息 | 已由 #274 收敛到 def，创建时只写 def | 本里程碑不再处理，仅确认新字段双写范围不包含挂载信息 |
 | 技术栈不可变 | `trpc-spec` 更新会改 `TrpcConfig.Language` | 提交不同 language 时报"不支持切换技术栈" |
 | 跨集合写入 | Application、配置文件、AppModel、AppSpec 分别写，中途失败留下半成品 | MongoDB 事务保护 |
 | blank 后端闭环 | 无 | 端到端测试：已有镜像 → plain 配置 → 渲染 → 部署 → 状态 → 下架；创建入口仍关闭 |
@@ -156,7 +158,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 | verify | 核对目标数与完成数、冲突清单 |
 | restore | 按备份条件回滚，不覆盖迁移后的用户编辑 |
 
-**框架 def 回填（总体方案 §3.4）：** 先执行 `repair_trpc_taf_framework_defs` 清理多余的框架 def；再逐应用比对 Workload 与 def 的文件名、挂载目录，并检查与 plain 文件的挂载路径冲突；冲突列入清单人工处理，不自动覆盖。核对一致后，渲染改读 def。
+**框架 def 核对（总体方案 §3.4）：** 挂载信息已由 #274 与迁移 000021 收敛到 def，无需重复回填。这里只核对迁移报告：多条框架 def 的应用、fileName/filePath 为空的应用，按需执行 `repair_trpc_taf_framework_defs` 后人工处理。
 
 **行为变化：** 新字段成为主读写来源；旧投影继续写一个窗口。
 

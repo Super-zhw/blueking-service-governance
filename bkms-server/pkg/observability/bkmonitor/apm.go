@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/render"
 )
 
@@ -42,15 +43,23 @@ const (
 	ApmTypeCustom = "custom"
 )
 
-// GetApmServiceName 根据应用类型获取 APM 服务名称（统一入口）
-func GetApmServiceName(appType, content string, appEnvVars map[string]string) (string, error) {
-	switch appType {
-	case bkmsapp.AppTypeTRPC:
+// GetApmServiceName 根据应用技术栈获取 APM 服务名称（统一入口）
+func GetApmServiceName(app *bkmsapp.Application, content string, appEnvVars map[string]string) (string, error) {
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return "", errors.Wrap(err, "resolve runtime mods")
+	}
+	props, err := runtimeMods.APMServiceName.Require()
+	if err != nil {
+		return "", errors.Wrap(err, "apm service name")
+	}
+	switch props.Parser {
+	case mods.APMConfigParserTrpcYAML:
 		return GetTrpcApmServiceName(content, appEnvVars)
-	case bkmsapp.AppTypeTAF:
+	case mods.APMConfigParserTafXML:
 		return GetTafApmServiceName(content, appEnvVars)
 	default:
-		return "", errors.Errorf("unsupported app type %q for apm service name", appType)
+		return "", errors.Errorf("unsupported apm config parser %q", props.Parser)
 	}
 }
 

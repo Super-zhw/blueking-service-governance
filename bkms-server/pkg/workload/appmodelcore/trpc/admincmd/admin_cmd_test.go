@@ -32,6 +32,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
@@ -107,6 +108,7 @@ var _ = Describe("TrpcAdminService", func() {
 			),
 		}
 		adminService.App = testApp
+		adminService.Props = adminPropsFor("go")
 		adminService.AppModel = testAppModel
 		adminService.Env = testEnv
 		adminService.EnvName = testEnv.Name
@@ -229,8 +231,8 @@ var _ = Describe("TrpcAdminService", func() {
 		DescribeTable(
 			"should return correct admin port for different languages",
 			func(language string, setupConfig configSetupFunc, expectedPort string, expectError bool, errorMsg string) {
-				// 设置语言
-				testApp.TrpcSpec.Language = language
+				// 设置能力参数
+				adminService.Props = adminPropsFor(language)
 
 				// 创建并配置 AdminConfig
 				adminConfig := new(admincmd.AdminConfig)
@@ -267,7 +269,7 @@ var _ = Describe("TrpcAdminService", func() {
 				"11018", false, ""),
 			Entry("unsupported language - should return error", "unknown",
 				nil,
-				"", true, "unsupported trpc language type"),
+				"", true, "unsupported admin config layout"),
 		)
 	})
 
@@ -306,7 +308,7 @@ var _ = Describe("TrpcAdminService", func() {
 
 		DescribeTable("should validate admin IP correctly",
 			func(language, configYAML string, expectError bool, errorSubstr string) {
-				testApp.TrpcSpec.Language = language
+				adminService.Props = adminPropsFor(language)
 				createConfigFile(configYAML)
 
 				err := adminService.Precheck(ctx)
@@ -338,3 +340,17 @@ var _ = Describe("TrpcAdminService", func() {
 		)
 	})
 })
+
+// adminPropsFor 按语言返回 tRPC admin 命令的执行参数。
+func adminPropsFor(language string) mods.AdminCommandProps {
+	layout := mods.TrpcAdminLayoutNested
+	switch language {
+	case "cpp", "node":
+		layout = mods.TrpcAdminLayoutFlat
+	case "java":
+		layout = mods.TrpcAdminLayoutNestedPrefixed
+	case "unknown":
+		layout = ""
+	}
+	return mods.AdminCommandProps{Protocol: mods.AdminProtocolTRPC, ConfigLayout: layout}
+}

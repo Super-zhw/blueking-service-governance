@@ -154,23 +154,20 @@ TAF 若有 Go 存量，不静默标为 cpp：补齐 taf+go 的测试与声明，
 
 第一版新 API 中，framework/language 创建后不可通过普通配置更新改变：修改技术栈会同时影响配置格式、脚本、镜像构建和历史部署。原 tRPC 更新输入允许填写 language，因此兼容窗口必须显式处理：旧入口若收到不同 language，返回明确的“不支持切换技术栈”错误，并在调用方迁移前核对是否有人依赖此能力。若必须保留，应另做具备完整校验与审计的技术栈转换操作，不能继续只改 AppModel。此项是提案中的行为收紧，需要阶段 0 决策。
 
-### 3.4 框架配置文件挂载信息收敛到 def
+### 3.4 框架配置文件挂载信息收敛到 def（已完成）
 
-决策（替代阶段 0 的“fileName/filePath 首期放 frameworkConfig”）：框架配置文件的挂载文件名、挂载目录改由框架 def 的 `Name`、`MountDir` 表达，与 plain 文件同一模型；`Workload.TrpcConfig/TafConfig` 的 `FileName`、`FilePath` 在兼容窗口内作为旧投影双写，M9 删除。
+框架配置文件的文件名与挂载目录已由框架 def 的 `Name` / `MountDir` 表达，与 plain 一致；`Workload.TrpcConfig/TafConfig` 中的旧字段不再写入。实现见 #274，数据迁移见 `db/migrations/000021`。
 
-现状与风险：
+| 环节 | 现状 |
+| --- | --- |
+| 新建 | 创建应用时把 spec 传入的 fileName / filePath 写入框架 def |
+| 渲染 | 插件直接使用 `GetFrameworkMountableFile` 返回的 Name / MountDir |
+| 存量 | 000021 把 `app_models` 上的 fileName / filePath 回填到唯一一条框架 def 并清理旧字段；多条框架 def 的应用不回填 |
+| 多条 def | 先执行 `repair_trpc_taf_framework_defs` 收敛，再单独处理 |
+| 回滚 | 旧版本只读 `app_models`；回滚最低版本为写入 def 的桥接版本，且需确认迁移未清理旧字段，或从备份恢复 |
+| 待核对 | 000021 报告中的多 def 应用、fileName/filePath 为空的应用 |
 
-| 现状 | 风险 | 处理 |
-| --- | --- | --- |
-| 框架 def 创建时不写 `MountDir`，挂载目录只在 `Workload.FilePath` | 直接改读 def 会挂到空目录 | 回填 `MountDir` 前，渲染继续读 Workload |
-| `trpc-spec` / `taf-spec` 改文件名只写 Workload，不改 def | `def.Name` 与实际挂载名可能不一致；未传文件名时 def 名为 `default` | 回填逐应用比对，不一致列入冲突清单，人工确认后再改 |
-| 旧接口曾把环境 overlay 拆成多条框架 def | 渲染只认一条框架 def，多条直接报错 | 回填前先跑 `repair_trpc_taf_framework_defs` 并确认无残留 |
-| 框架 def 的 `MountDir` 为空，不受 `appID + mountDir + name` 唯一索引约束 | 回填后可能与已有 plain 文件的挂载路径冲突，写入失败 | 回填前先检查挂载路径冲突，冲突应用单独处理 |
-| 容器内路径 = `Join(MountDir, Name)` | 与旧路径在斜杠、相对路径上不完全一致，导致挂载目标变化 | 回填前按旧值规范化，并做渲染清单比对 |
-| 旧二进制只读 Workload | 回滚后读不到新值 | 窗口内保持双写，不清理旧字段 |
-| Helm 的框架 def 存 values 文件，不挂载 | 误把规则套到 Helm | 只对 AppModel 应用生效 |
-
-切换顺序：M5 起新建与更新同时写 def 与 Workload；M8 回填历史数据并核对一致后，渲染改读 def；M9 删除 Workload 上的旧字段。阶段 1 中按原方案设计的代码（`trpc/taf.DecodeConfig`、`appruntime` 中对 frameworkConfig 文件元信息的比对）随之改为比对 def，或删除。
+第一版新 API 中，framework/language 创建后不可通过普通配置更新改变：修改技术栈会同时影响配置格式、脚本、镜像构建和历史部署。原 tRPC 更新输入允许填写 language，因此兼容窗口必须显式处理：旧入口若收到不同 language，返回明确的“不支持切换技术栈”错误，并在调用方迁移前核对是否有人依赖此能力。若必须保留，应另做具备完整校验与审计的技术栈转换操作，不能继续只改 AppModel。此项是提案中的行为收紧，需要阶段 0 决策。
 
 ## 4. RuntimeModSet：统一声明与消费规范
 
@@ -392,8 +389,8 @@ Application 与 AppModel 跨集合更新：上线前验证当前 MongoDB 部署�
 
 | 批次 | 工作 | 验收重点 |
 | --- | --- | --- |
-| 3A 渲染与配置 | 按 Framework/Mod 选择插件；框架内容仍走 provider/patcher；挂载信息仍读 Workload，改读 def 见 §3.4；会话存渲染结果 | 新旧 trpc/taf 资源清单等价；保留名称、挂载目标、ConfigMap、init container 和环境变量语义 |
-| 3B 应用生命周期 | 合并 trpc/taf Create/Update 编排；框架适配器提供差异；框架 def 与 Workload 双写挂载信息（§3.4）；完成跨集合失败恢复与审计 | 创建/更新失败可恢复；无半成品可部署应用；环境变量/文件版本 API 行为不变 |
+| 3A 渲染与配置 | 按 Framework/Mod 选择插件；框架内容仍走 provider/patcher；挂载信息已由 #274 收敛到 def（§3.4）；会话存渲染结果 | 新旧 trpc/taf 资源清单等价；保留名称、挂载目标、ConfigMap、init container 和环境变量语义 |
+| 3B 应用生命周期 | 合并 trpc/taf Create/Update 编排；框架适配器提供差异；完成跨集合失败恢复与审计 | 创建/更新失败可恢复；无半成品可部署应用；环境变量/文件版本 API 行为不变 |
 | 3C 通用 AppModel 功能 | 部署状态、预检查、实例、拓扑、WebConsole、环境变量、引用查询、异步轮询、镜像清理 | BKMSApp 被完整识别；旧任务仍能处理；查询/统计无遗漏；Helm/Agones 无回归 |
 | 3D 框架特性 | admincmd、APM、Polaris、BSCP 等消费 Mods 和类型化配置 | 不支持组合返回明确错误；不把框架专用限制错误施加到整个通用集成 |
 | 3E 集群依赖 | addon 的管理方式筛选与能力依赖分开；同步内置定义和数据库；更新调用接口 | blank 获得通用部署所需依赖，不自动要求框架专用依赖；required/optional 语义一致 |
@@ -473,6 +470,6 @@ rg -n 'requiredForAppTypes|optionalForAppTypes|"trpc"|"taf"' pkg/core/env/cluste
 | blank 首期能力 | 仅目录声明；创建关闭 |
 | fileName/filePath 归属 | 收敛到框架 def 的 `Name` / `MountDir`（替代原“首期放 frameworkConfig”），见 §3.4 |
 
-阶段 2（能力层）的组织方式、能力目录与 pkg 划分已确定，见 [bkms_app_runtime_model_phase1.md](./bkms_app_runtime_model_phase1.md)。整体进度与 PR 拆分见 [bkms_app_runtime_model_milestones.md](./bkms_app_runtime_model_milestones.md)。
+阶段 2（能力层）的组织方式、能力目录与 pkg 划分已确定，见 [bkms_app_runtime_model_phase1.md](./bkms_app_runtime_model_phase1.md)；执行端切换见 [bkms_app_runtime_model_phase2.md](./bkms_app_runtime_model_phase2.md)。整体进度与 PR 拆分见 [bkms_app_runtime_model_milestones.md](./bkms_app_runtime_model_milestones.md)。
 
 首个实现变更建议只覆盖阶段 0–1 的一个垂直切片：定义技术栈目录、Application 新字段及旧 tRPC 数据规范化，配齐一致性测试。待统一模型稳定后再用 devmode/platformBuild 验证能力规范，避免在尚未验证的抽象上同时迁移全部领域功能。

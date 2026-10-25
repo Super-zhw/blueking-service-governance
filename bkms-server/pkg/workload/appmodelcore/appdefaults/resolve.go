@@ -7,6 +7,7 @@ import (
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
@@ -23,11 +24,12 @@ type ResolvedAppSpec struct {
 }
 
 // Resolve builds the AppSpecs used to initialize a new AppModel application.
-// appType is used to derive devMode paths, which are not configurable in rules.
+// devModeProps 决定开发模式的路径；不支持开发模式的技术栈（如 blank）会跳过该 section。
 func Resolve(
 	ctx context.Context,
 	db *mongo.Database,
-	workspaceID, appID, appType string,
+	workspaceID, appID string,
+	devModeProps mods.DevModeProps,
 ) (*ResolvedAppSpec, error) {
 	rules, err := store.Of(db, RuleMeta).List(ctx, ByWorkspace(workspaceID))
 	if err != nil {
@@ -51,11 +53,15 @@ func Resolve(
 			}
 		}
 		if spec.DevMode != nil {
-			// devMode rules only carry enabled; workPath/mountPath are derived from the app type.
-			// Copy before setting paths because applyTo shares the section pointer with the rule.
-			devMode := *spec.DevMode
-			devMode.SetPathsByAppType(appType)
-			spec.DevMode = &devMode
+			// devMode 规则只带 enabled；路径来自能力声明。
+			// applyTo 与规则共享 section 指针，先复制再改路径。
+			if devModeProps.ScriptSet == "" {
+				spec.DevMode = nil
+			} else {
+				devMode := *spec.DevMode
+				devMode.SetPaths(devModeProps.WorkPath, devModeProps.MountPath)
+				spec.DevMode = &devMode
+			}
 		}
 		if spec.HasConfiguredSections() {
 			envSpecs = append(envSpecs, spec)

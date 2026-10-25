@@ -30,6 +30,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/model"
 	svc "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/service"
@@ -202,7 +203,12 @@ func enableBscpCfgForApp(
 	}
 
 	var workloadName, workloadKind string
-	if app.Type == bkmsapp.AppTypeTRPC {
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return errors.Wrap(err, "resolve runtime mods")
+	}
+	// 自动填充由能力声明决定；工作负载类型取 AppModel 渲染的默认类型
+	if runtimeMods.BSCPWorkloadMeta.Supported {
 		workloadName = app.Name
 		workloadKind = k8skind.GameDeploy
 	}

@@ -101,7 +101,7 @@ var _ = Describe("Service build validation", func() {
 
 		err := buildService.validateBeforeBuild(ctx, app, cfg)
 
-		Expect(err).To(MatchError(ContainSubstring("only supports Go language")))
+		Expect(err).To(MatchError(ContainSubstring("platformBuild: unsupported_stack")))
 	})
 
 	It("should reject platform generated Dockerfile build for non-TRPC app types", func() {
@@ -110,7 +110,7 @@ var _ = Describe("Service build validation", func() {
 
 		err := buildService.validateBeforeBuild(ctx, app, cfg)
 
-		Expect(err).To(MatchError(ContainSubstring("does not support app type taf")))
+		Expect(err).To(MatchError(ContainSubstring("platformBuild: unsupported_stack")))
 	})
 
 	It("should wrap image validation errors", func() {

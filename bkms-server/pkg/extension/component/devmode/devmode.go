@@ -31,7 +31,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 )
 
@@ -67,36 +67,27 @@ type Config struct {
 	// EnvType 环境类型
 	EnvType string
 
-	// AppType 应用类型: trpc / taf
-	AppType string
+	// Props 平台为该技术栈声明的脚本集与路径，为空表示不支持开发模式
+	Props mods.DevModeProps
 
 	// AppName 应用名称，应与二进制文件名一致
 	AppName string
-
-	// WorkPath 开发模式根目录，trpc 为 TrpcWorkPath，taf 为 TafWorkPath
-	WorkPath string
-
-	// MountPath 脚本挂载路径，为空时根据 WorkPath 自动计算
-	MountPath string
 
 	// StartupCommand 用户 app 启动命令
 	StartupCommand string
 
 	// StartupShCommand 用户 app 启动脚本，非空时写入独立脚本文件以 /bin/sh 执行（$0 为脚本路径）
 	StartupShCommand string
-
-	// TrpcBinaryPath trpc 二进制文件路径（仅 trpc 类型使用）
-	TrpcBinaryPath string
 }
 
-// IsTaf 判断是否为 taf 类型应用
+// IsTaf 是否使用 TAF 脚本集
 func (c *Config) IsTaf() bool {
-	return c.AppType == bkmsapp.AppTypeTAF
+	return c.Props.ScriptSet == mods.DevModeScriptSetTAF
 }
 
-// IsTrpc 判断是否为 trpc 类型应用
+// IsTrpc 是否使用 tRPC 脚本集
 func (c *Config) IsTrpc() bool {
-	return c.AppType == bkmsapp.AppTypeTRPC
+	return c.Props.ScriptSet == mods.DevModeScriptSetTRPC
 }
 
 // Output 开发模式组件输出
@@ -119,27 +110,20 @@ func New(config *Config) DevMode {
 	if config == nil {
 		return &builder{config: &Config{Enabled: false}}
 	}
-
-	// 根据 AppType 选择对应的 WorkPath 和 MountPath
-	if config.IsTaf() {
-		config.WorkPath = TafWorkPath
-	} else {
-		config.WorkPath = TrpcWorkPath
-	}
-	config.MountPath = config.WorkPath + "/" + ScriptsSubDir
-
 	return &builder{config: config}
 }
 
-// CreateDevModeConfig 从 AppModel 和环境信息创建开发模式配置
-func CreateDevModeConfig(appModel *appmodel.AppModel, envType string, enabled bool) *Config {
-	config := FromAppModel(appModel, envType)
+// CreateDevModeConfig 从 AppModel、能力参数和环境信息创建开发模式配置
+func CreateDevModeConfig(
+	appModel *appmodel.AppModel, props mods.DevModeProps, envType string, enabled bool,
+) *Config {
+	config := FromAppModel(appModel, props, envType)
 	config.Enabled = enabled
 	return config
 }
 
-// FromAppModel 从 AppModel 创建开发模式配置
-func FromAppModel(appModel *appmodel.AppModel, envType string) *Config {
+// FromAppModel 从 AppModel 与能力参数创建开发模式配置
+func FromAppModel(appModel *appmodel.AppModel, props mods.DevModeProps, envType string) *Config {
 	// 从 appModel.Workload.Command、Args 中提取
 	var customStartScript string
 
@@ -151,29 +135,14 @@ func FromAppModel(appModel *appmodel.AppModel, envType string) *Config {
 		customStartScript = strings.Join(temp, " ")
 	}
 
-	appType := appModel.Workload.Type
-	cfg := &Config{
+	return &Config{
 		Enabled:          false,
 		EnvType:          envType,
-		AppType:          appType,
+		Props:            props,
 		AppName:          appModel.Workload.Name,
 		StartupCommand:   customStartScript,
 		StartupShCommand: appModel.Workload.ShCommand,
 	}
-
-	if appType == bkmsapp.AppTypeTAF {
-		// taf 类型
-		cfg.TrpcBinaryPath = ""
-		cfg.WorkPath = TafWorkPath
-		cfg.MountPath = TafMountPath
-	} else {
-		// trpc 类型
-		cfg.WorkPath = TrpcWorkPath
-		cfg.MountPath = TrpcMountPath
-		cfg.TrpcBinaryPath = TrpcBinaryPath
-	}
-
-	return cfg
 }
 
 // ConfigMapResourceName 根据应用名称生成开发模式资源名称（ConfigMap / Volume）

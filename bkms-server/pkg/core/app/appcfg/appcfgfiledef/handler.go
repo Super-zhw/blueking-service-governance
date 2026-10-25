@@ -24,6 +24,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
@@ -166,6 +167,15 @@ func (h *Handler) CreateAppConfigFileDef(c *gin.Context) {
 	sourceType := appcfg.ContentSourceType(input.ContentSourceType)
 	fileType := appcfg.AppConfigFileType(input.FileType)
 	fileFormat := appcfg.FileFormat(input.FileFormat)
+
+	// plain 配置文件只在 AppModel 渲染链路中挂载，Helm / Agones 创建后不会生效
+	if appcfg.ConfigKind(input.ConfigKind) == appcfg.ConfigKindPlain && !bkmsapp.IsAppModelType(app.Type) {
+		bkerrs.AbortWithErr(
+			c,
+			bkerrs.New(bkerrs.ErrCodeInvalidArgument, "plain config file is only supported for appmodel applications"),
+		)
+		return
+	}
 
 	baseFileID, err := h.validateBaseAppConfigFileID(ctx, app.ID, fileType, input.BaseAppConfigFileID)
 	if err != nil {

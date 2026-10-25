@@ -19,7 +19,10 @@
 // Package devmode 提供开发模式组件支持
 package devmode
 
-import "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
+import (
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
+)
 
 // 环境类型常量，用于判断是否允许启用开发模式
 const (
@@ -46,14 +49,14 @@ const (
 
 // 开发模式 Kubernetes 资源名称和路径常量
 
-// trpc 相关常量
+// trpc 相关常量，路径取值以能力声明为准
 const (
 	// TrpcBinaryPath trpc 二进制文件路径
-	TrpcBinaryPath = "/usr/local/trpc/bin"
+	TrpcBinaryPath = mods.DevModeTrpcBinaryPath
 	// TrpcWorkPath trpc 开发模式根目录
-	TrpcWorkPath = "/data/bkms/dev-mode/trpc"
+	TrpcWorkPath = mods.DevModeTrpcWorkPath
 	// TrpcMountPath trpc 脚本文件挂载路径
-	TrpcMountPath = TrpcWorkPath + "/" + ScriptsSubDir
+	TrpcMountPath = mods.DevModeTrpcMountPath
 	// TrpcInitScriptPath trpc init.sh 脚本的完整路径
 	TrpcInitScriptPath = TrpcMountPath + "/init.sh"
 	// TrpcStartScriptPath trpc-start.sh 在 init.sh 拷贝出的脚本目录中的路径（仅 shell 模式使用），
@@ -61,12 +64,12 @@ const (
 	TrpcStartScriptPath = TrpcWorkPath + "/scripts/" + KeyTrpcStartScript
 )
 
-// taf 相关常量
+// taf 相关常量，路径取值以能力声明为准
 const (
 	// TafWorkPath taf 开发模式根目录
-	TafWorkPath = "/data/bkms/dev-mode/taf"
+	TafWorkPath = mods.DevModeTafWorkPath
 	// TafMountPath taf 脚本文件挂载路径
-	TafMountPath = TafWorkPath + "/" + ScriptsSubDir
+	TafMountPath = mods.DevModeTafMountPath
 	// TafInitScriptPath taf init.sh 脚本的完整路径
 	TafInitScriptPath = TafMountPath + "/init.sh"
 )

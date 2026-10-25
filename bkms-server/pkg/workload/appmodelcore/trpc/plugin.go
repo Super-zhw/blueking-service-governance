@@ -26,6 +26,7 @@ import (
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/cfgrender"
@@ -121,11 +122,17 @@ func (p *Plugin) computeTrpcConfig(
 	// 文件名和挂载目录以 def 为准。
 	item := *frameworkContent
 
-	// 依次调用注册的 ConfigPatcher 对配置进行补丁（如 polaris 注册信息注入）
-	for _, cfgPatcher := range p.configPatchers {
-		item.Content, err = cfgPatcher.Patch(ctx, app.ID, env.Name, item.Content)
-		if err != nil {
-			return appcfg.MountableFile{}, errors.Wrap(err, "patching tRPC config")
+	// 框架配置补丁由能力声明控制（目前仅北极星注册信息注入）
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return appcfg.MountableFile{}, errors.Wrap(err, "resolve runtime mods")
+	}
+	if runtimeMods.PolarisFrameworkPatch.Supported {
+		for _, cfgPatcher := range p.configPatchers {
+			item.Content, err = cfgPatcher.Patch(ctx, app.ID, env.Name, item.Content)
+			if err != nil {
+				return appcfg.MountableFile{}, errors.Wrap(err, "patching tRPC config")
+			}
 		}
 	}
 

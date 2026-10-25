@@ -36,6 +36,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/revision"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	bkciapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkci"
@@ -300,14 +301,18 @@ func encodeDockerBuildArgNames(names []string) (string, error) {
 }
 
 func getPlatformDockerfileLanguage(app *bkmsapp.Application) (string, error) {
-	if app == nil || app.TrpcSpec == nil {
-		return "", errors.Errorf("missing TrpcSpec for platform image build")
+	if app == nil {
+		return "", errors.New("application is required for platform image build")
 	}
-	language := strings.TrimSpace(app.TrpcSpec.Language)
-	if language == "" {
-		return "", errors.Errorf("missing TrpcSpec language for platform image build")
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return "", errors.Wrap(err, "resolve runtime mods")
 	}
-	return language, nil
+	props, err := runtimeMods.PlatformBuild.Require()
+	if err != nil {
+		return "", errors.Wrap(err, "platform image build")
+	}
+	return props.DockerfileLanguage, nil
 }
 
 // genPipelineBuildRepoAndImageParams 生成蓝盾流水线构建参数（镜像和仓库版本信息相关）

@@ -38,6 +38,7 @@ import (
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/render"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
@@ -54,15 +55,6 @@ import (
 const (
 	// maxConcurrentRequests 最大并发请求数
 	maxConcurrentRequests = 10
-)
-
-// trpc 框架语言类型常量
-const (
-	languageGo     = "go"
-	languageCpp    = "cpp"
-	languageJava   = "java"
-	languageNode   = "node"
-	languagePython = "python"
 )
 
 // getTrpcAdminCmdsResponse trpc admin cmds 接口响应结构
@@ -123,6 +115,8 @@ type TrpcAdminService struct {
 	// EnvVarsReader 统一环境变量读取器
 	EnvVarsReader *envvars.UnifiedEnvVarsReader
 
+	// Props admin 命令能力的执行参数
+	Props mods.AdminCommandProps
 	// App 应用
 	App *bkmsapp.Application
 	// AppModel 应用模型
@@ -166,10 +160,18 @@ func NewAdminService(
 		EnvVarsReader:         envvars.NewUnifiedEnvVarsReader(db, appDepsVarReader, polarisVarReader),
 	}
 
-	// 目前只支持 Trpc 应用
-	if app.Type != bkmsapp.AppTypeTRPC {
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return nil, errors.Wrap(err, "resolve runtime mods")
+	}
+	props, err := runtimeMods.AdminCommand.Require()
+	if err != nil {
+		return nil, errors.Wrap(err, "admin command")
+	}
+	if props.Protocol != mods.AdminProtocolTRPC {
 		return nil, errors.New("only support trpc app")
 	}
+	s.Props = props
 	if len(instanceIDs) == 0 {
 		return nil, errors.New("instanceIDs is required")
 	}
@@ -392,12 +394,12 @@ func (s *TrpcAdminService) MatchConfigValue(ctx context.Context, varName string)
 
 // GetAdminIP 根据配置和语言类型获取 admin IP 字符串配置
 func (s *TrpcAdminService) GetAdminIP(cfg *AdminConfig) string {
-	switch s.App.TrpcSpec.Language {
-	case languageGo, languagePython:
+	switch s.Props.ConfigLayout {
+	case mods.TrpcAdminLayoutNested:
 		return cfg.Server.Admin.IP
-	case languageCpp, languageNode:
+	case mods.TrpcAdminLayoutFlat:
 		return cfg.Server.AdminIP
-	case languageJava:
+	case mods.TrpcAdminLayoutNestedPrefixed:
 		return cfg.Server.Admin.AdminIP
 	default:
 		return ""
@@ -437,15 +439,15 @@ func (s *TrpcAdminService) Precheck(ctx context.Context) error {
 
 // GetAdminPort 根据配置和语言类型获取 admin Port 字符串配置
 func (s *TrpcAdminService) GetAdminPort(cfg *AdminConfig) (string, error) {
-	switch s.App.TrpcSpec.Language {
-	case languageGo, languagePython:
+	switch s.Props.ConfigLayout {
+	case mods.TrpcAdminLayoutNested:
 		return cfg.Server.Admin.Port, nil
-	case languageCpp, languageNode:
+	case mods.TrpcAdminLayoutFlat:
 		return cfg.Server.AdminPort, nil
-	case languageJava:
+	case mods.TrpcAdminLayoutNestedPrefixed:
 		return cfg.Server.Admin.AdminPort, nil
 	default:
-		return "", errors.Errorf("unsupported trpc language type: %s", s.App.TrpcSpec.Language)
+		return "", errors.Errorf("unsupported admin config layout: %s", s.Props.ConfigLayout)
 	}
 }
 

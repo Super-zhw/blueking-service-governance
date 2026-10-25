@@ -22,7 +22,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
 
@@ -36,7 +35,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:        true,
 					EnvType:        devmode.EnvTypeProduction,
-					AppType:        bkmsapp.AppTypeTAF,
+					Props:          tafProps(),
 					AppName:        "test-taf-app",
 					StartupCommand: "./app",
 				}
@@ -50,7 +49,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:        true,
 					EnvType:        devmode.EnvTypeDevelopment,
-					AppType:        bkmsapp.AppTypeTAF,
+					Props:          tafProps(),
 					AppName:        "test-taf-app",
 					StartupCommand: "./test-taf-app",
 				}
@@ -68,10 +67,9 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:        true,
 					EnvType:        devmode.EnvTypeDevelopment,
-					AppType:        bkmsapp.AppTypeTAF,
+					Props:          tafProps(),
 					AppName:        "test-taf-app",
 					StartupCommand: "./test-taf-app",
-					TrpcBinaryPath: "",
 				}
 				builder := devmode.New(config)
 				output, err := builder.Build()
@@ -83,7 +81,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:        true,
 					EnvType:        devmode.EnvTypeDevelopment,
-					AppType:        bkmsapp.AppTypeTAF,
+					Props:          tafProps(),
 					AppName:        "test-taf-app",
 					StartupCommand: "./test-taf-app --config=/etc/config.yaml",
 				}
@@ -101,7 +99,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:          true,
 					EnvType:          devmode.EnvTypeDevelopment,
-					AppType:          bkmsapp.AppTypeTAF,
+					Props:            tafProps(),
 					AppName:          "test-taf-app",
 					StartupShCommand: script,
 				}
@@ -116,7 +114,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled: true,
 					EnvType: devmode.EnvTypeDevelopment,
-					AppType: bkmsapp.AppTypeTAF,
+					Props:   tafProps(),
 					AppName: "test-taf-app",
 				}
 				builder := devmode.New(config)
@@ -129,7 +127,7 @@ var _ = Describe("DevMode Component TAF", func() {
 			It("should return nil without error", func() {
 				config := &devmode.Config{
 					Enabled: false,
-					AppType: bkmsapp.AppTypeTAF,
+					Props:   tafProps(),
 				}
 				builder := devmode.New(config)
 				output, err := builder.Build()
@@ -141,7 +139,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled: true,
 					EnvType: devmode.EnvTypeProduction,
-					AppType: bkmsapp.AppTypeTAF,
+					Props:   tafProps(),
 					AppName: "test-taf-app",
 				}
 				builder := devmode.New(config)
@@ -152,7 +150,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled: true,
 					EnvType: "unknown",
-					AppType: bkmsapp.AppTypeTAF,
+					Props:   tafProps(),
 					AppName: "test-taf-app",
 				}
 				builder := devmode.New(config)
@@ -163,7 +161,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled: true,
 					EnvType: "",
-					AppType: bkmsapp.AppTypeTAF,
+					Props:   tafProps(),
 					AppName: "test-taf-app",
 				}
 				builder := devmode.New(config)
@@ -174,7 +172,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled: true,
 					EnvType: devmode.EnvTypeDevelopment,
-					AppType: bkmsapp.AppTypeTAF,
+					Props:   tafProps(),
 					AppName: "",
 				}
 				builder := devmode.New(config)
@@ -187,7 +185,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:        true,
 					EnvType:        devmode.EnvTypeDevelopment,
-					AppType:        bkmsapp.AppTypeTAF,
+					Props:          tafProps(),
 					AppName:        "test-taf-app",
 					StartupCommand: "./app",
 				}
@@ -199,7 +197,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:        true,
 					EnvType:        devmode.EnvTypeTest,
-					AppType:        bkmsapp.AppTypeTAF,
+					Props:          tafProps(),
 					AppName:        "test-taf-app",
 					StartupCommand: "./app",
 				}
@@ -211,7 +209,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled:        true,
 					EnvType:        devmode.EnvTypeStaging,
-					AppType:        bkmsapp.AppTypeTAF,
+					Props:          tafProps(),
 					AppName:        "test-taf-app",
 					StartupCommand: "./app",
 				}
@@ -223,7 +221,7 @@ var _ = Describe("DevMode Component TAF", func() {
 				config := &devmode.Config{
 					Enabled: true,
 					EnvType: devmode.EnvTypeStaging,
-					AppType: bkmsapp.AppTypeTAF,
+					Props:   tafProps(),
 					AppName: "test-taf-app",
 				}
 				builder := devmode.New(config)
@@ -240,7 +238,7 @@ var _ = Describe("DevMode Component TAF", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTAF,
+				Props:          tafProps(),
 				AppName:        "test-taf-app",
 				StartupCommand: "./app",
 			}
@@ -254,7 +252,7 @@ var _ = Describe("DevMode Component TAF", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTAF,
+				Props:          tafProps(),
 				AppName:        "test-taf-app",
 				StartupCommand: "./app",
 			}

@@ -36,10 +36,10 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/revision"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 	workloadruntime "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/image/runtime"
 )
 
@@ -99,13 +99,13 @@ func (s *Service) validateBeforeBuild(ctx context.Context, app *bkmsapp.Applicat
 	if app == nil {
 		return errors.New("application must not be nil for platform generated Dockerfile build")
 	}
-	// 平台生成 Dockerfile 目前仅支持 TRPC 应用；其他类型（如 TAF/Helm）直接拒绝并返回精确的类型错误
-	if app.Type != bkmsapp.AppTypeTRPC {
-		return errors.Errorf("platform generated Dockerfile build does not support app type %s", app.Type)
+	// 平台生成 Dockerfile 的支持范围由能力声明决定（目前仅 trpc + go）
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return errors.Wrap(err, "resolve runtime mods")
 	}
-	// TRPC 应用中，暂时只支持 Go 语言的自动构建
-	if app.TrpcSpec == nil || app.TrpcSpec.Language != appmodel.LanguageGo {
-		return errors.New("platform generated Dockerfile build only supports Go language for now")
+	if _, err = runtimeMods.PlatformBuild.Require(); err != nil {
+		return errors.Wrap(err, "platform generated Dockerfile build")
 	}
 	// 确保 builder & runner 镜像可用：落在工作空间生效镜像源路径下的按自定义镜像向仓库确认，
 	// 其余仍要求来自平台维护的运行时镜像清单

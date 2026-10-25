@@ -26,9 +26,10 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 )
 
 // CollectConfigWarnings 为单个 PolarisConfig 收集校验 warnings。
@@ -48,15 +49,19 @@ func CollectConfigWarnings(
 		return nil
 	}
 
-	// 获取应用模型
-	model, err := store.Of(db, appmodel.AppModelMeta).Get(ctx, appmodel.ByApp(config.AppID))
+	app, err := store.Of(db, bkmsapp.AppMeta).Get(ctx, bkmsapp.ByID(config.AppID))
 	if err != nil {
-		log.Warnf(ctx, "get app model for polaris validation failed: app=%s, err=%v", config.AppID, err)
+		log.Warnf(ctx, "get app for polaris validation failed: app=%s, err=%v", config.AppID, err)
 		return nil
 	}
 
-	// 仅对 tRPC 类型的应用进行校验
-	if model.Workload.Type != appmodel.WorkloadTypeTrpc {
+	// 仅对支持该能力的应用进行校验（目前为 tRPC）
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		log.Warnf(ctx, "resolve runtime mods for polaris validation failed: app=%s, err=%v", config.AppID, err)
+		return nil
+	}
+	if !runtimeMods.PolarisServiceCheck.Supported {
 		return nil
 	}
 

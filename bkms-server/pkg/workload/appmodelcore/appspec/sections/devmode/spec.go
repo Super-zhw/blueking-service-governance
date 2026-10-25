@@ -23,7 +23,6 @@ import (
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/v2/bson"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	componentdevmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
 
@@ -49,17 +48,13 @@ type Spec struct {
 	MountPath *string `bson:"mountPath,omitempty"`
 }
 
-// SetPathsByAppType 根据应用类型设置 WorkPath 和 MountPath。
-// 不同类型的应用使用不同的开发模式路径，此方法统一处理路径赋值逻辑。
-func (s *Spec) SetPathsByAppType(appType string) {
-	switch appType {
-	case bkmsapp.AppTypeTAF:
-		s.WorkPath = lo.ToPtr(componentdevmode.TafWorkPath)
-		s.MountPath = lo.ToPtr(componentdevmode.TafMountPath)
-	case bkmsapp.AppTypeTRPC:
-		s.WorkPath = lo.ToPtr(componentdevmode.TrpcWorkPath)
-		s.MountPath = lo.ToPtr(componentdevmode.TrpcMountPath)
+// SetPaths 按能力声明的路径设置 WorkPath 和 MountPath。
+func (s *Spec) SetPaths(workPath, mountPath string) {
+	if workPath == "" || mountPath == "" {
+		return
 	}
+	s.WorkPath = lo.ToPtr(workPath)
+	s.MountPath = lo.ToPtr(mountPath)
 }
 
 // Clone deep-copies the section.

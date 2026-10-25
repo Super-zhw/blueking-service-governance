@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec/serializer"
 )
@@ -104,12 +105,23 @@ func devModeOutput(
 	spec *appspec.DevModeSpec,
 	app *bkmsapp.Application,
 ) *serializer.AppSpecDevModeOutput {
-	return new(serializer.AppSpecDevModeOutput).FromModel(spec, app.Type)
+	props := devModeProps(app)
+	return new(serializer.AppSpecDevModeOutput).FromModel(spec, props.WorkPath, props.MountPath)
 }
 
 func envDevModeInput(
 	input serializer.SetEnvAppSpecDevModeInput,
 	app *bkmsapp.Application,
 ) *appspec.DevModeSpec {
-	return input.AppSpecDevMode.ToModel(app.Type)
+	props := devModeProps(app)
+	return input.AppSpecDevMode.ToModel(props.WorkPath, props.MountPath)
+}
+
+// devModeProps 取应用的能力参数；技术栈非法或不支持开发模式时返回零值，由渲染阶段给出能力错误。
+func devModeProps(app *bkmsapp.Application) mods.DevModeProps {
+	set, err := mods.Of(app)
+	if err != nil {
+		return mods.DevModeProps{}
+	}
+	return set.DevMode.Props
 }

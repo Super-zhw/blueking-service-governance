@@ -71,6 +71,7 @@ var _ = Describe("Build Functions", func() {
 			ID:          "test-app-id",
 			Name:        "bkms-server",
 			WorkspaceID: "ws-" + stringx.Random(8),
+			Type:        bkmsapp.AppTypeTRPC,
 			TrpcSpec:    &bkmsapp.TrpcSpec{Language: appmodel.LanguageGo},
 		}
 
@@ -366,7 +367,7 @@ var _ = Describe("Build Functions", func() {
 			params, err := genPlatformBuildParams(testCfg.CodeRepo, testApp)
 
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("missing TrpcSpec for platform image build"))
+			Expect(err.Error()).To(ContainSubstring("platformBuild: incomplete_language"))
 			Expect(params).To(BeNil())
 		})
 	})
@@ -535,7 +536,7 @@ var _ = Describe("Build Functions", func() {
 			_, err := genPipelineBuildParams(ctx, testutil.NewDB(GinkgoT()), testApp, testCfg, rev, imageTag)
 
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("missing TrpcSpec for platform image build"))
+			Expect(err.Error()).To(ContainSubstring("platformBuild: incomplete_language"))
 		})
 
 		It("should return error when platform build app language is empty", func() {
@@ -549,7 +550,7 @@ var _ = Describe("Build Functions", func() {
 			_, err := genPipelineBuildParams(ctx, testutil.NewDB(GinkgoT()), testApp, testCfg, rev, imageTag)
 
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("missing TrpcSpec language for platform image build"))
+			Expect(err.Error()).To(ContainSubstring("platformBuild: incomplete_language"))
 		})
 
 		It("should return error when CodeRepo is nil", func() {

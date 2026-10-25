@@ -39,6 +39,7 @@ import (
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/render"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
@@ -119,8 +120,15 @@ func NewAdminService(
 	instanceIDs []string,
 	stores *AdminServiceStores,
 ) (*TafAdminService, error) {
-	// 目前只支持 TAF 应用
-	if app.Type != bkmsapp.AppTypeTAF {
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return nil, errors.Wrap(err, "resolve runtime mods")
+	}
+	props, err := runtimeMods.AdminCommand.Require()
+	if err != nil {
+		return nil, errors.Wrap(err, "admin command")
+	}
+	if props.Protocol != mods.AdminProtocolTAF {
 		return nil, errors.New("only support taf app")
 	}
 	if len(instanceIDs) == 0 {

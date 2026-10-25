@@ -50,8 +50,22 @@ var _ = Describe("FrameworkPolicy", func() {
 			Expect(err.Error()).To(ContainSubstring("YAML"))
 		})
 
-		It("should validate as YAML regardless of format parameter", func() {
+		It("should validate as YAML for an unknown format", func() {
 			Expect(policy.ValidateContent("key: value", "unknown_format")).To(Succeed())
+		})
+
+		It("should accept TAF config that is not valid YAML", func() {
+			content := `<taf>
+	<application>
+		<client>
+			locator=taf.tafregistry.QueryObj@tcp -h 1.1.1.1 -p 17890
+			timeout: 3000
+		</client>
+	</application>
+</taf>`
+			Expect(policy.ValidateContent(content, appcfg.FileFormatTAF)).To(Succeed())
+			// 同样内容按 YAML 校验会失败，确认校验按格式分流
+			Expect(policy.ValidateContent(content, appcfg.FileFormatYAML)).NotTo(Succeed())
 		})
 	})
 

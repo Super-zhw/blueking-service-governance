@@ -35,12 +35,14 @@ type AppSpecDevModeOutput struct {
 }
 
 // FromModel fills output fields from an AppSpec devMode section.
-func (o *AppSpecDevModeOutput) FromModel(spec *appspec.DevModeSpec, appType string) *AppSpecDevModeOutput {
+func (o *AppSpecDevModeOutput) FromModel(
+	spec *appspec.DevModeSpec, workPath, mountPath string,
+) *AppSpecDevModeOutput {
 	if spec == nil {
 		return nil
 	}
-	// 非标准行为：devMode 的路径字段不是用户配置项，而是由应用类型推导出来，响应前统一补齐。
-	spec.SetPathsByAppType(appType)
+	// 非标准行为：devMode 的路径字段不是用户配置项，而是由能力声明给出，响应前统一补齐。
+	spec.SetPaths(workPath, mountPath)
 
 	*o = AppSpecDevModeOutput{}
 	if spec.Enabled != nil {
@@ -66,7 +68,7 @@ type AppSpecDevModeInput struct {
 }
 
 // ToModel converts input to an AppSpec devMode section.
-func (i *AppSpecDevModeInput) ToModel(appType string) *appspec.DevModeSpec {
+func (i *AppSpecDevModeInput) ToModel(workPath, mountPath string) *appspec.DevModeSpec {
 	if i == nil {
 		return nil
 	}
@@ -74,7 +76,7 @@ func (i *AppSpecDevModeInput) ToModel(appType string) *appspec.DevModeSpec {
 		Enabled: lo.ToPtr(i.Enabled),
 	}
 	// 非标准行为：兼容旧 API 的入参结构，但不允许客户端自定义 workPath/mountPath。
-	spec.SetPathsByAppType(appType)
+	spec.SetPaths(workPath, mountPath)
 	return spec
 }
 

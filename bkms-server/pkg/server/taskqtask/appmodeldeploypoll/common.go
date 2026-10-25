@@ -258,7 +258,7 @@ func resolveApmServiceName(
 		log.Errorf(ctx, "sync apm service config: build app env vars failed, app=%s env=%s: %v", app.ID, env.Name, err)
 		return ""
 	}
-	serviceName, err := bkmmodel.GetApmServiceName(app.Type, frameworkFile.Content, appEnvVars.ToMap())
+	serviceName, err := bkmmodel.GetApmServiceName(app, frameworkFile.Content, appEnvVars.ToMap())
 	if err != nil {
 		if errors.Is(err, bkmmodel.ErrAPMConfigMissing) {
 			log.Infof(ctx, "apm config missing, skip sync apm service config, app=%s env=%s", app.ID, env.Name)

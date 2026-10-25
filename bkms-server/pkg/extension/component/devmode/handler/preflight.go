@@ -34,6 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
@@ -202,7 +203,15 @@ func (h *Handler) getEffectiveDevMode(
 			"devmode is not enabled for app %s in environment %s", app.ID, envName,
 		)
 	}
-	devModeSpec.SetPathsByAppType(app.Type)
+	runtimeMods, err := mods.Of(app)
+	if err != nil {
+		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "resolve runtime mods")
+	}
+	props, err := runtimeMods.DevMode.Require()
+	if err != nil {
+		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "dev mode")
+	}
+	devModeSpec.SetPaths(props.WorkPath, props.MountPath)
 
 	return devModeSpec, nil
 }

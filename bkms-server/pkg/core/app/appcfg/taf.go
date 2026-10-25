@@ -33,6 +33,16 @@ import (
 //   - For leaf nodes (key=value pairs): overlay values replace base values
 //   - For branch nodes (<section>): recursively merge children
 //   - New nodes in overlay are added to the result
+//
+// validateTAFContent 用 TAF 解析器解析内容。TAF 解析器较宽松，主要用于避免把 TAF 内容按 YAML 校验拒绝。
+func validateTAFContent(content string) error {
+	cfg := conf.New()
+	if err := cfg.InitFromString(content); err != nil {
+		return errors.Wrap(err, "parse TAF content")
+	}
+	return nil
+}
+
 func mergeTAFContent(base string, overlay *string) (string, error) {
 	if overlay == nil {
 		return base, nil

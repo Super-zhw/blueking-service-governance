@@ -28,6 +28,7 @@ import (
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appdefaults"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
@@ -93,7 +94,11 @@ func NewService(
 // Create 创建 TAF 应用资源（AppModel + AppConfigFile + App）
 func (s *Service) Create(ctx context.Context, app *bkmsapp.Application, params *CreateParams) error {
 	// 在写入任何应用数据前读取初始化规则，避免读取失败时留下部分应用数据。
-	resolved, err := appdefaults.Resolve(ctx, s.db, app.WorkspaceID, app.ID, app.Type)
+	devModeSet, err := mods.Of(app)
+	if err != nil {
+		return errors.Wrap(err, "resolve runtime mods")
+	}
+	resolved, err := appdefaults.Resolve(ctx, s.db, app.WorkspaceID, app.ID, devModeSet.DevMode.Props)
 	if err != nil {
 		return errors.Wrap(err, "resolve application defaults")
 	}

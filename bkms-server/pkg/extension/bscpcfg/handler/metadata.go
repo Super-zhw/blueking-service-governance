@@ -23,7 +23,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	cfgmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/model"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/bscpcfg/serializer"
@@ -87,7 +87,13 @@ func (h *Handler) InitMetadata(c *gin.Context) {
 
 	var workloadName string
 	var workloadKind string
-	if app.Type == bkmsapp.AppTypeTRPC {
+	runtimeMods, modErr := mods.Of(app)
+	if modErr != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(modErr, bkerrs.ErrCodeInvalidRequest, "resolve runtime mods"))
+		return
+	}
+	// 自动填充由能力声明决定；工作负载类型取 AppModel 渲染的默认类型
+	if runtimeMods.BSCPWorkloadMeta.Supported {
 		workloadName = app.Name
 		workloadKind = k8skind.GameDeploy
 	}

@@ -12,7 +12,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	bkmsworkspace "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	componentdevmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
@@ -58,7 +58,7 @@ var _ = Describe("Application default resolution", func() {
 	})
 
 	It("uses platform defaults without persisting rules", func() {
-		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-without-rules", bkmsapp.AppTypeTRPC)
+		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-without-rules", trpcProps())
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Default.AppID).To(Equal("app-without-rules"))
 		Expect(resolved.Default.EnvName).To(Equal(appspec.DefaultEnvName))
@@ -79,7 +79,7 @@ var _ = Describe("Application default resolution", func() {
 		Expect(ruleStore.Create(ctx, resourcesRule(workspace.ID, "production"))).To(Succeed())
 		Expect(ruleStore.Create(ctx, devModeRule(workspace.ID, "production", true))).To(Succeed())
 
-		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-combined-defaults", bkmsapp.AppTypeTRPC)
+		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-combined-defaults", trpcProps())
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Environments).To(HaveLen(1))
 		spec := resolved.Environments[0]
@@ -104,7 +104,7 @@ var _ = Describe("Application default resolution", func() {
 		})
 		Expect(ruleStore.Create(ctx, devModeRule(workspace.ID, "production", true))).To(Succeed())
 
-		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-matching-envs", bkmsapp.AppTypeTRPC)
+		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-matching-envs", trpcProps())
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Environments).To(HaveLen(2))
 
@@ -125,7 +125,7 @@ var _ = Describe("Application default resolution", func() {
 		})
 		Expect(ruleStore.Create(ctx, devModeRule(workspace.ID, "development", true))).To(Succeed())
 
-		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-taf-dev-mode", bkmsapp.AppTypeTAF)
+		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-taf-dev-mode", tafProps())
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Environments).To(HaveLen(1))
 		spec := resolved.Environments[0]
@@ -155,7 +155,7 @@ var _ = Describe("Application default resolution", func() {
 		})
 		Expect(ruleStore.Create(ctx, resourcesRule(workspace.ID, "production", "staging"))).To(Succeed())
 
-		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-multi-env-types", bkmsapp.AppTypeTRPC)
+		resolved, err := appdefaults.Resolve(ctx, db, workspace.ID, "app-multi-env-types", trpcProps())
 		Expect(err).NotTo(HaveOccurred())
 		Expect(resolved.Environments).To(HaveLen(2))
 
@@ -189,5 +189,23 @@ func devModeRule(workspaceID, envType string, enabled bool) *appdefaults.Rule {
 		Spec: &appspec.AppSpec{
 			DevMode: &appspec.DevModeSpec{Enabled: lo.ToPtr(enabled)},
 		},
+	}
+}
+
+// trpcProps 返回 tRPC 技术栈的开发模式能力参数。
+func trpcProps() mods.DevModeProps {
+	return mods.DevModeProps{
+		ScriptSet: mods.DevModeScriptSetTRPC,
+		WorkPath:  componentdevmode.TrpcWorkPath,
+		MountPath: componentdevmode.TrpcMountPath,
+	}
+}
+
+// tafProps 返回 TAF 技术栈的开发模式能力参数。
+func tafProps() mods.DevModeProps {
+	return mods.DevModeProps{
+		ScriptSet: mods.DevModeScriptSetTAF,
+		WorkPath:  componentdevmode.TafWorkPath,
+		MountPath: componentdevmode.TafMountPath,
 	}
 }

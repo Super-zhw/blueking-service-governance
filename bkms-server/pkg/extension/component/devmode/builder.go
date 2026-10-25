@@ -31,7 +31,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 )
 
@@ -69,8 +68,8 @@ func (b *builder) Validate() error {
 	if !b.IsAllowed() {
 		return errors.Wrapf(ErrNotAllowed, "environment %s", b.config.EnvType)
 	}
-	if !bkmsapp.IsAppModelType(b.config.AppType) {
-		return errors.Wrapf(ErrUnsupportedAppType, "%s only trpc and taf are supported", b.config.AppType)
+	if b.config.Props.ScriptSet == "" {
+		return ErrUnsupportedAppType
 	}
 	if b.config.AppName == "" {
 		return ErrAppNameRequired
@@ -78,8 +77,8 @@ func (b *builder) Validate() error {
 	if b.config.StartupCommand == "" && b.config.StartupShCommand == "" {
 		return ErrStartupCommandRequired
 	}
-	// taf 类型不校验 TrpcBinaryPath，trpc 类型需要校验
-	if b.config.IsTrpc() && b.config.TrpcBinaryPath == "" {
+	// taf 脚本集不需要二进制路径，trpc 脚本集需要
+	if b.config.IsTrpc() && b.config.Props.BinaryPath == "" {
 		return ErrTrpcBinaryPathRequired
 	}
 	return nil
@@ -90,9 +89,8 @@ func (b *builder) Build() (*Output, error) {
 	if b.config == nil || !b.config.Enabled {
 		return nil, nil
 	}
-	// trpc 类型需要处理 TrpcBinaryPath
 	if b.config.IsTrpc() {
-		b.config.TrpcBinaryPath = strings.TrimSuffix(b.config.TrpcBinaryPath, "/")
+		b.config.Props.BinaryPath = strings.TrimSuffix(b.config.Props.BinaryPath, "/")
 	}
 
 	configMap, err := b.BuildConfigMap()
@@ -133,7 +131,7 @@ func (b *builder) BuildConfigMap() (*corev1.ConfigMap, error) {
 	} else {
 		// trpc 类型
 		initSh = TrpcInitScript
-		data[KeyBkmsTrpcBinPath] = b.config.TrpcBinaryPath
+		data[KeyBkmsTrpcBinPath] = b.config.Props.BinaryPath
 		// shell 模式下 start.sh 改为执行 trpc-start.sh，用 sh -c 内联会让包装进程被误认为业务进程
 		data[KeyBkmsCustomStartScript] = lo.Ternary(
 			b.config.StartupShCommand == "", b.config.StartupCommand, TrpcStartScriptPath,
@@ -213,13 +211,13 @@ func (b *builder) BuildVolumeMount() corev1.VolumeMount {
 		// 引用的 Volume 名称
 		Name: ConfigMapResourceName(b.config.AppName),
 		// 挂载路径
-		MountPath: b.config.MountPath,
+		MountPath: b.config.Props.MountPath,
 	}
 }
 
 // BuildCommand 构建启动命令，指向挂载路径下的 init.sh
 func (b *builder) BuildCommand() []string {
-	return []string{filepath.Join(b.config.MountPath, "init.sh")}
+	return []string{filepath.Join(b.config.Props.MountPath, "init.sh")}
 }
 
 // renderScript 使用 Go template 渲染脚本内容

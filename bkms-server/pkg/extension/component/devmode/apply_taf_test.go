@@ -26,7 +26,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
 )
@@ -81,7 +80,7 @@ var _ = Describe("PatchGameDeployment TAF", func() {
 			validConfig = &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTAF,
+				Props:          tafProps(),
 				AppName:        "test-taf-app",
 				StartupCommand: "./test-taf-app",
 			}
@@ -133,9 +132,8 @@ var _ = Describe("PatchGameDeployment TAF", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTAF,
+				Props:          tafProps(),
 				AppName:        "my-taf-service",
-				WorkPath:       "/data/bkms/dev-mode/taf",
 				StartupCommand: "./my-taf-service --config=/etc/config.yaml",
 			}
 
@@ -186,7 +184,7 @@ var _ = Describe("PatchGameDeployment TAF", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeStaging,
-				AppType:        bkmsapp.AppTypeTAF,
+				Props:          tafProps(),
 				AppName:        "my-taf-service",
 				StartupCommand: "./my-taf-service --config=/etc/config.yaml",
 			}
@@ -217,7 +215,7 @@ var _ = Describe("PatchGameDeployment TAF", func() {
 			config := &devmode.Config{
 				Enabled:        true,
 				EnvType:        devmode.EnvTypeDevelopment,
-				AppType:        bkmsapp.AppTypeTAF,
+				Props:          tafProps(),
 				AppName:        "my-taf-service",
 				StartupCommand: "./my-taf-service",
 			}

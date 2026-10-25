@@ -31,16 +31,16 @@ var _ = Describe("GetApmServiceName", func() {
 	// ==================== GetApmServiceName 入口分发 ====================
 
 	Describe("appType dispatch", func() {
-		It("should return error for unsupported app type", func() {
-			_, err := bkmonitor.GetApmServiceName("unknown", "", nil)
+		It("should return error for undocumented app type", func() {
+			_, err := bkmonitor.GetApmServiceName(&app.Application{Type: "unknown"}, "", nil)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("unsupported app type"))
+			Expect(err.Error()).To(ContainSubstring("unknown_app_type"))
 		})
 
 		It("should return error for empty app type", func() {
-			_, err := bkmonitor.GetApmServiceName("", "", nil)
+			_, err := bkmonitor.GetApmServiceName(&app.Application{}, "", nil)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("unsupported app type"))
+			Expect(err.Error()).To(ContainSubstring("unknown_app_type"))
 		})
 
 		It("should dispatch to trpc handler for trpc app type", func() {
@@ -53,7 +53,7 @@ plugins:
     galileo:
       ocp_addr: "http://ocp.example.com"
 `
-			serviceName, err := bkmonitor.GetApmServiceName(app.AppTypeTRPC, content, nil)
+			serviceName, err := bkmonitor.GetApmServiceName(&app.Application{Type: app.AppTypeTRPC}, content, nil)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(serviceName).To(Equal("myapp.myserver"))
 		})
@@ -68,7 +68,7 @@ plugins:
 		</server>
 	</application>
 </taf>`
-			serviceName, err := bkmonitor.GetApmServiceName(app.AppTypeTAF, content, nil)
+			serviceName, err := bkmonitor.GetApmServiceName(&app.Application{Type: app.AppTypeTAF}, content, nil)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(serviceName).To(Equal("MyApp.MyServer"))
 		})

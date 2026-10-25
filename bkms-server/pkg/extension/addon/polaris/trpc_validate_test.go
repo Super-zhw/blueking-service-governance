@@ -30,6 +30,7 @@ import (
 	"go.uber.org/fx/fxtest"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
@@ -46,6 +47,7 @@ var _ = Describe("CollectConfigWarnings", func() {
 		db                    *mongo.Database
 		cfgProvider           appcfg.MountableFileProvider
 		testAppID             string
+		appStore              *bkmsapp.ApplicationStore
 	)
 
 	BeforeEach(func() {
@@ -63,11 +65,13 @@ var _ = Describe("CollectConfigWarnings", func() {
 		configStore = store.Of(db, polaris.ConfigMeta)
 		appConfigFileDefStore = testutil.NewStore(GinkgoT(), appcfg.AppConfigFileDefMeta)
 		cfgProvider = appcfg.NewMountableFileProvider(db)
+		appStore = testutil.NewStore(GinkgoT(), bkmsapp.AppMeta)
 	})
 
 	AfterEach(func() {
 		// 清理测试数据
 		_ = appmodel.DeleteAppModel(ctx, db, testAppID)
+		_, _ = appStore.DeleteMany(ctx, bkmsapp.ByID(testAppID))
 		_, _ = store.Of(database.DB(), appcfg.AppConfigFileMeta).
 			DeleteMany(ctx, appcfg.FilesByApp(testAppID))
 		_, _ = appConfigFileDefStore.DeleteMany(ctx, appcfg.DefsByApp(testAppID))
@@ -76,9 +80,16 @@ var _ = Describe("CollectConfigWarnings", func() {
 		diApp.RequireStop()
 	})
 
-	// 辅助函数：创建 tRPC 类型的 AppModel
+	// 辅助函数：创建 tRPC 类型应用及其 AppModel
 	createTrpcAppModel := func() {
-		err := appmodel.CreateAppModel(ctx, db, &appmodel.AppModel{
+		err := appStore.Create(ctx, &bkmsapp.Application{
+			ID:          testAppID,
+			Name:        testAppID,
+			WorkspaceID: "test-ws",
+			Type:        bkmsapp.AppTypeTRPC,
+		})
+		Expect(err).NotTo(HaveOccurred())
+		err = appmodel.CreateAppModel(ctx, db, &appmodel.AppModel{
 			AppID: testAppID,
 			Workload: appmodel.Workload{
 				Type: appmodel.WorkloadTypeTrpc,
