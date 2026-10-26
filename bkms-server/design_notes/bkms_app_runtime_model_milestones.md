@@ -31,7 +31,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M1 能力集合新路径
 
-**范围：** `runtimemod` 基础包（Spec 与查表工厂）、8 个能力声明、`Set` 与 `Of(app)`、`Public` / `Matrix`、`CapabilityStack`；taf / blank 完整 golden、`Set` 字段反射对齐、import 约束测试。
+**范围：** `runtimemod` 基础包（Spec 与查表工厂）、8 个能力声明、`Set` 与 `Of(app)`、`Public` / `Matrix`、`CapabilityStack`；taf / blank 完整 golden、`Set` 字段反射对齐。
 
 **行为变化：** 无。生产代码不调用新路径。
 
@@ -41,7 +41,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M2 能力执行端切换
 
-状态：已实现，待合并。实现说明见 [阶段 2 实现](./bkms_app_runtime_model_phase2.md)。
+状态：已合并，PR #302。实现说明见 [阶段 2 实现](./bkms_app_runtime_model_phase2.md)。
 
 **范围：** 8 个能力的消费点改读 `mods.Of(app)`，删除对应的类型分支。
 

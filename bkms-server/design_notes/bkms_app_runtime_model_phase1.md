@@ -160,7 +160,6 @@ M1 交付：
 | golden JSON（5 组合 + Matrix） | 支持矩阵与对外契约不随重构漂移 |
 | `Set` 字段与 `Public()` 输出对齐（反射） | 新增能力漏进 `all()` 时立即失败 |
 | 工厂函数单测 | ByFramework / ByLanguage 的空语言、未知值语义 |
-| import 约束 | `mods` 只依赖 appruntime、runtimemod、core/app，不引入其他领域包 |
 
 M2 交付：执行器覆盖测试（各能力所在模块），保证凡 `Supported=true` 的组合都能构造执行器。
 
@@ -174,7 +173,7 @@ pkg/core/appruntime/runtimemod/mods/   # 组装：Set、Of(app)、Resolve、Matr
 pkg/capability/<能力>/                 # 各能力声明及部分执行函数（M3 起）
 ```
 
-划分原则：基础包只放与具体能力无关的类型和工具；能力声明一个能力一个包；`mods` 只负责组装。详见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
+划分原则：基础包只放与具体能力无关的类型和工具；能力声明一个能力一个包；`mods` 只负责组装。依赖方向由编译期循环检测保证，不另设 import 约束测试。详见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
 
 ---
 
@@ -182,9 +181,9 @@ pkg/capability/<能力>/                 # 各能力声明及部分执行函数�
 
 | 步骤 | 内容 | 状态 |
 | --- | --- | --- |
-| M1 | 声明、`Set`、`Of(app)`、测试、文档 | 本次 |
-| M2 | 8 个能力的执行端改读 `Set` | 待做 |
-| M3 | 能力搬到 `pkg/capability/*` | 待做 |
+| M1 | 声明、`Set`、`Of(app)`、测试、文档 | ✅ #294 |
+| M2 | 8 个能力的执行端改读 `Set` | ✅ #302 |
+| M3 | 能力搬到 `pkg/capability/*` | 🚧 #307 |
 
 M2 的两个已知行为点：
 
