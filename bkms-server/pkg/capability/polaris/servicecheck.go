@@ -87,17 +87,17 @@ func checkServiceNameInEnv(
 	serviceNames, err := getTrpcServiceNames(ctx, provider, target.AppID, envName)
 	if err != nil {
 		if envName == "" {
-			return fmt.Sprintf("[%s] failed to read tRPC config file: %v", target.ConfigName, err)
+			return fmt.Sprintf("[%s] 读取 tRPC 配置文件失败: %v", target.ConfigName, err)
 		}
-		return fmt.Sprintf("[%s] env '%s': failed to read tRPC config file: %v", target.ConfigName, envName, err)
+		return fmt.Sprintf("[%s] 环境 '%s': 读取 tRPC 配置文件失败: %v", target.ConfigName, envName, err)
 	}
 
 	if !lo.Contains(serviceNames, target.PolarisName) {
 		if envName == "" {
-			return fmt.Sprintf("[%s] polaris name '%s' is recommended to match a tRPC service name %v",
+			return fmt.Sprintf("[%s] 北极星服务名 '%s' 推荐与 tRPC 配置中的服务名 %v 一致",
 				target.ConfigName, target.PolarisName, serviceNames)
 		}
-		return fmt.Sprintf("[%s] env '%s': polaris name '%s' is recommended to match a tRPC service name %v",
+		return fmt.Sprintf("[%s] 环境 '%s': 北极星服务名 '%s' 推荐与 tRPC 配置中的服务名 %v 一致",
 			target.ConfigName, envName, target.PolarisName, serviceNames)
 	}
 	return ""
