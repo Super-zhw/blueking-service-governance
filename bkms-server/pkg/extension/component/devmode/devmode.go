@@ -29,8 +29,10 @@ package devmode
 import (
 	"strings"
 
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 )
@@ -103,6 +105,16 @@ type Output struct {
 
 	// Command 容器启动命令（指向 init.sh）
 	Command []string
+}
+
+// RequireProps 返回应用的开发模式能力参数。应用的技术栈不支持开发模式时返回
+// ErrUnsupportedAppType。开发模式的各个入口（配置写入、预检、重启、渲染）统一通过它判断。
+func RequireProps(app *bkmsapp.Application) (mods.DevModeProps, error) {
+	props, err := mods.Of(app).DevMode.Require()
+	if err != nil {
+		return mods.DevModeProps{}, errors.Wrapf(ErrUnsupportedAppType, "app %s: %v", app.ID, err)
+	}
+	return props, nil
 }
 
 // New 创建开发模式构建器实例

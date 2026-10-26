@@ -34,11 +34,11 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode/serializer"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/bcstoken"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
@@ -203,8 +203,7 @@ func (h *Handler) getEffectiveDevMode(
 			"devmode is not enabled for app %s in environment %s", app.ID, envName,
 		)
 	}
-	runtimeMods := mods.Of(app)
-	props, err := runtimeMods.DevMode.Require()
+	props, err := devmode.RequireProps(app)
 	if err != nil {
 		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "dev mode")
 	}

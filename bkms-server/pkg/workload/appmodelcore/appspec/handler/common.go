@@ -237,6 +237,19 @@ func setEnvSection[T, I any](
 	sectionName string,
 	toModel func(I, *bkmsapp.Application) *T,
 ) {
+	setEnvSectionChecked(h, c, section, sectionName, func(input I, app *bkmsapp.Application) (*T, error) {
+		return toModel(input, app), nil
+	})
+}
+
+// setEnvSectionChecked 与 setEnvSection 相同，但 toModel 可以拒绝输入，错误按参数错误返回。
+func setEnvSectionChecked[T, I any](
+	h *Handler,
+	c *gin.Context,
+	section appspec.SectionHandle[T],
+	sectionName string,
+	toModel func(I, *bkmsapp.Application) (*T, error),
+) {
 	var uriInput serializer.AppEnvURIInput
 	var input I
 	if err := ginutils.BindURIJSON(c, &uriInput, &input); err != nil {
@@ -259,7 +272,11 @@ func setEnvSection[T, I any](
 		)
 		return
 	}
-	newSection := toModel(input, app)
+	newSection, err := toModel(input, app)
+	if err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrapf(err, bkerrs.ErrCodeInvalidArgument, "invalid env %s", sectionName))
+		return
+	}
 
 	if err = appspec.SetEnvSection(
 		ctx,

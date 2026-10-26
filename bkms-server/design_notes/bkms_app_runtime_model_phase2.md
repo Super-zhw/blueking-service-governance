@@ -42,15 +42,15 @@
 
 ## 3. 关键实现约定
 
-**技术栈来源。** 所有能力解析统一走 `mods.Of(app)`，内部用 `appruntime.CapabilityStack` 从 Application 快照取技术栈。语言的取值优先级仍是 `Application.Language` → `TrpcSpec.Language` → `TrpcConfig.Language`，因此存量应用切换后行为不变。
+**技术栈来源。** 所有能力解析统一走 `mods.Of(app)`，内部用 `appruntime.CapabilityStack` 从 Application 快照取技术栈：框架取 `Application.Framework`，为空时由旧 `type`（trpc / taf）推出；语言取 `Application.Language`，为空时取 `TrpcSpec.Language`。不读取 AppModel，因此只记录在 `TrpcConfig.Language` 的语言不参与解析；存量 TAF 没有语言属于正常情况。
 
-**错误语义。** 技术栈非法（类型冲突、未知框架）在 `Of` 阶段返回 error；能力不支持体现在 `Mod.Supported`；执行器调用 `Require()` 时才得到 `ErrModUnsupported`。渲染和构建链路直接把 `Require()` 的错误上抛。
+**错误语义。** `Of` 不返回 error：技术栈非法（类型与框架冲突、未知语言等）时记录告警日志，返回全部能力不支持、原因为 `invalid_stack` 的能力集合。能力是否可用统一由 `Require()` 判断，不可用时返回 `ErrModUnsupported`，渲染和构建链路直接上抛。
 
 **TAF 内容校验。** `appcfg` 内用 TAF 解析器校验 TAF 格式内容。该解析器较宽松，本次只解决"把合法 TAF 当 YAML 拒绝"的问题，不引入更严格的语法校验。
 
 **BSCP 工作负载类型。** 仍写入 `GameDeployment`。BSCP 元信息是应用级、创建时初始化，而实际渲染类型随环境变化（联邦环境渲染 Deployment），且 `WorkloadKind` 目前不在注入链路中被消费。按环境覆盖 kind 需要先定义应用级元信息的表达方式，留给 M4 随渲染分派一起处理。
 
-**devMode 的启用判断。** 是否启用、环境是否允许仍由 AppSpec 与 devmode 模块负责；能力声明只提供脚本集与路径。启用但在不支持的技术栈上运行，在渲染阶段返回能力错误。
+**devMode 的启用判断。** 能力判断集中在 `devmode.RequireProps(app)`，配置写入、预检、重启、渲染四个入口都经过它：技术栈不支持开发模式时，写入 `enabled=true` 返回参数错误，预检与重启返回请求错误，渲染返回能力错误。是否启用、环境是否允许仍由 AppSpec 与 devmode 模块负责。
 
 ---
 

@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
 
@@ -272,6 +273,17 @@ var _ = Describe("Unsupported stack", func() {
 			StartupCommand: "./test-app",
 		}
 		_, err := devmode.New(config).Build()
+		Expect(err).To(MatchError(devmode.ErrUnsupportedAppType))
+	})
+
+	It("should return props for a trpc app", func() {
+		props, err := devmode.RequireProps(&bkmsapp.Application{ID: "trpc-app", Type: bkmsapp.AppTypeTRPC})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(props.WorkPath).To(Equal(devmode.TrpcWorkPath))
+	})
+
+	It("should reject an app whose stack does not support dev mode", func() {
+		_, err := devmode.RequireProps(&bkmsapp.Application{ID: "helm-app", Type: bkmsapp.AppTypeHelm})
 		Expect(err).To(MatchError(devmode.ErrUnsupportedAppType))
 	})
 })

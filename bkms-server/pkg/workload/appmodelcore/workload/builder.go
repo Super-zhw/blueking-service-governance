@@ -38,7 +38,6 @@ import (
 
 	build "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
@@ -842,10 +841,9 @@ func (b *Builder) ComputeAppModel(
 	// 检查：不是生产环境，且启用了开发模式
 	b.devModeConfig = nil
 	if shouldEnableDevModeInEnv(env.Type, effectiveAppSpec) {
-		runtimeMods := mods.Of(b.app)
-		devModeProps, err := runtimeMods.DevMode.Require()
+		devModeProps, err := devmode.RequireProps(b.app)
 		if err != nil {
-			return nil, errors.Wrap(err, "dev mode")
+			return nil, errors.Wrap(err, "resolve dev mode props")
 		}
 		b.devModeConfig = devmode.CreateDevModeConfig(appModel, devModeProps, env.Type, true)
 		if effectiveAppSpec.DevMode.WorkPath != nil {

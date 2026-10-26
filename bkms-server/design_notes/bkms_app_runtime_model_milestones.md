@@ -128,7 +128,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M6 新 API 上线
 
-**范围：** 总体方案 §5.1 的全部新接口；旧接口改为调用同一领域服务的薄适配层并强制核对 framework；详情 / 列表增量返回 `framework` / `language`；合并 `trpc-build-deploys` / `taf-build-deploys` 为一键构建部署接口；Swagger 与 Bruno。
+**范围：** 总体方案 §5.1 的全部新接口；旧接口改为调用同一领域服务的薄适配层并强制核对 framework；详情 / 列表增量返回 `framework` / `language`；合并 `trpc-build-deploys` / `taf-build-deploys` 为一键构建部署接口；合并 `instances/admin-cmds` / `instances/taf-admin-cmds` 为统一管理命令接口，按 `adminCommand` 的协议分派，执行端随之去掉协议校验；Swagger 与 Bruno。
 
 **行为变化：** 只新增接口；旧接口业务效果不变，响应 `type` 仍为 `trpc|taf`。
 

@@ -31,16 +31,16 @@ var _ = Describe("GetApmServiceName", func() {
 	// ==================== GetApmServiceName 入口分发 ====================
 
 	Describe("appType dispatch", func() {
-		It("should return error for undocumented app type", func() {
+		It("should return error for an unknown app type", func() {
 			_, err := bkmonitor.GetApmServiceName(&app.Application{Type: "unknown"}, "", nil)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("unknown_app_type"))
+			Expect(err.Error()).To(ContainSubstring("apmServiceName: invalid_stack"))
 		})
 
 		It("should return error for empty app type", func() {
 			_, err := bkmonitor.GetApmServiceName(&app.Application{}, "", nil)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("unknown_app_type"))
+			Expect(err.Error()).To(ContainSubstring("apmServiceName: invalid_stack"))
 		})
 
 		It("should dispatch to trpc handler for trpc app type", func() {
