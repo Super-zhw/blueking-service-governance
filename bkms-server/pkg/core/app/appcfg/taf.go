@@ -26,14 +26,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// mergeTAFContent merges two TAF contents, with overlay taking precedence over base.
-// TAF format only supports simple merge, overlay values replace base values.
-//
-// The merge logic:
-//   - For leaf nodes (key=value pairs): overlay values replace base values
-//   - For branch nodes (<section>): recursively merge children
-//   - New nodes in overlay are added to the result
-//
 // validateTAFContent 用 TAF 解析器解析内容。TAF 解析器较宽松，主要用于避免把 TAF 内容按 YAML 校验拒绝。
 func validateTAFContent(content string) error {
 	cfg := conf.New()
@@ -43,6 +35,13 @@ func validateTAFContent(content string) error {
 	return nil
 }
 
+// mergeTAFContent merges two TAF contents, with overlay taking precedence over base.
+// TAF format only supports simple merge, overlay values replace base values.
+//
+// The merge logic:
+//   - For leaf nodes (key=value pairs): overlay values replace base values
+//   - For branch nodes (<section>): recursively merge children
+//   - New nodes in overlay are added to the result
 func mergeTAFContent(base string, overlay *string) (string, error) {
 	if overlay == nil {
 		return base, nil
