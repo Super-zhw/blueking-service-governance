@@ -24,7 +24,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
@@ -154,64 +153,5 @@ func (h *Handler) CreateAppInstanceWebConsole(c *gin.Context) {
 	)
 	ginutils.OK(c, serializer.CreateAppInstanceWebConsoleOutput{
 		Data: &serializer.WebConsoleInfoOutputObj{URL: webConsoleURL},
-	})
-}
-
-// CreateAppInstanceWeTerm 获取应用运行实例（Pod）WeTerm 登录链接。
-//
-//	@ID			CreateAppInstanceWeTerm
-//	@Summary	获取应用运行实例（Pod）WeTerm 登录链接
-//	@Description	未配置 WeTerm 环境 ID（如社区版）时返回 NOT_IMPLEMENTED。
-//	@Tags		instance
-//	@Produce	json
-//	@Security	BkUserInfo
-//	@Security	BkUserCredential
-//	@Param		appID		path		string	true	"应用 ID"
-//	@Param		envName		path		string	true	"部署环境名称"
-//	@Param		instanceID	path		string	true	"实例 ID"
-//	@Success	200			{object}	serializer.CreateAppInstanceWeTermOutput
-//	@Failure	400			{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/instances/{instanceID}/weterm [post]
-func (h *Handler) CreateAppInstanceWeTerm(c *gin.Context) {
-	var uriInput serializer.AppInstanceURIInput
-	if err := ginutils.BindURI(c, &uriInput); err != nil {
-		bkerrs.AbortWithErr(c, err)
-		return
-	}
-	envID := config.G.BCS.WeTermEnvID
-	if envID == "" {
-		bkerrs.AbortWithErr(c, bkerrs.New(bkerrs.ErrCodeNotImplemented, "weterm is not supported"))
-		return
-	}
-
-	ctx := c.Request.Context()
-	target, err := h.resolveConsoleTarget(ctx, uriInput)
-	if err != nil {
-		bkerrs.AbortWithErr(c, err)
-		return
-	}
-	weTermURL := bcs.BuildWeTermURL(bcs.WeTermParams{
-		EnvID:         envID,
-		ProjectID:     target.workspace.BkSystems.BkBCSProjectID,
-		ProjectCode:   target.workspace.BkSystems.BkBCSProjectCode,
-		ClusterID:     target.env.Cluster.ClusterID,
-		Namespace:     target.env.Cluster.Namespace,
-		PodName:       uriInput.InstanceID,
-		ContainerName: target.containerName,
-	})
-
-	// 创建 WeTerm 操作记录
-	go audit.AddOperationRecordAsync(
-		context.WithoutCancel(ctx),
-		audit.OperationTypeCreate,
-		audit.ResourceTypeInstance,
-		uriInput.InstanceID,
-		audit.WithAttribute(audit.AttributeWeTerm),
-		audit.WithWorkspaceID(target.app.WorkspaceID),
-		audit.WithAppID(target.app.ID),
-		audit.WithEnvName(uriInput.EnvName),
-	)
-	ginutils.OK(c, serializer.CreateAppInstanceWeTermOutput{
-		Data: &serializer.WeTermInfoOutputObj{URL: weTermURL},
 	})
 }

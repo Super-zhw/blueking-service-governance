@@ -16,18 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package bcs_test
+package handler
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bcs"
 )
 
-var _ = Describe("BuildWeTermURL", func() {
+var _ = Describe("buildWeTermURL", func() {
 	It("builds url in the order agreed with BCS", func() {
-		url := bcs.BuildWeTermURL(bcs.WeTermParams{
+		url := buildWeTermURL(weTermParams{
 			EnvID:         "env-id",
 			ProjectID:     "project-id",
 			ProjectCode:   "project-code",
@@ -43,7 +41,7 @@ var _ = Describe("BuildWeTermURL", func() {
 	})
 
 	It("escapes query values", func() {
-		url := bcs.BuildWeTermURL(bcs.WeTermParams{PodName: "a&b=c"})
+		url := buildWeTermURL(weTermParams{PodName: "a&b=c"})
 		Expect(url).To(ContainSubstring("pod=a%26b%3Dc&"))
 	})
 })
