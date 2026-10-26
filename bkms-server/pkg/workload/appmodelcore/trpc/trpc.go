@@ -96,10 +96,7 @@ func NewService(
 // Create 创建 tRPC 应用资源（AppModel + AppConfigFile + App）
 func (s *Service) Create(ctx context.Context, app *bkmsapp.Application, params *CreateParams) error {
 	// 在写入任何应用数据前读取初始化规则，避免读取失败时留下部分应用数据。
-	devModeSet, err := mods.Of(app)
-	if err != nil {
-		return errors.Wrap(err, "resolve runtime mods")
-	}
+	devModeSet := mods.Of(app)
 	resolved, err := appdefaults.Resolve(ctx, s.db, app.WorkspaceID, app.ID, devModeSet.DevMode.Props)
 	if err != nil {
 		return errors.Wrap(err, "resolve application defaults")

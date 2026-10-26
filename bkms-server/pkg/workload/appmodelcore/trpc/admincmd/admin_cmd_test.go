@@ -32,6 +32,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
@@ -91,7 +92,7 @@ var _ = Describe("TrpcAdminService", func() {
 			},
 		})
 		// 设置 TrpcSpec（dbfactory 创建的应用默认没有 TrpcSpec）
-		testApp.TrpcSpec = &bkmsapp.TrpcSpec{Language: "go"}
+		testApp.TrpcSpec = &bkmsapp.TrpcSpec{Language: appruntime.LanguageGo}
 
 		// 使用 dbfactory 创建测试用 Environment
 		testEnv = dbfactory.Env(ctx, envService, testApp.WorkspaceID)
@@ -108,7 +109,7 @@ var _ = Describe("TrpcAdminService", func() {
 			),
 		}
 		adminService.App = testApp
-		adminService.Props = adminPropsFor("go")
+		adminService.Props = adminPropsFor(appruntime.LanguageGo)
 		adminService.AppModel = testAppModel
 		adminService.Env = testEnv
 		adminService.EnvName = testEnv.Name
@@ -252,22 +253,22 @@ var _ = Describe("TrpcAdminService", func() {
 					Expect(port).To(Equal(expectedPort))
 				}
 			},
-			Entry("Go language - server.admin.port", "go",
+			Entry("Go language - server.admin.port", appruntime.LanguageGo,
 				func(cfg *admincmd.AdminConfig) { cfg.Server.Admin.Port = "11014" },
 				"11014", false, ""),
-			Entry("Python language - server.admin.port", "python",
+			Entry("Python language - server.admin.port", appruntime.LanguagePython,
 				func(cfg *admincmd.AdminConfig) { cfg.Server.Admin.Port = "11015" },
 				"11015", false, ""),
-			Entry("C++ language - server.admin_port", "cpp",
+			Entry("C++ language - server.admin_port", appruntime.LanguageCpp,
 				func(cfg *admincmd.AdminConfig) { cfg.Server.AdminPort = "11016" },
 				"11016", false, ""),
-			Entry("Node language - server.admin_port", "node",
+			Entry("Node language - server.admin_port", appruntime.LanguageNodeJS,
 				func(cfg *admincmd.AdminConfig) { cfg.Server.AdminPort = "11017" },
 				"11017", false, ""),
-			Entry("Java language - server.admin.admin_port", "java",
+			Entry("Java language - server.admin.admin_port", appruntime.LanguageJava,
 				func(cfg *admincmd.AdminConfig) { cfg.Server.Admin.AdminPort = "11018" },
 				"11018", false, ""),
-			Entry("unsupported language - should return error", "unknown",
+			Entry("unsupported language - should return error", unknownLanguage,
 				nil,
 				"", true, "unsupported admin config layout"),
 		)
@@ -319,38 +320,32 @@ var _ = Describe("TrpcAdminService", func() {
 					Expect(err).NotTo(HaveOccurred())
 				}
 			},
-			Entry("go - IP 0.0.0.0, pass", "go",
+			Entry("go - IP 0.0.0.0, pass", appruntime.LanguageGo,
 				"server:\n  admin:\n    ip: \"0.0.0.0\"\n    port: \"11014\"",
 				false, ""),
-			Entry("go - IP 127.0.0.1, pass", "go",
+			Entry("go - IP 127.0.0.1, pass", appruntime.LanguageGo,
 				"server:\n  admin:\n    ip: \"127.0.0.1\"\n    port: \"11014\"",
 				false, ""),
-			Entry("go - IP not configured, error", "go",
+			Entry("go - IP not configured, error", appruntime.LanguageGo,
 				"server:\n  admin:\n    port: \"11014\"",
 				true, "admin server IP is not configured"),
-			Entry("go - invalid IP, error", "go",
+			Entry("go - invalid IP, error", appruntime.LanguageGo,
 				"server:\n  admin:\n    ip: \"10.0.0.1\"\n    port: \"11014\"",
 				true, "admin server binding IP can only be 0.0.0.0 or 127.0.0.1"),
-			Entry("cpp - server.admin_ip 0.0.0.0, pass", "cpp",
+			Entry("cpp - server.admin_ip 0.0.0.0, pass", appruntime.LanguageCpp,
 				"server:\n  admin_ip: \"0.0.0.0\"\n  admin_port: \"11014\"",
 				false, ""),
-			Entry("java - invalid admin_ip, error", "java",
+			Entry("java - invalid admin_ip, error", appruntime.LanguageJava,
 				"server:\n  admin:\n    admin_ip: \"127.0.0.2\"\n    admin_port: \"11014\"",
 				true, "admin server binding IP can only be 0.0.0.0 or 127.0.0.1"),
 		)
 	})
 })
 
-// adminPropsFor 按语言返回 tRPC admin 命令的执行参数。
+// unknownLanguage 能力声明中未登记的语言，用于验证不支持的布局。
+const unknownLanguage = "unknown"
+
+// adminPropsFor 按语言取 tRPC admin 命令的执行参数，与能力声明保持一致。
 func adminPropsFor(language string) mods.AdminCommandProps {
-	layout := mods.TrpcAdminLayoutNested
-	switch language {
-	case "cpp", "node":
-		layout = mods.TrpcAdminLayoutFlat
-	case "java":
-		layout = mods.TrpcAdminLayoutNestedPrefixed
-	case "unknown":
-		layout = ""
-	}
-	return mods.AdminCommandProps{Protocol: mods.AdminProtocolTRPC, ConfigLayout: layout}
+	return mods.AdminCommand.Resolve(appruntime.FrameworkTRPC, language).Props
 }

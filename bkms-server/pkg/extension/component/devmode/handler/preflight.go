@@ -203,10 +203,7 @@ func (h *Handler) getEffectiveDevMode(
 			"devmode is not enabled for app %s in environment %s", app.ID, envName,
 		)
 	}
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "resolve runtime mods")
-	}
+	runtimeMods := mods.Of(app)
 	props, err := runtimeMods.DevMode.Require()
 	if err != nil {
 		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "dev mode")

@@ -87,11 +87,7 @@ func (h *Handler) InitMetadata(c *gin.Context) {
 
 	var workloadName string
 	var workloadKind string
-	runtimeMods, modErr := mods.Of(app)
-	if modErr != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(modErr, bkerrs.ErrCodeInvalidRequest, "resolve runtime mods"))
-		return
-	}
+	runtimeMods := mods.Of(app)
 	// 自动填充由能力声明决定；工作负载类型取 AppModel 渲染的默认类型
 	if runtimeMods.BSCPWorkloadMeta.Supported {
 		workloadName = app.Name

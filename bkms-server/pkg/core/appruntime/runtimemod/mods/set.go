@@ -21,6 +21,7 @@ package mods
 import (
 	"github.com/pkg/errors"
 
+	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
@@ -28,7 +29,7 @@ import (
 
 // Set 应用的全部能力。
 //
-// 新增能力时，需同步修改本结构体、resolve、all，测试会检查三者是否一致。
+// 新增能力时，需同步修改本结构体、resolve、invalid、all，测试会检查四者是否一致。
 type Set struct {
 	// Stack 解析所用的技术栈。
 	Stack appruntime.Stack
@@ -53,14 +54,15 @@ type Set struct {
 
 // Of 解析应用的技术栈，得出全部能力。
 //
-// 只读 Application 自身的字段，不加载 AppModel。只有技术栈非法时才返回 error；
-// 能力不支持不算错误，体现在各 Mod 的 Supported 上。
-func Of(app *bkmsapp.Application) (Set, error) {
+// 只读 Application 自身的字段，不加载 AppModel。技术栈非法时记录告警日志，
+// 返回全部能力不支持（原因为 invalid_stack）的结果；执行器调用 Require 时会得到能力错误。
+func Of(app *bkmsapp.Application) Set {
 	stack, err := appruntime.CapabilityStack(app.RuntimeSnapshot())
 	if err != nil {
-		return Set{}, errors.Wrap(err, "resolve tech stack")
+		log.WarnNoContextf("resolve tech stack of app %s failed, all runtime mods are unsupported: %v", app.ID, err)
+		return invalid(appruntime.Stack{Type: app.Type})
 	}
-	return resolve(stack), nil
+	return resolve(stack)
 }
 
 // Resolve 按已规范化的技术栈得出全部能力，用于调用方已自行取得技术栈的场景。
@@ -82,6 +84,21 @@ func resolve(stack appruntime.Stack) Set {
 		PolarisServiceCheck:   PolarisServiceCheck.ResolveStack(stack),
 		PolarisFrameworkPatch: PolarisFrameworkPatch.ResolveStack(stack),
 		BSCPWorkloadMeta:      BSCPWorkloadMeta.ResolveStack(stack),
+	}
+}
+
+// invalid 技术栈非法时的能力集合，所有能力都不支持。
+func invalid(stack appruntime.Stack) Set {
+	return Set{
+		Stack:                 stack,
+		FrameworkFile:         FrameworkFile.Invalid(),
+		DevMode:               DevMode.Invalid(),
+		PlatformBuild:         PlatformBuild.Invalid(),
+		AdminCommand:          AdminCommand.Invalid(),
+		APMServiceName:        APMServiceName.Invalid(),
+		PolarisServiceCheck:   PolarisServiceCheck.Invalid(),
+		PolarisFrameworkPatch: PolarisFrameworkPatch.Invalid(),
+		BSCPWorkloadMeta:      BSCPWorkloadMeta.Invalid(),
 	}
 }
 

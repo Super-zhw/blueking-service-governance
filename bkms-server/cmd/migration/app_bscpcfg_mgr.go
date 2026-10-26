@@ -203,10 +203,7 @@ func enableBscpCfgForApp(
 	}
 
 	var workloadName, workloadKind string
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		return errors.Wrap(err, "resolve runtime mods")
-	}
+	runtimeMods := mods.Of(app)
 	// 自动填充由能力声明决定；工作负载类型取 AppModel 渲染的默认类型
 	if runtimeMods.BSCPWorkloadMeta.Supported {
 		workloadName = app.Name

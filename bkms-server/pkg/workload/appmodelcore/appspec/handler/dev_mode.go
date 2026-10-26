@@ -119,9 +119,6 @@ func envDevModeInput(
 
 // devModeProps 取应用的能力参数；技术栈非法或不支持开发模式时返回零值，由渲染阶段给出能力错误。
 func devModeProps(app *bkmsapp.Application) mods.DevModeProps {
-	set, err := mods.Of(app)
-	if err != nil {
-		return mods.DevModeProps{}
-	}
+	set := mods.Of(app)
 	return set.DevMode.Props
 }

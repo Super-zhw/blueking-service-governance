@@ -45,10 +45,7 @@ const (
 
 // GetApmServiceName 根据应用技术栈获取 APM 服务名称（统一入口）
 func GetApmServiceName(app *bkmsapp.Application, content string, appEnvVars map[string]string) (string, error) {
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		return "", errors.Wrap(err, "resolve runtime mods")
-	}
+	runtimeMods := mods.Of(app)
 	props, err := runtimeMods.APMServiceName.Require()
 	if err != nil {
 		return "", errors.Wrap(err, "apm service name")

@@ -47,33 +47,39 @@ func mustResolve(framework, language string) mods.Set {
 
 var _ = Describe("Of", func() {
 	It("reads the language of a legacy trpc app from TrpcSpec", func() {
-		set, err := mods.Of(&bkmsapp.Application{
+		set := mods.Of(&bkmsapp.Application{
 			Type:     bkmsapp.AppTypeTRPC,
 			TrpcSpec: &bkmsapp.TrpcSpec{Language: appruntime.LanguageGo},
 		})
-		Expect(err).NotTo(HaveOccurred())
 		Expect(set.Stack.Framework).To(Equal(appruntime.FrameworkTRPC))
 		Expect(set.Stack.Language).To(Equal(appruntime.LanguageGo))
 		Expect(set.PlatformBuild.Supported).To(BeTrue())
 	})
 
 	It("keeps devmode available for a legacy taf app without a language", func() {
-		set, err := mods.Of(&bkmsapp.Application{Type: bkmsapp.AppTypeTAF})
-		Expect(err).NotTo(HaveOccurred())
+		set := mods.Of(&bkmsapp.Application{Type: bkmsapp.AppTypeTAF})
 		Expect(set.Stack.Language).To(BeEmpty())
 		Expect(set.DevMode.Supported).To(BeTrue())
 		Expect(set.DevMode.Props.ScriptSet).To(Equal(mods.DevModeScriptSetTAF))
 		Expect(set.PlatformBuild.ReasonCode).To(Equal(runtimemod.ReasonUnsupportedStack))
 	})
 
-	It("rejects a stack that contradicts itself", func() {
-		_, err := mods.Of(&bkmsapp.Application{
+	It("marks every capability unsupported when the stack contradicts itself", func() {
+		set := mods.Of(&bkmsapp.Application{
 			Type:     bkmsapp.AppTypeTRPC,
 			Language: appruntime.LanguageCpp,
 			TrpcSpec: &bkmsapp.TrpcSpec{Language: appruntime.LanguageGo},
 		})
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring(appruntime.IssueLanguageConflict))
+		views := set.Public().Mods
+		Expect(views).To(HaveLen(8))
+		for id, mod := range views {
+			Expect(mod.Supported).To(BeFalse(), string(id))
+			Expect(mod.ReasonCode).To(Equal(runtimemod.ReasonInvalidStack), string(id))
+		}
+
+		_, err := set.DevMode.Require()
+		Expect(err).To(MatchError(runtimemod.ErrModUnsupported))
+		Expect(err.Error()).To(ContainSubstring("devMode: invalid_stack"))
 	})
 })
 

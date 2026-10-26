@@ -160,10 +160,7 @@ func NewAdminService(
 		EnvVarsReader:         envvars.NewUnifiedEnvVarsReader(db, appDepsVarReader, polarisVarReader),
 	}
 
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		return nil, errors.Wrap(err, "resolve runtime mods")
-	}
+	runtimeMods := mods.Of(app)
 	props, err := runtimeMods.AdminCommand.Require()
 	if err != nil {
 		return nil, errors.Wrap(err, "admin command")

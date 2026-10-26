@@ -123,10 +123,7 @@ func (p *Plugin) computeTrpcConfig(
 	item := *frameworkContent
 
 	// 框架配置补丁由能力声明控制（目前仅北极星注册信息注入）
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		return appcfg.MountableFile{}, errors.Wrap(err, "resolve runtime mods")
-	}
+	runtimeMods := mods.Of(app)
 	if runtimeMods.PolarisFrameworkPatch.Supported {
 		for _, cfgPatcher := range p.configPatchers {
 			item.Content, err = cfgPatcher.Patch(ctx, app.ID, env.Name, item.Content)

@@ -842,10 +842,7 @@ func (b *Builder) ComputeAppModel(
 	// 检查：不是生产环境，且启用了开发模式
 	b.devModeConfig = nil
 	if shouldEnableDevModeInEnv(env.Type, effectiveAppSpec) {
-		runtimeMods, err := mods.Of(b.app)
-		if err != nil {
-			return nil, errors.Wrap(err, "resolve runtime mods")
-		}
+		runtimeMods := mods.Of(b.app)
 		devModeProps, err := runtimeMods.DevMode.Require()
 		if err != nil {
 			return nil, errors.Wrap(err, "dev mode")

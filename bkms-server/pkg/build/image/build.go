@@ -304,10 +304,7 @@ func getPlatformDockerfileLanguage(app *bkmsapp.Application) (string, error) {
 	if app == nil {
 		return "", errors.New("application is required for platform image build")
 	}
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		return "", errors.Wrap(err, "resolve runtime mods")
-	}
+	runtimeMods := mods.Of(app)
 	props, err := runtimeMods.PlatformBuild.Require()
 	if err != nil {
 		return "", errors.Wrap(err, "platform image build")

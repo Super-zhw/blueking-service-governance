@@ -56,11 +56,7 @@ func CollectConfigWarnings(
 	}
 
 	// 仅对支持该能力的应用进行校验（目前为 tRPC）
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		log.Warnf(ctx, "resolve runtime mods for polaris validation failed: app=%s, err=%v", config.AppID, err)
-		return nil
-	}
+	runtimeMods := mods.Of(app)
 	if !runtimeMods.PolarisServiceCheck.Supported {
 		return nil
 	}

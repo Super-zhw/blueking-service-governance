@@ -58,6 +58,8 @@ const (
 	ReasonUnsupportedAppType ReasonCode = "unsupported_app_type"
 	// ReasonUnsupportedStack 该框架（或框架与语言的组合）不支持此能力。
 	ReasonUnsupportedStack ReasonCode = "unsupported_stack"
+	// ReasonInvalidStack 应用的技术栈数据非法（如类型与框架冲突、语言冲突），所有能力都不支持。
+	ReasonInvalidStack ReasonCode = "invalid_stack"
 	// ReasonIncompleteLanguage 能否支持取决于语言，但应用未记录语言。
 	// BRIDGE-ONLY：只有存量应用会缺少语言，回填后删除。
 	ReasonIncompleteLanguage ReasonCode = "incomplete_language"
@@ -113,6 +115,11 @@ func (s Spec[P]) ResolveStack(stack appruntime.Stack) Mod[P] {
 	mod := s.Resolve(stack.Framework, stack.Language)
 	mod.ID = s.ID
 	return mod
+}
+
+// Invalid 构造技术栈非法时的结果。
+func (s Spec[P]) Invalid() Mod[P] {
+	return Mod[P]{ID: s.ID, ReasonCode: ReasonInvalidStack}
 }
 
 // Supported 构造支持的结果。

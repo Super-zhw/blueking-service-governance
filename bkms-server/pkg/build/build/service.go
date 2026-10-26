@@ -100,11 +100,8 @@ func (s *Service) validateBeforeBuild(ctx context.Context, app *bkmsapp.Applicat
 		return errors.New("application must not be nil for platform generated Dockerfile build")
 	}
 	// 平台生成 Dockerfile 的支持范围由能力声明决定（目前仅 trpc + go）
-	runtimeMods, err := mods.Of(app)
-	if err != nil {
-		return errors.Wrap(err, "resolve runtime mods")
-	}
-	if _, err = runtimeMods.PlatformBuild.Require(); err != nil {
+	runtimeMods := mods.Of(app)
+	if _, err := runtimeMods.PlatformBuild.Require(); err != nil {
 		return errors.Wrap(err, "platform generated Dockerfile build")
 	}
 	// 确保 builder & runner 镜像可用：落在工作空间生效镜像源路径下的按自定义镜像向仓库确认，
