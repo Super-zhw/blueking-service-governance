@@ -15,7 +15,6 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	bkmsworkspace "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
-	componentdevmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appdefaults"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
@@ -131,8 +130,8 @@ var _ = Describe("Application default resolution", func() {
 		spec := resolved.Environments[0]
 		Expect(spec.EnvName).To(Equal(development.Name))
 		Expect(*spec.DevMode.Enabled).To(BeTrue())
-		Expect(*spec.DevMode.WorkPath).To(Equal(componentdevmode.TafWorkPath))
-		Expect(*spec.DevMode.MountPath).To(Equal(componentdevmode.TafMountPath))
+		Expect(*spec.DevMode.WorkPath).To(Equal(devmode.TafWorkPath))
+		Expect(*spec.DevMode.MountPath).To(Equal(devmode.TafMountPath))
 
 		rules, err := ruleStore.List(ctx, appdefaults.ByWorkspace(workspace.ID))
 		Expect(err).NotTo(HaveOccurred())
@@ -196,8 +195,8 @@ func devModeRule(workspaceID, envType string, enabled bool) *appdefaults.Rule {
 func trpcProps() devmode.Props {
 	return devmode.Props{
 		ScriptSet: devmode.ScriptSetTRPC,
-		WorkPath:  componentdevmode.TrpcWorkPath,
-		MountPath: componentdevmode.TrpcMountPath,
+		WorkPath:  devmode.TrpcWorkPath,
+		MountPath: devmode.TrpcMountPath,
 	}
 }
 
@@ -205,7 +204,7 @@ func trpcProps() devmode.Props {
 func tafProps() devmode.Props {
 	return devmode.Props{
 		ScriptSet: devmode.ScriptSetTAF,
-		WorkPath:  componentdevmode.TafWorkPath,
-		MountPath: componentdevmode.TafMountPath,
+		WorkPath:  devmode.TafWorkPath,
+		MountPath: devmode.TafMountPath,
 	}
 }

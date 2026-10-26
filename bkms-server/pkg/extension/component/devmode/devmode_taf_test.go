@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
 
@@ -245,7 +246,7 @@ var _ = Describe("DevMode Component TAF", func() {
 			builder := devmode.New(config)
 			command := builder.BuildCommand()
 			Expect(command).To(HaveLen(1))
-			Expect(command[0]).To(Equal(devmode.TafMountPath + "/init.sh"))
+			Expect(command[0]).To(Equal(devmodecap.TafMountPath + "/init.sh"))
 		})
 
 		It("should use taf mount path for init.sh", func() {

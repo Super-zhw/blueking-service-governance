@@ -17,7 +17,7 @@
 | M0 | 新模型字段、框架目录、兼容读取、扫描工具 | 0、1 | — | ✅ #225 |
 | M1 | 能力集合新路径（只新增，不接入） | 2 | 1 | ✅ |
 | M2 | 能力执行端切换到能力集合 | 2、3D | 1 | ✅ #302 |
-| M3 | 能力 pkg 划分（纯移动） | — | 1 | 🚧 |
+| M3 | 能力 pkg 划分（纯移动） | — | 1 | 🚧 #307 |
 | M4 | 运行链路识别 bkmsApp：渲染分派、部署预检、集群依赖等 | 3A、3C、3E | 2 | ⬜ |
 | M5 | 创建与修改流程统一：编排合并、新旧字段双写、blank 后端闭环 | 3B、3F | 2 | ⬜ |
 | M6 | 新 API 上线，旧 API 改薄适配层 | 4（服务端） | 2 | ⬜ |
@@ -75,13 +75,13 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M3 能力 pkg 划分
 
-状态：实施中。方案见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
+状态：已实现，PR #307。方案见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
 
-**范围：** 能力声明移到 `pkg/capability/<能力>/`（一个能力一个包，北极星两个能力合并为 `polaris`），并去掉标识符中重复的能力前缀；组装 `Set` / `Of` 保留在 `runtimemod/mods`；执行代码不动；`pkg/framework/*` 随 M4。
+**范围：** 能力声明移到 `pkg/capability/<能力>/`（一个能力一个包，北极星两个能力合并为 `polaris`），并去掉标识符中重复的能力前缀；组装 `Set` / `Of` 保留在 `runtimemod/mods`；顺带处理遗留项 L-2、L-4、L-7；其余执行代码不动；`pkg/framework/*` 随 M4。
 
-**行为变化：** 无，零逻辑 diff。
+**行为变化：** 无，只移动代码，不改逻辑。
 
-**退出条件：** `mods` 下只剩组装与测试；能力包只依赖 `runtimemod`、`appruntime`；遗留项已登记；`make lint`、`make test` 通过。
+**退出条件：** `mods` 下只剩组装与测试；能力包不依赖 `runtimemod/mods`；遗留项已登记；`make lint`、`make test` 通过。
 
 ---
 
@@ -186,17 +186,17 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## 遗留项
 
-M3 只移动了能力声明，执行代码仍在原包。每个里程碑结束前按"检查方式"复核，处理后在此处与 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md) §5 同时标记。检索需加 `--no-ignore-vcs`，否则 `rg` 会因 `.gitignore` 的 `build/` 跳过 `pkg/build`。
+M3 移动了能力声明并处理了 L-2、L-4、L-7，其余执行代码仍在原包。每个里程碑结束前按"检查方式"复核，处理后在此处与 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md) §5 同时标记。检索需加 `--no-ignore-vcs`，否则 `rg` 会因 `.gitignore` 的 `build/` 跳过 `pkg/build`。
 
 | 编号 | 事项 | 处理时机 | 状态 |
 | --- | --- | --- | --- |
 | L-1 | devMode 执行代码收敛到 `capability/devmode` | 不晚于 M9 | ⬜ |
-| L-2 | `extension/component/devmode/constants.go` 中的路径常量别名 | 同 L-1 | ⬜ |
+| L-2 | `extension/component/devmode/constants.go` 中的路径常量别名 | M3 | ✅ |
 | L-3 | devMode 渲染仍读 AppSpec 持久化路径 | M9 | ⬜ |
-| L-4 | platformBuild 执行代码迁移 | 不晚于 M9 | ⬜ |
+| L-4 | platformBuild 执行代码迁移 | M3 | ✅ |
 | L-5 | adminCommand 协议实现进 `pkg/framework/*`；管理命令接口合并 | M4 / M6 | ⬜ |
 | L-6 | APM 解析实现进 `pkg/framework/*` | M4 | ⬜ |
-| L-7 | 北极星服务名校验迁移 | 不晚于 M9 | ⬜ |
+| L-7 | 北极星服务名校验迁移 | M3 | ✅ |
 | L-8 | 北极星补丁器进 `pkg/framework/trpc` | M4 | ⬜ |
 | L-9 | BSCP 工作负载类型按渲染结果取值 | M4 | ⬜ |
 | L-10 | frameworkFile 声明尚无执行端读取 | M7 | ⬜ |

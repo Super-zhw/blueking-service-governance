@@ -34,6 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkci"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkci/pipelineparam"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/revision"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/platformbuild"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
@@ -237,9 +238,12 @@ func genPlatformBuildParams(cfg *RepositoryConfig, app *bkmsapp.Application) (ma
 		return params, nil
 	}
 
-	language, err := getPlatformDockerfileLanguage(app)
+	if app == nil {
+		return nil, errors.New("application is required for platform image build")
+	}
+	language, err := platformbuild.DockerfileLanguage(mods.Of(app).PlatformBuild)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "platform image build")
 	}
 
 	platBuildCfg := cfg.PlatformBuildConfig
@@ -298,18 +302,6 @@ func encodeDockerBuildArgNames(names []string) (string, error) {
 		return "", errors.Wrap(err, "marshal Docker build arg names")
 	}
 	return string(data), nil
-}
-
-func getPlatformDockerfileLanguage(app *bkmsapp.Application) (string, error) {
-	if app == nil {
-		return "", errors.New("application is required for platform image build")
-	}
-	runtimeMods := mods.Of(app)
-	props, err := runtimeMods.PlatformBuild.Require()
-	if err != nil {
-		return "", errors.Wrap(err, "platform image build")
-	}
-	return props.DockerfileLanguage, nil
 }
 
 // genPipelineBuildRepoAndImageParams 生成蓝盾流水线构建参数（镜像和仓库版本信息相关）

@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
 )
@@ -158,7 +159,7 @@ var _ = Describe("PatchGameDeployment TRPC", func() {
 			for _, m := range mainContainer.VolumeMounts {
 				if m.Name == devmode.ConfigMapResourceName("my-service") {
 					mountFound = true
-					Expect(m.MountPath).To(Equal(devmode.TrpcMountPath))
+					Expect(m.MountPath).To(Equal(devmodecap.TrpcMountPath))
 					break
 				}
 			}

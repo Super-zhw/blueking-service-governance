@@ -34,6 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkci/pipelinevar"
 	imgbuild "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/revision"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/platformbuild"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
@@ -100,8 +101,7 @@ func (s *Service) validateBeforeBuild(ctx context.Context, app *bkmsapp.Applicat
 		return errors.New("application must not be nil for platform generated Dockerfile build")
 	}
 	// 平台生成 Dockerfile 的支持范围由能力声明决定（目前仅 trpc + go）
-	runtimeMods := mods.Of(app)
-	if _, err := runtimeMods.PlatformBuild.Require(); err != nil {
+	if _, err := platformbuild.DockerfileLanguage(mods.Of(app).PlatformBuild); err != nil {
 		return errors.Wrap(err, "platform generated Dockerfile build")
 	}
 	// 确保 builder & runner 镜像可用：落在工作空间生效镜像源路径下的按自定义镜像向仓库确认，

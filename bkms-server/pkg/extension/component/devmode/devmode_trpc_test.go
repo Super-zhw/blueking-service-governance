@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
@@ -231,7 +232,7 @@ var _ = Describe("DevMode Component TRPC", func() {
 			builder := devmode.New(config)
 			command := builder.BuildCommand()
 			Expect(command).To(HaveLen(1))
-			Expect(command[0]).To(Equal(devmode.TrpcMountPath + "/init.sh"))
+			Expect(command[0]).To(Equal(devmodecap.TrpcMountPath + "/init.sh"))
 		})
 
 		It("should use custom mount path for init.sh", func() {
@@ -279,7 +280,7 @@ var _ = Describe("Unsupported stack", func() {
 	It("should return props for a trpc app", func() {
 		props, err := devmode.RequireProps(&bkmsapp.Application{ID: "trpc-app", Type: bkmsapp.AppTypeTRPC})
 		Expect(err).NotTo(HaveOccurred())
-		Expect(props.WorkPath).To(Equal(devmode.TrpcWorkPath))
+		Expect(props.WorkPath).To(Equal(devmodecap.TrpcWorkPath))
 	})
 
 	It("should reject an app whose stack does not support dev mode", func() {

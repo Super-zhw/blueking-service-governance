@@ -20,16 +20,15 @@ package devmode_test
 
 import (
 	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 )
 
 // trpcProps 返回 tRPC 技术栈的开发模式能力参数。
 func trpcProps() devmodecap.Props {
 	return devmodecap.Props{
 		ScriptSet:  devmodecap.ScriptSetTRPC,
-		WorkPath:   devmode.TrpcWorkPath,
-		MountPath:  devmode.TrpcMountPath,
-		BinaryPath: devmode.TrpcBinaryPath,
+		WorkPath:   devmodecap.TrpcWorkPath,
+		MountPath:  devmodecap.TrpcMountPath,
+		BinaryPath: devmodecap.TrpcBinaryPath,
 	}
 }
 
@@ -37,7 +36,7 @@ func trpcProps() devmodecap.Props {
 func tafProps() devmodecap.Props {
 	return devmodecap.Props{
 		ScriptSet: devmodecap.ScriptSetTAF,
-		WorkPath:  devmode.TafWorkPath,
-		MountPath: devmode.TafMountPath,
+		WorkPath:  devmodecap.TafWorkPath,
+		MountPath: devmodecap.TafMountPath,
 	}
 }

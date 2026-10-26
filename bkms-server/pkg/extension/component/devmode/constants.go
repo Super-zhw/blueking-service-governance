@@ -39,39 +39,19 @@ const (
 	EnvTypeProduction = string(env.TypeProduction)
 )
 
+// ConfigMapResourceSuffix ConfigMap 资源名称后缀
+const ConfigMapResourceSuffix = "-devmode-scripts"
+
+// 脚本路径，根目录与挂载目录取自能力声明 capability/devmode
 const (
-	// ConfigMapResourceSuffix ConfigMap 资源名称后缀
-	ConfigMapResourceSuffix = "-devmode-scripts"
-
-	// ScriptsSubDir 脚本子目录名称
-	ScriptsSubDir = "configmap-scripts"
-)
-
-// 开发模式 Kubernetes 资源名称和路径常量
-
-// trpc 相关常量，路径取值以能力声明为准
-const (
-	// TrpcBinaryPath trpc 二进制文件路径
-	TrpcBinaryPath = devmodecap.TrpcBinaryPath
-	// TrpcWorkPath trpc 开发模式根目录
-	TrpcWorkPath = devmodecap.TrpcWorkPath
-	// TrpcMountPath trpc 脚本文件挂载路径
-	TrpcMountPath = devmodecap.TrpcMountPath
 	// TrpcInitScriptPath trpc init.sh 脚本的完整路径
-	TrpcInitScriptPath = TrpcMountPath + "/init.sh"
+	TrpcInitScriptPath = devmodecap.TrpcMountPath + "/init.sh"
 	// TrpcStartScriptPath trpc-start.sh 在 init.sh 拷贝出的脚本目录中的路径（仅 shell 模式使用），
 	// 与 start.sh 等脚本一样在 Pod 启动时固定，不随 ConfigMap 热更新变化
-	TrpcStartScriptPath = TrpcWorkPath + "/scripts/" + KeyTrpcStartScript
-)
+	TrpcStartScriptPath = devmodecap.TrpcWorkPath + "/scripts/" + KeyTrpcStartScript
 
-// taf 相关常量，路径取值以能力声明为准
-const (
-	// TafWorkPath taf 开发模式根目录
-	TafWorkPath = devmodecap.TafWorkPath
-	// TafMountPath taf 脚本文件挂载路径
-	TafMountPath = devmodecap.TafMountPath
 	// TafInitScriptPath taf init.sh 脚本的完整路径
-	TafInitScriptPath = TafMountPath + "/init.sh"
+	TafInitScriptPath = devmodecap.TafMountPath + "/init.sh"
 )
 
 // ConfigMap Data 中的脚本文件 key（同时也是挂载后的文件名）

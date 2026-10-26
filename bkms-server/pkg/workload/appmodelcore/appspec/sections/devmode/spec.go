@@ -23,19 +23,19 @@ import (
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/v2/bson"
 
-	componentdevmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 )
 
 // allowedWorkPaths 允许的 WorkPath 值（根据应用类型不同）
 var allowedWorkPaths = []string{
-	componentdevmode.TrpcWorkPath,
-	componentdevmode.TafWorkPath,
+	devmodecap.TrpcWorkPath,
+	devmodecap.TafWorkPath,
 }
 
 // allowedMountPaths 允许的 MountPath 值（根据应用类型不同）
 var allowedMountPaths = []string{
-	componentdevmode.TrpcMountPath,
-	componentdevmode.TafMountPath,
+	devmodecap.TrpcMountPath,
+	devmodecap.TafMountPath,
 }
 
 // Spec stores dev mode settings.

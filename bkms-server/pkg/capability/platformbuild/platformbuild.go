@@ -20,6 +20,8 @@
 package platformbuild
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
@@ -49,4 +51,15 @@ var Spec = runtimemod.Spec[Props]{
 			return runtimemod.Unsupported[Props]()
 		}
 	},
+}
+
+// DockerfileLanguage 返回平台生成 Dockerfile 使用的语言；技术栈不支持平台构建时返回错误。
+//
+// 构建前置校验与实际构建都通过它取语言，两处判断保持一致。
+func DockerfileLanguage(mod runtimemod.Mod[Props]) (string, error) {
+	props, err := mod.Require()
+	if err != nil {
+		return "", errors.Wrap(err, "resolve dockerfile language")
+	}
+	return props.DockerfileLanguage, nil
 }

@@ -1,10 +1,8 @@
 # 阶段 2 收尾：能力包划分（M3）
 
-状态：已实现，待提 PR。
+状态：已实现，PR #307。
 
-对应 [里程碑](./bkms_app_runtime_model_milestones.md) M3。前置为 M2（PR #302）合入。本阶段只移动能力声明并调整包名与引用，不改任何逻辑。
-
-能力的整体分层与边界见 [能力全景与分层](./bkms_app_runtime_model_capability_map.md)：本阶段处理其中的 L5（技术栈能力），L6（框架实现）随 M4。
+对应 [里程碑](./bkms_app_runtime_model_milestones.md) M3。前置为 M2（PR #302）合入。本阶段移动能力声明并调整包名与引用，顺带把 L-2、L-4、L-7 的执行代码移入能力包；只移动，不改逻辑。
 
 ---
 
@@ -13,11 +11,11 @@
 | 问题 | 结论 |
 | --- | --- |
 | 目录粒度 | 一个能力一个目录；北极星两个能力合并为 `polaris/` |
-| 移动范围 | 只移动能力声明（Spec、Props、常量）；执行代码留在原包，遗留项见 §5 |
+| 移动范围 | 移动能力声明（Spec、Props、常量）；执行代码中 L-2、L-4、L-7 随本阶段移入，其余留在原包，见 §5 |
+| 执行函数入参 | 能力包内的执行函数接收 `mods.Of(app).<能力>`，不自行解析技术栈，避免与 `mods` 循环依赖 |
 | 框架协议实现 | `pkg/framework/*` 不在本阶段拆分，随 M4 渲染分派一起做 |
 | 组装包 | `Set`、`Of`、`Resolve`、`Matrix` 保留在 `runtimemod/mods`，调用方继续使用 `mods.Of`；该目录只剩组装与测试 |
 | 基础包 | `pkg/core/appruntime/runtimemod` 不动 |
-| 分层对应 | `pkg/capability/*` 对应能力全景的 L5（技术栈能力），`pkg/framework/*` 对应 L6（框架实现）；L1–L4 的代码不动 |
 
 ---
 
@@ -28,10 +26,10 @@ pkg/core/appruntime/runtimemod/       基础：ModID、ReasonCode、Mod、Spec�
 pkg/core/appruntime/runtimemod/mods/  组装：Set、Of、Resolve、Matrix、Public（保留）
 pkg/capability/frameworkfile/         框架配置文件
 pkg/capability/devmode/               开发模式
-pkg/capability/platformbuild/         平台构建
+pkg/capability/platformbuild/         平台构建：声明 + DockerfileLanguage
 pkg/capability/admincommand/          admin 命令
 pkg/capability/apmservicename/        APM 服务名提取
-pkg/capability/polaris/               servicecheck.go（服务名校验）、frameworkpatch.go（注册信息注入）
+pkg/capability/polaris/               servicecheck.go（服务名校验：声明 + CheckServiceName）、frameworkpatch.go（注册信息注入）
 pkg/capability/bscpworkloadmeta/      BSCP 元信息自动填充
 ```
 
@@ -39,10 +37,10 @@ pkg/capability/bscpworkloadmeta/      BSCP 元信息自动填充
 
 ```
 执行代码 ──▶ runtimemod/mods ──▶ pkg/capability/<能力> ──▶ runtimemod ──▶ appruntime
-    └──────────────────────────────▶ pkg/capability/<能力>（取 Props、常量）
+    └──────────────────────────────▶ pkg/capability/<能力>（取 Props、常量，调用执行函数）
 ```
 
-- `pkg/capability/<能力>`：只依赖 `runtimemod`、`appruntime` 和标准库。
+- `pkg/capability/<能力>`：不依赖 `runtimemod/mods`。声明只依赖 `runtimemod`、`appruntime`；执行函数可依赖底层领域包（如 `polaris` 依赖 `core/app/appcfg`），但不能依赖引用它的业务包。
 - `runtimemod/mods`：依赖各能力包、`runtimemod`、`appruntime`、`core/app`、`common/logging`。它虽然位于基础包目录下，但职责是组装，不属于基础包。
 - 反向依赖会形成循环，编译期即报错，不再另加 import 约束测试。
 
@@ -85,6 +83,9 @@ pkg/capability/bscpworkloadmeta/      BSCP 元信息自动填充
 | 组装与测试 | `mods/set.go`、`mods/set_test.go`、`mods/declaration_test.go` | 改为引用各能力包，只改 import 与标识符 |
 | 引用方 | `pkg/extension/component/devmode/{constants,devmode}.go`、`pkg/workload/appmodelcore/appdefaults/resolve.go`、`pkg/workload/appmodelcore/appspec/handler/dev_mode.go`、`pkg/workload/appmodelcore/{trpc,taf}/admincmd/admin_cmd.go`、`pkg/observability/bkmonitor/apm.go` | 只改引用 Props、常量的 import 与标识符；只调用 `mods.Of` 的文件不改 |
 | 引用方测试 | `pkg/extension/component/devmode/helpers_test.go`、`pkg/workload/appmodelcore/appdefaults/resolve_test.go`、`pkg/workload/appmodelcore/trpc/admincmd/admin_cmd_test.go` | 同上 |
+| L-2 | `extension/component/devmode/constants.go`；引用方 `appspec/sections/devmode/spec.go` 及若干测试 | 删除路径常量别名与重复的 `ScriptsSubDir`，引用方直接用 `capability/devmode` |
+| L-4 | `build/image/build.go`、`build/build/service.go` | `getPlatformDockerfileLanguage` 移入 `platformbuild.DockerfileLanguage`，构建前置校验与实际构建共用 |
+| L-7 | `extension/addon/polaris/trpc_validate.go` → `config_warnings.go`；`core/app/appcfg/trpc_utils.go` 删除 | 逐环境校验、提示文案、tRPC 服务名解析移入 `polaris.CheckServiceName`；addon 只保留 immediate 判断与应用加载；解析测试随迁 |
 | 文档 | 总体方案 §4.5、phase1 §6、里程碑 M2 / M3 状态 | 同步新路径 |
 
 实施顺序：
@@ -99,19 +100,19 @@ pkg/capability/bscpworkloadmeta/      BSCP 元信息自动填充
 
 ## 5. 遗留项
 
-本阶段只移动声明，执行代码仍在原包。下表登记所有遗留项，后续每个里程碑结束前按"检查方式"复核。
+本阶段处理了 L-2、L-4、L-7，其余执行代码仍在原包。下表登记所有遗留项，后续每个里程碑结束前按"检查方式"复核。
 
 > 检查时注意：仓库 `.gitignore` 的 `build/` 会让 `rg` 跳过 `pkg/build`，检索需加 `--no-ignore-vcs`。
 
 | 编号 | 能力 / 事项 | 执行代码当前位置 | 目标 | 处理时机 | 检查方式 |
 | --- | --- | --- | --- | --- | --- |
 | L-1 | devMode 执行代码 | `extension/component/devmode`（含 handler、脚本）、`appspec/sections/devmode`、`appspec/handler/dev_mode.go`、`appdefaults/resolve.go`、`workload/builder.go` | 收敛到 `capability/devmode` | 待排期，不晚于 M9 | `rg --no-ignore-vcs -l 'capability/devmode"' pkg` 结果只剩该目录 |
-| L-2 | devMode 路径常量重复 | `extension/component/devmode/constants.go` 以别名引用 `capability/devmode` 的路径常量 | 与 L-1 一起删除别名常量 | 同 L-1 | `rg -n 'TrpcWorkPath =' pkg/extension` 无结果 |
+| L-2 ✅ | devMode 路径常量重复 | 已处理：别名常量删除，引用方直接用 `capability/devmode` | — | M3 | `rg -n 'TrpcWorkPath =' pkg/extension` 无结果 |
 | L-3 | devMode 渲染仍读 AppSpec 持久化路径 | `workload/builder.go` 用 AppSpec 的 `workPath` / `mountPath` 覆盖能力参数 | 只用能力参数；AppSpec 中两字段删除 | M9 | `rg -n 'DevMode.WorkPath' pkg/workload/appmodelcore/workload` 无结果 |
-| L-4 | platformBuild 执行代码 | `build/build/service.go`、`build/image/build.go` | `capability/platformbuild` | 待排期，不晚于 M9 | `rg --no-ignore-vcs -n 'PlatformBuild.Require' pkg` 只出现在目标目录 |
+| L-4 ✅ | platformBuild 执行代码 | 已处理：取 Dockerfile 语言移入 `platformbuild.DockerfileLanguage`；其余构建流程与技术栈无关，留在 `pkg/build` | — | M3 | `rg --no-ignore-vcs -n 'PlatformBuild\.Require' pkg` 无结果 |
 | L-5 | adminCommand 执行代码 | `appmodelcore/{trpc,taf}/admincmd`、`workload/instance/handler/admin_cmd.go` | 能力壳进 `capability/admincommand`，协议实现进 `pkg/framework/*` | 协议实现随 M4；接口合并随 M6 | `ls pkg/workload/appmodelcore/*/admincmd` 不存在 |
 | L-6 | apmServiceName 执行代码 | `observability/bkmonitor/{apm,telemetry_config}.go` | 解析器分派进 `capability/apmservicename`，解析实现进 `pkg/framework/*` | 随 M4 | `rg -n 'APMServiceName.Require' pkg/observability` 无结果 |
-| L-7 | 北极星服务名校验 | `extension/addon/polaris/trpc_validate.go`、`core/app/appcfg/trpc_utils.go` | `capability/polaris` | 待排期，不晚于 M9 | `rg -l 'trpc_validate' pkg/extension` 无结果 |
+| L-7 ✅ | 北极星服务名校验 | 已处理：校验与 tRPC 服务名解析移入 `polaris.CheckServiceName`；addon 只保留 immediate 判断与应用加载 | 解析可随 M4 再移入 `pkg/framework/trpc` | M3 | `rg -n 'parseTrpcServiceNames' pkg` 只出现在 `capability/polaris` |
 | L-8 | 北极星注册信息注入 | `appmodelcore/trpc/plugin.go`、`appmodelcore/trpc/patcher` | 开关进 `capability/polaris`，补丁器进 `pkg/framework/trpc` | 随 M4 | `rg -l 'package patcher' pkg/workload` 无结果 |
 | L-9 | BSCP 元信息自动填充 | `extension/bscpcfg/handler/metadata.go`、`cmd/migration/app_bscpcfg_mgr.go` | `capability/bscpworkloadmeta`；工作负载类型按渲染结果取值 | 随 M4 | `rg -n 'k8skind.GameDeploy' pkg/extension/bscpcfg cmd` 无结果 |
 | L-10 | frameworkFile 无执行端读取 | 内容校验按存储的 `FileFormat` 分派（`core/app/appcfg`），未读能力声明 | 前端改读能力集合；后端校验按需接入 | M7 | `rg --no-ignore-vcs -n '\.FrameworkFile\.' pkg` 有消费方 |
@@ -123,7 +124,7 @@ pkg/capability/bscpworkloadmeta/      BSCP 元信息自动填充
 
 ## 6. 验收
 
-- diff 只包含文件移动、import 与标识符替换、注释；无逻辑改动。
+- diff 只包含文件与函数移动、import 与标识符替换、注释；无逻辑改动。
 - `runtimemod/mods` 下只剩 `set.go` 与测试，能力声明全部位于 `pkg/capability/<能力>/`。
 - 对外 JSON 不变：golden 测试原样通过。
 - `go build ./...`、`make lint`、`make test` 通过（`bkintegrations/bkci` 等既有环境相关失败除外）。
