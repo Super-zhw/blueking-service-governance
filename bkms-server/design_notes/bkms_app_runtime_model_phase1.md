@@ -41,11 +41,12 @@ func ByLanguage[P Props](table map[string]P) func(string, string) Mod[P]
 简单能力一行即可：
 
 ```go
-var FrameworkFile = runtimemod.Spec[FrameworkFileProps]{
+// pkg/capability/frameworkfile
+var Spec = runtimemod.Spec[Props]{
     ID: runtimemod.ModFrameworkFile,
-    Resolve: runtimemod.ByFramework(map[string]FrameworkFileProps{
-        appruntime.FrameworkTRPC: {Format: FrameworkFileYAML},
-        appruntime.FrameworkTAF:  {Format: FrameworkFileTAF},
+    Resolve: runtimemod.ByFramework(map[string]Props{
+        appruntime.FrameworkTRPC: {Format: FormatYAML},
+        appruntime.FrameworkTAF:  {Format: FormatTAF},
     }),
 }
 ```
@@ -169,10 +170,11 @@ M2 交付：执行器覆盖测试（各能力所在模块），保证凡 `Suppor
 
 ```
 pkg/core/appruntime/runtimemod/        # 基础：ModID、ReasonCode、Mod、Spec、工厂、对外结构
-pkg/core/appruntime/runtimemod/mods/   # 具体能力声明、Set、Of(app)
+pkg/core/appruntime/runtimemod/mods/   # 组装：Set、Of(app)、Resolve、Matrix
+pkg/capability/<能力>/                 # 各能力声明（M3 起）
 ```
 
-划分原则：基础包只放与具体能力无关的类型和工具；具体能力集中在 `mods`，每个能力一个文件。M3 再把各能力连同声明搬到 `pkg/capability/<能力>/`，届时 `Set` 的组装独立成一个薄包。
+划分原则：基础包只放与具体能力无关的类型和工具；能力声明一个能力一个包；`mods` 只负责组装。详见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
 
 ---
 

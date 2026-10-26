@@ -16,36 +16,24 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package mods
+package polaris
 
 import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
 
-// PlatformBuildProps 平台构建的执行参数。
-type PlatformBuildProps struct {
-	// DockerfileLanguage 传给流水线的 Dockerfile 生成语言。
-	DockerfileLanguage string
-}
+// FrameworkPatchProps 无参数。
+type FrameworkPatchProps struct{}
 
 // Public 无对外内容。
-func (p PlatformBuildProps) Public() any { return nil }
+func (p FrameworkPatchProps) Public() any { return nil }
 
-// PlatformBuild 平台构建：由平台生成 Dockerfile 并构建镜像。仅 tRPC + go 支持。
-var PlatformBuild = runtimemod.Spec[PlatformBuildProps]{
-	ID: runtimemod.ModPlatformBuild,
-	Resolve: func(framework, language string) runtimemod.Mod[PlatformBuildProps] {
-		if framework != appruntime.FrameworkTRPC {
-			return runtimemod.Unsupported[PlatformBuildProps]()
-		}
-		switch language {
-		case appruntime.LanguageGo:
-			return runtimemod.Supported(PlatformBuildProps{DockerfileLanguage: appruntime.LanguageGo})
-		case "":
-			return runtimemod.Incomplete[PlatformBuildProps]()
-		default:
-			return runtimemod.Unsupported[PlatformBuildProps]()
-		}
-	},
+// FrameworkPatch 北极星注册信息注入：渲染框架配置文件时，把北极星注册信息写入
+// plugins.registry.polaris.service，已有该配置时不覆盖。仅 tRPC 支持。
+var FrameworkPatch = runtimemod.Spec[FrameworkPatchProps]{
+	ID: runtimemod.ModPolarisFrameworkPatch,
+	Resolve: runtimemod.ByFramework(map[string]FrameworkPatchProps{
+		appruntime.FrameworkTRPC: {},
+	}),
 }

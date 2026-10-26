@@ -36,6 +36,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/admincommand"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
@@ -125,7 +126,7 @@ func NewAdminService(
 	if err != nil {
 		return nil, errors.Wrap(err, "admin command")
 	}
-	if props.Protocol != mods.AdminProtocolTAF {
+	if props.Protocol != admincommand.ProtocolTAF {
 		return nil, errors.New("only support taf app")
 	}
 	if len(instanceIDs) == 0 {

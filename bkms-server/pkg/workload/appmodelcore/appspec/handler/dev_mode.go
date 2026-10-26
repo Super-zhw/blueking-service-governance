@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	componentdevmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
@@ -124,7 +125,7 @@ func envDevModeInput(
 }
 
 // devModeProps 取应用的能力参数；技术栈非法或不支持开发模式时返回零值，由渲染阶段给出能力错误。
-func devModeProps(app *bkmsapp.Application) mods.DevModeProps {
+func devModeProps(app *bkmsapp.Application) devmode.Props {
 	set := mods.Of(app)
 	return set.DevMode.Props
 }

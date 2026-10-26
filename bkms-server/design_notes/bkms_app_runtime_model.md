@@ -209,7 +209,7 @@ flowchart LR
 | `polarisFrameworkPatch` | trpc | 无参数；仅指配置注入，不等于 Polaris 注册本身 |
 | `bscpWorkloadMeta` | trpc | 无参数；工作负载类型取实际渲染结果；TAF 尚未接入 |
 
-完整定义与对外契约见 [能力集合方案](./bkms_app_runtime_model_phase1.md) §3，此处不再维护第二份清单。判定标准：**支持与否或参数因技术栈不同而变化**才建 Mod。对所有技术栈一致的功能（plain 配置文件、一键构建部署、构建、监控等）、管理方式相关（部署、渲染、实例、AppSpec、组件）、环境/集群相关（GPA、HostPort、端口池、集群 addon）都不建 Mod。
+完整定义与对外契约见 [能力集合方案](./bkms_app_runtime_model_phase1.md) §3，此处不再维护第二份清单。 全部能力的分层与归属判断见 [能力全景与分层](./bkms_app_runtime_model_capability_map.md)。判定标准：**支持与否或参数因技术栈不同而变化**才建 Mod。对所有技术栈一致的功能（plain 配置文件、一键构建部署、构建、监控等）、管理方式相关（部署、渲染、实例、AppSpec、组件）、环境/集群相关（GPA、HostPort、端口池、集群 addon）都不建 Mod。
 
 ### 4.3 解析规则
 
@@ -238,11 +238,12 @@ AppSpec.DevMode 保留 Enabled 等用户配置；模块 props 为平台定义的
 | 包 | 职责 | 依赖约束 |
 | --- | --- | --- |
 | `pkg/core/appruntime/runtimemod` | ModID、ReasonCode、Mod、Spec、查表工厂、对外结构 | 只依赖 `appruntime` 与标准库 |
-| `pkg/core/appruntime/runtimemod/mods` | 各能力的声明、props 类型、公开投影、`Set` 与 `Of(app)` | 只依赖 `appruntime`、`runtimemod`、`core/app` |
+| `pkg/capability/<能力>` | 各能力的声明、props 类型、公开投影，一个能力一个包 | 只依赖 `appruntime`、`runtimemod` |
+| `pkg/core/appruntime/runtimemod/mods` | 组装：`Set`、`Of(app)`、`Resolve`、`Matrix` | 依赖各能力包、`appruntime`、`runtimemod`、`core/app` |
 | 应用运行时组装 | `mods.Of(app)`：Application → 技术栈 → 能力集合 | 不放在 `core/app` 方法里，避免 core/app 反向依赖 |
 | `appmodelcore/trpc`、`taf`、blank 适配器 | 框架配置解码、校验、默认值、渲染/初始化差异 | 保留框架知识；通用业务通过 Mod/适配器接口调用 |
 
-不要求第一版把各领域包搬家。M3 再把各能力连同声明搬到 `pkg/capability/<能力>/`，届时 `Set` 的组装独立成薄包；禁止让 core/app 直接 import devmode/build/admincmd 来拼能力集合。
+M3 起能力声明位于 `pkg/capability/<能力>/`，执行代码仍在原业务包，遗留项见里程碑文档。禁止让 core/app 直接 import devmode/build/admincmd 来拼能力集合。
 
 ## 5. API 与产品契约
 

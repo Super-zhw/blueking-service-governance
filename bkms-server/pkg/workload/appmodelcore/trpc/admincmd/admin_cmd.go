@@ -36,6 +36,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/admincommand"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
@@ -116,7 +117,7 @@ type TrpcAdminService struct {
 	EnvVarsReader *envvars.UnifiedEnvVarsReader
 
 	// Props admin 命令能力的执行参数
-	Props mods.AdminCommandProps
+	Props admincommand.Props
 	// App 应用
 	App *bkmsapp.Application
 	// AppModel 应用模型
@@ -165,7 +166,7 @@ func NewAdminService(
 	if err != nil {
 		return nil, errors.Wrap(err, "admin command")
 	}
-	if props.Protocol != mods.AdminProtocolTRPC {
+	if props.Protocol != admincommand.ProtocolTRPC {
 		return nil, errors.New("only support trpc app")
 	}
 	s.Props = props
@@ -392,11 +393,11 @@ func (s *TrpcAdminService) MatchConfigValue(ctx context.Context, varName string)
 // GetAdminIP 根据配置和语言类型获取 admin IP 字符串配置
 func (s *TrpcAdminService) GetAdminIP(cfg *AdminConfig) string {
 	switch s.Props.ConfigLayout {
-	case mods.TrpcAdminLayoutNested:
+	case admincommand.TrpcLayoutNested:
 		return cfg.Server.Admin.IP
-	case mods.TrpcAdminLayoutFlat:
+	case admincommand.TrpcLayoutFlat:
 		return cfg.Server.AdminIP
-	case mods.TrpcAdminLayoutNestedPrefixed:
+	case admincommand.TrpcLayoutNestedPrefixed:
 		return cfg.Server.Admin.AdminIP
 	default:
 		return ""
@@ -437,11 +438,11 @@ func (s *TrpcAdminService) Precheck(ctx context.Context) error {
 // GetAdminPort 根据配置和语言类型获取 admin Port 字符串配置
 func (s *TrpcAdminService) GetAdminPort(cfg *AdminConfig) (string, error) {
 	switch s.Props.ConfigLayout {
-	case mods.TrpcAdminLayoutNested:
+	case admincommand.TrpcLayoutNested:
 		return cfg.Server.Admin.Port, nil
-	case mods.TrpcAdminLayoutFlat:
+	case admincommand.TrpcLayoutFlat:
 		return cfg.Server.AdminPort, nil
-	case mods.TrpcAdminLayoutNestedPrefixed:
+	case admincommand.TrpcLayoutNestedPrefixed:
 		return cfg.Server.Admin.AdminPort, nil
 	default:
 		return "", errors.Errorf("unsupported admin config layout: %s", s.Props.ConfigLayout)

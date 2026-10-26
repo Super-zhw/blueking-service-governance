@@ -10,9 +10,9 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxtest"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	bkmsworkspace "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	componentdevmode "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
@@ -193,18 +193,18 @@ func devModeRule(workspaceID, envType string, enabled bool) *appdefaults.Rule {
 }
 
 // trpcProps 返回 tRPC 技术栈的开发模式能力参数。
-func trpcProps() mods.DevModeProps {
-	return mods.DevModeProps{
-		ScriptSet: mods.DevModeScriptSetTRPC,
+func trpcProps() devmode.Props {
+	return devmode.Props{
+		ScriptSet: devmode.ScriptSetTRPC,
 		WorkPath:  componentdevmode.TrpcWorkPath,
 		MountPath: componentdevmode.TrpcMountPath,
 	}
 }
 
 // tafProps 返回 TAF 技术栈的开发模式能力参数。
-func tafProps() mods.DevModeProps {
-	return mods.DevModeProps{
-		ScriptSet: mods.DevModeScriptSetTAF,
+func tafProps() devmode.Props {
+	return devmode.Props{
+		ScriptSet: devmode.ScriptSetTAF,
 		WorkPath:  componentdevmode.TafWorkPath,
 		MountPath: componentdevmode.TafMountPath,
 	}

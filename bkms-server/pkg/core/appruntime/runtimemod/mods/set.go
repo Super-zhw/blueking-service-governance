@@ -21,6 +21,13 @@ package mods
 import (
 	"github.com/pkg/errors"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/admincommand"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/apmservicename"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/bscpworkloadmeta"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/frameworkfile"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/platformbuild"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/polaris"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
@@ -35,21 +42,21 @@ type Set struct {
 	Stack appruntime.Stack
 
 	// FrameworkFile 框架配置文件。
-	FrameworkFile runtimemod.Mod[FrameworkFileProps]
+	FrameworkFile runtimemod.Mod[frameworkfile.Props]
 	// DevMode 开发模式。
-	DevMode runtimemod.Mod[DevModeProps]
+	DevMode runtimemod.Mod[devmode.Props]
 	// PlatformBuild 平台生成 Dockerfile 构建。
-	PlatformBuild runtimemod.Mod[PlatformBuildProps]
+	PlatformBuild runtimemod.Mod[platformbuild.Props]
 	// AdminCommand admin 命令。
-	AdminCommand runtimemod.Mod[AdminCommandProps]
+	AdminCommand runtimemod.Mod[admincommand.Props]
 	// APMServiceName APM 服务名提取。
-	APMServiceName runtimemod.Mod[APMServiceNameProps]
+	APMServiceName runtimemod.Mod[apmservicename.Props]
 	// PolarisServiceCheck 北极星服务名校验。
-	PolarisServiceCheck runtimemod.Mod[PolarisServiceCheckProps]
+	PolarisServiceCheck runtimemod.Mod[polaris.ServiceCheckProps]
 	// PolarisFrameworkPatch 北极星注册信息注入。
-	PolarisFrameworkPatch runtimemod.Mod[PolarisFrameworkPatchProps]
+	PolarisFrameworkPatch runtimemod.Mod[polaris.FrameworkPatchProps]
 	// BSCPWorkloadMeta BSCP 元信息自动填充。
-	BSCPWorkloadMeta runtimemod.Mod[BSCPWorkloadMetaProps]
+	BSCPWorkloadMeta runtimemod.Mod[bscpworkloadmeta.Props]
 }
 
 // Of 解析应用的技术栈，得出全部能力。
@@ -76,14 +83,14 @@ func Resolve(stack appruntime.Stack) (Set, error) {
 func resolve(stack appruntime.Stack) Set {
 	return Set{
 		Stack:                 stack,
-		FrameworkFile:         FrameworkFile.ResolveStack(stack),
-		DevMode:               DevMode.ResolveStack(stack),
-		PlatformBuild:         PlatformBuild.ResolveStack(stack),
-		AdminCommand:          AdminCommand.ResolveStack(stack),
-		APMServiceName:        APMServiceName.ResolveStack(stack),
-		PolarisServiceCheck:   PolarisServiceCheck.ResolveStack(stack),
-		PolarisFrameworkPatch: PolarisFrameworkPatch.ResolveStack(stack),
-		BSCPWorkloadMeta:      BSCPWorkloadMeta.ResolveStack(stack),
+		FrameworkFile:         frameworkfile.Spec.ResolveStack(stack),
+		DevMode:               devmode.Spec.ResolveStack(stack),
+		PlatformBuild:         platformbuild.Spec.ResolveStack(stack),
+		AdminCommand:          admincommand.Spec.ResolveStack(stack),
+		APMServiceName:        apmservicename.Spec.ResolveStack(stack),
+		PolarisServiceCheck:   polaris.ServiceCheck.ResolveStack(stack),
+		PolarisFrameworkPatch: polaris.FrameworkPatch.ResolveStack(stack),
+		BSCPWorkloadMeta:      bscpworkloadmeta.Spec.ResolveStack(stack),
 	}
 }
 
@@ -91,14 +98,14 @@ func resolve(stack appruntime.Stack) Set {
 func invalid(stack appruntime.Stack) Set {
 	return Set{
 		Stack:                 stack,
-		FrameworkFile:         FrameworkFile.Invalid(),
-		DevMode:               DevMode.Invalid(),
-		PlatformBuild:         PlatformBuild.Invalid(),
-		AdminCommand:          AdminCommand.Invalid(),
-		APMServiceName:        APMServiceName.Invalid(),
-		PolarisServiceCheck:   PolarisServiceCheck.Invalid(),
-		PolarisFrameworkPatch: PolarisFrameworkPatch.Invalid(),
-		BSCPWorkloadMeta:      BSCPWorkloadMeta.Invalid(),
+		FrameworkFile:         frameworkfile.Spec.Invalid(),
+		DevMode:               devmode.Spec.Invalid(),
+		PlatformBuild:         platformbuild.Spec.Invalid(),
+		AdminCommand:          admincommand.Spec.Invalid(),
+		APMServiceName:        apmservicename.Spec.Invalid(),
+		PolarisServiceCheck:   polaris.ServiceCheck.Invalid(),
+		PolarisFrameworkPatch: polaris.FrameworkPatch.Invalid(),
+		BSCPWorkloadMeta:      bscpworkloadmeta.Spec.Invalid(),
 	}
 }
 

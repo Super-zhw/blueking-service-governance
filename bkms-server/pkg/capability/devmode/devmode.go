@@ -16,45 +16,46 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package mods
+// Package devmode 声明开发模式能力：哪些框架支持开发模式，以及脚本集与容器内路径。
+package devmode
 
 import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
 
-// DevModeScriptSet 开发模式注入的脚本集。
-type DevModeScriptSet string
+// ScriptSet 开发模式注入的脚本集。
+type ScriptSet string
 
 const (
-	// DevModeScriptSetTRPC tRPC 脚本集。
-	DevModeScriptSetTRPC DevModeScriptSet = "trpc"
-	// DevModeScriptSetTAF TAF 脚本集。
-	DevModeScriptSetTAF DevModeScriptSet = "taf"
+	// ScriptSetTRPC tRPC 脚本集。
+	ScriptSetTRPC ScriptSet = "trpc"
+	// ScriptSetTAF TAF 脚本集。
+	ScriptSetTAF ScriptSet = "taf"
 )
 
-// DevModePathScriptsSubDir 脚本所在的子目录。
-const DevModePathScriptsSubDir = "configmap-scripts"
+// ScriptsSubDir 脚本所在的子目录。
+const ScriptsSubDir = "configmap-scripts"
 
 // 开发模式的容器内路径，由平台决定，用户不能修改。
 const (
-	// DevModeTrpcWorkPath tRPC 开发模式根目录。
-	DevModeTrpcWorkPath = "/data/bkms/dev-mode/trpc"
-	// DevModeTrpcMountPath tRPC 脚本挂载目录。
-	DevModeTrpcMountPath = DevModeTrpcWorkPath + "/" + DevModePathScriptsSubDir
-	// DevModeTrpcBinaryPath tRPC 二进制所在目录。
-	DevModeTrpcBinaryPath = "/usr/local/trpc/bin"
+	// TrpcWorkPath tRPC 开发模式根目录。
+	TrpcWorkPath = "/data/bkms/dev-mode/trpc"
+	// TrpcMountPath tRPC 脚本挂载目录。
+	TrpcMountPath = TrpcWorkPath + "/" + ScriptsSubDir
+	// TrpcBinaryPath tRPC 二进制所在目录。
+	TrpcBinaryPath = "/usr/local/trpc/bin"
 
-	// DevModeTafWorkPath TAF 开发模式根目录。
-	DevModeTafWorkPath = "/data/bkms/dev-mode/taf"
-	// DevModeTafMountPath TAF 脚本挂载目录。
-	DevModeTafMountPath = DevModeTafWorkPath + "/" + DevModePathScriptsSubDir
+	// TafWorkPath TAF 开发模式根目录。
+	TafWorkPath = "/data/bkms/dev-mode/taf"
+	// TafMountPath TAF 脚本挂载目录。
+	TafMountPath = TafWorkPath + "/" + ScriptsSubDir
 )
 
-// DevModeProps 开发模式的执行参数。
-type DevModeProps struct {
+// Props 开发模式的执行参数。
+type Props struct {
 	// ScriptSet 脚本集。
-	ScriptSet DevModeScriptSet
+	ScriptSet ScriptSet
 	// WorkPath 开发模式根目录。
 	WorkPath string
 	// MountPath 脚本挂载目录。
@@ -64,28 +65,28 @@ type DevModeProps struct {
 }
 
 // Public 对外展示根目录与挂载目录，与 AppSpec 接口返回的一致。
-func (p DevModeProps) Public() any {
+func (p Props) Public() any {
 	return struct {
 		WorkPath  string `json:"workPath"`
 		MountPath string `json:"mountPath"`
 	}{p.WorkPath, p.MountPath}
 }
 
-// DevMode 开发模式：tRPC、TAF 支持。是否开启、当前环境是否允许，由 devmode 模块在运行时判断。
-var DevMode = runtimemod.Spec[DevModeProps]{
+// Spec 开发模式：tRPC、TAF 支持。是否开启、当前环境是否允许，由 devmode 模块在运行时判断。
+var Spec = runtimemod.Spec[Props]{
 	ID: runtimemod.ModDevMode,
-	Resolve: runtimemod.ByFramework(map[string]DevModeProps{
+	Resolve: runtimemod.ByFramework(map[string]Props{
 		appruntime.FrameworkTRPC: {
-			ScriptSet:  DevModeScriptSetTRPC,
-			WorkPath:   DevModeTrpcWorkPath,
-			MountPath:  DevModeTrpcMountPath,
-			BinaryPath: DevModeTrpcBinaryPath,
+			ScriptSet:  ScriptSetTRPC,
+			WorkPath:   TrpcWorkPath,
+			MountPath:  TrpcMountPath,
+			BinaryPath: TrpcBinaryPath,
 		},
 
 		appruntime.FrameworkTAF: {
-			ScriptSet: DevModeScriptSetTAF,
-			WorkPath:  DevModeTafWorkPath,
-			MountPath: DevModeTafMountPath,
+			ScriptSet: ScriptSetTAF,
+			WorkPath:  TafWorkPath,
+			MountPath: TafMountPath,
 		},
 	}),
 }

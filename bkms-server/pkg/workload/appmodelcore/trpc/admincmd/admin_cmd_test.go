@@ -28,12 +28,12 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxtest"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/admincommand"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris"
@@ -346,6 +346,6 @@ var _ = Describe("TrpcAdminService", func() {
 const unknownLanguage = "unknown"
 
 // adminPropsFor 按语言取 tRPC admin 命令的执行参数，与能力声明保持一致。
-func adminPropsFor(language string) mods.AdminCommandProps {
-	return mods.AdminCommand.Resolve(appruntime.FrameworkTRPC, language).Props
+func adminPropsFor(language string) admincommand.Props {
+	return admincommand.Spec.Resolve(appruntime.FrameworkTRPC, language).Props
 }

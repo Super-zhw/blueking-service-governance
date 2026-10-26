@@ -25,6 +25,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/admincommand"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
@@ -60,7 +62,7 @@ var _ = Describe("Of", func() {
 		set := mods.Of(&bkmsapp.Application{Type: bkmsapp.AppTypeTAF})
 		Expect(set.Stack.Language).To(BeEmpty())
 		Expect(set.DevMode.Supported).To(BeTrue())
-		Expect(set.DevMode.Props.ScriptSet).To(Equal(mods.DevModeScriptSetTAF))
+		Expect(set.DevMode.Props.ScriptSet).To(Equal(devmode.ScriptSetTAF))
 		Expect(set.PlatformBuild.ReasonCode).To(Equal(runtimemod.ReasonUnsupportedStack))
 	})
 
@@ -129,20 +131,20 @@ var _ = Describe("Resolve", func() {
 
 	It("selects the admin config layout per language", func() {
 		Expect(mustResolve(appruntime.FrameworkTRPC, appruntime.LanguageGo).AdminCommand.Props.ConfigLayout).
-			To(Equal(mods.TrpcAdminLayoutNested))
+			To(Equal(admincommand.TrpcLayoutNested))
 		Expect(mustResolve(appruntime.FrameworkTRPC, appruntime.LanguageCpp).AdminCommand.Props.ConfigLayout).
-			To(Equal(mods.TrpcAdminLayoutFlat))
+			To(Equal(admincommand.TrpcLayoutFlat))
 		Expect(mustResolve(appruntime.FrameworkTAF, appruntime.LanguageCpp).AdminCommand.Props.Protocol).
-			To(Equal(mods.AdminProtocolTAF))
+			To(Equal(admincommand.ProtocolTAF))
 	})
 
 	It("registers admin layouts for out-of-catalog languages while keeping them unreachable", func() {
-		Expect(mods.AdminCommand.Resolve(appruntime.FrameworkTRPC, appruntime.LanguagePython).Props.ConfigLayout).
-			To(Equal(mods.TrpcAdminLayoutNested))
-		Expect(mods.AdminCommand.Resolve(appruntime.FrameworkTRPC, appruntime.LanguageNodeJS).Props.ConfigLayout).
-			To(Equal(mods.TrpcAdminLayoutFlat))
-		Expect(mods.AdminCommand.Resolve(appruntime.FrameworkTRPC, appruntime.LanguageJava).Props.ConfigLayout).
-			To(Equal(mods.TrpcAdminLayoutNestedPrefixed))
+		Expect(admincommand.Spec.Resolve(appruntime.FrameworkTRPC, appruntime.LanguagePython).Props.ConfigLayout).
+			To(Equal(admincommand.TrpcLayoutNested))
+		Expect(admincommand.Spec.Resolve(appruntime.FrameworkTRPC, appruntime.LanguageNodeJS).Props.ConfigLayout).
+			To(Equal(admincommand.TrpcLayoutFlat))
+		Expect(admincommand.Spec.Resolve(appruntime.FrameworkTRPC, appruntime.LanguageJava).Props.ConfigLayout).
+			To(Equal(admincommand.TrpcLayoutNestedPrefixed))
 
 		for _, language := range []string{
 			appruntime.LanguageJava, appruntime.LanguageNodeJS, appruntime.LanguagePython,
@@ -165,7 +167,7 @@ var _ = Describe("Resolve", func() {
 		first.DevMode.Props.WorkPath = "/mutated"
 
 		second := mustResolve(appruntime.FrameworkTRPC, appruntime.LanguageGo)
-		Expect(second.DevMode.Props.WorkPath).To(Equal(mods.DevModeTrpcWorkPath))
+		Expect(second.DevMode.Props.WorkPath).To(Equal(devmode.TrpcWorkPath))
 	})
 })
 

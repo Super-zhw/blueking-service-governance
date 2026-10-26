@@ -20,7 +20,7 @@
 package devmode
 
 import (
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 )
 
@@ -52,11 +52,11 @@ const (
 // trpc 相关常量，路径取值以能力声明为准
 const (
 	// TrpcBinaryPath trpc 二进制文件路径
-	TrpcBinaryPath = mods.DevModeTrpcBinaryPath
+	TrpcBinaryPath = devmodecap.TrpcBinaryPath
 	// TrpcWorkPath trpc 开发模式根目录
-	TrpcWorkPath = mods.DevModeTrpcWorkPath
+	TrpcWorkPath = devmodecap.TrpcWorkPath
 	// TrpcMountPath trpc 脚本文件挂载路径
-	TrpcMountPath = mods.DevModeTrpcMountPath
+	TrpcMountPath = devmodecap.TrpcMountPath
 	// TrpcInitScriptPath trpc init.sh 脚本的完整路径
 	TrpcInitScriptPath = TrpcMountPath + "/init.sh"
 	// TrpcStartScriptPath trpc-start.sh 在 init.sh 拷贝出的脚本目录中的路径（仅 shell 模式使用），
@@ -67,9 +67,9 @@ const (
 // taf 相关常量，路径取值以能力声明为准
 const (
 	// TafWorkPath taf 开发模式根目录
-	TafWorkPath = mods.DevModeTafWorkPath
+	TafWorkPath = devmodecap.TafWorkPath
 	// TafMountPath taf 脚本文件挂载路径
-	TafMountPath = mods.DevModeTafMountPath
+	TafMountPath = devmodecap.TafMountPath
 	// TafInitScriptPath taf init.sh 脚本的完整路径
 	TafInitScriptPath = TafMountPath + "/init.sh"
 )

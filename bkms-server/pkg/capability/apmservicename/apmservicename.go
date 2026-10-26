@@ -16,38 +16,39 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package mods
+// Package apmservicename 声明 APM 服务名提取能力：各框架读取服务名的解析方式。
+package apmservicename
 
 import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
 
-// APMConfigParser 读取 APM 服务名的解析方式。
-type APMConfigParser string
+// Parser 读取 APM 服务名的解析方式。
+type Parser string
 
 const (
-	// APMConfigParserTrpcYAML 解析 tRPC 的 YAML 配置。
-	APMConfigParserTrpcYAML APMConfigParser = "trpcYAML"
-	// APMConfigParserTafXML 解析 TAF 的 XML 配置。
-	APMConfigParserTafXML APMConfigParser = "tafXML"
+	// ParserTrpcYAML 解析 tRPC 的 YAML 配置。
+	ParserTrpcYAML Parser = "trpcYAML"
+	// ParserTafXML 解析 TAF 的 XML 配置。
+	ParserTafXML Parser = "tafXML"
 )
 
-// APMServiceNameProps APM 服务名提取的执行参数。
-type APMServiceNameProps struct {
+// Props APM 服务名提取的执行参数。
+type Props struct {
 	// Parser 解析方式。
-	Parser APMConfigParser
+	Parser Parser
 }
 
 // Public 无对外内容。
-func (p APMServiceNameProps) Public() any { return nil }
+func (p Props) Public() any { return nil }
 
-// APMServiceName APM 服务名提取：从框架配置文件中读取 APM 服务名。tRPC、TAF 支持。
-var APMServiceName = runtimemod.Spec[APMServiceNameProps]{
+// Spec APM 服务名提取：从框架配置文件中读取 APM 服务名。tRPC、TAF 支持。
+var Spec = runtimemod.Spec[Props]{
 	ID: runtimemod.ModAPMServiceName,
-	Resolve: runtimemod.ByFramework(map[string]APMServiceNameProps{
-		appruntime.FrameworkTRPC: {Parser: APMConfigParserTrpcYAML},
+	Resolve: runtimemod.ByFramework(map[string]Props{
+		appruntime.FrameworkTRPC: {Parser: ParserTrpcYAML},
 
-		appruntime.FrameworkTAF: {Parser: APMConfigParserTafXML},
+		appruntime.FrameworkTAF: {Parser: ParserTafXML},
 	}),
 }

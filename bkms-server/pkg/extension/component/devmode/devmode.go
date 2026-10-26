@@ -32,6 +32,7 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
@@ -70,7 +71,7 @@ type Config struct {
 	EnvType string
 
 	// Props 平台为该技术栈声明的脚本集与路径，为空表示不支持开发模式
-	Props mods.DevModeProps
+	Props devmodecap.Props
 
 	// AppName 应用名称，应与二进制文件名一致
 	AppName string
@@ -84,12 +85,12 @@ type Config struct {
 
 // IsTaf 是否使用 TAF 脚本集
 func (c *Config) IsTaf() bool {
-	return c.Props.ScriptSet == mods.DevModeScriptSetTAF
+	return c.Props.ScriptSet == devmodecap.ScriptSetTAF
 }
 
 // IsTrpc 是否使用 tRPC 脚本集
 func (c *Config) IsTrpc() bool {
-	return c.Props.ScriptSet == mods.DevModeScriptSetTRPC
+	return c.Props.ScriptSet == devmodecap.ScriptSetTRPC
 }
 
 // Output 开发模式组件输出
@@ -109,10 +110,10 @@ type Output struct {
 
 // RequireProps 返回应用的开发模式能力参数。应用的技术栈不支持开发模式时返回
 // ErrUnsupportedAppType。开发模式的各个入口（配置写入、预检、重启、渲染）统一通过它判断。
-func RequireProps(app *bkmsapp.Application) (mods.DevModeProps, error) {
+func RequireProps(app *bkmsapp.Application) (devmodecap.Props, error) {
 	props, err := mods.Of(app).DevMode.Require()
 	if err != nil {
-		return mods.DevModeProps{}, errors.Wrapf(ErrUnsupportedAppType, "app %s: %v", app.ID, err)
+		return devmodecap.Props{}, errors.Wrapf(ErrUnsupportedAppType, "app %s: %v", app.ID, err)
 	}
 	return props, nil
 }
@@ -127,7 +128,7 @@ func New(config *Config) DevMode {
 
 // CreateDevModeConfig 从 AppModel、能力参数和环境信息创建开发模式配置
 func CreateDevModeConfig(
-	appModel *appmodel.AppModel, props mods.DevModeProps, envType string, enabled bool,
+	appModel *appmodel.AppModel, props devmodecap.Props, envType string, enabled bool,
 ) *Config {
 	config := FromAppModel(appModel, props, envType)
 	config.Enabled = enabled
@@ -135,7 +136,7 @@ func CreateDevModeConfig(
 }
 
 // FromAppModel 从 AppModel 与能力参数创建开发模式配置
-func FromAppModel(appModel *appmodel.AppModel, props mods.DevModeProps, envType string) *Config {
+func FromAppModel(appModel *appmodel.AppModel, props devmodecap.Props, envType string) *Config {
 	// 从 appModel.Workload.Command、Args 中提取
 	var customStartScript string
 

@@ -24,6 +24,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/apmservicename"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/render"
@@ -51,9 +52,9 @@ func GetApmServiceName(app *bkmsapp.Application, content string, appEnvVars map[
 		return "", errors.Wrap(err, "apm service name")
 	}
 	switch props.Parser {
-	case mods.APMConfigParserTrpcYAML:
+	case apmservicename.ParserTrpcYAML:
 		return GetTrpcApmServiceName(content, appEnvVars)
-	case mods.APMConfigParserTafXML:
+	case apmservicename.ParserTafXML:
 		return GetTafApmServiceName(content, appEnvVars)
 	default:
 		return "", errors.Errorf("unsupported apm config parser %q", props.Parser)

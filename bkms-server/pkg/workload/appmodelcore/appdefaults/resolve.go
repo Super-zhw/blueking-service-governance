@@ -7,7 +7,7 @@ import (
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appspec"
@@ -29,7 +29,7 @@ func Resolve(
 	ctx context.Context,
 	db *mongo.Database,
 	workspaceID, appID string,
-	devModeProps mods.DevModeProps,
+	devModeProps devmode.Props,
 ) (*ResolvedAppSpec, error) {
 	rules, err := store.Of(db, RuleMeta).List(ctx, ByWorkspace(workspaceID))
 	if err != nil {
