@@ -227,8 +227,8 @@ var _ = Describe("CollectConfigWarnings", func() {
 					config,
 				)
 				Expect(warnings).To(HaveLen(1))
-				Expect(warnings[0]).To(ContainSubstring("环境 'dev'"))
-				Expect(warnings[0]).To(ContainSubstring("推荐与 tRPC 配置中的服务名"))
+				Expect(warnings[0]).To(ContainSubstring("env 'dev'"))
+				Expect(warnings[0]).To(ContainSubstring("is recommended to match a tRPC service name"))
 				Expect(warnings[0]).To(ContainSubstring("trpc.app.server.service"))
 				Expect(warnings[0]).To(ContainSubstring("trpc.app.server.other"))
 			})
@@ -309,8 +309,8 @@ var _ = Describe("CollectConfigWarnings", func() {
 				)
 				Expect(warnings).To(HaveLen(1))
 				Expect(warnings[0]).To(ContainSubstring("[my-polaris]"))
-				Expect(warnings[0]).To(ContainSubstring("环境 'dev'"))
-				Expect(warnings[0]).To(ContainSubstring("推荐与 tRPC 配置中的服务名"))
+				Expect(warnings[0]).To(ContainSubstring("env 'dev'"))
+				Expect(warnings[0]).To(ContainSubstring("is recommended to match a tRPC service name"))
 			})
 		})
 	})
@@ -359,8 +359,8 @@ var _ = Describe("CollectConfigWarnings", func() {
 				)
 				// dev 匹配，prod 不匹配
 				Expect(warnings).To(HaveLen(1))
-				Expect(warnings[0]).To(ContainSubstring("环境 'prod'"))
-				Expect(warnings[0]).To(ContainSubstring("推荐与 tRPC 配置中的服务名"))
+				Expect(warnings[0]).To(ContainSubstring("env 'prod'"))
+				Expect(warnings[0]).To(ContainSubstring("is recommended to match a tRPC service name"))
 			})
 		})
 
