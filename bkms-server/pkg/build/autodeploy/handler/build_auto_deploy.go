@@ -29,6 +29,8 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/revision"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/perm"
@@ -87,7 +89,7 @@ func (h *Handler) newBuildService() (*build.Service, error) {
 //	@Failure		500		{object}	bkerrs.GinErrorOutput
 //	@Router			/apps/{appID}/envs/{envName}/trpc-build-deploys [post]
 func (h *Handler) CreateTrpcBuildDeploy(c *gin.Context) {
-	h.createAppModelBuildDeploy(c, bkmsapp.AppTypeTRPC)
+	h.createAppModelBuildDeploy(c, appruntime.FrameworkTRPC)
 }
 
 // CreateTafBuildDeploy 触发 TAF 应用构建，并在构建成功后自动部署到指定环境。
@@ -108,10 +110,11 @@ func (h *Handler) CreateTrpcBuildDeploy(c *gin.Context) {
 //	@Failure		500		{object}	bkerrs.GinErrorOutput
 //	@Router			/apps/{appID}/envs/{envName}/taf-build-deploys [post]
 func (h *Handler) CreateTafBuildDeploy(c *gin.Context) {
-	h.createAppModelBuildDeploy(c, bkmsapp.AppTypeTAF)
+	h.createAppModelBuildDeploy(c, appruntime.FrameworkTAF)
 }
 
-func (h *Handler) createAppModelBuildDeploy(c *gin.Context, expectedAppType string) {
+// createAppModelBuildDeploy 触发构建并自动部署。expectedFramework 为旧 trpc / taf 专属接口要求的应用框架
+func (h *Handler) createAppModelBuildDeploy(c *gin.Context, expectedFramework string) {
 	// 绑定路径和请求体，并合并新旧修订字段；失败已写响应
 	uriInput, input, rev, ok := bindBuildDeployRequest(c)
 	if !ok {
@@ -119,7 +122,7 @@ func (h *Handler) createAppModelBuildDeploy(c *gin.Context, expectedAppType stri
 	}
 
 	// 校验应用类型、环境部署权限，以及非生产且应用可见的环境
-	app, ok := h.prepareBuildAutoDeploy(c, uriInput, expectedAppType)
+	app, ok := h.prepareBuildAutoDeploy(c, uriInput, expectedFramework)
 	if !ok {
 		return
 	}
@@ -182,7 +185,7 @@ func bindBuildDeployRequest(
 func (h *Handler) prepareBuildAutoDeploy(
 	c *gin.Context,
 	uriInput serializer.AppEnvURIInput,
-	expectedAppType string,
+	expectedFramework string,
 ) (*bkmsapp.Application, bool) {
 	ctx := c.Request.Context()
 	app, err := ginperm.ValidateAppByID(ctx, h.registry, uriInput.AppID, ginperm.TypeEdit)
@@ -191,7 +194,7 @@ func (h *Handler) prepareBuildAutoDeploy(
 		return nil, false
 	}
 
-	if app.Type != expectedAppType {
+	if mods.Of(app).Stack.Framework != expectedFramework {
 		bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "invalid app type: %s", app.Type))
 		return nil, false
 	}

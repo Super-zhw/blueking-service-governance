@@ -262,6 +262,25 @@ var _ = Describe("Query", func() {
 		})
 	})
 
+	Describe("AddonAppTypeOf", func() {
+		DescribeTable("should match AppModel apps by framework and Helm apps by type",
+			func(app *bkmsapp.Application, expected string) {
+				Expect(clusteraddon.AddonAppTypeOf(app)).To(Equal(expected))
+			},
+			Entry("legacy trpc", &bkmsapp.Application{Type: bkmsapp.AppTypeTRPC}, "trpc"),
+			Entry("legacy taf", &bkmsapp.Application{Type: bkmsapp.AppTypeTAF}, "taf"),
+			Entry("bkmsApp with trpc framework",
+				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "trpc", Language: "go"}, "trpc"),
+			Entry("bkmsApp with taf framework",
+				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "taf"}, "taf"),
+			// blank 尚未登记到组件定义，匹配不到任何组件，按管理方式表达见 M5
+			Entry("bkmsApp with blank framework",
+				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "blank", Language: "go"}, "blank"),
+			Entry("helm", &bkmsapp.Application{Type: bkmsapp.AppTypeHelm}, "helm"),
+			Entry("agones", &bkmsapp.Application{Type: bkmsapp.AppTypeAgones}, "agones"),
+		)
+	})
+
 	Describe("InspectRequiredAddons", func() {
 		It("queries only applicable required addons", func() {
 			mockey.PatchConvey("applicable required addons", GinkgoT(), func() {

@@ -207,7 +207,7 @@ func (s *Service) checkRequiredClusterAddons(
 		return err
 	}
 	missing, err := clusteraddon.InspectRequiredAddons(
-		ctx, defs, app.Type, env, "",
+		ctx, defs, clusteraddon.AddonAppTypeOf(app), env, "",
 	)
 	if err != nil {
 		return errors.Wrap(err, "inspect required cluster addons")

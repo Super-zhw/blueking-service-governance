@@ -229,11 +229,11 @@ func (s *AppCfgFileDefService) validateDefUpdateByPolicy(def *AppConfigFileDef, 
 		reason  string
 	}{
 		{
-			update.Name != nil && *update.Name != def.Name, policy.AllowNameUpdate(update.AppType),
+			update.Name != nil && *update.Name != def.Name, policy.AllowNameUpdate(update.Framework),
 			"this config kind does not allow modifying name",
 		},
 		{
-			update.MountDir != nil, policy.AllowMountDirUpdate(update.AppType),
+			update.MountDir != nil, policy.AllowMountDirUpdate(update.Framework),
 			"this config kind does not support modifying mountDir via def",
 		},
 		{
@@ -372,7 +372,7 @@ func (s *AppCfgFileDefService) convertEnvInstancesForStrategy(
 // 创建时这两个值已经写在 def 上。后续 spec 只更新语言、启动命令和参数，名字和目录只通过 def 更新接口修改，查询继续从 def 填回。届时删除本函数。
 func (s *AppCfgFileDefService) SyncFrameworkFileLocation(
 	ctx context.Context,
-	appID, appType, fileName, mountDir string,
+	appID, framework, fileName, mountDir string,
 ) error {
 	defs, err := ListDefsByApp(ctx, s.DefStore, appID, DefFilterConfigKind(ConfigKindFramework))
 	if err != nil {
@@ -383,7 +383,7 @@ func (s *AppCfgFileDefService) SyncFrameworkFileLocation(
 	}
 	def := &defs[0]
 
-	update := FileDefUpdate{AppType: appType}
+	update := FileDefUpdate{Framework: framework}
 	if fileName != "" && fileName != def.Name {
 		update.Name = &fileName
 	}

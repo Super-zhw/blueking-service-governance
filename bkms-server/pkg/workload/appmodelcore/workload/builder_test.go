@@ -33,6 +33,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil/dbfactory"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/secret"
@@ -89,8 +90,12 @@ var _ = Describe("Builder", func() {
 		var builder *workload.Builder
 
 		BeforeEach(func() {
+			// standard 插件只对应 blank 框架
 			app = dbfactory.ApplicationWithOpts(ctx, appStore, &dbfactory.ApplicationOpts{
 				WorkspaceID: newWorkspaceID(ctx),
+				Type:        bkmsapp.AppTypeBKMSApp,
+				Framework:   appruntime.FrameworkBlank,
+				Language:    appruntime.LanguageGo,
 			})
 			envObj = dbfactory.Env(ctx, envSvc, app.WorkspaceID)
 
@@ -139,6 +144,25 @@ var _ = Describe("Builder", func() {
 			Expect(gd.Spec.Template.Spec.Containers).To(HaveLen(1))
 			Expect(gd.Spec.Template.Spec.Containers[0].Image).To(Equal(appModel.Workload.Image))
 			Expect(gd.Spec.Template.Spec.Containers[0].VolumeMounts).To(BeEmpty())
+		})
+
+		It("should pick the plugin by framework and ignore workload.type", func() {
+			// workload.type 写成 trpc，blank 应用仍按 standard 渲染，不挂 trpc 资源
+			appModel.Workload.Type = appmodel.WorkloadTypeTrpc
+			result, err := workload.NewBuilder(builderSvc, app, appModel).Build(ctx, envObj)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.ExtraObjects).To(BeEmpty())
+			Expect(asGameDeployment(result).Spec.Template.Spec.InitContainers).To(BeEmpty())
+		})
+
+		It("should fail to render when the app tech stack is invalid", func() {
+			// type 与 framework 冲突，取不到框架
+			conflicted := *app
+			conflicted.Type = bkmsapp.AppTypeTAF
+			conflicted.Framework = appruntime.FrameworkTRPC
+			_, err := workload.NewBuilder(builderSvc, &conflicted, appModel).Build(ctx, envObj)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("resolving workload plugin"))
 		})
 
 		It("should build native Deployment when the env is a federation host", func() {

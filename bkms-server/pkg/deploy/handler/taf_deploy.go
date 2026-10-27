@@ -22,7 +22,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/serializer"
 )
 
@@ -65,7 +65,7 @@ func (h *Handler) ListTafDeployRecords(c *gin.Context) {
 //	@Failure	404		{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/envs/{envName}/taf-deploys/precheck [get]
 func (h *Handler) PreCheckTafDeploy(c *gin.Context) {
-	h.preCheckDeploy(c, bkmsapp.AppTypeTAF)
+	h.preCheckDeploy(c, appruntime.FrameworkTAF)
 }
 
 // CreateTafDeploy 创建 TAF 应用部署
@@ -159,5 +159,5 @@ func (h *Handler) GetTafResourceSnapshot(c *gin.Context) {
 //	@Failure	400				{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/envs/{envName}/taf-deploys/latest-status [get]
 func (h *Handler) GetLatestTafDeployStatus(c *gin.Context) {
-	h.getLatestAppModelDeployStatus(c, bkmsapp.AppTypeTAF)
+	h.getLatestAppModelDeployStatus(c, appruntime.FrameworkTAF)
 }

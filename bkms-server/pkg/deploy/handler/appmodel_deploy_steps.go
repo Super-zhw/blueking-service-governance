@@ -33,6 +33,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/clusteraddon"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
@@ -102,7 +103,8 @@ func (h *Handler) listAppModelDeployRecords(c *gin.Context) {
 }
 
 // preCheckDeploy runs tRPC / TAF deployment pre-checks (undefined env vars and required cluster addons).
-func (h *Handler) preCheckDeploy(c *gin.Context, expectedAppType string) {
+// expectedFramework 为旧 trpc / taf 专属接口要求的应用框架。
+func (h *Handler) preCheckDeploy(c *gin.Context, expectedFramework string) {
 	var uriInput serializer.AppEnvURIInput
 	if err := ginutils.BindURI(c, &uriInput); err != nil {
 		bkerrs.AbortWithErr(c, err)
@@ -117,10 +119,10 @@ func (h *Handler) preCheckDeploy(c *gin.Context, expectedAppType string) {
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
-	if app.Type != expectedAppType {
+	if mods.Of(app).Stack.Framework != expectedFramework {
 		bkerrs.AbortWithErr(c, bkerrs.New(
 			bkerrs.ErrCodeInvalidRequest,
-			fmt.Sprintf("invalid app type: expected %s, got %s", expectedAppType, app.Type),
+			fmt.Sprintf("invalid app type: expected %s, got %s", expectedFramework, app.Type),
 		))
 		return
 	}
@@ -392,8 +394,9 @@ func (h *Handler) getAppModelResourceSnapshot(c *gin.Context) {
 	})
 }
 
-// getLatestAppModelDeployStatus 应用最新一次部署的状态（含应用类型检查、自动区分手动部署/构建后自动部署）
-func (h *Handler) getLatestAppModelDeployStatus(c *gin.Context, expectedAppType string) {
+// getLatestAppModelDeployStatus 应用最新一次部署的状态（含应用框架检查、自动区分手动部署/构建后自动部署）
+// expectedFramework 为旧 trpc / taf 专属接口要求的应用框架。
+func (h *Handler) getLatestAppModelDeployStatus(c *gin.Context, expectedFramework string) {
 	var uriInput serializer.AppEnvURIInput
 	var input serializer.GetLatestAppModelDeployStatusInput
 	if err := ginutils.BindURIQuery(c, &uriInput, &input); err != nil {
@@ -407,7 +410,7 @@ func (h *Handler) getLatestAppModelDeployStatus(c *gin.Context, expectedAppType 
 		bkerrs.AbortWithErr(c, err)
 		return
 	}
-	if app.Type != expectedAppType {
+	if mods.Of(app).Stack.Framework != expectedFramework {
 		bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "invalid app type: %s", app.Type))
 		return
 	}

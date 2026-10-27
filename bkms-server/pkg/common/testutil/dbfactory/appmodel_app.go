@@ -27,6 +27,7 @@ import (
 	build "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/database"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
@@ -142,6 +143,7 @@ func TrpcApplication(
 			Description:       appcfg.CfgSystemVersionDescription,
 			ConfigKind:        appcfg.ConfigKindFramework,
 			AppType:           app.Type,
+			Framework:         appruntime.FrameworkTRPC,
 		},
 	)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
@@ -289,6 +291,7 @@ func TafApplication(
 			Description:       appcfg.CfgSystemVersionDescription,
 			ConfigKind:        appcfg.ConfigKindFramework,
 			AppType:           app.Type,
+			Framework:         appruntime.FrameworkTAF,
 		},
 	)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())

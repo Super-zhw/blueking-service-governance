@@ -26,6 +26,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
@@ -208,6 +209,7 @@ func (h *Handler) CreateAppConfigFileDef(c *gin.Context) {
 		Description:         input.Description,
 		ConfigKind:          appcfg.ConfigKind(input.ConfigKind),
 		AppType:             app.Type,
+		Framework:           mods.Of(app).Stack.Framework,
 	})
 	if err != nil {
 		abortDefWriteErr(c, err, "creating def", app.ID, input.Name, input.MountDir)
@@ -313,7 +315,7 @@ func (h *Handler) UpdateAppCfgFileDef(c *gin.Context) {
 
 	operator := auth.MustGetUser(ctx).ID
 	update := input.ToFileDefUpdate(operator)
-	update.AppType = app.Type
+	update.Framework = mods.Of(app).Stack.Framework
 	oldDef := *def
 
 	svc := h.newAppCfgFileDefService()
@@ -413,7 +415,7 @@ func (h *Handler) UpdateHelmFile(c *gin.Context) {
 		BaseAppConfigFileID:    baseID,
 		BSCPConfig:             bscpConfig,
 		Operator:               operator,
-		AppType:                app.Type,
+		Framework:              mods.Of(app).Stack.Framework,
 		Description:            input.Description,
 		ExpectedCurrentVersion: input.CurrentVersion,
 	})

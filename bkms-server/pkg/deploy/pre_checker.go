@@ -145,10 +145,10 @@ func (c *PreDeployChecker) checkIfBaselineLaneDeployed(ctx context.Context, para
 		return nil
 	}
 
-	switch params.AppType {
-	case bkmsapp.AppTypeHelm, bkmsapp.AppTypeAgones:
+	switch {
+	case bkmsapp.IsHelmBasedType(params.AppType):
 		return helmdeploy.CheckIfTrafficLaneDeployed(ctx, c.db, params.AppID, params.EnvName, baselineLane.LaneName)
-	case bkmsapp.AppTypeTRPC, bkmsapp.AppTypeTAF:
+	case bkmsapp.IsAppModelType(params.AppType):
 		return appmodeldeploy.CheckIfTrafficLaneDeployed(
 			ctx,
 			c.db,

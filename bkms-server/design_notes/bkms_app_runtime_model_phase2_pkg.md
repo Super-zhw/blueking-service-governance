@@ -1,6 +1,6 @@
 # 阶段 2 收尾：能力包划分（M3）
 
-状态：已实现，PR #307。
+状态：已合并，PR #307。
 
 对应 [里程碑](./bkms_app_runtime_model_milestones.md) M3。前置为 M2（PR #302）合入。本阶段移动能力声明并调整包名与引用，顺带把 L-2、L-4、L-7 的执行代码移入能力包；只移动，不改逻辑。
 
@@ -13,7 +13,7 @@
 | 目录粒度 | 一个能力一个目录；北极星两个能力合并为 `polaris/` |
 | 移动范围 | 移动能力声明（Spec、Props、常量）；执行代码中 L-2、L-4、L-7 随本阶段移入，其余留在原包，见 §5 |
 | 执行函数入参 | 能力包内的执行函数接收 `mods.Of(app).<能力>`，不自行解析技术栈，避免与 `mods` 循环依赖 |
-| 框架协议实现 | `pkg/framework/*` 不在本阶段拆分，随 M4 渲染分派一起做 |
+| 框架协议实现 | `pkg/framework/*` 不在本阶段拆分，单独在 M4.5 做 |
 | 组装包 | `Set`、`Of`、`Resolve`、`Matrix` 保留在 `runtimemod/mods`，调用方继续使用 `mods.Of`；该目录只剩组装与测试 |
 | 基础包 | `pkg/core/appruntime/runtimemod` 不动 |
 
@@ -110,13 +110,13 @@ pkg/capability/bscpworkloadmeta/      BSCP 元信息自动填充
 | L-2 ✅ | devMode 路径常量重复 | 已处理：别名常量删除，引用方直接用 `capability/devmode` | — | M3 | `rg -n 'TrpcWorkPath =' pkg/extension` 无结果 |
 | L-3 | devMode 渲染仍读 AppSpec 持久化路径 | `workload/builder.go` 用 AppSpec 的 `workPath` / `mountPath` 覆盖能力参数 | 只用能力参数；AppSpec 中两字段删除 | M9 | `rg -n 'DevMode.WorkPath' pkg/workload/appmodelcore/workload` 无结果 |
 | L-4 ✅ | platformBuild 执行代码 | 已处理：取 Dockerfile 语言移入 `platformbuild.DockerfileLanguage`；其余构建流程与技术栈无关，留在 `pkg/build` | — | M3 | `rg --no-ignore-vcs -n 'PlatformBuild\.Require' pkg` 无结果 |
-| L-5 | adminCommand 执行代码 | `appmodelcore/{trpc,taf}/admincmd`、`workload/instance/handler/admin_cmd.go` | 能力壳进 `capability/admincommand`，协议实现进 `pkg/framework/*` | 协议实现随 M4；接口合并随 M6 | `ls pkg/workload/appmodelcore/*/admincmd` 不存在 |
-| L-6 | apmServiceName 执行代码 | `observability/bkmonitor/{apm,telemetry_config}.go` | 解析器分派进 `capability/apmservicename`，解析实现进 `pkg/framework/*` | 随 M4 | `rg -n 'APMServiceName.Require' pkg/observability` 无结果 |
-| L-7 ✅ | 北极星服务名校验 | 已处理：校验与 tRPC 服务名解析移入 `polaris.CheckServiceName`；addon 只保留 immediate 判断与应用加载 | 解析可随 M4 再移入 `pkg/framework/trpc` | M3 | `rg -n 'parseTrpcServiceNames' pkg` 只出现在 `capability/polaris` |
-| L-8 | 北极星注册信息注入 | `appmodelcore/trpc/plugin.go`、`appmodelcore/trpc/patcher` | 开关进 `capability/polaris`，补丁器进 `pkg/framework/trpc` | 随 M4 | `rg -l 'package patcher' pkg/workload` 无结果 |
-| L-9 | BSCP 元信息自动填充 | `extension/bscpcfg/handler/metadata.go`、`cmd/migration/app_bscpcfg_mgr.go` | `capability/bscpworkloadmeta`；工作负载类型按渲染结果取值 | 随 M4 | `rg -n 'k8skind.GameDeploy' pkg/extension/bscpcfg cmd` 无结果 |
+| L-5 | adminCommand 执行代码 | `appmodelcore/{trpc,taf}/admincmd`、`workload/instance/handler/admin_cmd.go` | 能力壳进 `capability/admincommand`，协议实现进 `pkg/framework/*` | 协议实现随 M4.5；接口合并随 M6 | `ls pkg/workload/appmodelcore/*/admincmd` 不存在 |
+| L-6 | apmServiceName 执行代码 | `observability/bkmonitor/{apm,telemetry_config}.go` | 解析器分派进 `capability/apmservicename`，解析实现进 `pkg/framework/*` | 随 M4.5 | `rg -n 'APMServiceName.Require' pkg/observability` 无结果 |
+| L-7 ✅ | 北极星服务名校验 | 已处理：校验与 tRPC 服务名解析移入 `polaris.CheckServiceName`；addon 只保留 immediate 判断与应用加载 | 解析可随 M4.5 再移入 `pkg/framework/trpc` | M3 | `rg -n 'parseTrpcServiceNames' pkg` 只出现在 `capability/polaris` |
+| L-8 | 北极星注册信息注入 | `appmodelcore/trpc/plugin.go`、`appmodelcore/trpc/patcher` | 开关进 `capability/polaris`，补丁器进 `pkg/framework/trpc` | 随 M4.5 | `rg -l 'package patcher' pkg/workload` 无结果 |
+| L-9 | BSCP 元信息自动填充 | `extension/bscpcfg/handler/metadata.go`、`cmd/migration/app_bscpcfg_mgr.go` | `capability/bscpworkloadmeta`；工作负载类型按渲染结果取值 | 有使用方时，不晚于 M9（目前只影响展示） | `rg -n 'k8skind.GameDeploy' pkg/extension/bscpcfg cmd` 无结果 |
 | L-10 | frameworkFile 无执行端读取 | 内容校验按存储的 `FileFormat` 分派（`core/app/appcfg`），未读能力声明 | 前端改读能力集合；后端校验按需接入 | M7 | `rg --no-ignore-vcs -n '\.FrameworkFile\.' pkg` 有消费方 |
-| L-11 | 框架协议实现未拆分 | `appmodelcore/{trpc,taf}` | `pkg/framework/{trpc,taf,blank}` | M4 | `ls pkg/framework` 存在且 `appmodelcore/{trpc,taf}` 已移除 |
+| L-11 | 框架协议实现未拆分 | `appmodelcore/{trpc,taf}` | `pkg/framework/{trpc,taf,blank}` | M4.5 | `ls pkg/framework` 存在且 `appmodelcore/{trpc,taf}` 已移除 |
 
 遗留项同步登记到里程碑文档的"遗留项"一节，处理后在两处同时标记完成。
 

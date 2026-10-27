@@ -38,6 +38,7 @@ import (
 
 	build "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
@@ -192,9 +193,10 @@ func (b *Builder) buildPodContents(in *buildInputs) (*podContents, error) {
 
 // appendPluginAndConfigResources 把 plugin、plain files、dev mode 的存储和 init container 写入 pod。
 func (b *Builder) appendPluginAndConfigResources(in *buildInputs, pod *podContents) error {
-	wlPlugin, err := plugin.GetWorkloadPlugin(in.appModel.Workload.Type)
+	// 插件按应用框架选择，与能力集合同一来源；不再读取 AppModel 的 workload.type
+	wlPlugin, err := plugin.GetFrameworkPlugin(mods.Of(b.app).Stack.Framework)
 	if err != nil {
-		return errors.Wrap(err, "resolving workload plugin")
+		return errors.Wrapf(err, "resolving workload plugin for app %s", b.app.ID)
 	}
 	pluginSession, err := wlPlugin.Start(in.ctx, in.env, b.app, in.appModel, plugin.RenderContext{
 		EnvVars:   in.varsMap,

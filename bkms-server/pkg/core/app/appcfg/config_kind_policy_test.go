@@ -88,30 +88,35 @@ var _ = Describe("FrameworkPolicy", func() {
 			Expect(err.Error()).To(ContainSubstring("mountedEnvNames"))
 		})
 
-		DescribeTable("should reject a mount dir unless the app type allows it",
-			func(appType string) {
+		DescribeTable("should reject a mount dir unless the framework allows it",
+			func(appType, framework string) {
 				err := policy.ValidateCreateParams(appcfg.CreateCfgFileParams{
-					AppType:  appType,
-					MountDir: "/etc/a",
+					AppType:   appType,
+					Framework: framework,
+					MountDir:  "/etc/a",
 				})
 				Expect(err).To(HaveOccurred())
 				Expect(errors.Is(err, appcfg.ErrInvalidConfigSpec)).To(BeTrue())
 				Expect(err.Error()).To(ContainSubstring("mountDir"))
 			},
-			Entry("helm", "helm"),
-			Entry("agones", "agones"),
-			Entry("empty app type", ""),
+			Entry("helm", "helm", ""),
+			Entry("agones", "agones", ""),
+			Entry("bkmsApp with blank framework", "bkmsApp", "blank"),
+			Entry("empty app type", "", ""),
 		)
 
 		DescribeTable("should allow a framework file to set a mount dir",
-			func(appType string) {
+			func(appType, framework string) {
 				Expect(policy.ValidateCreateParams(appcfg.CreateCfgFileParams{
-					AppType:  appType,
-					MountDir: "/usr/local/trpc/bin",
+					AppType:   appType,
+					Framework: framework,
+					MountDir:  "/usr/local/trpc/bin",
 				})).To(Succeed())
 			},
-			Entry("trpc", "trpc"),
-			Entry("taf", "taf"),
+			Entry("trpc", "trpc", "trpc"),
+			Entry("taf", "taf", "taf"),
+			Entry("bkmsApp with trpc framework", "bkmsApp", "trpc"),
+			Entry("bkmsApp with taf framework", "bkmsApp", "taf"),
 		)
 	})
 
@@ -177,17 +182,19 @@ var _ = Describe("FrameworkPolicy", func() {
 			Expect(policy.AllowNameUpdate("trpc")).To(BeFalse())
 		})
 
-		It("should allow renaming taf and helm framework files", func() {
+		It("should allow renaming taf, blank and helm framework files", func() {
 			Expect(policy.AllowNameUpdate("taf")).To(BeTrue())
-			Expect(policy.AllowNameUpdate("helm")).To(BeTrue())
+			Expect(policy.AllowNameUpdate("blank")).To(BeTrue())
+			// Helm 应用没有框架
 			Expect(policy.AllowNameUpdate("")).To(BeTrue())
 		})
 	})
 
 	Describe("AllowMountDirUpdate", func() {
-		It("should not allow mount dir update for helm", func() {
-			Expect(policy.AllowMountDirUpdate("helm")).To(BeFalse())
+		It("should not allow mount dir update for helm and blank", func() {
+			// Helm 应用没有框架
 			Expect(policy.AllowMountDirUpdate("")).To(BeFalse())
+			Expect(policy.AllowMountDirUpdate("blank")).To(BeFalse())
 		})
 
 		It("should allow mount dir update for trpc and taf", func() {

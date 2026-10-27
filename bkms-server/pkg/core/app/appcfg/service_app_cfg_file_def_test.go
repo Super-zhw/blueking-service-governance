@@ -495,7 +495,6 @@ var _ = Describe("AppCfgFileDefService — Create / Update / Delete", func() {
 			newName := first.Def.Name
 			err = f.Svc.UpdateAppCfgFileDef(f.Ctx, def, appcfg.FileDefUpdate{
 				Name:     &newName,
-				AppType:  "helm",
 				Operator: "editor",
 			})
 			Expect(errors.Is(err, appcfg.ErrAppConfigFileDefAlreadyExists)).To(BeTrue())
@@ -512,9 +511,9 @@ var _ = Describe("AppCfgFileDefService — Create / Update / Delete", func() {
 
 			newDir := "/usr/local/trpc/bin/"
 			err = f.Svc.UpdateAppCfgFileDef(f.Ctx, def, appcfg.FileDefUpdate{
-				MountDir: &newDir,
-				AppType:  "trpc",
-				Operator: "editor",
+				MountDir:  &newDir,
+				Framework: "trpc",
+				Operator:  "editor",
 			})
 			Expect(err).NotTo(HaveOccurred())
 
@@ -530,9 +529,9 @@ var _ = Describe("AppCfgFileDefService — Create / Update / Delete", func() {
 
 			newName := "other.yaml"
 			err = f.Svc.UpdateAppCfgFileDef(f.Ctx, def, appcfg.FileDefUpdate{
-				Name:     &newName,
-				AppType:  "trpc",
-				Operator: "editor",
+				Name:      &newName,
+				Framework: "trpc",
+				Operator:  "editor",
 			})
 			Expect(err).To(HaveOccurred())
 			Expect(errors.Is(err, appcfg.ErrInvalidConfigSpec)).To(BeTrue())
@@ -1059,9 +1058,9 @@ var _ = Describe("AppCfgFileDefService — Create / Update / Delete", func() {
 			result := f.createFrameworkFile("keep.yaml")
 			mountDir := "/etc/keep"
 			err := f.Svc.UpdateAppCfgFileDef(f.Ctx, result.Def, appcfg.FileDefUpdate{
-				MountDir: &mountDir,
-				AppType:  "taf",
-				Operator: "editor",
+				MountDir:  &mountDir,
+				Framework: "taf",
+				Operator:  "editor",
 			})
 			Expect(err).NotTo(HaveOccurred())
 
@@ -1078,9 +1077,9 @@ var _ = Describe("AppCfgFileDefService — Create / Update / Delete", func() {
 			result := f.createFrameworkFile("trpc_go.yaml")
 			mountDir := "/etc/app"
 			err := f.Svc.UpdateAppCfgFileDef(f.Ctx, result.Def, appcfg.FileDefUpdate{
-				MountDir: &mountDir,
-				AppType:  "taf",
-				Operator: "editor",
+				MountDir:  &mountDir,
+				Framework: "taf",
+				Operator:  "editor",
 			})
 			Expect(err).NotTo(HaveOccurred())
 			f.createPlainFile("taken.yaml", "/etc/app", "taken")
@@ -1137,7 +1136,6 @@ var _ = Describe("AppCfgFileDefService — UpdateHelmFile", func() {
 
 		result, err := f.Svc.UpdateHelmFile(f.Ctx, def, file, appcfg.HelmFileUpdate{
 			Name:     "values-b.yaml",
-			AppType:  "helm",
 			Operator: "editor",
 		})
 		Expect(err).NotTo(HaveOccurred())
@@ -1167,7 +1165,6 @@ var _ = Describe("AppCfgFileDefService — UpdateHelmFile", func() {
 
 		_, err = f.Svc.UpdateHelmFile(f.Ctx, def, file, appcfg.HelmFileUpdate{
 			Name:     first.Def.Name,
-			AppType:  "helm",
 			Operator: "editor",
 		})
 		Expect(errors.Is(err, appcfg.ErrAppConfigFileDefAlreadyExists)).To(BeTrue())
@@ -1188,9 +1185,9 @@ var _ = Describe("AppCfgFileDefService — UpdateHelmFile", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		_, err = f.Svc.UpdateHelmFile(f.Ctx, def, file, appcfg.HelmFileUpdate{
-			Name:     "other.yaml",
-			AppType:  "trpc",
-			Operator: "editor",
+			Name:      "other.yaml",
+			Framework: "trpc",
+			Operator:  "editor",
 		})
 		Expect(errors.Is(err, appcfg.ErrInvalidConfigSpec)).To(BeTrue())
 
@@ -1225,7 +1222,6 @@ var _ = Describe("AppCfgFileDefService — UpdateHelmFile", func() {
 		result, err := f.Svc.UpdateHelmFile(f.Ctx, def, file, appcfg.HelmFileUpdate{
 			Name:                def.Name,
 			BaseAppConfigFileID: &other.ID,
-			AppType:             "helm",
 			Operator:            "editor",
 		})
 		Expect(err).NotTo(HaveOccurred())
@@ -1262,7 +1258,6 @@ var _ = Describe("AppCfgFileDefService — UpdateHelmFile", func() {
 		_, err = f.Svc.UpdateHelmFile(f.Ctx, def, file, appcfg.HelmFileUpdate{
 			Name:                   "renamed.yaml",
 			BaseAppConfigFileID:    &other.ID,
-			AppType:                "helm",
 			Operator:               "editor",
 			ExpectedCurrentVersion: &staleVersion,
 		})

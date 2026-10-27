@@ -28,6 +28,7 @@ import (
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appdefaults"
@@ -131,6 +132,7 @@ func (s *Service) Create(ctx context.Context, app *bkmsapp.Application, params *
 			Description:       appcfg.CfgSystemVersionDescription,
 			ConfigKind:        appcfg.ConfigKindFramework,
 			AppType:           app.Type,
+			Framework:         appruntime.FrameworkTAF,
 		},
 	); err != nil {
 		return errors.Wrap(err, "create default config file")
@@ -205,7 +207,7 @@ func (s *Service) Update(
 	// todo 兼容：fileName、filePath 仍从 spec 同步到 def，未传时保持 def 原值。见 SyncFrameworkFileLocation。
 	if params.TafConfig != nil {
 		if err = s.appConfigFileService.SyncFrameworkFileLocation(
-			ctx, app.ID, app.Type, params.TafConfig.FileName, params.TafConfig.FilePath,
+			ctx, app.ID, appruntime.FrameworkTAF, params.TafConfig.FileName, params.TafConfig.FilePath,
 		); err != nil {
 			return nil, nil, errors.Wrapf(err, "sync framework file location for app %s", app.ID)
 		}

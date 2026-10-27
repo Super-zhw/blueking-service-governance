@@ -27,6 +27,8 @@ import (
 	"gopkg.in/yaml.v3"
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/helm"
 )
@@ -123,7 +125,19 @@ func ApplicableAddonDefs(defs []*ClusterAddonDef, env *envmodel.Environment) []*
 	})
 }
 
+// AddonAppTypeOf 返回应用匹配 requiredForAppTypes / optionalForAppTypes 时使用的取值。
+//
+// 组件定义里按 trpc / taf / helm / agones 登记。AppModel 类应用按框架匹配，bkmsApp 与旧 trpc / taf
+// 应用结果一致；Helm 类应用按类型匹配。blank 目前没有登记，匹配不到任何组件。
+func AddonAppTypeOf(app *bkmsapp.Application) string {
+	if bkmsapp.IsAppModelType(app.Type) {
+		return mods.Of(app).Stack.Framework
+	}
+	return app.Type
+}
+
 // InspectRequiredAddons 查询必选组件状态。缺失作为检查结果，查询失败作为错误返回。
+// appType 为 AddonAppTypeOf 的结果。
 // namespace 的取值与组件列表、安装和卸载接口保持一致：优先使用传入值，为空时取各组件的 defaultNamespace，再回退到 bcs-system。
 // 当前部署预检和创建部署均传空值，保留按 namespace 复用查询，不因前端安装表单固定使用 bcs-system 而在此写死。
 func InspectRequiredAddons(

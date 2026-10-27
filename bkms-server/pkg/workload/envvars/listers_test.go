@@ -151,6 +151,21 @@ var _ = Describe("ListBuiltinVars", func() {
 		}))
 	})
 
+	DescribeTable("should inject the container name var only for AppModel-managed apps",
+		func(appType, framework string, expected bool) {
+			app := &bkmsapp.Application{Name: "demo-app", Type: appType, Framework: framework}
+
+			builtinVars, err := envvars.ListBuiltinVars(ctx, db, environment, app, nil)
+			Expect(err).NotTo(HaveOccurred())
+			_, ok := envVarByKey(builtinVars)[envvars.EnvVarNameContainerName]
+			Expect(ok).To(Equal(expected))
+		},
+		Entry("legacy taf", bkmsapp.AppTypeTAF, "", true),
+		Entry("bkmsApp with trpc framework", bkmsapp.AppTypeBKMSApp, "trpc", true),
+		Entry("bkmsApp with blank framework", bkmsapp.AppTypeBKMSApp, "blank", true),
+		Entry("helm", bkmsapp.AppTypeHelm, "", false),
+	)
+
 	It("should append resource limit built-in vars when app model is provided", func() {
 		app := &bkmsapp.Application{Name: "demo-app", Type: bkmsapp.AppTypeTRPC}
 		am := &appmodel.AppModel{Workload: appmodel.Workload{

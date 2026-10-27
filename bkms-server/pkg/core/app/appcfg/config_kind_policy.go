@@ -48,11 +48,11 @@ type ConfigKindPolicy interface {
 	// IsEffectiveForEnv 判断该 def 是否在指定环境下生效。
 	IsEffectiveForEnv(def *AppConfigFileDef, envName string) bool
 	// AllowNameUpdate 是否允许通过 def 接口修改文件名。
-	// appType 用来区分同一 ConfigKind 下的应用类型，例如 framework 里的 helm 与 trpc。
-	AllowNameUpdate(appType string) bool
+	// framework 用来区分同一 ConfigKind 下的应用，Helm 应用为空。
+	AllowNameUpdate(framework string) bool
 	// AllowMountDirUpdate 是否允许通过 def 接口修改挂载目录。
-	// appType 用来区分同一 ConfigKind 下的应用类型，例如 framework 里的 helm 与 trpc。
-	AllowMountDirUpdate(appType string) bool
+	// framework 用来区分同一 ConfigKind 下的应用，Helm 应用为空。
+	AllowMountDirUpdate(framework string) bool
 	// AllowMountedEnvNamesUpdate 是否允许通过 def 接口修改挂载环境范围。
 	AllowMountedEnvNamesUpdate() bool
 	// AllowEnableEnvVarRenderUpdate 是否允许通过 def 接口修改环境变量渲染开关。
@@ -85,7 +85,7 @@ func (p FrameworkPolicy) ValidateCreateParams(params CreateCfgFileParams) error 
 		return errors.Wrap(ErrInvalidConfigSpec, "framework config file does not support mountedEnvNames")
 	}
 	// 挂载目录是否允许与更新使用同一规则：只有 trpc/taf 可以带 mountDir。
-	if params.MountDir != "" && !p.AllowMountDirUpdate(params.AppType) {
+	if params.MountDir != "" && !p.AllowMountDirUpdate(params.Framework) {
 		return errors.Wrap(ErrInvalidConfigSpec, "framework config file does not allow mountDir")
 	}
 	return nil
@@ -140,14 +140,14 @@ func (FrameworkPolicy) IsEffectiveForEnv(_ *AppConfigFileDef, _ string) bool {
 }
 
 // AllowNameUpdate trpc 的框架文件名创建后不能改。taf 和 Helm 可以改。
-func (FrameworkPolicy) AllowNameUpdate(appType string) bool {
-	return appType != "trpc"
+func (FrameworkPolicy) AllowNameUpdate(framework string) bool {
+	return framework != appruntime.FrameworkTRPC
 }
 
 // AllowMountDirUpdate framework 默认不允许改挂载目录，避免 Helm values 被写上目录。
 // trpc/taf 的框架文件目录存在 def 上，允许修改。
-func (FrameworkPolicy) AllowMountDirUpdate(appType string) bool {
-	return appType == "trpc" || appType == "taf"
+func (FrameworkPolicy) AllowMountDirUpdate(framework string) bool {
+	return framework == appruntime.FrameworkTRPC || framework == appruntime.FrameworkTAF
 }
 
 // AllowMountedEnvNamesUpdate framework 始终对全部环境生效，不允许设置挂载范围。

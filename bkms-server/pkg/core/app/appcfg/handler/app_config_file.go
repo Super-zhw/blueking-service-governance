@@ -34,6 +34,7 @@ import (
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	slz "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg/serializer"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
@@ -129,6 +130,7 @@ func (h *Handler) CreateAppConfigFile(c *gin.Context) {
 		Description:         input.Description,
 		ConfigKind:          appcfg.ConfigKindFramework,
 		AppType:             app.Type,
+		Framework:           mods.Of(app).Stack.Framework,
 	}
 	// 框架页按环境保存会带 overlay + envName。这里改挂到已有 def，避免 Create 再建一条孤儿 framework def。
 	var obj *appcfg.AppConfigFile

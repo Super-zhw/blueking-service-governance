@@ -145,8 +145,10 @@ type CreateCfgFileParams struct {
 	Description         string
 	// ConfigKind 决定适用的策略集，默认 ConfigKindFramework。
 	ConfigKind ConfigKind
-	// AppType 应用类型（trpc/taf/helm/agones）。tRPC/TAF 的 framework 限制为每个应用一条 def。
+	// AppType 应用类型（trpc/taf/bkmsApp/helm/agones）。AppModel 类应用的 framework 限制为每个应用一条 def。
 	AppType string
+	// Framework 应用框架（trpc/taf/blank），Helm 应用为空。决定框架文件能否带挂载目录。
+	Framework string
 }
 
 // HelmFileUpdate 一次保存 Helm 编辑表单上的名称、overlay base 和 BSCP 绑定。
@@ -157,7 +159,7 @@ type HelmFileUpdate struct {
 	BaseAppConfigFileID    *bson.ObjectID
 	BSCPConfig             *BSCPConfig
 	Operator               string
-	AppType                string
+	Framework              string
 	Description            string
 	ExpectedCurrentVersion *int64
 }
@@ -180,8 +182,8 @@ type FileDefUpdate struct {
 	EnableEnvVarRender *bool
 	EnvContentStrategy *EnvContentStrategy
 	Operator           string
-	// AppType 应用类型。trpc 的框架文件不允许改名；trpc/taf 允许通过 def 改挂载目录。
-	AppType string
+	// Framework 应用框架，Helm 应用为空。trpc 的框架文件不允许改名；trpc/taf 允许通过 def 改挂载目录。
+	Framework string
 }
 
 // CreateEnvInstanceParams 创建环境级配置实例的参数。

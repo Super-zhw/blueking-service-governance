@@ -21,7 +21,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/serializer"
 )
 
@@ -64,7 +64,7 @@ func (h *Handler) ListTrpcDeployRecords(c *gin.Context) {
 //	@Failure	404		{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/envs/{envName}/trpc-deploys/precheck [get]
 func (h *Handler) PreCheckTrpcDeploy(c *gin.Context) {
-	h.preCheckDeploy(c, bkmsapp.AppTypeTRPC)
+	h.preCheckDeploy(c, appruntime.FrameworkTRPC)
 }
 
 // CreateTrpcDeploy 创建 Trpc 应用部署
@@ -158,5 +158,5 @@ func (h *Handler) GetTrpcResourceSnapshot(c *gin.Context) {
 //	@Failure	400				{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/envs/{envName}/trpc-deploys/latest-status [get]
 func (h *Handler) GetLatestTrpcDeployStatus(c *gin.Context) {
-	h.getLatestAppModelDeployStatus(c, bkmsapp.AppTypeTRPC)
+	h.getLatestAppModelDeployStatus(c, appruntime.FrameworkTRPC)
 }

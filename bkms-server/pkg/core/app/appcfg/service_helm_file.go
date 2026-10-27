@@ -44,9 +44,9 @@ func (s *AppCfgFileDefService) UpdateHelmFile(
 	previousName := def.Name
 	if update.Name != previousName {
 		if err := s.UpdateAppCfgFileDef(ctx, def, FileDefUpdate{
-			Name:     &update.Name,
-			AppType:  update.AppType,
-			Operator: update.Operator,
+			Name:      &update.Name,
+			Framework: update.Framework,
+			Operator:  update.Operator,
 		}); err != nil {
 			return nil, errors.Wrapf(err, "update helm file name for def %s", def.ID.Hex())
 		}
@@ -70,9 +70,9 @@ func (s *AppCfgFileDefService) UpdateHelmFile(
 	}); err != nil {
 		if result.NameChanged {
 			if restoreErr := s.UpdateAppCfgFileDef(ctx, def, FileDefUpdate{
-				Name:     &previousName,
-				AppType:  update.AppType,
-				Operator: update.Operator,
+				Name:      &previousName,
+				Framework: update.Framework,
+				Operator:  update.Operator,
 			}); restoreErr != nil {
 				return nil, errors.Wrapf(
 					restoreErr,

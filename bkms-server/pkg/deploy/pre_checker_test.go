@@ -30,6 +30,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
+	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	helmdeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/helm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/helm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/trafficmanager"
@@ -134,6 +135,24 @@ var _ = Describe("PreDeployChecker", func() {
 					Status:          helm.StatusDeployed,
 				})).To(Succeed())
 
+				err := checker.Do(ctx, params)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		It("should check AppModel deploy records for a bkmsApp", func() {
+			mockey.PatchConvey("test", GinkgoT(), func() {
+				mockTrafficManagerAndGetBaseline("baseline")
+				persistEnv(ctx, devEnv)
+
+				Expect(store.Of(checker.db, appmodeldeploy.RecordMeta).Create(ctx, &appmodeldeploy.Record{
+					AppID:           appID,
+					EnvName:         envName,
+					TrafficLaneName: "baseline",
+					Status:          appmodeldeploy.StatusDeployed,
+				})).To(Succeed())
+
+				params.AppType = bkmsapp.AppTypeBKMSApp
 				err := checker.Do(ctx, params)
 				Expect(err).NotTo(HaveOccurred())
 			})

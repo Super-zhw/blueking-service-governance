@@ -471,6 +471,6 @@ rg -n 'requiredForAppTypes|optionalForAppTypes|"trpc"|"taf"' pkg/core/env/cluste
 | blank 首期能力 | 仅目录声明；创建关闭 |
 | fileName/filePath 归属 | 收敛到框架 def 的 `Name` / `MountDir`（替代原“首期放 frameworkConfig”），见 §3.4 |
 
-阶段 2（能力层）的组织方式、能力目录与 pkg 划分已确定，见 [bkms_app_runtime_model_phase1.md](./bkms_app_runtime_model_phase1.md)；执行端切换见 [bkms_app_runtime_model_phase2.md](./bkms_app_runtime_model_phase2.md)；能力包划分见 [bkms_app_runtime_model_phase2_pkg.md](./bkms_app_runtime_model_phase2_pkg.md)。整体进度与 PR 拆分见 [bkms_app_runtime_model_milestones.md](./bkms_app_runtime_model_milestones.md)。
+阶段 2（能力层）的组织方式、能力目录与 pkg 划分已确定，见 [bkms_app_runtime_model_phase1.md](./bkms_app_runtime_model_phase1.md)；执行端切换见 [bkms_app_runtime_model_phase2.md](./bkms_app_runtime_model_phase2.md)；能力包划分见 [bkms_app_runtime_model_phase2_pkg.md](./bkms_app_runtime_model_phase2_pkg.md)。运行链路识别 bkmsApp 见 [bkms_app_runtime_model_phase3_runtime.md](./bkms_app_runtime_model_phase3_runtime.md)。整体进度与 PR 拆分见 [bkms_app_runtime_model_milestones.md](./bkms_app_runtime_model_milestones.md)。
 
 首个实现变更建议只覆盖阶段 0–1 的一个垂直切片：定义技术栈目录、Application 新字段及旧 tRPC 数据规范化，配齐一致性测试。待统一模型稳定后再用 devmode/platformBuild 验证能力规范，避免在尚未验证的抽象上同时迁移全部领域功能。

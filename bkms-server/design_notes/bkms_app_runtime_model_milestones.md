@@ -17,8 +17,9 @@
 | M0 | 新模型字段、框架目录、兼容读取、扫描工具 | 0、1 | — | ✅ #225 |
 | M1 | 能力集合新路径（只新增，不接入） | 2 | 1 | ✅ |
 | M2 | 能力执行端切换到能力集合 | 2、3D | 1 | ✅ #302 |
-| M3 | 能力 pkg 划分（纯移动） | — | 1 | 🚧 #307 |
-| M4 | 运行链路识别 bkmsApp：渲染分派、部署预检、集群依赖等 | 3A、3C、3E | 2 | ⬜ |
+| M3 | 能力 pkg 划分（纯移动） | — | 1 | ✅ #307 |
+| M4 | 运行链路识别 bkmsApp：渲染分派、部署预检、集群依赖等 | 3A、3C、3E | 2 | 🚧 |
+| M4.5 | 框架协议实现拆到 `pkg/framework/*`（纯移动） | 3A、3D | 2 | ⬜ |
 | M5 | 创建与修改流程统一：编排合并、新旧字段双写、blank 后端闭环 | 3B、3F | 2 | ⬜ |
 | M6 | 新 API 上线，旧 API 改薄适配层 | 4（服务端） | 2 | ⬜ |
 | M7 | 前端接入，切换响应 type | 4（客户端） | 3 | ⬜ |
@@ -75,7 +76,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M3 能力 pkg 划分
 
-状态：已实现，PR #307。方案见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
+状态：已合并，PR #307。方案见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
 
 **范围：** 能力声明移到 `pkg/capability/<能力>/`（一个能力一个包，北极星两个能力合并为 `polaris`），并去掉标识符中重复的能力前缀；组装 `Set` / `Of` 保留在 `runtimemod/mods`；顺带处理遗留项 L-2、L-4、L-7；其余执行代码不动；`pkg/framework/*` 随 M4。
 
@@ -87,24 +88,37 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M4 运行链路识别 bkmsApp
 
+状态：已实现，待提 PR。方案见 [M4 运行链路识别 bkmsApp](./bkms_app_runtime_model_phase3_runtime.md)。
+
 **目标：** 部署、渲染等运行链路改为按管理方式（`IsAppModelType`）或 framework 判断，不再比较 `type == "trpc"` 这类字面值。只改判断逻辑，不改数据。
 
 **为什么需要：** 今天应用 type 只有 trpc / taf，字面值比较都能命中；blank 只能是 `bkmsApp`，M7 后所有应用也都是 `bkmsApp`，这些比较会全部落空。
 
 | 事项 | 现状 | 改为 |
 | --- | --- | --- |
-| 渲染插件选择 | 按 `Workload.Type` 选插件，空值默认 trpc（`workload/builder.go`、`plugin/plugin.go`） | 按 `Application.Framework` 选；blank 对应 standard 插件；去掉空值兜底 |
-| 部署预检 | 只认 trpc / taf，bkmsApp 落入 default 报错（`deploy/pre_checker.go`） | 按 `IsAppModelType` |
-| 部署接口类型校验 | 严格比较 expectedAppType（`appmodel_deploy_steps.go`） | 按 framework 核对 |
+| 渲染插件选择 | 按 `Workload.Type` 选插件，空值默认 trpc（`workload/builder.go`、`plugin/plugin.go`） | 按 `mods.Of(app).Stack.Framework` 选；blank 对应 standard 插件；去掉空值兜底 |
+| 部署预检（泳道） | 只认 trpc / taf，bkmsApp 落入 default 报错（`deploy/pre_checker.go`） | 按 `IsAppModelType` |
+| 旧类型专属接口的类型校验 | 严格比较 expectedAppType（部署预检、部署状态、一键构建部署、trpc-spec / taf-spec） | 按 framework 核对 |
 | 容器名内置变量 | 只给 trpc / taf 注入（`envvars/listers.go`） | 按 `IsAppModelType` |
-| 集群 addon 依赖 | 比较 type 字面值，YAML 只写 trpc / taf（`clusteraddon/query.go`） | 按管理方式与工作负载形态表达；同步内置 YAML 与库内记录 |
-| 其余字面值比较 | 组件引用查询、监控指标类型归一等 | 同上 |
+| 集群 addon 必装检查 | 用 `app.Type` 匹配 YAML 里的 trpc / taf（`clusteraddon/query.go`） | AppModel 类应用按 framework 匹配；YAML、库内记录、前端不变。按管理方式表达移到 M5 |
+| 框架文件名称、目录能否修改 | 比较 `"trpc"`、`"taf"`（`appcfg/config_kind_policy.go`） | 按 framework |
+| 组件引用查询、监控指标类型归一 | — | 经核实已兼容 bkmsApp，不改 |
 
 框架配置文件的挂载信息已由 #274 收敛到 def（含迁移 000021），M4 不再处理。
 
-**行为变化：** 无。
+**行为变化：** 无。上线前扫描测试、正式环境，存量渲染插件全部不变。
 
 **退出条件：** trpc / taf 新旧渲染清单逐项一致（含 `trpc-init`、`/taf-config-template` 等资源名）；不再有对 trpc / taf 字面值的运行时判断；Helm / Agones 无回归。
+
+---
+
+## M4.5 框架协议实现拆分
+
+**范围：** `appmodelcore/{trpc,taf}` 及 standard 插件拆到 `pkg/framework/{trpc,taf,blank}`，处理遗留项 L-5、L-6、L-8、L-11。只移动，不改逻辑。
+
+**行为变化：** 无，零逻辑 diff。
+
+**退出条件：** `appmodelcore/{trpc,taf}` 已移除；`make lint`、`make test` 通过。
 
 ---
 
@@ -121,6 +135,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 | 跨集合写入 | Application、配置文件、AppModel、AppSpec 分别写，中途失败留下半成品 | MongoDB 事务保护 |
 | blank 后端闭环 | 无 | 端到端测试：已有镜像 → plain 配置 → 渲染 → 部署 → 状态 → 下架；创建入口仍关闭 |
 | 旧路由调用量 | 无统计 | 埋点，作为 M9 下线依据 |
+| 集群 addon 依赖表达 | `requiredForAppTypes` 写 trpc / taf，blank 匹配不到（M4 只改了匹配方式） | 按管理方式表达（如 `appmodel`），查询兼容旧值；同步内置 YAML、库内记录与前端集群组件页分组 |
 
 **行为变化：** 技术栈切换被拒绝；其余对外行为不变。
 
@@ -194,12 +209,12 @@ M3 移动了能力声明并处理了 L-2、L-4、L-7，其余执行代码仍在�
 | L-2 | `extension/component/devmode/constants.go` 中的路径常量别名 | M3 | ✅ |
 | L-3 | devMode 渲染仍读 AppSpec 持久化路径 | M9 | ⬜ |
 | L-4 | platformBuild 执行代码迁移 | M3 | ✅ |
-| L-5 | adminCommand 协议实现进 `pkg/framework/*`；管理命令接口合并 | M4 / M6 | ⬜ |
-| L-6 | APM 解析实现进 `pkg/framework/*` | M4 | ⬜ |
+| L-5 | adminCommand 协议实现进 `pkg/framework/*`；管理命令接口合并 | M4.5 / M6 | ⬜ |
+| L-6 | APM 解析实现进 `pkg/framework/*` | M4.5 | ⬜ |
 | L-7 | 北极星服务名校验迁移 | M3 | ✅ |
-| L-8 | 北极星补丁器进 `pkg/framework/trpc` | M4 | ⬜ |
-| L-9 | BSCP 工作负载类型按渲染结果取值 | M4 | ⬜ |
+| L-8 | 北极星补丁器进 `pkg/framework/trpc` | M4.5 | ⬜ |
+| L-9 | BSCP 工作负载类型按渲染结果取值（目前只影响展示，留意） | 有使用方时，不晚于 M9 | ⬜ |
 | L-10 | frameworkFile 声明尚无执行端读取 | M7 | ⬜ |
-| L-11 | 框架协议实现拆分到 `pkg/framework/*` | M4 | ⬜ |
+| L-11 | 框架协议实现拆分到 `pkg/framework/*` | M4.5 | ⬜ |
 
 各项的当前位置、目标与检查命令见 M3 文档 §5。
