@@ -168,18 +168,6 @@ type BCSRepoConfig struct {
 	ChartName   string `json:"chartName" bson:"chartName"`
 }
 
-// IsAppModelType checks if the given app type is an appmodel type.
-// During the bridge period this includes legacy trpc/taf and bkmsApp.
-func IsAppModelType(appType string) bool {
-	return appruntime.IsAppModelType(appType)
-}
-
-// IsHelmBasedType checks if the given app type is a helm-based type
-// Helm-based types include Helm and Agones, which are both based on Helm charts
-func IsHelmBasedType(appType string) bool {
-	return appruntime.IsHelmBasedType(appType)
-}
-
 // DisplayLanguage returns the list-safe language without reading AppModel.
 func (a *Application) DisplayLanguage() string {
 	language, _ := a.displayStack()

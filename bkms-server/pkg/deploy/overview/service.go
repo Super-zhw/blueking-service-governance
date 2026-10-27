@@ -29,6 +29,7 @@ import (
 	"golang.org/x/sync/semaphore"
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	deploystatus "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/status"
@@ -87,7 +88,7 @@ type envRowSources struct {
 //   - 部署总览结果
 //   - error
 func (s *Service) GetOverview(ctx context.Context, application *bkmsapp.Application) (*Result, error) {
-	if !bkmsapp.IsAppModelType(application.Type) {
+	if !appruntime.IsAppModelType(application.Type) {
 		return nil, errors.Errorf("unsupported app type: %s", application.Type)
 	}
 

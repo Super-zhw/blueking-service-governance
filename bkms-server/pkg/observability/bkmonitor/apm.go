@@ -20,22 +20,13 @@
 package bkmonitor
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/apmservicename"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/apmservicename"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/render"
-)
-
-var (
-	// ErrAPMConfigMissing 表示 APM 相关配置缺失（如未配置 telemetry、缺少 service_name 等）
-	ErrAPMConfigMissing = errors.New("apm config missing")
-
-	// ErrAPMConfigParse 表示 APM 配置解析或渲染失败
-	ErrAPMConfigParse = errors.New("apm config parse error")
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/taf/tafconf"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/trpc/trpcconf"
 )
 
 const (
@@ -53,58 +44,10 @@ func GetApmServiceName(app *bkmsapp.Application, content string, appEnvVars map[
 	}
 	switch props.Parser {
 	case apmservicename.ParserTrpcYAML:
-		return GetTrpcApmServiceName(content, appEnvVars)
+		return trpcconf.APMServiceName(content, appEnvVars)
 	case apmservicename.ParserTafXML:
-		return GetTafApmServiceName(content, appEnvVars)
+		return tafconf.APMServiceName(content, appEnvVars)
 	default:
 		return "", errors.Errorf("unsupported apm config parser %q", props.Parser)
 	}
-}
-
-// GetTrpcApmServiceName 获取 trpc 应用的 APM 服务名称
-// trpc 配置使用 YAML 格式，变量渲染使用 ExpandShellVars（Shell 变量格式 ${VAR}）
-// 1、解析 telemetry 配置
-// 2、如果是 OpenTelemetry 类型, 直接获取服务名称，并返回给调用者
-// 3、如果是 伽利略 类型, 解析 trpc 服务配置, 获取服务名称，并返回给调用者
-func GetTrpcApmServiceName(content string, appEnvVars map[string]string) (string, error) {
-	contentByte := []byte(render.RenderShellVars(content, appEnvVars))
-
-	telemetryConfig, err := ParseTelemetryConfig(contentByte)
-	if err != nil {
-		return "", errors.Wrapf(ErrAPMConfigParse, "parse telemetry config: %s", err)
-	}
-	if telemetryConfig.GetTelemetryType() == TelemetryTypeUnknown {
-		return "", errors.Wrap(ErrAPMConfigMissing, "telemetry config type unknown")
-	}
-	if telemetryConfig.IsOpenTelemetry() {
-		return telemetryConfig.OpenTelemetry.GetServiceName()
-	}
-
-	trpcServerConfig, err := ParseTrpcServerConfig(contentByte)
-	if err != nil {
-		return "", errors.Wrapf(ErrAPMConfigParse, "parse trpc server config: %s", err)
-	}
-	if trpcServerConfig.Server.App == "" {
-		return "", errors.Wrap(ErrAPMConfigMissing, "trpc server config app empty")
-	}
-	if trpcServerConfig.Server.Server == "" {
-		return "", errors.Wrap(ErrAPMConfigMissing, "trpc server config server empty")
-	}
-
-	return fmt.Sprintf("%s.%s", trpcServerConfig.Server.App, trpcServerConfig.Server.Server), nil
-}
-
-// GetTafApmServiceName 获取 taf 应用的 APM 服务名称
-// taf 配置使用 XML 格式，变量渲染使用 Renderer（支持 ${{env.KEY}}）
-func GetTafApmServiceName(content string, appEnvVars map[string]string) (string, error) {
-	rendered, err := render.New(render.SetEnvContext(appEnvVars)).Render(content)
-	if err != nil {
-		return "", errors.Wrapf(ErrAPMConfigParse, "render taf config: %s", err)
-	}
-
-	tafConfig, err := ParseTafConfig([]byte(rendered))
-	if err != nil {
-		return "", errors.Wrapf(ErrAPMConfigParse, "parse taf config: %s", err)
-	}
-	return tafConfig.GetServiceName()
 }

@@ -18,8 +18,8 @@
 | M1 | 能力集合新路径（只新增，不接入） | 2 | 1 | ✅ |
 | M2 | 能力执行端切换到能力集合 | 2、3D | 1 | ✅ #302 |
 | M3 | 能力 pkg 划分（纯移动） | — | 1 | ✅ #307 |
-| M4 | 运行链路识别 bkmsApp：渲染分派、部署预检、集群依赖等 | 3A、3C、3E | 2 | 🚧 |
-| M4.5 | 框架协议实现拆到 `pkg/framework/*`（纯移动） | 3A、3D | 2 | ⬜ |
+| M4 | 运行链路识别 bkmsApp：渲染分派、部署预检、集群依赖等 | 3A、3C、3E | 2 | ✅ #309 |
+| M4.5 | 框架协议实现拆到 `appmodelcore/framework/*`，能力包移到 `core/appruntime/capability`（纯移动） | 3A、3D | 2 | 🚧 |
 | M5 | 创建与修改流程统一：编排合并、新旧字段双写、blank 后端闭环 | 3B、3F | 2 | ⬜ |
 | M6 | 新 API 上线，旧 API 改薄适配层 | 4（服务端） | 2 | ⬜ |
 | M7 | 前端接入，切换响应 type | 4（客户端） | 3 | ⬜ |
@@ -78,7 +78,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 状态：已合并，PR #307。方案见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
 
-**范围：** 能力声明移到 `pkg/capability/<能力>/`（一个能力一个包，北极星两个能力合并为 `polaris`），并去掉标识符中重复的能力前缀；组装 `Set` / `Of` 保留在 `runtimemod/mods`；顺带处理遗留项 L-2、L-4、L-7；其余执行代码不动；`pkg/framework/*` 随 M4。
+**范围：** 能力声明移到 `pkg/core/appruntime/capability/<能力>/`（一个能力一个包，北极星两个能力合并为 `polaris`），并去掉标识符中重复的能力前缀；组装 `Set` / `Of` 保留在 `runtimemod/mods`；顺带处理遗留项 L-2、L-4、L-7；其余执行代码不动；`pkg/workload/appmodelcore/framework/*` 随 M4。
 
 **行为变化：** 无，只移动代码，不改逻辑。
 
@@ -88,7 +88,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M4 运行链路识别 bkmsApp
 
-状态：已实现，待提 PR。方案见 [M4 运行链路识别 bkmsApp](./bkms_app_runtime_model_phase3_runtime.md)。
+状态：已合并，PR #309。方案见 [M4 运行链路识别 bkmsApp](./bkms_app_runtime_model_phase3_runtime.md)。
 
 **目标：** 部署、渲染等运行链路改为按管理方式（`IsAppModelType`）或 framework 判断，不再比较 `type == "trpc"` 这类字面值。只改判断逻辑，不改数据。
 
@@ -96,7 +96,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 | 事项 | 现状 | 改为 |
 | --- | --- | --- |
-| 渲染插件选择 | 按 `Workload.Type` 选插件，空值默认 trpc（`workload/builder.go`、`plugin/plugin.go`） | 按 `mods.Of(app).Stack.Framework` 选；blank 对应 standard 插件；去掉空值兜底 |
+| 渲染插件选择 | 按 `Workload.Type` 选插件，空值默认 trpc（`workload/builder.go`、`plugin/plugin.go`） | 按 `mods.Of(app).Stack.Framework` 选；blank 对应 standard 插件（M4.5 起不走插件）；去掉空值兜底 |
 | 部署预检（泳道） | 只认 trpc / taf，bkmsApp 落入 default 报错（`deploy/pre_checker.go`） | 按 `IsAppModelType` |
 | 旧类型专属接口的类型校验 | 严格比较 expectedAppType（部署预检、部署状态、一键构建部署、trpc-spec / taf-spec） | 按 framework 核对 |
 | 容器名内置变量 | 只给 trpc / taf 注入（`envvars/listers.go`） | 按 `IsAppModelType` |
@@ -114,9 +114,11 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M4.5 框架协议实现拆分
 
-**范围：** `appmodelcore/{trpc,taf}` 及 standard 插件拆到 `pkg/framework/{trpc,taf,blank}`，处理遗留项 L-5、L-6、L-8、L-11。只移动，不改逻辑。
+状态：已实现，待提 PR。方案见 [M4.5 框架协议实现拆分](./bkms_app_runtime_model_phase3_framework.md)。
 
-**行为变化：** 无，零逻辑 diff。
+**范围：** `appmodelcore/{trpc,taf}` 拆到 `appmodelcore/framework/{trpc,taf}`；`pkg/capability` 移到 `core/appruntime/capability`，`pkg` 下不新增顶级目录；APM 与北极星服务名的 tRPC / TAF 配置解析移入 `framework/*/*conf`。处理遗留项 L-5（协议实现）、L-6、L-8、L-11。除 standard 插件外只移动，不改逻辑。
+
+**行为变化：** blank 不再走 standard 插件，改为跳过插件步骤，渲染结果不变；standard 插件与 `WorkloadTypeStandard` 删除。其余零逻辑 diff。
 
 **退出条件：** `appmodelcore/{trpc,taf}` 已移除；`make lint`、`make test` 通过。
 
@@ -128,7 +130,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 | 事项 | 现状 | 改为 |
 | --- | --- | --- |
-| 创建编排 | 按类型分派到 `trpc.go`、`taf.go` 两套几乎相同的流程（解析默认值、建框架 def、初始化 AppModel、写 AppSpec） | 合并为一个编排服务，差异（配置格式、旧投影）由框架适配器提供，并读取能力声明 |
+| 创建编排 | 按类型分派到 `trpc.go`、`taf.go` 两套几乎相同的流程（解析默认值、建框架 def、初始化 AppModel、写 AppSpec） | 合并为一个编排服务，位于 `workload/appmodelcore`（不放进 `core/app`），差异（配置格式、旧投影）由框架适配器提供，并读取能力声明 |
 | 新字段写入 | 生产代码从未写过 `Application.Language/Framework` | 与旧字段同时写 |
 | 框架配置文件挂载信息 | 已由 #274 收敛到 def，创建时只写 def | 本里程碑不再处理，仅确认新字段双写范围不包含挂载信息 |
 | 技术栈不可变 | `trpc-spec` 更新会改 `TrpcConfig.Language` | 提交不同 language 时报"不支持切换技术栈" |
@@ -201,20 +203,20 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## 遗留项
 
-M3 移动了能力声明并处理了 L-2、L-4、L-7，其余执行代码仍在原包。每个里程碑结束前按"检查方式"复核，处理后在此处与 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md) §5 同时标记。检索需加 `--no-ignore-vcs`，否则 `rg` 会因 `.gitignore` 的 `build/` 跳过 `pkg/build`。
+M3 移动了能力声明并处理了 L-2、L-4、L-7，其余执行代码仍在原包。M4.5 起执行代码不再移入能力包（见总体方案 §4.5），遗留项的目标是执行端只通过能力 props 工作。每个里程碑结束前按"检查方式"复核，处理后在此处与 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md) §5 同时标记。检索需加 `--no-ignore-vcs`，否则 `rg` 会因 `.gitignore` 的 `build/` 跳过 `pkg/build`。
 
 | 编号 | 事项 | 处理时机 | 状态 |
 | --- | --- | --- | --- |
-| L-1 | devMode 执行代码收敛到 `capability/devmode` | 不晚于 M9 | ⬜ |
+| L-1 | devMode 执行端只通过能力 props 选择脚本与路径，不读 AppType；执行代码留在原模块（M2 已满足） | M4.5 | ✅ |
 | L-2 | `extension/component/devmode/constants.go` 中的路径常量别名 | M3 | ✅ |
 | L-3 | devMode 渲染仍读 AppSpec 持久化路径 | M9 | ⬜ |
 | L-4 | platformBuild 执行代码迁移 | M3 | ✅ |
-| L-5 | adminCommand 协议实现进 `pkg/framework/*`；管理命令接口合并 | M4.5 / M6 | ⬜ |
-| L-6 | APM 解析实现进 `pkg/framework/*` | M4.5 | ⬜ |
-| L-7 | 北极星服务名校验迁移 | M3 | ✅ |
-| L-8 | 北极星补丁器进 `pkg/framework/trpc` | M4.5 | ⬜ |
+| L-5 | adminCommand 协议实现进 `appmodelcore/framework/*`（M4.5 已完成）；管理命令接口合并，分派留在使用方 | M4.5 / M6 | 🚧 |
+| L-6 | APM 解析实现进 `pkg/workload/appmodelcore/framework/*`；分派留在 bkmonitor | M4.5 | ✅ |
+| L-7 | 北极星服务名校验迁移（M4.5 起执行函数位于 `extension/addon/polaris`） | M3 | ✅ |
+| L-8 | 北极星补丁器进 `pkg/workload/appmodelcore/framework/trpc` | M4.5 | ✅ |
 | L-9 | BSCP 工作负载类型按渲染结果取值（目前只影响展示，留意） | 有使用方时，不晚于 M9 | ⬜ |
 | L-10 | frameworkFile 声明尚无执行端读取 | M7 | ⬜ |
-| L-11 | 框架协议实现拆分到 `pkg/framework/*` | M4.5 | ⬜ |
+| L-11 | 框架协议实现拆分到 `pkg/workload/appmodelcore/framework/*`；standard 插件删除，blank 不走插件 | M4.5 | ✅ |
 
 各项的当前位置、目标与检查命令见 M3 文档 §5。

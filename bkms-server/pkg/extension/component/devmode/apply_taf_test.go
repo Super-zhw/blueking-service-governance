@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/component/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
 )

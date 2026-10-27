@@ -20,8 +20,18 @@
 package apmservicename
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
+)
+
+// 各框架解析器返回的错误，调用方用 errors.Is 区分"未配置"与"解析失败"。
+var (
+	// ErrConfigMissing APM 相关配置缺失，如未配置 telemetry、缺少 service_name 等。
+	ErrConfigMissing = errors.New("apm config missing")
+	// ErrConfigParse APM 配置解析或渲染失败。
+	ErrConfigParse = errors.New("apm config parse error")
 )
 
 // Parser 读取 APM 服务名的解析方式。

@@ -22,6 +22,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/bkintegrations/bkci"
 	build "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/image"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 )
 
 func collectBKCIRepositoriesForCreateApp(
@@ -38,7 +39,7 @@ func collectBKCIRepositoriesForCreateApp(
 		})
 	}
 
-	if bkmsapp.IsHelmBasedType(appType) && helmSpec != nil {
+	if appruntime.IsHelmBasedType(appType) && helmSpec != nil {
 		repos = append(repos, helmSourceRepositoriesToBind(helmSpec.HelmSource)...)
 	}
 

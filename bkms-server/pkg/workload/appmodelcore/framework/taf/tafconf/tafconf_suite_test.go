@@ -16,29 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package taf_test
+package tafconf_test
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/taf"
 )
 
-var _ = Describe("DecodeConfig", func() {
-	It("decodes legacy file metadata and rejects empty objects", func() {
-		cfg := taf.ConfigMapFromLegacy(appmodel.TafConfig{
-			FileName:    "taf_config.conf",
-			FilePath:    "/usr/local/taf/conf/",
-			FileContent: "<taf/>",
-		})
-		got, err := taf.DecodeConfig(cfg, appruntime.FrameworkConfigVersionV1)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(got).To(Equal(taf.Config{FileName: "taf_config.conf", FilePath: "/usr/local/taf/conf/"}))
-
-		_, err = taf.DecodeConfig(map[string]any{}, appruntime.FrameworkConfigVersionV1)
-		Expect(err).To(HaveOccurred())
-	})
-})
+func TestTafconf(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "TAF Config Parser Suite")
+}

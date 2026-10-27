@@ -83,14 +83,14 @@ var _ = Describe("Builder", func() {
 		diApp.RequireStop()
 	})
 
-	Context("standard workload", func() {
+	Context("blank framework workload", func() {
 		var app *bkmsapp.Application
 		var envObj *envmodel.Environment
 		var appModel *appmodel.AppModel
 		var builder *workload.Builder
 
 		BeforeEach(func() {
-			// standard 插件只对应 blank 框架
+			// blank 没有框架插件，只渲染公共部分
 			app = dbfactory.ApplicationWithOpts(ctx, appStore, &dbfactory.ApplicationOpts{
 				WorkspaceID: newWorkspaceID(ctx),
 				Type:        bkmsapp.AppTypeBKMSApp,
@@ -105,7 +105,6 @@ var _ = Describe("Builder", func() {
 			appModel = &appmodel.AppModel{
 				AppID: app.ID,
 				Workload: appmodel.Workload{
-					Type:  appmodel.WorkloadTypeStandard,
 					Name:  app.Name,
 					Image: "nginx:latest",
 					EnvVars: []appmodel.Variable{
@@ -147,7 +146,7 @@ var _ = Describe("Builder", func() {
 		})
 
 		It("should pick the plugin by framework and ignore workload.type", func() {
-			// workload.type 写成 trpc，blank 应用仍按 standard 渲染，不挂 trpc 资源
+			// workload.type 写成 trpc，blank 应用仍不走插件，不挂 trpc 资源
 			appModel.Workload.Type = appmodel.WorkloadTypeTrpc
 			result, err := workload.NewBuilder(builderSvc, app, appModel).Build(ctx, envObj)
 			Expect(err).NotTo(HaveOccurred())

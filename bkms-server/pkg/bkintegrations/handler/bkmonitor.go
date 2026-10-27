@@ -30,6 +30,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/apmservicename"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
@@ -111,7 +112,7 @@ func (h *Handler) GetApmServiceName(c *gin.Context) {
 	serviceName, svcErr := bkmmodel.GetApmServiceName(app, frameworkFile.Content, appEnvVars.ToMap())
 	if svcErr != nil {
 		log.Errorf(ctx, "get apm service name error for app %s env %s: %v", app.ID, env.Name, svcErr)
-		if errors.Is(svcErr, bkmmodel.ErrAPMConfigMissing) {
+		if errors.Is(svcErr, apmservicename.ErrConfigMissing) {
 			bkerrs.AbortWithErr(c, bkerrs.WrapAPMConfigMissing(svcErr, app.ID, env.Name))
 			return
 		}

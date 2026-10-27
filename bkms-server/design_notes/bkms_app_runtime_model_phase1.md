@@ -41,7 +41,7 @@ func ByLanguage[P Props](table map[string]P) func(string, string) Mod[P]
 简单能力一行即可：
 
 ```go
-// pkg/capability/frameworkfile
+// pkg/core/appruntime/capability/frameworkfile
 var Spec = runtimemod.Spec[Props]{
     ID: runtimemod.ModFrameworkFile,
     Resolve: runtimemod.ByFramework(map[string]Props{
@@ -168,9 +168,9 @@ M2 交付：执行器覆盖测试（各能力所在模块），保证凡 `Suppor
 ## 6. 能力代码的 pkg 划分
 
 ```
-pkg/core/appruntime/runtimemod/        # 基础：ModID、ReasonCode、Mod、Spec、工厂、对外结构
-pkg/core/appruntime/runtimemod/mods/   # 组装：Set、Of(app)、Resolve、Matrix
-pkg/capability/<能力>/                 # 各能力声明及部分执行函数（M3 起）
+pkg/core/appruntime/runtimemod/       # 基础：ModID、ReasonCode、Mod、Spec、工厂、对外结构
+pkg/core/appruntime/runtimemod/mods/  # 组装：Set、Of(app)、Resolve、Matrix
+pkg/core/appruntime/capability/<能力>/  # 各能力声明及部分执行函数（M3 起）
 ```
 
 划分原则：基础包只放与具体能力无关的类型和工具；能力声明一个能力一个包；`mods` 只负责组装。依赖方向由编译期循环检测保证，不另设 import 约束测试。详见 [M3 能力包划分](./bkms_app_runtime_model_phase2_pkg.md)。
@@ -183,7 +183,7 @@ pkg/capability/<能力>/                 # 各能力声明及部分执行函数�
 | --- | --- | --- |
 | M1 | 声明、`Set`、`Of(app)`、测试、文档 | ✅ #294 |
 | M2 | 8 个能力的执行端改读 `Set` | ✅ #302 |
-| M3 | 能力搬到 `pkg/capability/*` | ✅ #307 |
+| M3 | 能力搬到 `pkg/core/appruntime/capability/*` | ✅ #307 |
 
 M2 的两个已知行为点：
 

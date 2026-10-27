@@ -16,11 +16,13 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package polaris
+package trpcconf_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/trpc/trpcconf"
 )
 
 var _ = Describe("ParseTrpcServiceNames", func() {
@@ -39,7 +41,7 @@ server:
       timeout: 60000
 `
 
-		names, err := parseTrpcServiceNames(content)
+		names, err := trpcconf.ParseServiceNames(content)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(names).To(Equal([]string{
@@ -68,7 +70,7 @@ plugins:
       address: 127.0.0.1:2379
 `
 
-		names, err := parseTrpcServiceNames(content)
+		names, err := trpcconf.ParseServiceNames(content)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(names).To(Equal([]string{"trpc.bkms.valid.Service"}))
@@ -84,14 +86,14 @@ client:
     - name: trpc.bkms.registry.etcd
 `
 
-		names, err := parseTrpcServiceNames(content)
+		names, err := trpcconf.ParseServiceNames(content)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(names).To(BeEmpty())
 	})
 
 	It("should return error when yaml is invalid", func() {
-		_, err := parseTrpcServiceNames("server:\n  service:\n    - name: [")
+		_, err := trpcconf.ParseServiceNames("server:\n  service:\n    - name: [")
 
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("unmarshal tRPC config YAML"))

@@ -16,16 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package bkmonitor 提供蓝鲸监控相关功能
-package bkmonitor
+// Package trpcconf 解析 tRPC 配置文件（YAML）：APM 服务名、服务列表等。
+//
+// 只依赖能力声明与通用渲染工具，供能力包和执行端引用。
+package trpcconf
 
 import (
-	"encoding/xml"
-	"fmt"
-	"strings"
-
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
+
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/apmservicename"
 )
 
 const (
@@ -48,8 +48,8 @@ const (
 	TelemetryTypeUnknown TelemetryType = "unknown"
 )
 
-// TrpcServerConfig trpc 服务配置
-type TrpcServerConfig struct {
+// ServerConfig tRPC 配置中的 server 段
+type ServerConfig struct {
 	Server struct {
 		App string `yaml:"app"`
 
@@ -200,9 +200,9 @@ func ParseTelemetryConfig(data []byte) (*Telemetry, error) {
 	return &config.Plugins.Telemetry, nil
 }
 
-// ParseTrpcServerConfig 从 YAML 字节解析配置
-func ParseTrpcServerConfig(data []byte) (*TrpcServerConfig, error) {
-	var config TrpcServerConfig
+// ParseServerConfig 从 YAML 字节解析配置
+func ParseServerConfig(data []byte) (*ServerConfig, error) {
+	var config ServerConfig
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, errors.Wrapf(err, "unmarshal trpc server config")
 	}
@@ -217,76 +217,5 @@ func (s *OpenTelemetryConfig) GetServiceName() (string, error) {
 		}
 	}
 
-	return "", errors.Wrapf(ErrAPMConfigMissing, "%s service name not found", TelemetryTypeOpenTelemetry)
-}
-
-// ========== TAF 配置 ==========
-
-// TafConfig TAF 配置文件根结构（XML 格式）
-// TAF 配置使用非标准 XML 格式，在 XML 标签内使用 key=value 格式存储配置项
-type TafConfig struct {
-	XMLName     xml.Name       `xml:"taf"`
-	Application TafApplication `xml:"application"`
-}
-
-// TafApplication TAF application 节点
-type TafApplication struct {
-	// CharData 包含 setdivision 等 key=value 格式的配置项
-	CharData string    `xml:",chardata"`
-	Server   TafServer `xml:"server"`
-}
-
-// TafServer TAF server 节点
-type TafServer struct {
-	// CharData 包含 app、server 等 key=value 格式的配置项
-	CharData string `xml:",chardata"`
-}
-
-// ParseTafConfig 从 XML 字节解析 TAF 配置
-func ParseTafConfig(data []byte) (*TafConfig, error) {
-	var config TafConfig
-	if err := xml.Unmarshal(data, &config); err != nil {
-		return nil, errors.Wrap(err, "unmarshal taf config")
-	}
-	return &config, nil
-}
-
-// GetServiceName 从 TAF 配置中获取 APM 服务名称
-// 拼接规则：{app}.{server}.{setdivision去除点号保留星号}
-// setdivision 为可选字段，为空时拼接结果为 {app}.{server}
-func (c *TafConfig) GetServiceName() (string, error) {
-	serverKV := parseTafKeyValues(c.Application.Server.CharData)
-	app := serverKV["app"]
-	server := serverKV["server"]
-
-	if app == "" || server == "" {
-		return "", errors.Wrap(ErrAPMConfigMissing, "taf config missing app or server field")
-	}
-
-	appKV := parseTafKeyValues(c.Application.CharData)
-	setDivision := appKV["setdivision"]
-
-	if setDivision == "" {
-		return fmt.Sprintf("%s.%s", app, server), nil
-	}
-
-	// 去除点号，保留星号
-	setDivision = strings.ReplaceAll(setDivision, ".", "")
-	return fmt.Sprintf("%s.%s.%s", app, server, setDivision), nil
-}
-
-// parseTafKeyValues 解析 TAF 配置中 key=value 格式的文本内容
-func parseTafKeyValues(text string) map[string]string {
-	result := make(map[string]string)
-	for _, line := range strings.Split(text, "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) == 2 {
-			result[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
-		}
-	}
-	return result
+	return "", errors.Wrapf(apmservicename.ErrConfigMissing, "%s service name not found", TelemetryTypeOpenTelemetry)
 }

@@ -55,15 +55,15 @@
 | --- | --- | --- |
 | [Application](../pkg/core/app/app.go) | `Type=trpc/taf`；`TrpcSpec` 仅含 language；`IsAppModelType` 只识别这两类 | `TrpcSpec` 的信息应提升到 `Application.Language`，不需要为了取代它再增加空的应用级 map |
 | [AppModel / Workload](../pkg/workload/appmodelcore/appmodel/entities.go) | `Workload.Type` 再次区分 trpc/taf；TrpcConfig 再存 language；两种配置都有文件元信息与内容字段 | 删除重复技术栈字段，统一框架配置载体；处理历史 fileContent |
-| [tRPC 更新服务](../pkg/workload/appmodelcore/trpc/trpc.go) | 更新 `Workload.TrpcConfig.Language`，该路径没有同步更新 Application.TrpcSpec | 两处 language 可能不一致，迁移时必须检测冲突，不能假设二者始终相等 |
+| [tRPC 更新服务](../pkg/workload/appmodelcore/framework/trpc/trpc.go) | 更新 `Workload.TrpcConfig.Language`，该路径没有同步更新 Application.TrpcSpec | 两处 language 可能不一致，迁移时必须检测冲突，不能假设二者始终相等 |
 | [workload plugin](../pkg/workload/appmodelcore/workload/plugin/plugin.go) | 按 Workload.Type 选择插件；空字符串回退 tRPC | 新模型禁止依赖这个回退，兼容行为仅允许放在旧记录适配层 |
-| [standard plugin](../pkg/workload/appmodelcore/standard/plugin.go) | 已有无框架特效的内部插件，用于测试 | 可作为 blank 的执行基础，但不能据此声称 blank 已达到产品可用状态 |
+| standard plugin（M4.5 已删除） | 无框架特效的内部插件，仅用于测试 | 与 blank 不对等；blank 不走框架插件，只渲染公共部分 |
 | [workload builder](../pkg/workload/appmodelcore/workload/builder.go) | 框架插件、plain 配置文件、devmode 已有独立组装步骤 | 保留此分工，改变能力选择与输入，不重建渲染流水线 |
 | [devmode](../pkg/extension/component/devmode/devmode.go)、[校验](../pkg/extension/component/devmode/builder.go) | Type 决定脚本、工作路径、二进制路径；校验环境与启动命令 | props 需要描述执行策略和路径；是否启用仍归 AppSpec |
 | [构建前置检查](../pkg/build/build/service.go)、[镜像构建](../pkg/build/image/build.go) | 平台生成 Dockerfile 仅支持 trpc+go，依赖 TrpcSpec.Language | 不能改成“所有 BKMSApp 均支持”；独立能力 `platformBuild` 保留当前范围 |
 | [应用路由](../pkg/core/app/router.go)、[输入](../pkg/core/app/serializer/app.go) | 创建已是统一 POST；请求 type/spec 分叉，更新为 trpc-spec/taf-spec | 扩展现有创建入口，统一更新契约；不是再建两套创建路由 |
 | [部署路由](../pkg/deploy/router.go)、[构建部署路由](../pkg/build/autodeploy/router.go) | 两套镜像接口；部署路由明确标注 CLI 使用 | 合并到 AppModel 部署契约，迁移 UI/CLI 后才删除旧路由 |
-| [框架文件渲染](../pkg/workload/appmodelcore/trpc/plugin.go) | 内容来自 MountableFileProvider，但挂载文件名/目录仍以 AppModel 为准 | 不能直接采用 def 的 name/mountDir，历史 def 名可能是 default |
+| [框架文件渲染](../pkg/workload/appmodelcore/framework/trpc/plugin.go) | 内容来自 MountableFileProvider，但挂载文件名/目录仍以 AppModel 为准 | 不能直接采用 def 的 name/mountDir，历史 def 名可能是 default |
 | [旧配置迁移](../pkg/core/render/migrate/draft.go) | 明确处理 `workload.tafConfig.fileContent` 残留 | 删除字段之前核对残留内容，兼容已有迁移工具 |
 | [集群依赖定义](../pkg/core/env/clusteraddon/assets/addons) | requiredForAppTypes / optionalForAppTypes 使用 trpc/taf | 既要迁移代码，也要迁移内置 YAML 及其已同步的数据库记录 |
 
@@ -238,12 +238,14 @@ AppSpec.DevMode 保留 Enabled 等用户配置；模块 props 为平台定义的
 | 包 | 职责 | 依赖约束 |
 | --- | --- | --- |
 | `pkg/core/appruntime/runtimemod` | ModID、ReasonCode、Mod、Spec、查表工厂、对外结构 | 只依赖 `appruntime` 与标准库 |
-| `pkg/capability/<能力>` | 各能力的声明、props 类型、公开投影及执行函数，一个能力一个包 | 不依赖 `runtimemod/mods`；执行函数接收 `mods.Of(app).<能力>` |
+| `pkg/core/appruntime/capability/<能力>` | 各能力的声明、props 类型、公开投影、常量与错误约定，一个能力一个包 | 只依赖 `appruntime`、`runtimemod`；不依赖 `runtimemod/mods` 及 workload、extension 等业务层；不放执行代码 |
 | `pkg/core/appruntime/runtimemod/mods` | 组装：`Set`、`Of(app)`、`Resolve`、`Matrix` | 依赖各能力包、`appruntime`、`runtimemod`、`core/app` |
 | 应用运行时组装 | `mods.Of(app)`：Application → 技术栈 → 能力集合 | 不放在 `core/app` 方法里，避免 core/app 反向依赖 |
-| `appmodelcore/trpc`、`taf`、blank 适配器 | 框架配置解码、校验、默认值、渲染/初始化差异 | 保留框架知识；通用业务通过 Mod/适配器接口调用 |
+| `pkg/workload/appmodelcore/framework/<框架>` | 框架配置解码、校验、默认值、渲染/初始化差异、协议实现（M4.5 起） | 保留框架知识；可依赖能力包；通用业务通过 Mod/适配器接口调用 |
 
-M3 起能力声明位于 `pkg/capability/<能力>/`，执行代码逐步移入，未移入的见里程碑文档遗留项。禁止让 core/app 直接 import devmode/build/admincmd 来拼能力集合。
+能力声明位于 `pkg/core/appruntime/capability/<能力>/`（M3 引入，M4.5 从 `pkg/capability` 移入）。执行按 §1 第 3 条与 §4.1：模块使用自己的类型化 props 和已有执行器完成，执行代码留在原模块，框架专属实现在 `appmodelcore/framework`，只通过 `mods.Of(app).<能力>` 取支持情况与 props。M3 曾规划"执行代码逐步移入能力包"，与本节约束不符，M4.5 已撤回。禁止让 core/app 直接 import devmode/build/admincmd 来拼能力集合。
+
+包位置遵循《pkg 模块结构重构迁移总说明》（iwiki 4020906210）：`pkg` 下不新增顶级目录，`core` 只放基础对象，spec 与框架配置的解释归 `workload/appmodelcore`。
 
 ## 5. API 与产品契约
 
@@ -395,7 +397,7 @@ Application 与 AppModel 跨集合更新：上线前验证当前 MongoDB 部署�
 | 3C 通用 AppModel 功能 | 部署状态、预检查、实例、拓扑、WebConsole、环境变量、引用查询、异步轮询、镜像清理 | BKMSApp 被完整识别；旧任务仍能处理；查询/统计无遗漏；Helm/Agones 无回归 |
 | 3D 框架特性 | admincmd、APM、Polaris、BSCP 等消费 Mods 和类型化配置 | 不支持组合返回明确错误；不把框架专用限制错误施加到整个通用集成 |
 | 3E 集群依赖 | addon 的管理方式筛选与能力依赖分开；同步内置定义和数据库；更新调用接口 | blank 获得通用部署所需依赖，不自动要求框架专用依赖；required/optional 语义一致 |
-| 3F blank 验证 | 接入空框架适配器，复用 standard 行为；仅开放经过验证的通用能力 | 可用已有镜像创建、渲染、部署、查看状态/日志、挂载 plain 文件和下架；不产生 tRPC/TAF 框架资源 |
+| 3F blank 验证 | 接入空框架适配器，不走框架插件；仅开放经过验证的通用能力 | 可用已有镜像创建、渲染、部署、查看状态/日志、挂载 plain 文件和下架；不产生 tRPC/TAF 框架资源 |
 
 **退出门槛：** 领域流程不依赖旧 AppType/TrpcSpec/Workload.Type 选择技术栈；所有 map 访问有统一解码边界；尚未公开的 blank 已有完整后端端到端测试。框架协议实现和兼容层中的 trpc/taf 名字允许保留。
 
@@ -471,6 +473,6 @@ rg -n 'requiredForAppTypes|optionalForAppTypes|"trpc"|"taf"' pkg/core/env/cluste
 | blank 首期能力 | 仅目录声明；创建关闭 |
 | fileName/filePath 归属 | 收敛到框架 def 的 `Name` / `MountDir`（替代原“首期放 frameworkConfig”），见 §3.4 |
 
-阶段 2（能力层）的组织方式、能力目录与 pkg 划分已确定，见 [bkms_app_runtime_model_phase1.md](./bkms_app_runtime_model_phase1.md)；执行端切换见 [bkms_app_runtime_model_phase2.md](./bkms_app_runtime_model_phase2.md)；能力包划分见 [bkms_app_runtime_model_phase2_pkg.md](./bkms_app_runtime_model_phase2_pkg.md)。运行链路识别 bkmsApp 见 [bkms_app_runtime_model_phase3_runtime.md](./bkms_app_runtime_model_phase3_runtime.md)。整体进度与 PR 拆分见 [bkms_app_runtime_model_milestones.md](./bkms_app_runtime_model_milestones.md)。
+阶段 2（能力层）的组织方式、能力目录与 pkg 划分已确定，见 [bkms_app_runtime_model_phase1.md](./bkms_app_runtime_model_phase1.md)；执行端切换见 [bkms_app_runtime_model_phase2.md](./bkms_app_runtime_model_phase2.md)；能力包划分见 [bkms_app_runtime_model_phase2_pkg.md](./bkms_app_runtime_model_phase2_pkg.md)。运行链路识别 bkmsApp 见 [bkms_app_runtime_model_phase3_runtime.md](./bkms_app_runtime_model_phase3_runtime.md)；框架协议实现拆分见 [bkms_app_runtime_model_phase3_framework.md](./bkms_app_runtime_model_phase3_framework.md)。整体进度与 PR 拆分见 [bkms_app_runtime_model_milestones.md](./bkms_app_runtime_model_milestones.md)。
 
 首个实现变更建议只覆盖阶段 0–1 的一个垂直切片：定义技术栈目录、Application 新字段及旧 tRPC 数据规范化，配齐一致性测试。待统一模型稳定后再用 devmode/platformBuild 验证能力规范，避免在尚未验证的抽象上同时迁移全部领域功能。

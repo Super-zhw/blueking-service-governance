@@ -30,6 +30,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/autodeploy"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/helm"
@@ -392,9 +393,9 @@ func (s *DeployStatusService) prefetchLatestStatuses(
 		for _, laneName := range scopes[i].laneNames {
 			for _, application := range scopes[i].apps {
 				switch {
-				case app.IsAppModelType(application.Type):
+				case appruntime.IsAppModelType(application.Type):
 					appModelIDsByLane[laneName] = append(appModelIDsByLane[laneName], application.ID)
-				case app.IsHelmBasedType(application.Type):
+				case appruntime.IsHelmBasedType(application.Type):
 					helmIDsByLane[laneName] = append(helmIDsByLane[laneName], application.ID)
 				default:
 					return nil, errors.Wrapf(
@@ -489,7 +490,7 @@ func (s *DeployStatusService) GetLatestDeployStatus(
 	appID, appType, envName, laneName string,
 ) (*LatestDeployStatus, error) {
 	switch {
-	case app.IsAppModelType(appType):
+	case appruntime.IsAppModelType(appType):
 		// AppModel 应用可能存在一键构建部署记录；优先根据记录关联关系和创建时间选择真正最新的状态。
 		buildRecord, err := s.getLatestBuildAutoDeployRecord(ctx, appID, envName, laneName)
 		if err != nil {
@@ -504,7 +505,7 @@ func (s *DeployStatusService) GetLatestDeployStatus(
 			return nil, ErrDeployRecordNotFound
 		}
 		return status, nil
-	case app.IsHelmBasedType(appType):
+	case appruntime.IsHelmBasedType(appType):
 		// Helm 应用没有一键构建部署记录，直接读取 Helm 部署记录即可。
 		record, err := s.getLatestHelmDeployRecord(ctx, appID, envName, laneName)
 		if err != nil {
@@ -539,7 +540,7 @@ func (s *DeployStatusService) ListLatestByAppLane(
 	ctx context.Context,
 	appID, appType, laneName string,
 ) (map[string]*LatestDeployStatus, map[string]*appmodel.Record, error) {
-	if !app.IsAppModelType(appType) {
+	if !appruntime.IsAppModelType(appType) {
 		return nil, nil, ErrUnsupportedAppType
 	}
 

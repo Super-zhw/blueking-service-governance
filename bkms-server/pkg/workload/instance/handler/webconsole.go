@@ -24,7 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	bkmsworkspace "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
@@ -98,7 +98,7 @@ func (h *Handler) CreateAppInstanceWebConsole(c *gin.Context) {
 
 	containerName := defaults.WorkloadMainContainerName
 	// 非 AppModel 类应用主容器名称不一定是 main
-	if !bkmsapp.IsAppModelType(app.Type) {
+	if !appruntime.IsAppModelType(app.Type) {
 		podClient := k8sclient.NewPodClient(cluster.NewConfig(env.Cluster.ClusterID))
 		containerName, err = podClient.GetFirstContainerName(ctx, env.Cluster.Namespace, uriInput.InstanceID)
 		if err != nil {

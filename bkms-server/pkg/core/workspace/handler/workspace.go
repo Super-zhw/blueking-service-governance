@@ -31,6 +31,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
@@ -972,7 +973,7 @@ func (h *Handler) hasActiveDeploymentsInWorkspace(ctx context.Context, workspace
 		return false, err
 	}
 	for _, app := range apps {
-		if bkmsapp.IsAppModelType(app.Type) {
+		if appruntime.IsAppModelType(app.Type) {
 			hasActive, err := appmodeldeploy.HasActiveDeployments(ctx, h.registry.DB, app.ID)
 			if err != nil {
 				return false, err
@@ -980,7 +981,7 @@ func (h *Handler) hasActiveDeploymentsInWorkspace(ctx context.Context, workspace
 			if hasActive {
 				return true, nil
 			}
-		} else if bkmsapp.IsHelmBasedType(app.Type) {
+		} else if appruntime.IsHelmBasedType(app.Type) {
 			hasActive, err := helmdeploy.HasActiveDeployments(ctx, h.registry.DB, app.ID)
 			if err != nil {
 				return false, err

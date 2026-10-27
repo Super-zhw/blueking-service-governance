@@ -16,13 +16,13 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package bkmonitor_test
+package trpcconf_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/observability/bkmonitor"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/trpc/trpcconf"
 )
 
 var _ = Describe("TelemetryConfig", func() {
@@ -57,7 +57,7 @@ plugins:
         platform: BCS
         tenant_id: test-tenant
 `
-				telemetry, err := bkmonitor.ParseTelemetryConfig([]byte(yamlData))
+				telemetry, err := trpcconf.ParseTelemetryConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(telemetry).NotTo(BeNil())
@@ -88,7 +88,7 @@ plugins:
         - key: "env"
           value: "production"
 `
-				telemetry, err := bkmonitor.ParseTelemetryConfig([]byte(yamlData))
+				telemetry, err := trpcconf.ParseTelemetryConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(telemetry).NotTo(BeNil())
@@ -107,7 +107,7 @@ plugins:
 plugins:
   telemetry:
 `
-				telemetry, err := bkmonitor.ParseTelemetryConfig([]byte(yamlData))
+				telemetry, err := trpcconf.ParseTelemetryConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(telemetry).NotTo(BeNil())
@@ -124,7 +124,7 @@ plugins:
     galileo:
       ocp_addr: [invalid yaml
 `
-				telemetry, err := bkmonitor.ParseTelemetryConfig([]byte(yamlData))
+				telemetry, err := trpcconf.ParseTelemetryConfig([]byte(yamlData))
 
 				Expect(err).To(HaveOccurred())
 				Expect(telemetry).To(BeNil())
@@ -135,37 +135,37 @@ plugins:
 	Describe("GetTelemetryType", func() {
 		Context("when determining telemetry type", func() {
 			It("should return Galileo type when galileo has ocp_addr", func() {
-				telemetry := &bkmonitor.Telemetry{
-					Galileo: &bkmonitor.GalileoConfig{
+				telemetry := &trpcconf.Telemetry{
+					Galileo: &trpcconf.GalileoConfig{
 						OCPAddr: "http://ocp.example.com",
 					},
 				}
 
-				Expect(telemetry.GetTelemetryType()).To(Equal(bkmonitor.TelemetryTypeGalileo))
+				Expect(telemetry.GetTelemetryType()).To(Equal(trpcconf.TelemetryTypeGalileo))
 				Expect(telemetry.IsGalileo()).To(BeTrue())
 				Expect(telemetry.IsOpenTelemetry()).To(BeFalse())
 			})
 
 			It("should return OpenTelemetry type when opentelemetry is fully configured", func() {
-				telemetry := &bkmonitor.Telemetry{
-					OpenTelemetry: &bkmonitor.OpenTelemetryConfig{
+				telemetry := &trpcconf.Telemetry{
+					OpenTelemetry: &trpcconf.OpenTelemetryConfig{
 						Addr:     "http://otel.example.com",
 						TenantID: "tenant-123",
-						Attributes: []bkmonitor.Attribute{
+						Attributes: []trpcconf.Attribute{
 							{Key: "service_name", Value: "test"},
 						},
 					},
 				}
 
-				Expect(telemetry.GetTelemetryType()).To(Equal(bkmonitor.TelemetryTypeOpenTelemetry))
+				Expect(telemetry.GetTelemetryType()).To(Equal(trpcconf.TelemetryTypeOpenTelemetry))
 				Expect(telemetry.IsOpenTelemetry()).To(BeTrue())
 				Expect(telemetry.IsGalileo()).To(BeFalse())
 			})
 
 			It("should return Unknown type when both are nil", func() {
-				telemetry := &bkmonitor.Telemetry{}
+				telemetry := &trpcconf.Telemetry{}
 
-				Expect(telemetry.GetTelemetryType()).To(Equal(bkmonitor.TelemetryTypeUnknown))
+				Expect(telemetry.GetTelemetryType()).To(Equal(trpcconf.TelemetryTypeUnknown))
 				Expect(telemetry.IsOpenTelemetry()).To(BeFalse())
 				Expect(telemetry.IsGalileo()).To(BeFalse())
 			})
@@ -175,8 +175,8 @@ plugins:
 	Describe("OpenTelemetryConfig.GetServiceName", func() {
 		Context("when getting service name from attributes", func() {
 			It("should return service name when present", func() {
-				config := &bkmonitor.OpenTelemetryConfig{
-					Attributes: []bkmonitor.Attribute{
+				config := &trpcconf.OpenTelemetryConfig{
+					Attributes: []trpcconf.Attribute{
 						{Key: "env", Value: "production"},
 						{Key: "service_name", Value: "my-service.my-server"},
 						{Key: "version", Value: "1.0.0"},
@@ -189,8 +189,8 @@ plugins:
 			})
 
 			It("should return error when service_name not found", func() {
-				config := &bkmonitor.OpenTelemetryConfig{
-					Attributes: []bkmonitor.Attribute{
+				config := &trpcconf.OpenTelemetryConfig{
+					Attributes: []trpcconf.Attribute{
 						{Key: "env", Value: "production"},
 						{Key: "version", Value: "1.0.0"},
 					},
@@ -204,7 +204,7 @@ plugins:
 		})
 	})
 
-	Describe("ParseTrpcServerConfig", func() {
+	Describe("ParseServerConfig", func() {
 		Context("when parsing valid YAML data", func() {
 			It("should parse trpc server config successfully", func() {
 				yamlData := `
@@ -212,7 +212,7 @@ server:
   app: myapp
   server: myserver
 `
-				config, err := bkmonitor.ParseTrpcServerConfig([]byte(yamlData))
+				config, err := trpcconf.ParseServerConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(config).NotTo(BeNil())
@@ -231,7 +231,7 @@ server:
   server: Greeter
   local_ip: 127.0.0.1
 `
-				config, err := bkmonitor.ParseTrpcServerConfig([]byte(yamlData))
+				config, err := trpcconf.ParseServerConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(config).NotTo(BeNil())
@@ -246,7 +246,7 @@ server:
 global:
   namespace: Production
 `
-				config, err := bkmonitor.ParseTrpcServerConfig([]byte(yamlData))
+				config, err := trpcconf.ParseServerConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(config).NotTo(BeNil())
@@ -258,7 +258,7 @@ global:
 				yamlData := `
 server:
 `
-				config, err := bkmonitor.ParseTrpcServerConfig([]byte(yamlData))
+				config, err := trpcconf.ParseServerConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(config).NotTo(BeNil())
@@ -299,7 +299,7 @@ plugins:
         platform: BCS
         tenant_id: my-tenant-token
 `
-				telemetry, err := bkmonitor.ParseTelemetryConfig([]byte(yamlData))
+				telemetry, err := trpcconf.ParseTelemetryConfig([]byte(yamlData))
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(telemetry.Galileo).NotTo(BeNil())
@@ -329,117 +329,6 @@ plugins:
 				// Resource
 				Expect(galileo.Resource.Platform).To(Equal("BCS"))
 				Expect(galileo.Resource.TenantID).To(Equal("my-tenant-token"))
-			})
-		})
-	})
-
-	Describe("ParseTafConfig", func() {
-		Context("when parsing valid TAF XML data", func() {
-			It("should parse taf config with setdivision successfully", func() {
-				xmlData := `
-<taf>
-	<application>
-		setdivision=dev.sh.*
-		<server>
-			app=XXXXGAME
-			server=GameAAAAServer
-		</server>
-		<client>
-		</client>
-	</application>
-</taf>`
-				config, err := bkmonitor.ParseTafConfig([]byte(xmlData))
-
-				Expect(err).NotTo(HaveOccurred())
-				Expect(config).NotTo(BeNil())
-				Expect(config.Application.Server.CharData).To(ContainSubstring("app=XXXXGAME"))
-				Expect(config.Application.Server.CharData).To(ContainSubstring("server=GameAAAAServer"))
-				Expect(config.Application.CharData).To(ContainSubstring("setdivision=dev.sh.*"))
-			})
-
-			It("should get service name with setdivision", func() {
-				xmlData := `
-<taf>
-	<application>
-		setdivision=prod.sh.*
-		<server>
-			app=XXXXGAME
-			server=GameAAAAServer
-		</server>
-		<client>
-		</client>
-	</application>
-</taf>`
-				config, err := bkmonitor.ParseTafConfig([]byte(xmlData))
-				Expect(err).NotTo(HaveOccurred())
-
-				serviceName, err := config.GetServiceName()
-				Expect(err).NotTo(HaveOccurred())
-				Expect(serviceName).To(Equal("XXXXGAME.GameAAAAServer.prodsh*"))
-			})
-
-			It("should get service name without setdivision", func() {
-				xmlData := `
-<taf>
-	<application>
-		<server>
-			app=MyApp
-			server=MyServer
-		</server>
-		<client>
-		</client>
-	</application>
-</taf>`
-				config, err := bkmonitor.ParseTafConfig([]byte(xmlData))
-				Expect(err).NotTo(HaveOccurred())
-
-				serviceName, err := config.GetServiceName()
-				Expect(err).NotTo(HaveOccurred())
-				Expect(serviceName).To(Equal("MyApp.MyServer"))
-			})
-		})
-
-		Context("when parsing invalid TAF XML data", func() {
-			It("should return error for invalid xml syntax", func() {
-				xmlData := `<taf><application><server>app=Test`
-				_, err := bkmonitor.ParseTafConfig([]byte(xmlData))
-				Expect(err).To(HaveOccurred())
-			})
-		})
-
-		Context("when required fields are missing", func() {
-			It("should return error when app is missing", func() {
-				xmlData := `
-<taf>
-	<application>
-		<server>
-			server=MyServer
-		</server>
-	</application>
-</taf>`
-				config, err := bkmonitor.ParseTafConfig([]byte(xmlData))
-				Expect(err).NotTo(HaveOccurred())
-
-				_, err = config.GetServiceName()
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("missing app or server"))
-			})
-
-			It("should return error when server is missing", func() {
-				xmlData := `
-<taf>
-	<application>
-		<server>
-			app=MyApp
-		</server>
-	</application>
-</taf>`
-				config, err := bkmonitor.ParseTafConfig([]byte(xmlData))
-				Expect(err).NotTo(HaveOccurred())
-
-				_, err = config.GetServiceName()
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("missing app or server"))
 			})
 		})
 	})

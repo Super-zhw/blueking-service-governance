@@ -34,6 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	helmdeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/helm"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/taskq"
@@ -463,7 +464,7 @@ func (h *Handler) validateHelmApp(
 	if err != nil {
 		return nil, err
 	}
-	if !bkmsapp.IsHelmBasedType(app.Type) {
+	if !appruntime.IsHelmBasedType(app.Type) {
 		return nil, bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "app type is not helm based, but %s", app.Type)
 	}
 	return app, nil

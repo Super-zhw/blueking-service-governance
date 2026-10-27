@@ -349,12 +349,6 @@ var _ = Describe("Application store", func() {
 				To(ConsistOf(legacyID, modernID))
 		})
 
-		It("should recognize bkmsApp as an appmodel type", func() {
-			Expect(bkmsapp.IsAppModelType(bkmsapp.AppTypeBKMSApp)).To(BeTrue())
-			Expect(bkmsapp.IsAppModelType(bkmsapp.AppTypeTRPC)).To(BeTrue())
-			Expect(bkmsapp.IsAppModelType(bkmsapp.AppTypeHelm)).To(BeFalse())
-		})
-
 		It("should filter applications by multiple criteria", func() {
 			result, err := apps.List(ctx, bkmsapp.InWorkspace(workspace1ID), bkmsapp.OfType(bkmsapp.AppTypeHelm))
 			Expect(err).NotTo(HaveOccurred())

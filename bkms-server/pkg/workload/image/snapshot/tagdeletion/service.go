@@ -34,6 +34,7 @@ import (
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/utils/credentials"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	helmdeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/helm"
@@ -146,9 +147,9 @@ func (s *Service) ListImageUsages(ctx context.Context, appID, tag string) ([]Ima
 
 	var collectLaneUsageNamesFunc laneUsageCollectorFunc
 	switch {
-	case bkmsapp.IsAppModelType(app.Type):
+	case appruntime.IsAppModelType(app.Type):
 		collectLaneUsageNamesFunc = s.collectAppModelLaneUsageNames
-	case bkmsapp.IsHelmBasedType(app.Type):
+	case appruntime.IsHelmBasedType(app.Type):
 		collectLaneUsageNamesFunc = s.collectHelmLaneUsageNames
 	default:
 		return nil, errors.Errorf("unsupported app type %s", app.Type)

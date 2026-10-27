@@ -30,6 +30,7 @@ import (
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	polarisenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/addon/polaris/envvars"
 	depenvvars "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/extension/depservice/envvars"
@@ -237,7 +238,7 @@ func (s *Service) maskManifestSensitiveValues(
 	obj *unstructured.Unstructured,
 ) error {
 	// 非 AppModel 类型的应用没有应用环境变量上下文，但仍需执行 Secret 等资源级脱敏
-	if !bkmsapp.IsAppModelType(app.Type) {
+	if !appruntime.IsAppModelType(app.Type) {
 		k8smanifest.NewMasker(nil, envvartypes.SensitiveValueMask).Mask(obj)
 		return nil
 	}

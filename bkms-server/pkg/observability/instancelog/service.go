@@ -36,6 +36,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	k8sclient "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/client"
@@ -87,7 +88,7 @@ func NewLogManager(
 	podClient := k8sclient.NewPodClient(cluster.NewConfig(env.Cluster.ClusterID))
 	namespace := env.Cluster.Namespace
 	containerName := defaults.WorkloadMainContainerName
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		record, err := appmodeldeploy.GetLatest(ctx, db, app.ID, env.Name, trafficLaneName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "get latest deploy record for app %s", app.ID)

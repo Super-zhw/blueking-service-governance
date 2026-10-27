@@ -39,6 +39,7 @@ import (
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/serializer"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
@@ -147,7 +148,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		if input.AppModelSpec != nil && input.AppModelSpec.TrpcSpec != nil {
 			app.TrpcSpec = &bkmsapp.TrpcSpec{Language: input.AppModelSpec.TrpcSpec.Language}
 		}
-	} else if bkmsapp.IsHelmBasedType(input.Type) {
+	} else if appruntime.IsHelmBasedType(input.Type) {
 		if len(input.HelmSpec.HelmSource.ValueFiles) == 0 {
 			input.HelmSpec.HelmSource.ValueFiles = []string{"values.yaml"}
 		}
@@ -382,7 +383,7 @@ func (h *Handler) GetApp(c *gin.Context) {
 
 	var appModel *appmodel.AppModel
 	var components []serializer.ComponentOutputObj
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		appModel, err = store.Of(h.registry.DB, appmodel.AppModelMeta).Get(ctx, appmodel.ByApp(app.ID))
 		if err != nil {
 			bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "get app model"))
@@ -416,7 +417,7 @@ func (h *Handler) frameworkFileLocation(
 	ctx context.Context,
 	app *bkmsapp.Application,
 ) (string, string, error) {
-	if !bkmsapp.IsAppModelType(app.Type) {
+	if !appruntime.IsAppModelType(app.Type) {
 		return "", "", nil
 	}
 	defs, err := appcfg.ListDefsByApp(
@@ -548,7 +549,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 	operator := auth.MustGetUser(ctx).ID
 
 	// 检查是否存在活跃的部署
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		hasActive, iErr := appmodeldeploy.HasActiveDeployments(ctx, h.registry.DB, app.ID)
 		if iErr != nil {
 			bkerrs.AbortWithErr(c, bkerrs.Wrap(iErr, bkerrs.ErrCodeInternalServerError, "check active deployments"))
@@ -560,7 +561,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 			))
 			return
 		}
-	} else if bkmsapp.IsHelmBasedType(app.Type) {
+	} else if appruntime.IsHelmBasedType(app.Type) {
 		hasActive, iErr := helmdeploy.HasActiveDeployments(ctx, h.registry.DB, app.ID)
 		if iErr != nil {
 			bkerrs.AbortWithErr(c, bkerrs.Wrap(iErr, bkerrs.ErrCodeInternalServerError, "check active deployments"))
@@ -580,7 +581,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 		return
 	}
 	// 根据应用类型删除特定资源
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		if err = h.deleteAppModelApp(ctx, app); err != nil {
 			bkerrs.AbortWithErr(
 				c,
@@ -588,7 +589,7 @@ func (h *Handler) DeleteApp(c *gin.Context) {
 			)
 			return
 		}
-	} else if bkmsapp.IsHelmBasedType(app.Type) {
+	} else if appruntime.IsHelmBasedType(app.Type) {
 		if err = h.deleteHelmApp(ctx, app); err != nil {
 			bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "delete helm app resources"))
 			return
@@ -864,7 +865,7 @@ func (h *Handler) GetAppDeployOverview(c *gin.Context) {
 		return
 	}
 
-	if !bkmsapp.IsAppModelType(app.Type) {
+	if !appruntime.IsAppModelType(app.Type) {
 		bkerrs.AbortWithErr(c, bkerrs.Errorf(
 			bkerrs.ErrCodeInvalidArgument,
 			"deploy overview is only supported for trpc/taf apps, got type %q",

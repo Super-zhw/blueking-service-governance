@@ -42,7 +42,7 @@ func (p fakePlugin) Start(
 }
 
 var _ = BeforeSuite(func() {
-	for _, typ := range []string{appmodel.WorkloadTypeTrpc, appmodel.WorkloadTypeTaf, appmodel.WorkloadTypeStandard} {
+	for _, typ := range []string{appmodel.WorkloadTypeTrpc, appmodel.WorkloadTypeTaf} {
 		plugin.MustRegisterWorkloadPlugin(fakePlugin{typ: typ})
 	}
 })
@@ -56,8 +56,13 @@ var _ = Describe("GetFrameworkPlugin", func() {
 		},
 		Entry("trpc", "trpc", appmodel.WorkloadTypeTrpc),
 		Entry("taf", "taf", appmodel.WorkloadTypeTaf),
-		Entry("blank uses the standard plugin", "blank", appmodel.WorkloadTypeStandard),
 	)
+
+	It("should return no plugin for blank", func() {
+		p, err := plugin.GetFrameworkPlugin("blank")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(p).To(BeNil())
+	})
 
 	DescribeTable("should reject an empty or unknown framework",
 		func(framework string) {

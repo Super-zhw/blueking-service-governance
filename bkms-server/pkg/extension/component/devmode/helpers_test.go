@@ -19,7 +19,7 @@
 package devmode_test
 
 import (
-	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/devmode"
 )
 
 // trpcProps 返回 tRPC 技术栈的开发模式能力参数。

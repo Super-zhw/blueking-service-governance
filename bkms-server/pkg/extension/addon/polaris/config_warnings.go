@@ -23,7 +23,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
-	polariscap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/polaris"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
@@ -49,11 +48,11 @@ func CollectConfigWarnings(
 		return nil
 	}
 
-	return polariscap.CheckServiceName(
+	return checkServiceName(
 		ctx,
 		cfgProvider,
 		mods.Of(app).PolarisServiceCheck,
-		polariscap.ServiceCheckTarget{
+		serviceCheckTarget{
 			AppID:       config.AppID,
 			ConfigName:  config.Name,
 			PolarisName: config.PolarisName,

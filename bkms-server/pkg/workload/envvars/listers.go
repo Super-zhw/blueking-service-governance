@@ -26,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/defaults"
@@ -144,7 +145,7 @@ func getAppBuiltinVars(app bkmsapp.Application) envvartypes.EnvVariableList {
 	})
 
 	// AppModel 管理的应用由平台渲染容器，容器名固定，需要注入；Helm 应用的容器由 chart 决定
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		envVars = append(envVars, envvartypes.EnvVariableObj{
 			Key:         EnvVarNameContainerName,
 			Value:       defaults.WorkloadMainContainerName,

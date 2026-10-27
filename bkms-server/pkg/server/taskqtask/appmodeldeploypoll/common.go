@@ -26,6 +26,8 @@ import (
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/apmservicename"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy"
@@ -173,7 +175,7 @@ func newApmServiceConfigRequest(
 	kind, name string,
 ) *bkmapi.UpdateApmServiceConfigReq {
 	// 仅 trpc / taf 应用需要回调 apm 关联容器接口
-	if !bkmsapp.IsAppModelType(app.Type) {
+	if !appruntime.IsAppModelType(app.Type) {
 		log.Infof(ctx, "app %s type %s not trpc/taf, skip sync apm service config", app.ID, app.Type)
 		return nil
 	}
@@ -260,7 +262,7 @@ func resolveApmServiceName(
 	}
 	serviceName, err := bkmmodel.GetApmServiceName(app, frameworkFile.Content, appEnvVars.ToMap())
 	if err != nil {
-		if errors.Is(err, bkmmodel.ErrAPMConfigMissing) {
+		if errors.Is(err, apmservicename.ErrConfigMissing) {
 			log.Infof(ctx, "apm config missing, skip sync apm service config, app=%s env=%s", app.ID, env.Name)
 			return ""
 		}

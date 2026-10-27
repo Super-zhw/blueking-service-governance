@@ -32,6 +32,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/build/revision"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/config"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	bkciapi "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bkci"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
@@ -62,7 +63,7 @@ func NewChartBuildService(db *mongo.Database) *ChartBuildService {
 func (s *ChartBuildService) validate(app *bkmsapp.Application) error {
 	appInfo := app.String()
 
-	if !bkmsapp.IsHelmBasedType(app.Type) {
+	if !appruntime.IsHelmBasedType(app.Type) {
 		return errors.Errorf("app %s type is not helm based, but %s", appInfo, app.Type)
 	}
 	if app.HelmSpec == nil || app.HelmSpec.HelmSource == nil {

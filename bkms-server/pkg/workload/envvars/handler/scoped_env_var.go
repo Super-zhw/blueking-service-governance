@@ -31,6 +31,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/server/ginutils"
@@ -847,7 +848,7 @@ func (h *Handler) setGroupEnvAndApp(ctx context.Context, group *audit.OperationG
 }
 
 func ensureAppSupportsDefinedEnvVars(app *bkmsapp.Application) error {
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		return nil
 	}
 	return bkerrs.Errorf(

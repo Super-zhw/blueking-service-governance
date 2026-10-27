@@ -25,9 +25,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/standard"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/taf"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/trpc"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/taf"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/trpc"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/workload/plugin"
 )
 
@@ -40,7 +39,6 @@ func InitPlugin(
 	db *mongo.Database,
 ) {
 	initOnce.Do(func() {
-		plugin.MustRegisterWorkloadPlugin(standard.Plugin{})
 		plugin.MustRegisterWorkloadPlugin(trpc.NewPlugin(
 			mountableFileProvider,
 			db,

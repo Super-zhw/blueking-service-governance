@@ -20,7 +20,7 @@
 package devmode
 
 import (
-	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
+	devmodecap "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/devmode"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 )
 

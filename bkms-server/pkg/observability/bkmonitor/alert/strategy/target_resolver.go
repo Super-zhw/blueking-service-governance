@@ -28,6 +28,7 @@ import (
 
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	k8skind "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/kubernetes/kind"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/store"
@@ -209,7 +210,7 @@ func (s *Service) resolveStrategyWorkloads(
 		return nil, errors.New("app is nil")
 	}
 	// 3. Helm 应用优先从资源快照中解析真实受管 workload，解析不到时再回退到应用名。
-	if bkmsapp.IsHelmBasedType(app.Type) {
+	if appruntime.IsHelmBasedType(app.Type) {
 		if workloads := s.resolveHelmWorkloads(ctx, app.ID, env.Name, trafficLaneName); len(workloads) > 0 {
 			log.Infof(
 				ctx,

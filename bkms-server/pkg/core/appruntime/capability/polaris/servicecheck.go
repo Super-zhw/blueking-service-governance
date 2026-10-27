@@ -16,16 +16,25 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package polaris 声明与框架相关的北极星能力：服务名校验与注册信息注入。北极星注册本身不在此声明。
 package polaris
 
 import (
-	"testing"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
 
-func TestPolaris(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Polaris Capability Suite")
+// ServiceCheckProps 无参数。
+type ServiceCheckProps struct{}
+
+// Public 无对外内容。
+func (p ServiceCheckProps) Public() any { return nil }
+
+// ServiceCheck 北极星服务名校验：北极星配置的服务名不在 tRPC 配置文件中时给出警告。仅 tRPC 支持。
+// 校验由 extension/addon/polaris 执行。
+var ServiceCheck = runtimemod.Spec[ServiceCheckProps]{
+	ID: runtimemod.ModPolarisServiceCheck,
+	Resolve: runtimemod.ByFramework(map[string]ServiceCheckProps{
+		appruntime.FrameworkTRPC: {},
+	}),
 }

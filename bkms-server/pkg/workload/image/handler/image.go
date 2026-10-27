@@ -28,6 +28,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
@@ -431,7 +432,7 @@ func (h *Handler) ListImageTagDeployRecords(c *gin.Context) {
 		total   int64
 		results []*serializer.ImageTagDeployRecordOutputObj
 	)
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		recordPage, listErr := store.Of(h.registry.DB, appmodeldeploy.RecordMeta).ListPage(
 			ctx,
 			queryInput.Page,
@@ -608,7 +609,7 @@ func (h *Handler) buildDeployedEnvsMap(
 		pairs []deploytypes.ImageTagEnvPair
 		err   error
 	)
-	if bkmsapp.IsAppModelType(app.Type) {
+	if appruntime.IsAppModelType(app.Type) {
 		pairs, err = appmodeldeploy.ListImageTagDeployedEnvs(ctx, h.registry.DB, appID)
 	} else {
 		pairs, err = helmdeploy.ListImageTagDeployedEnvs(ctx, h.registry.DB, appID)

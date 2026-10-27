@@ -1,6 +1,6 @@
 # 阶段 3 第一步：运行链路识别 bkmsApp（M4）
 
-状态：已实现，待提 PR。
+状态：已合并，PR #309。
 
 对应 [里程碑](./bkms_app_runtime_model_milestones.md) M4，总体方案阶段 3 的 3A、3C、3E。前置为 M3（PR #307）合入。
 
@@ -16,7 +16,7 @@
 
 | 事项 | 去向 |
 | --- | --- |
-| `appmodelcore/{trpc,taf}` 拆到 `pkg/framework/*`（L-5、L-6、L-8、L-11） | M4.5，纯目录移动单独成里程碑 |
+| `appmodelcore/{trpc,taf}` 拆到 `pkg/workload/appmodelcore/framework/*`（L-5、L-6、L-8、L-11） | M4.5，纯目录移动单独成里程碑 |
 | 集群 addon 改为按管理方式表达 | M5，随 blank 后端闭环 |
 | BSCP 元信息中的工作负载类型（L-9） | 暂不处理，见 §5 |
 | 创建流程中的字面值（`handler/app.go`、`serializer/validate.go`） | M5 |

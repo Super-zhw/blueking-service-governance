@@ -47,8 +47,8 @@ type BuildResult struct {
 //   - EnableEnvVarRender=true → 经 cfgrender.RenderConfigContents 渲染后走 runtimerender
 //   - EnableEnvVarRender=false → 跳过渲染，直接构建 ConfigMap 挂载
 //
-// 该函数由 Builder 公共步骤调用，独立于任何框架 plugin，因此所有 workload 类型
-// （trpc、taf、standard）都能自动获得 plain 文件支持。
+// 该函数由 Builder 公共步骤调用，独立于任何框架 plugin，因此所有框架
+// （trpc、taf、blank）都能自动获得 plain 文件支持。
 func BuildPlainConfigFiles(
 	ctx context.Context,
 	cfgProvider appcfg.MountableFileProvider,

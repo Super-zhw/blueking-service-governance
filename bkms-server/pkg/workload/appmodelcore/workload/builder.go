@@ -193,10 +193,45 @@ func (b *Builder) buildPodContents(in *buildInputs) (*podContents, error) {
 
 // appendPluginAndConfigResources 把 plugin、plain files、dev mode 的存储和 init container 写入 pod。
 func (b *Builder) appendPluginAndConfigResources(in *buildInputs, pod *podContents) error {
+	if err := b.appendPluginResources(in, pod); err != nil {
+		return err
+	}
+
+	plainMounts, plainVolumes, plainExtras, plainInits, err := b.buildPlainConfigFiles(
+		in.ctx, in.appModel, in.env, in.varsMap, in.collector,
+	)
+	if err != nil {
+		return errors.Wrap(err, "building plain config files")
+	}
+	pod.addStorage(plainMounts, plainVolumes)
+	pod.extraObjs = append(pod.extraObjs, plainExtras...)
+	pod.addInitContainers(plainInits, in.appEnvVars.ToKubeObjs())
+
+	devModeOutput, err := devmode.New(b.devModeConfig).Build()
+	if err != nil {
+		return errors.Wrap(err, "building dev mode component")
+	}
+	if devModeOutput == nil {
+		return nil
+	}
+	if pod.extraObjs, err = AppendAsUnstructured(pod.extraObjs, devModeOutput.ConfigMap); err != nil {
+		return errors.Wrap(err, "appending dev mode config map as unstructured")
+	}
+	pod.addStorage([]corev1.VolumeMount{devModeOutput.VolumeMount}, []corev1.Volume{devModeOutput.Volume})
+	pod.container.Command = devModeOutput.Command
+	pod.container.Args = nil
+	return nil
+}
+
+// appendPluginResources 把框架插件的存储、额外资源和 init container 写入 pod。框架没有插件（blank）时跳过。
+func (b *Builder) appendPluginResources(in *buildInputs, pod *podContents) error {
 	// 插件按应用框架选择，与能力集合同一来源；不再读取 AppModel 的 workload.type
 	wlPlugin, err := plugin.GetFrameworkPlugin(mods.Of(b.app).Stack.Framework)
 	if err != nil {
 		return errors.Wrapf(err, "resolving workload plugin for app %s", b.app.ID)
+	}
+	if wlPlugin == nil {
+		return nil
 	}
 	pluginSession, err := wlPlugin.Start(in.ctx, in.env, b.app, in.appModel, plugin.RenderContext{
 		EnvVars:   in.varsMap,
@@ -223,30 +258,6 @@ func (b *Builder) appendPluginAndConfigResources(in *buildInputs, pod *podConten
 		return errors.Wrap(err, "building plugin init containers")
 	}
 	pod.addInitContainers(pluginInits, in.appEnvVars.ToKubeObjs())
-
-	plainMounts, plainVolumes, plainExtras, plainInits, err := b.buildPlainConfigFiles(
-		in.ctx, in.appModel, in.env, in.varsMap, in.collector,
-	)
-	if err != nil {
-		return errors.Wrap(err, "building plain config files")
-	}
-	pod.addStorage(plainMounts, plainVolumes)
-	pod.extraObjs = append(pod.extraObjs, plainExtras...)
-	pod.addInitContainers(plainInits, in.appEnvVars.ToKubeObjs())
-
-	devModeOutput, err := devmode.New(b.devModeConfig).Build()
-	if err != nil {
-		return errors.Wrap(err, "building dev mode component")
-	}
-	if devModeOutput == nil {
-		return nil
-	}
-	if pod.extraObjs, err = AppendAsUnstructured(pod.extraObjs, devModeOutput.ConfigMap); err != nil {
-		return errors.Wrap(err, "appending dev mode config map as unstructured")
-	}
-	pod.addStorage([]corev1.VolumeMount{devModeOutput.VolumeMount}, []corev1.Volume{devModeOutput.Volume})
-	pod.container.Command = devModeOutput.Command
-	pod.container.Args = nil
 	return nil
 }
 

@@ -24,7 +24,7 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
-	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	bkmsenv "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
@@ -146,9 +146,9 @@ func (c *PreDeployChecker) checkIfBaselineLaneDeployed(ctx context.Context, para
 	}
 
 	switch {
-	case bkmsapp.IsHelmBasedType(params.AppType):
+	case appruntime.IsHelmBasedType(params.AppType):
 		return helmdeploy.CheckIfTrafficLaneDeployed(ctx, c.db, params.AppID, params.EnvName, baselineLane.LaneName)
-	case bkmsapp.IsAppModelType(params.AppType):
+	case appruntime.IsAppModelType(params.AppType):
 		return appmodeldeploy.CheckIfTrafficLaneDeployed(
 			ctx,
 			c.db,

@@ -16,7 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package trpc_test
+package taf_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
@@ -24,33 +24,21 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/trpc"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/taf"
 )
 
 var _ = Describe("DecodeConfig", func() {
-	It("decodes legacy file metadata and rejects unknown keys or empty objects", func() {
-		legacy := appmodel.TrpcConfig{
-			FileName:    "trpc_go.yaml",
-			FilePath:    "/etc/",
-			Language:    "go",
-			FileContent: "secret",
-		}
-		cfg := trpc.ConfigMapFromLegacy(legacy)
-		Expect(cfg).To(Equal(map[string]any{"fileName": "trpc_go.yaml", "filePath": "/etc/"}))
-
-		got, err := trpc.DecodeConfig(cfg, appruntime.FrameworkConfigVersionV1)
+	It("decodes legacy file metadata and rejects empty objects", func() {
+		cfg := taf.ConfigMapFromLegacy(appmodel.TafConfig{
+			FileName:    "taf_config.conf",
+			FilePath:    "/usr/local/taf/conf/",
+			FileContent: "<taf/>",
+		})
+		got, err := taf.DecodeConfig(cfg, appruntime.FrameworkConfigVersionV1)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(got).To(Equal(trpc.Config{FileName: "trpc_go.yaml", FilePath: "/etc/"}))
+		Expect(got).To(Equal(taf.Config{FileName: "taf_config.conf", FilePath: "/usr/local/taf/conf/"}))
 
-		_, err = trpc.DecodeConfig(map[string]any{
-			"fileName": "trpc_go.yaml",
-			"filePath": "/etc/",
-			"language": "go",
-		}, appruntime.FrameworkConfigVersionV1)
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring("invalid keys: language"))
-
-		_, err = trpc.DecodeConfig(map[string]any{}, appruntime.FrameworkConfigVersionV1)
+		_, err = taf.DecodeConfig(map[string]any{}, appruntime.FrameworkConfigVersionV1)
 		Expect(err).To(HaveOccurred())
 	})
 })

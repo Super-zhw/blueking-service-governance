@@ -36,11 +36,11 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/envvarrefs"
 )
 
-// frameworkPlugins 框架到渲染插件的对应关系。blank 没有框架专属资源，使用 standard 插件。
+// frameworkPlugins 框架到渲染插件的对应关系。blank 没有框架专属资源，不使用插件，对应空值。
 var frameworkPlugins = map[string]string{
 	appruntime.FrameworkTRPC:  appmodel.WorkloadTypeTrpc,
 	appruntime.FrameworkTAF:   appmodel.WorkloadTypeTaf,
-	appruntime.FrameworkBlank: appmodel.WorkloadTypeStandard,
+	appruntime.FrameworkBlank: "",
 }
 
 // RenderContext shares env vars and undefined-reference collection across renderers in one build.
@@ -115,11 +115,15 @@ func MustRegisterWorkloadPlugin(plugin WorkloadPlugin) {
 	}
 }
 
-// GetFrameworkPlugin 按应用框架取渲染插件。框架为空（技术栈非法）或未知时返回错误。
+// GetFrameworkPlugin 按应用框架取渲染插件。框架没有插件（blank）时返回 nil；
+// 框架为空（技术栈非法）或未知时返回错误。
 func GetFrameworkPlugin(framework string) (WorkloadPlugin, error) {
 	workloadType, ok := frameworkPlugins[framework]
 	if !ok {
 		return nil, errors.Errorf("no workload plugin for framework %q", framework)
+	}
+	if workloadType == "" {
+		return nil, nil
 	}
 
 	workloadPlugins.mu.RLock()

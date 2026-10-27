@@ -21,16 +21,16 @@ package mods
 import (
 	"github.com/pkg/errors"
 
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/admincommand"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/apmservicename"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/bscpworkloadmeta"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/devmode"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/frameworkfile"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/platformbuild"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/capability/polaris"
 	log "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/logging"
 	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/admincommand"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/apmservicename"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/bscpworkloadmeta"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/devmode"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/frameworkfile"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/platformbuild"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/polaris"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod"
 )
 

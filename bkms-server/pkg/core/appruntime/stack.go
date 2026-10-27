@@ -157,7 +157,7 @@ func productFrameworkFromWorkloadType(workloadType string) string {
 	case FrameworkTRPC, FrameworkTAF, FrameworkBlank:
 		return workloadType
 	default:
-		// Empty or internal types such as "standard" are not product frameworks.
+		// Empty or other values are not product frameworks.
 		return ""
 	}
 }
