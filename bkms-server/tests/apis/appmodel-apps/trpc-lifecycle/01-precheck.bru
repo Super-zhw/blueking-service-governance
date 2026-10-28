@@ -1,0 +1,27 @@
+meta {
+  name: 01-precheck
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{serviceURL}}/apps/{{trpcLcAppID}}/envs/{{trpcLcEnvName}}/appmodel-deploys/precheck
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should pass the deploy pre-check through the unified API", () => {
+    expect(res.body.data).to.be.an("object");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 30000
+}

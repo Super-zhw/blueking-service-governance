@@ -232,8 +232,9 @@
     unknown: t('未知'),
   };
 
-  // 应用类型展示名称映射
+  // 应用类型展示名称映射；bkmsApp 涵盖 tRPC、TAF 等平台托管的应用，trpc / taf 为旧登记值
   const appTypeLabelMap: Record<string, string> = {
+    bkmsApp: t('tRPC / TAF 应用'),
     helm: t('Helm 应用'),
     taf: t('TAF 应用'),
     trpc: t('tRPC 应用'),

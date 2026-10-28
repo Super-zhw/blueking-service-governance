@@ -83,7 +83,7 @@ func (c *DeployPreChecker) Check(
 		return nil, err
 	}
 	missing, err := clusteraddon.InspectRequiredAddons(
-		ctx, defs, clusteraddon.AddonAppTypeOf(app), env, "",
+		ctx, defs, clusteraddon.AddonAppTypesOf(app), env, "",
 	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "pre-check required addons for app %s", app.ID)

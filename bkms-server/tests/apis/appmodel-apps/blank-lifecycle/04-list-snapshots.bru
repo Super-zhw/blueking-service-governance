@@ -1,0 +1,34 @@
+meta {
+  name: 04-list-snapshots
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/appmodel-deploys/{{blankLcDeployID}}/resource-snapshots?page=1&pageSize=20
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should render a GameDeployment workload", () => {
+    const kinds = res.body.data.results.map((row) => row.kind);
+    expect(kinds, JSON.stringify(kinds)).to.include("GameDeployment");
+  });
+  test("should not render framework resources for blank", () => {
+    const names = res.body.data.results.map((row) => row.name);
+    names.forEach((name) => {
+      expect(name, JSON.stringify(names)).to.not.match(/trpc|taf/);
+    });
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

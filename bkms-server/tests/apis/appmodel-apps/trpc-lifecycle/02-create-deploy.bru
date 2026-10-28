@@ -1,0 +1,51 @@
+meta {
+  name: 02-create-deploy
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{serviceURL}}/apps/{{trpcLcAppID}}/envs/{{trpcLcEnvName}}/appmodel-deploys
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "imageTag": "{{trpcLcImageTag}}",
+    "replicas": 1
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+script:post-response {
+  if (res.status !== 200) {
+    return;
+  }
+  const appmodel = require("./helpers/appmodel");
+  const record = await appmodel.waitForAppModelDeployTerminal({
+    kind: "appmodel",
+    appID: bru.getVar("trpcLcAppID"),
+    envName: bru.getVar("trpcLcEnvName"),
+    expectedStatus: "deployed",
+    imageTag: bru.getVar("trpcLcImageTag")
+  });
+  bru.setVar("trpcLcDeployID", record.id);
+  bru.setVar("trpcLcDeployStatus", record.status);
+}
+
+tests {
+  test("should deploy the trpc app and converge to deployed", () => {
+    expect(bru.getVar("trpcLcDeployID")).to.be.a("string").and.not.empty;
+    expect(bru.getVar("trpcLcDeployStatus")).to.equal("deployed");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 130000
+}

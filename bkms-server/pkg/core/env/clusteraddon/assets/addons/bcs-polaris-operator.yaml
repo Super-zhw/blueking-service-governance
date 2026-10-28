@@ -7,5 +7,4 @@ chartInfo:
   defaultNamespace: bcs-system
 requiredForAppTypes: []
 optionalForAppTypes:
-  - trpc
-  - taf
+  - bkmsApp

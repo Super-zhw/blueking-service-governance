@@ -1,0 +1,64 @@
+meta {
+  name: blank-lifecycle
+  seq: 2
+}
+
+auth {
+  mode: inherit
+}
+
+script:pre-request {
+  // 通过统一接口创建 blank 应用并真实部署到 kind 集群，耗时较长，
+  // 由 RUN_APPMODEL_DEPLOY_API_TESTS 控制，未设置时跳过整个目录。
+  if (!bru.getProcessEnv("RUN_APPMODEL_DEPLOY_API_TESTS")) {
+    console.log("blank-lifecycle skipped: RUN_APPMODEL_DEPLOY_API_TESTS not set");
+    bru.runner.skipRequest();
+    return;
+  }
+
+  const common = require("./common");
+
+  if (!bru.getVar("blankLcReady")) {
+    const suffix = bru.getVar("randomSuffix");
+    // BKMS_APITEST_WORKLOAD_IMAGE 为不带 tag 的 <registry>/<name>，需提供 1.0.0 且镜像内有 sleep
+    const imageRepository = bru.getProcessEnv("BKMS_APITEST_WORKLOAD_IMAGE");
+    if (!imageRepository || imageRepository.includes(":") || imageRepository.lastIndexOf("/") <= 0) {
+      throw new Error(`BKMS_APITEST_WORKLOAD_IMAGE must be a tag-less <registry>/<name>, got: ${imageRepository}`);
+    }
+    const slashIdx = imageRepository.lastIndexOf("/");
+    const registry = imageRepository.slice(0, slashIdx);
+    const imageName = imageRepository.slice(slashIdx + 1);
+    const envName = `blanklc-env-${suffix}`;
+
+    const ws = await common.createWorkspace({
+      id: `blanklc-ws-${suffix}`,
+      imageRegistry: {registry, username: "registry-user", password: "registry-foo-password"}
+    });
+    await common.createEnvironment({
+      name: envName,
+      workspaceID: ws.id,
+      type: "test",
+      description: "bkmsApp blank deploy lifecycle suite",
+      cluster: {clusterID: "BCS-K8S-00002", clusterType: "single", namespace: "default"}
+    });
+    const app = await common.createAppModelApp({
+      id: `blanklc-app-${suffix}`,
+      name: imageName,
+      workspaceID: ws.id,
+      framework: "blank",
+      language: "go",
+      appModelSpec: {command: ["sleep"], args: ["3600"], envVars: []},
+      buildConfig: {sourceType: "imageRegistry", imageBuildConfig: {name: imageName}}
+    });
+    // 降低资源请求，保证单节点 kind 集群能调度
+    await common.updateDefaultAppSpecResources({
+      appID: app.id,
+      resources: {replicas: 1, cpuRequests: "100m", cpuLimits: "200m", memoryRequests: "128Mi", memoryLimits: "256Mi"}
+    });
+
+    bru.setVar("blankLcAppID", app.id);
+    bru.setVar("blankLcEnvName", envName);
+    bru.setVar("blankLcImageTag", "1.0.0");
+    bru.setVar("blankLcReady", true);
+  }
+}

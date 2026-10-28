@@ -11,7 +11,6 @@ chartInfo:
       - --concurrent-gamedeployment-syncs=5
     DeleteProtectEnable: true
 requiredForAppTypes:
-  - trpc
-  - taf
+  - bkmsApp
 optionalForAppTypes: []
 unsupportedOnFederation: true

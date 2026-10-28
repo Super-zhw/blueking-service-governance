@@ -25,6 +25,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	helmrelease "helm.sh/helm/v3/pkg/release"
@@ -262,22 +263,24 @@ var _ = Describe("Query", func() {
 		})
 	})
 
-	Describe("AddonAppTypeOf", func() {
-		DescribeTable("should match AppModel apps by framework and Helm apps by type",
-			func(app *bkmsapp.Application, expected string) {
-				Expect(clusteraddon.AddonAppTypeOf(app)).To(Equal(expected))
+	Describe("AddonAppTypesOf", func() {
+		DescribeTable("should match AppModel apps by bkmsApp plus framework and Helm apps by type",
+			func(app *bkmsapp.Application, expected []string) {
+				Expect(clusteraddon.AddonAppTypesOf(app)).To(Equal(expected))
 			},
-			Entry("legacy trpc", &bkmsapp.Application{Type: bkmsapp.AppTypeTRPC}, "trpc"),
-			Entry("legacy taf", &bkmsapp.Application{Type: bkmsapp.AppTypeTAF}, "taf"),
+			Entry("legacy trpc", &bkmsapp.Application{Type: bkmsapp.AppTypeTRPC}, []string{"bkmsApp", "trpc"}),
+			Entry("legacy taf", &bkmsapp.Application{Type: bkmsapp.AppTypeTAF}, []string{"bkmsApp", "taf"}),
 			Entry("bkmsApp with trpc framework",
-				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "trpc", Language: "go"}, "trpc"),
-			Entry("bkmsApp with taf framework",
-				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "taf"}, "taf"),
-			// blank 尚未登记到组件定义，匹配不到任何组件，按管理方式表达见 M5
+				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "trpc", Language: "go"},
+				[]string{"bkmsApp", "trpc"}),
 			Entry("bkmsApp with blank framework",
-				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "blank", Language: "go"}, "blank"),
-			Entry("helm", &bkmsapp.Application{Type: bkmsapp.AppTypeHelm}, "helm"),
-			Entry("agones", &bkmsapp.Application{Type: bkmsapp.AppTypeAgones}, "agones"),
+				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "blank", Language: "go"},
+				[]string{"bkmsApp", "blank"}),
+			// 技术栈非法时取不到框架，仍按管理方式匹配
+			Entry("bkmsApp with invalid stack",
+				&bkmsapp.Application{Type: bkmsapp.AppTypeBKMSApp, Framework: "unknown"}, []string{"bkmsApp"}),
+			Entry("helm", &bkmsapp.Application{Type: bkmsapp.AppTypeHelm}, []string{"helm"}),
+			Entry("agones", &bkmsapp.Application{Type: bkmsapp.AppTypeAgones}, []string{"agones"}),
 		)
 	})
 
@@ -289,7 +292,7 @@ var _ = Describe("Query", func() {
 				mockey.Mock(helm.NewActionConfiguration).Return(&action.Configuration{}, nil).Build()
 				query := mockey.Mock(helm.ListReleases).Return(nil, nil).Build()
 				missing, err := clusteraddon.InspectRequiredAddons(context.Background(), defs,
-					bkmsapp.AppTypeTRPC, addonEnvironment("cluster", true), "")
+					[]string{bkmsapp.AppTypeBKMSApp, "blank"}, addonEnvironment("cluster", true), "")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(
 					missing,
@@ -297,6 +300,30 @@ var _ = Describe("Query", func() {
 				Expect(query.Times()).To(Equal(1))
 			})
 		})
+
+		DescribeTable("matches required addons by any of the addon app types",
+			func(registered, addonAppTypes []string, required bool) {
+				mockey.PatchConvey("addon app type matching", GinkgoT(), func() {
+					def := gameDeployDef()
+					def.RequiredForAppTypes = registered
+					mockey.Mock(helm.NewActionConfiguration).Return(&action.Configuration{}, nil).Build()
+					mockey.Mock(helm.ListReleases).Return(nil, nil).Build()
+					missing, err := clusteraddon.InspectRequiredAddons(context.Background(),
+						[]*clusteraddon.ClusterAddonDef{def}, addonAppTypes, addonEnvironment("cluster", false), "")
+					Expect(err).NotTo(HaveOccurred())
+					Expect(missing).To(HaveLen(lo.Ternary(required, 1, 0)))
+				})
+			},
+			Entry("bkmsApp registration matches blank",
+				[]string{bkmsapp.AppTypeBKMSApp}, []string{bkmsapp.AppTypeBKMSApp, "blank"}, true),
+			// 按旧值登记的定义仍按框架匹配
+			Entry("legacy trpc registration matches trpc",
+				[]string{"trpc"}, []string{bkmsapp.AppTypeBKMSApp, "trpc"}, true),
+			Entry("legacy trpc registration does not match blank",
+				[]string{"trpc"}, []string{bkmsapp.AppTypeBKMSApp, "blank"}, false),
+			Entry("bkmsApp registration does not match helm",
+				[]string{bkmsapp.AppTypeBKMSApp}, []string{bkmsapp.AppTypeHelm}, false),
+		)
 
 		DescribeTable("queries each required namespace once",
 			func(hookNamespace string, expectedNamespaces []string) {
@@ -313,7 +340,7 @@ var _ = Describe("Query", func() {
 						}).Build()
 					query := mockey.Mock(helm.ListReleases).Return(nil, nil).Build()
 					missing, err := clusteraddon.InspectRequiredAddons(context.Background(), defs,
-						bkmsapp.AppTypeTRPC, addonEnvironment("cluster", false), "")
+						[]string{bkmsapp.AppTypeBKMSApp, "blank"}, addonEnvironment("cluster", false), "")
 					Expect(err).NotTo(HaveOccurred())
 					Expect(namespaces).To(Equal(expectedNamespaces))
 					Expect(query.Times()).To(Equal(len(expectedNamespaces)))
@@ -341,7 +368,7 @@ var _ = Describe("Query", func() {
 						[]*clusteraddon.ClusterAddonDef{
 							def,
 						},
-						bkmsapp.AppTypeTAF,
+						[]string{bkmsapp.AppTypeBKMSApp, "taf"},
 						addonEnvironment("cluster", false),
 						"",
 					)
@@ -374,9 +401,16 @@ var _ = Describe("Query", func() {
 					if configFails {
 						config.Return(nil, cause)
 					}
-					_, err := clusteraddon.InspectRequiredAddons(context.Background(),
+					_, err := clusteraddon.InspectRequiredAddons(
+						context.Background(),
 						[]*clusteraddon.ClusterAddonDef{gameDeployDef(), hookOperatorDef()},
-						bkmsapp.AppTypeTRPC, addonEnvironment("target-cluster", false), "operator-ns")
+						[]string{
+							bkmsapp.AppTypeBKMSApp,
+							"blank",
+						},
+						addonEnvironment("target-cluster", false),
+						"operator-ns",
+					)
 					Expect(errors.Is(err, cause)).To(BeTrue())
 					Expect(err.Error()).To(ContainSubstring("target-cluster"))
 					Expect(err.Error()).To(ContainSubstring("operator-ns"))
@@ -396,8 +430,15 @@ var _ = Describe("Query", func() {
 				def := gameDeployDef()
 				def.OptionalForAppTypes = []string{bkmsapp.AppTypeHelm}
 				config := mockey.Mock(helm.NewActionConfiguration).Return(&action.Configuration{}, nil).Build()
-				missing, err := clusteraddon.InspectRequiredAddons(context.Background(),
-					[]*clusteraddon.ClusterAddonDef{def}, bkmsapp.AppTypeHelm, addonEnvironment("cluster", false), "")
+				missing, err := clusteraddon.InspectRequiredAddons(
+					context.Background(),
+					[]*clusteraddon.ClusterAddonDef{
+						def,
+					},
+					[]string{bkmsapp.AppTypeHelm},
+					addonEnvironment("cluster", false),
+					"",
+				)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(missing).To(BeEmpty())
 				Expect(config.Times()).To(BeZero())
@@ -412,7 +453,7 @@ func gameDeployDef() *clusteraddon.ClusterAddonDef {
 		DisplayName:             "Gamedeploy",
 		ChartInfo:               clusteraddon.HelmChartInfo{ChartName: "bcs-gamedeployment-operator"},
 		UnsupportedOnFederation: true,
-		RequiredForAppTypes:     []string{bkmsapp.AppTypeTRPC, bkmsapp.AppTypeTAF},
+		RequiredForAppTypes:     []string{bkmsapp.AppTypeBKMSApp},
 	}
 }
 
@@ -422,7 +463,7 @@ func hookOperatorDef() *clusteraddon.ClusterAddonDef {
 		DisplayName:             "Hook-operator",
 		ChartInfo:               clusteraddon.HelmChartInfo{ChartName: "bcs-hook-operator"},
 		UnsupportedOnFederation: true,
-		RequiredForAppTypes:     []string{bkmsapp.AppTypeTRPC, bkmsapp.AppTypeTAF},
+		RequiredForAppTypes:     []string{bkmsapp.AppTypeBKMSApp},
 	}
 }
 

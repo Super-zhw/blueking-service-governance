@@ -23,22 +23,23 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/taf"
 )
 
 var _ = Describe("DecodeConfig", func() {
-	It("decodes legacy file metadata and rejects empty objects", func() {
-		cfg := taf.ConfigMapFromLegacy(appmodel.TafConfig{
-			FileName:    "taf_config.conf",
-			FilePath:    "/usr/local/taf/conf/",
-			FileContent: "<taf/>",
-		})
-		got, err := taf.DecodeConfig(cfg, appruntime.FrameworkConfigVersionV1)
+	It("accepts an empty object", func() {
+		got, err := taf.DecodeConfig(map[string]any{}, appruntime.FrameworkConfigVersionV1)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(got).To(Equal(taf.Config{FileName: "taf_config.conf", FilePath: "/usr/local/taf/conf/"}))
+		Expect(got).To(Equal(taf.Config{}))
+	})
 
-		_, err = taf.DecodeConfig(map[string]any{}, appruntime.FrameworkConfigVersionV1)
-		Expect(err).To(HaveOccurred())
+	It("rejects keys that moved to the framework config file def", func() {
+		_, err := taf.DecodeConfig(map[string]any{"fileName": "a.conf"}, appruntime.FrameworkConfigVersionV1)
+		Expect(err).To(MatchError(ContainSubstring("invalid keys: fileName")))
+	})
+
+	It("rejects an unknown version", func() {
+		_, err := taf.DecodeConfig(map[string]any{}, 2)
+		Expect(err).To(MatchError(ContainSubstring("TAF")))
 	})
 })

@@ -1,0 +1,40 @@
+meta {
+  name: 01-get-runtime-definitions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{serviceURL}}/app-runtime-definitions
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should return the framework catalog", () => {
+    const frameworks = res.body.data.frameworks;
+    const byName = Object.fromEntries(frameworks.map((f) => [f.name, f]));
+    expect(byName.trpc.supportedLanguages).to.have.members(["go", "cpp"]);
+    expect(byName.taf.supportedLanguages).to.deep.equal(["cpp"]);
+    expect(byName.blank.supportedLanguages).to.have.members(["go", "cpp"]);
+  });
+
+  test("should return the capability matrix for every valid stack", () => {
+    const matrix = res.body.data.matrix;
+    expect(matrix).to.have.lengthOf(5);
+    const blankGo = matrix.find((v) => v.framework === "blank" && v.language === "go");
+    expect(blankGo.mods.frameworkFile.supported).to.equal(false);
+    const trpcGo = matrix.find((v) => v.framework === "trpc" && v.language === "go");
+    expect(trpcGo.mods.platformBuild.supported).to.equal(true);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

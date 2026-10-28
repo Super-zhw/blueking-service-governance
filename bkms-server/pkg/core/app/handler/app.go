@@ -112,21 +112,8 @@ func (h *Handler) CreateApp(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-
-	// 先校验 workspace 存在，再校验创建应用权限，保证错误语义与其他 workspace 级接口一致。
-	if _, err := ginperm.ValidateWorkspaceForAppCreate(ctx, h.registry, uriInput.WorkspaceID); err != nil {
+	if err := h.checkAppCreatable(ctx, uriInput.WorkspaceID, input.Name); err != nil {
 		bkerrs.AbortWithErr(c, err)
-		return
-	}
-
-	// 检查应用是否已存在
-	existingApp, err := h.apps().Get(ctx, bkmsapp.ByName(uriInput.WorkspaceID, input.Name))
-	if existingApp != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeInvalidRequest, "app %s already exists", input.Name))
-		return
-	}
-	if err != nil && !errors.Is(err, bkmsapp.ErrAppNotFound) {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "check app existence"))
 		return
 	}
 
@@ -142,6 +129,7 @@ func (h *Handler) CreateApp(c *gin.Context) {
 	}
 
 	// 设置类型特定字段
+	var err error
 	if input.Type == bkmsapp.AppTypeTRPC {
 		// TrpcSpec/AppModelSpec 由 struct-level validator 强制要求；
 		// 这里保留 nil 防御，避免 validator 后续被改动时导致 panic。
@@ -170,11 +158,52 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		app.HelmSpec = helmSpec
 	}
 
-	// 创建构建配置
-	buildConfig, err := input.BuildConfig.ToModel(input.ID)
+	buildConfig, err := h.createBuildConfig(ctx, app, input.BuildConfig)
 	if err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "parse build config"))
+		bkerrs.AbortWithErr(c, err)
 		return
+	}
+
+	// 根据应用类型创建特定资源（复用现有逻辑）
+	if err = h.createAppByType(ctx, app, &input); err != nil {
+		bkerrs.AbortWithErr(c, err)
+		return
+	}
+
+	h.onAppCreated(ctx, app, buildConfig)
+
+	ginutils.OK(c, serializer.CreateAppOutput{
+		Data: new(serializer.AppOutputObj).FromModel(app),
+	})
+}
+
+// checkAppCreatable 校验工作空间与创建权限，并确认同名应用不存在。
+func (h *Handler) checkAppCreatable(ctx context.Context, workspaceID, name string) error {
+	// 先校验 workspace 存在，再校验创建应用权限，保证错误语义与其他 workspace 级接口一致。
+	if _, err := ginperm.ValidateWorkspaceForAppCreate(ctx, h.registry, workspaceID); err != nil {
+		return err
+	}
+
+	// 检查应用是否已存在
+	existingApp, err := h.apps().Get(ctx, bkmsapp.ByName(workspaceID, name))
+	if existingApp != nil {
+		return bkerrs.Errorf(bkerrs.ErrCodeInvalidRequest, "app %s already exists", name)
+	}
+	if err != nil && !errors.Is(err, bkmsapp.ErrAppNotFound) {
+		return bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "check app existence")
+	}
+	return nil
+}
+
+// createBuildConfig 校验并写入应用的构建配置，同时确保构建与 Helm 源使用的蓝盾代码库已关联到工作空间。
+func (h *Handler) createBuildConfig(
+	ctx context.Context,
+	app *bkmsapp.Application,
+	input *serializer.BuildConfigInput,
+) (*imagebuild.Config, error) {
+	buildConfig, err := input.ToModel(app.ID)
+	if err != nil {
+		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "parse build config")
 	}
 	imageReferenceValidator := workloadruntime.NewImageReferenceValidator(h.registry.DB)
 	if err = build.ValidatePlatformBuildImages(
@@ -185,29 +214,24 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		if build.IsImageRegistryFailure(err) {
 			errCode = bkerrs.ErrCodeInternalServerError
 		}
-		bkerrs.AbortWithErr(c, bkerrs.New(errCode, err.Error()))
-		return
+		return nil, bkerrs.New(errCode, err.Error())
 	}
 	if err = bkci.EnsureWorkspaceRepositories(
 		ctx,
 		h.registry.DB,
-		uriInput.WorkspaceID,
-		collectBKCIRepositoriesForCreateApp(input.Type, app.HelmSpec, buildConfig),
+		app.WorkspaceID,
+		collectBKCIRepositoriesForCreateApp(app.Type, app.HelmSpec, buildConfig),
 	); err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "ensure bkci repositories"))
-		return
+		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "ensure bkci repositories")
 	}
 	if err = h.buildConfigs().Create(ctx, buildConfig); err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "create build config"))
-		return
+		return nil, bkerrs.Wrap(err, bkerrs.ErrCodeInternalServerError, "create build config")
 	}
+	return buildConfig, nil
+}
 
-	// 根据应用类型创建特定资源（复用现有逻辑）
-	if err = h.createAppByType(ctx, app, &input); err != nil {
-		bkerrs.AbortWithErr(c, err)
-		return
-	}
-
+// onAppCreated 应用创建成功后的异步处理：自定义镜像记录、默认告警策略与操作审计。
+func (h *Handler) onAppCreated(ctx context.Context, app *bkmsapp.Application, buildConfig *imagebuild.Config) {
 	// 应用与构建配置都已落库后再异步 get_or_create 自定义镜像记录，尚无成功快照的镜像会触发一次刷新
 	// 放在应用创建之后，避免创建失败时仍往工作空间写入候选镜像
 	// 失败只打日志，不回滚已保存的数据；WithoutCancel 避免请求结束后 persist 被取消
@@ -261,10 +285,6 @@ func (h *Handler) CreateApp(c *gin.Context) {
 		audit.WithWorkspaceID(app.WorkspaceID),
 		audit.WithAppID(app.ID),
 	)
-
-	ginutils.OK(c, serializer.CreateAppOutput{
-		Data: new(serializer.AppOutputObj).FromModel(app),
-	})
 }
 
 // GetAppIDAutoSuffix 获取创建应用时使用的自动 ID 后缀。

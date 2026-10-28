@@ -17,5 +17,4 @@ chartInfo:
         memory: 512Mi
 requiredForAppTypes: []
 optionalForAppTypes:
-  - trpc
-  - taf
+  - bkmsApp

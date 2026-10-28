@@ -1,0 +1,42 @@
+meta {
+  name: 06-delete
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/appmodel-deploys
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+script:post-response {
+  if (res.status !== 200) {
+    return;
+  }
+  const appmodel = require("./helpers/appmodel");
+  const record = await appmodel.waitForAppModelDeployTerminal({
+    kind: "appmodel",
+    appID: bru.getVar("blankLcAppID"),
+    envName: bru.getVar("blankLcEnvName"),
+    expectedStatus: "uninstalled",
+    imageTag: bru.getVar("blankLcImageTag")
+  });
+  bru.setVar("blankLcUninstalledStatus", record.status);
+}
+
+tests {
+  test("should uninstall the blank app", () => {
+    expect(bru.getVar("blankLcUninstalledStatus")).to.equal("uninstalled");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 130000
+}

@@ -1,0 +1,46 @@
+meta {
+  name: 11-get-taf-app
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{serviceURL}}/apps/{{bkmsAppTafID}}/app-config-file-defs/defaults
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+script:post-response {
+  const axios = require("axios");
+  const {AUTH_HEADERS} = require("./common");
+  const resp = await axios.get(`${bru.getEnvVar("serviceURL")}/apps/${bru.getVar("bkmsAppTafID")}/runtime-mods`,
+    {headers: AUTH_HEADERS});
+  bru.setVar("bkmsAppTafModsJSON", JSON.stringify(resp.data.data.mods));
+}
+
+tests {
+  test("should create the framework config file def", () => {
+    const items = res.body.items || [];
+    const framework = items.filter((i) => i.configKind === "framework");
+    expect(framework, JSON.stringify(items)).to.have.lengthOf(1);
+    expect(framework[0].name).to.equal("app.conf");
+    expect(framework[0].mountDir).to.equal("/usr/local/app/conf");
+  });
+
+  test("should resolve taf capabilities", () => {
+    const mods = JSON.parse(bru.getVar("bkmsAppTafModsJSON"));
+    expect(mods.frameworkFile.supported).to.equal(true);
+    expect(mods.frameworkFile.props.format).to.equal("taf");
+    expect(mods.platformBuild.supported).to.equal(false);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

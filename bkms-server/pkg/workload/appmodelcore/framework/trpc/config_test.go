@@ -23,34 +23,23 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/framework/trpc"
 )
 
 var _ = Describe("DecodeConfig", func() {
-	It("decodes legacy file metadata and rejects unknown keys or empty objects", func() {
-		legacy := appmodel.TrpcConfig{
-			FileName:    "trpc_go.yaml",
-			FilePath:    "/etc/",
-			Language:    "go",
-			FileContent: "secret",
-		}
-		cfg := trpc.ConfigMapFromLegacy(legacy)
-		Expect(cfg).To(Equal(map[string]any{"fileName": "trpc_go.yaml", "filePath": "/etc/"}))
-
-		got, err := trpc.DecodeConfig(cfg, appruntime.FrameworkConfigVersionV1)
+	It("accepts an empty object", func() {
+		got, err := trpc.DecodeConfig(map[string]any{}, appruntime.FrameworkConfigVersionV1)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(got).To(Equal(trpc.Config{FileName: "trpc_go.yaml", FilePath: "/etc/"}))
+		Expect(got).To(Equal(trpc.Config{}))
+	})
 
-		_, err = trpc.DecodeConfig(map[string]any{
-			"fileName": "trpc_go.yaml",
-			"filePath": "/etc/",
-			"language": "go",
-		}, appruntime.FrameworkConfigVersionV1)
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring("invalid keys: language"))
+	It("rejects keys that moved to the framework config file def", func() {
+		_, err := trpc.DecodeConfig(map[string]any{"fileName": "a.conf"}, appruntime.FrameworkConfigVersionV1)
+		Expect(err).To(MatchError(ContainSubstring("invalid keys: fileName")))
+	})
 
-		_, err = trpc.DecodeConfig(map[string]any{}, appruntime.FrameworkConfigVersionV1)
-		Expect(err).To(HaveOccurred())
+	It("rejects an unknown version", func() {
+		_, err := trpc.DecodeConfig(map[string]any{}, 2)
+		Expect(err).To(MatchError(ContainSubstring("tRPC")))
 	})
 })

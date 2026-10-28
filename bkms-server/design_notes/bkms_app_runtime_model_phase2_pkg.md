@@ -112,7 +112,7 @@ pkg/core/appruntime/capability/bscpworkloadmeta/  BSCP 元信息自动填充
 | L-2 ✅ | devMode 路径常量重复 | 已处理：别名常量删除，引用方直接用 `capability/devmode` | — | M3 | `rg -n 'TrpcWorkPath =' pkg/extension` 无结果 |
 | L-3 | devMode 渲染仍读 AppSpec 持久化路径 | `workload/builder.go` 用 AppSpec 的 `workPath` / `mountPath` 覆盖能力参数 | 只用能力参数；AppSpec 中两字段删除 | M9 | `rg -n 'DevMode.WorkPath' pkg/workload/appmodelcore/workload` 无结果 |
 | L-4 ✅ | platformBuild 执行代码 | 已处理：取 Dockerfile 语言移入 `platformbuild.DockerfileLanguage`；其余构建流程与技术栈无关，留在 `pkg/build` | — | M3 | `rg --no-ignore-vcs -n 'PlatformBuild\.Require' pkg` 无结果 |
-| L-5 | adminCommand 执行代码 | `appmodelcore/{trpc,taf}/admincmd`、`workload/instance/handler/admin_cmd.go` | 协议实现进 `appmodelcore/framework/*`（M4.5 已完成）；按 props 分派留在使用方，接口合并后随接口所在包（M4.5 前的目标"能力壳进 `capability/admincommand`"已撤回） | 协议实现随 M4.5；接口合并随 M6 | `ls pkg/workload/appmodelcore/*/admincmd` 不存在（M4.5 已满足） |
+| L-5 ✅ | adminCommand 执行代码 | 已处理：协议实现在 `appmodelcore/framework/*`（M4.5）；按 props 分派留在使用方；管理命令接口不再合并（M5 + M6 决定）（M4.5 前的目标"能力壳进 `capability/admincommand`"已撤回） | — | M4.5 | `ls pkg/workload/appmodelcore/*/admincmd` 不存在（M4.5 已满足） |
 | L-6 ✅ | apmServiceName 执行代码 | 已处理（M4.5）：解析实现移入 `framework/{trpc,taf}/*conf`，错误约定移入 `capability/apmservicename`；分派留在 `bkmonitor`（进能力包会与 `trpcconf` 互相引用） | — | M4.5 | `ls pkg/observability/bkmonitor/telemetry_config.go` 不存在 |
 | L-7 ✅ | 北极星服务名校验 | 已处理：校验与 tRPC 服务名解析移入 `polaris.CheckServiceName`；addon 只保留 immediate 判断与应用加载 | M4.5：解析移入 `framework/trpc/trpcconf`，执行函数移到 `extension/addon/polaris`（避免 `core` 依赖 `workload`） | M3 | `rg -n 'ParseServiceNames' pkg` 只出现在 `trpcconf` 与 `extension/addon/polaris` |
 | L-8 ✅ | 北极星注册信息注入 | 已处理（M4.5）：补丁器随 `framework/trpc/patcher` 移动；开关已由能力声明控制 | — | M4.5 | `rg -l 'package patcher' pkg/workload` 无结果 |

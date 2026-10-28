@@ -70,6 +70,12 @@ func (h *Handler) UpdateAppTafSpec(c *gin.Context) {
 		return
 	}
 
+	// 新接口创建的 bkmsApp 应用只能通过 appmodel-spec 修改，避免把旧字段写回新应用
+	if app.Type == bkmsapp.AppTypeBKMSApp {
+		bkerrs.AbortWithErr(c, bkerrs.New(bkerrs.ErrCodeInvalidRequest, "bkmsApp app must use appmodel-spec"))
+		return
+	}
+
 	// 检查应用框架
 	if mods.Of(app).Stack.Framework != appruntime.FrameworkTAF {
 		bkerrs.AbortWithErr(c, bkerrs.New(bkerrs.ErrCodeInvalidRequest, "only TAF app supports taf spec"))

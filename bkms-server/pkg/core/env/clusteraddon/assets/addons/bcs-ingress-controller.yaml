@@ -17,5 +17,4 @@ chartInfo:
 requiredForAppTypes: 
   - agones
 optionalForAppTypes:
-  - trpc
-  - taf
+  - bkmsApp

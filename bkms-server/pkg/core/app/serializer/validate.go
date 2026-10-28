@@ -50,6 +50,8 @@ func init() {
 		// conditional required fields based on app type.
 		v.RegisterStructValidation(validateCreateAppInputStruct, CreateAppInput{})
 		v.RegisterStructValidation(validateAppModelSpecInputStruct, AppModelSpecInput{})
+		v.RegisterStructValidation(validateBKMSAppModelSpecInputStruct, BKMSAppModelSpecInput{})
+		v.RegisterStructValidation(validateUpdateBKMSAppModelSpecInputStruct, UpdateBKMSAppModelSpecInput{})
 		v.RegisterStructValidation(validateCreateAppComponentInputStruct, CreateAppComponentInput{})
 		// Register struct-level validator for HelmSourceInput to enforce
 		// the matching repo config based on RepoType. This applies to both
@@ -135,15 +137,19 @@ func validateFrameworkFileLocationRequired(sl validator.StructLevel, specField, 
 
 // validateAppModelSpecEnvVarsUnique validate app unique env vars key
 func validateAppModelSpecEnvVarsUnique(sl validator.StructLevel, spec *AppModelSpecInput) {
-	if spec == nil || len(spec.EnvVars) == 0 {
+	if spec == nil {
 		return
 	}
+	validateEnvVarsUnique(sl, spec.EnvVars)
+}
 
-	seen := make(map[string]struct{}, len(spec.EnvVars))
-	for _, envVar := range spec.EnvVars {
+// validateEnvVarsUnique 校验应用环境变量的 key 不重复。
+func validateEnvVarsUnique(sl validator.StructLevel, envVars []VariableInput) {
+	seen := make(map[string]struct{}, len(envVars))
+	for _, envVar := range envVars {
 		if _, ok := seen[envVar.Key]; ok {
 			sl.ReportError(
-				spec.EnvVars,
+				envVars,
 				"AppModelSpec.EnvVars",
 				"EnvVars",
 				"env_var_key_unique",
@@ -157,15 +163,20 @@ func validateAppModelSpecEnvVarsUnique(sl validator.StructLevel, spec *AppModelS
 // validateAppModelSpecInputStruct ensures ShCommand is not blank and is mutually exclusive with Command and Args.
 func validateAppModelSpecInputStruct(sl validator.StructLevel) {
 	input := sl.Current().Interface().(AppModelSpecInput)
-	if input.ShCommand == "" {
+	validateStartCommand(sl, input.Command, input.Args, input.ShCommand)
+}
+
+// validateStartCommand 校验启动脚本不能为纯空白，且与启动命令、参数互斥。
+func validateStartCommand(sl validator.StructLevel, command, args []string, shCommand string) {
+	if shCommand == "" {
 		return
 	}
 	// 仅拒绝纯空白脚本，非空脚本原样保留，不做 TrimSpace 归一化
-	if strings.TrimSpace(input.ShCommand) == "" {
-		sl.ReportError(input.ShCommand, "ShCommand", "ShCommand", "sh_command_not_blank", "")
+	if strings.TrimSpace(shCommand) == "" {
+		sl.ReportError(shCommand, "ShCommand", "ShCommand", "sh_command_not_blank", "")
 	}
-	if len(input.Command) > 0 || len(input.Args) > 0 {
-		sl.ReportError(input.ShCommand, "ShCommand", "ShCommand", "exec_command_or_sh_command_exclusive", "")
+	if len(command) > 0 || len(args) > 0 {
+		sl.ReportError(shCommand, "ShCommand", "ShCommand", "exec_command_or_sh_command_exclusive", "")
 	}
 }
 
@@ -199,4 +210,17 @@ func validateHelmSourceInputStruct(sl validator.StructLevel) {
 			sl.ReportError(nil, "GitRepoConfig", "GitRepoConfig", "required", "")
 		}
 	}
+}
+
+// validateBKMSAppModelSpecInputStruct 校验 bkmsApp 创建请求中的启动配置与环境变量。
+func validateBKMSAppModelSpecInputStruct(sl validator.StructLevel) {
+	input := sl.Current().Interface().(BKMSAppModelSpecInput)
+	validateStartCommand(sl, input.Command, input.Args, input.ShCommand)
+	validateEnvVarsUnique(sl, input.EnvVars)
+}
+
+// validateUpdateBKMSAppModelSpecInputStruct 校验 bkmsApp 修改请求中的启动配置。
+func validateUpdateBKMSAppModelSpecInputStruct(sl validator.StructLevel) {
+	input := sl.Current().Interface().(UpdateBKMSAppModelSpecInput)
+	validateStartCommand(sl, input.Command, input.Args, input.ShCommand)
 }

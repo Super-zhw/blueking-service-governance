@@ -71,6 +71,21 @@ type HelmDeployHandler interface {
 	// GetLatestTafDeployStatus 获取 TAF 应用最新一次部署的状态
 	GetLatestTafDeployStatus(c *gin.Context)
 
+	// ListAppModelDeployRecords 获取 AppModel 应用部署记录列表，不限框架
+	ListAppModelDeployRecords(c *gin.Context)
+	// PreCheckAppModelDeploy AppModel 部署前检查，不限框架
+	PreCheckAppModelDeploy(c *gin.Context)
+	// CreateAppModelDeploy 部署 AppModel 应用，不限框架
+	CreateAppModelDeploy(c *gin.Context)
+	// DeleteAppModelDeploy 删除 AppModel 应用部署，不限框架
+	DeleteAppModelDeploy(c *gin.Context)
+	// ListAppModelResourceSnapshots 获取 AppModel 应用资源快照列表，不限框架
+	ListAppModelResourceSnapshots(c *gin.Context)
+	// GetAppModelResourceSnapshot 获取 AppModel 应用部署记录下某个资源的快照详情，不限框架
+	GetAppModelResourceSnapshot(c *gin.Context)
+	// GetLatestAppModelDeployStatus 获取 AppModel 应用最新一次部署的状态，不限框架
+	GetLatestAppModelDeployStatus(c *gin.Context)
+
 	// GetBatchReleaseProgress 获取应用模型应用最新一次部署的分批发布进度
 	GetBatchReleaseProgress(c *gin.Context)
 }
@@ -130,6 +145,18 @@ func Register(rg *gin.RouterGroup, h HelmDeployHandler) {
 	rg.GET("/apps/:appID/envs/:envName/taf-deploys/:deployID/resource-snapshots/:snapshotID", h.GetTafResourceSnapshot)
 	// 获取 TAF 应用最新一次部署的状态
 	rg.GET("/apps/:appID/envs/:envName/taf-deploys/latest-status", h.GetLatestTafDeployStatus)
+
+	// AppModel 应用统一部署接口，不限框架（bkmsApp 与旧 trpc / taf 应用均可使用）
+	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys", h.ListAppModelDeployRecords)
+	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys/precheck", h.PreCheckAppModelDeploy)
+	rg.POST("/apps/:appID/envs/:envName/appmodel-deploys", h.CreateAppModelDeploy)
+	rg.DELETE("/apps/:appID/envs/:envName/appmodel-deploys", h.DeleteAppModelDeploy)
+	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys/:deployID/resource-snapshots", h.ListAppModelResourceSnapshots)
+	rg.GET(
+		"/apps/:appID/envs/:envName/appmodel-deploys/:deployID/resource-snapshots/:snapshotID",
+		h.GetAppModelResourceSnapshot,
+	)
+	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys/latest-status", h.GetLatestAppModelDeployStatus)
 
 	// 获取应用最新一次部署的分批发布进度
 	rg.GET("/apps/:appID/envs/:envName/batch-release", h.GetBatchReleaseProgress)

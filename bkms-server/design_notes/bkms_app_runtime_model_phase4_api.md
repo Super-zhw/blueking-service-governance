@@ -1,0 +1,128 @@
+# 阶段 3B / 3F / 4：新 API 与 blank 闭环（M5 + M6）
+
+状态：已实现，待提 PR。
+
+对应 [里程碑](./bkms_app_runtime_model_milestones.md) M5、M6 合并实施，总体方案阶段 3B、3F、4（服务端）。前置为 M4.5（PR #311）合入。
+
+---
+
+## 1. 目标与边界
+
+**目标：** 提供 bkmsApp 的新 API，新应用只写新字段；用新 API 跑通 tRPC、TAF、blank 三种应用的完整链路。旧 API 保持原样，旧数据由 M8 统一迁移。
+
+**范围外：**
+
+| 事项 | 原因 / 去向 |
+| --- | --- |
+| 旧 API 改为薄适配层、新旧字段双写 | 旧 API 按旧方式运行，旧数据由 M8 回填 |
+| 旧 API 拒绝切换技术栈 | 属于旧 API 行为，不改；冲突数据由 M8 扫描处理 |
+| 创建失败的跨集合一致性 | 改造前已存在，与本需求无关；新 API 沿用"Application 最后写"的顺序 |
+| 旧路由埋点 | 切换时统一下线旧路由，不需要观察数据 |
+| 合并 `admin-cmds` / `taf-admin-cmds` | 两者已按能力判断协议（M2），bkmsApp 应用可直接使用 |
+| 环境级能力接口 `envs/:envName/runtime-mods` | 总体方案标注"若产品需要"，目前无需求 |
+| `appmodel-spec` 并发写冲突检查 | AppModel 没有版本号，旧更新接口也没有；单独评估 |
+| 前端改用新 API、输出 `type=bkmsApp` 给旧客户端 | M7 |
+
+---
+
+## 2. 决策
+
+| 问题 | 结论 |
+| --- | --- |
+| 新 API 是否加开关 | 不加。正式环境不主动调用，只在测试环境使用 |
+| 新建应用入口 | 新开路由 `POST /workspaces/:workspaceID/appmodel-apps`，旧入口不变 |
+| 旧 spec 更新接口遇到 bkmsApp 应用 | `PUT trpc-spec`、`PUT taf-spec` 拒绝 `type=bkmsApp`，避免把旧字段写回新应用 |
+| 框架差异如何提供 | 不引入框架适配器接口。是否创建框架文件及其格式读能力 `frameworkFile`；frameworkConfig 按框架查表调用对应的 `DecodeConfig` |
+| frameworkConfig | 新建时写 `{}` 与版本 1。trpc / taf 的 `Config` 去掉已收敛到 def 的 fileName / filePath；blank 只接受 `{}` |
+| 新建应用的 language | 必填，按框架目录校验；TAF 只接受 `cpp` |
+| 存量 TAF 的 language | 已核对：正式环境 1 个应用，确认是 C++；测试环境 13 个为测试数据。由 M8 回填为 `cpp`，不手工修复 |
+| 集群组件登记值 | YAML 中 trpc / taf 改为 `bkmsApp`；AppModel 应用一律按 `bkmsApp` 匹配，查询兼容旧值；前端集群组件页补充 `bkmsApp` 分组名 |
+
+---
+
+## 3. 接口
+
+| 接口 | 说明 |
+| --- | --- |
+| `POST /workspaces/:workspaceID/appmodel-apps` | 创建 bkmsApp 应用 |
+| `PUT /apps/:appID/appmodel-spec` | 修改启动配置与 frameworkConfig，不能修改 framework / language |
+| `GET /app-runtime-definitions` | 框架目录（框架、支持的语言）与能力矩阵 |
+| `GET /apps/:appID/runtime-mods` | 应用的能力集合及公开参数 |
+| `/apps/:appID/envs/:envName/appmodel-deploys` | 部署记录、预检、部署、下架、资源快照列表与详情、最新状态；复用现有通用 handler，只要求是 AppModel 应用，不校验框架 |
+| `POST /apps/:appID/envs/:envName/appmodel-build-deploys` | 一键构建部署；同上 |
+| 详情 `GET /apps/:appID`、列表 `GET /workspaces/:workspaceID/apps` | `framework`、`language` 已由 M0 的兼容投影返回；bkmsApp 应用的详情另外返回 `appModelSpec.frameworkConfig` |
+
+创建请求：
+
+| 字段 | 说明 |
+| --- | --- |
+| `name`、`id`、`buildConfig` | 与旧接口一致 |
+| `framework`、`language` | 必填，按框架目录校验 |
+| `appModelSpec` | 启动命令、参数、启动脚本、环境变量、`frameworkConfig`（缺省为 `{}`） |
+| `frameworkConfigFile` | 框架配置文件的名称、挂载目录、内容。框架支持框架配置文件时必填，否则（blank）传入即报错 |
+
+修改请求中 `frameworkConfig` 的语义按总体方案 §5.1：缺省不修改，`null` 拒绝，`{}` 为显式替换并重新校验。
+
+---
+
+## 4. 创建流程
+
+编排服务位于 `workload/appmodelcore`（暂名 `lifecycle`），只服务新 API：
+
+1. 校验技术栈、frameworkConfig、框架配置文件输入，全部通过后再写库。
+2. 写构建配置（与旧接口相同的校验）。
+3. 能力 `frameworkFile` 支持时，按其格式创建框架配置文件 def 与内容。
+4. 写 AppModel：启动配置、环境变量、`frameworkConfig`、`frameworkConfigVersion=1`；不写 `Workload.Type`、`TrpcConfig`、`TafConfig`。
+5. 按工作空间默认规则写 AppSpec（与旧流程相同）。
+6. 最后写 Application：`type=bkmsApp`、`framework`、`language`；不写 `TrpcSpec`。
+7. 异步任务与审计与旧接口相同：自定义镜像记录、默认告警策略、操作记录。
+
+旧的 `framework/{trpc,taf}/{trpc,taf}.go` 继续服务旧 API，M9 删除。
+
+---
+
+## 5. 其他改动
+
+| 事项 | 改动 |
+| --- | --- |
+| APM 服务名同步 | 部署轮询先判断应用是否支持 `apmServiceName`，再读框架文件；否则 blank 每次部署都会记一条 Error |
+| 集群组件 | 内置 YAML 改为 `bkmsApp`，启动时同步到库；匹配时 AppModel 应用取 `bkmsApp` 与框架，命中任一即可，兼容仍按 trpc / taf 登记的旧定义；前端集群组件页 `bkmsApp` 分组显示为"tRPC / TAF 应用" |
+| frameworkConfig 类型 | trpc / taf 的 `Config` 改为空结构；新增 blank 的解码 |
+| 文档 | 里程碑合并 M5、M6，删除"MongoDB 事务保护"，M4.5 标为 ✅ #311；阶段 0 文档记录 TAF 存量核对结果 |
+
+---
+
+## 6. 与总体方案、里程碑的差异
+
+| 原规划 | 本方案 | 原因 |
+| --- | --- | --- |
+| §5.1 复用 `POST /workspaces/:workspaceID/apps` | 新开 `appmodel-apps` | 旧 API 不接收新参数，避免回归验证 |
+| §5.3 旧 create / spec 接口转换为统一领域命令；M6 旧接口改薄适配层 | 旧接口不改 | 同上 |
+| M5 新旧字段双写 | 不双写 | 新接口只写新字段，旧数据由 M8 统一 |
+| M5 MongoDB 事务保护 | 不做 | 与本需求无关，见 §1 |
+| M5 旧路由埋点 | 不做 | 切换时统一下线 |
+| M6 合并管理命令接口 | 不合并 | 现有接口已按能力分派 |
+| §2.2 框架适配器提供差异 | 能力声明加各框架的 `DecodeConfig` | 新接口不写旧投影后，剩余差异不足以构成接口 |
+
+---
+
+## 7. 测试
+
+- 单测：
+  - 三种框架经编排服务创建后的字段正确，没有旧字段；
+  - 非法技术栈、blank 传入框架配置文件、frameworkConfig 含未知 key 时被拒绝；
+  - 修改接口的 frameworkConfig 语义；
+  - 旧 spec 接口拒绝 bkmsApp 应用；
+  - 集群组件按新值与旧值匹配；
+  - 能力查询接口。
+- Bruno：新增 `tests/apis/appmodel-apps`。`api` 目录覆盖创建、详情、能力查询、修改及各类拒绝场景；`{blank,trpc,taf}-lifecycle` 走统一接口完成预检 → 部署 → 资源快照 → 最新状态 → 下架，blank 另外先创建 plain 配置文件。部署类用例由 `RUN_APPMODEL_DEPLOY_API_TESTS` 控制，默认跳过。
+- 回归：旧 API 的 Bruno 用例、`make lint`、`make test`。
+- Swagger：新接口只在测试环境使用，本次不生成文档（代码中保留注解），M7 前端接入时再执行 `make apidocs`。
+
+---
+
+## 8. 验收
+
+- 新 API 创建的三种应用只含新字段，能完整走完部署链路。
+- 旧 API 行为不变，旧 Bruno 用例通过。
+- blank 应用不产生框架资源，不触发框架能力的报错日志。

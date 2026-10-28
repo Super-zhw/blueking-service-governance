@@ -28,6 +28,7 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/capability/apmservicename"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/workspace"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy"
@@ -177,6 +178,11 @@ func newApmServiceConfigRequest(
 	// 仅 trpc / taf 应用需要回调 apm 关联容器接口
 	if !appruntime.IsAppModelType(app.Type) {
 		log.Infof(ctx, "app %s type %s not trpc/taf, skip sync apm service config", app.ID, app.Type)
+		return nil
+	}
+	// 不支持从框架配置提取 APM 服务名的应用（如 blank）没有框架配置文件，直接跳过
+	if !mods.Of(app).APMServiceName.Supported {
+		log.Infof(ctx, "app %s does not support apm service name, skip sync apm service config", app.ID)
 		return nil
 	}
 	// 查询环境绑定的 APM 名称

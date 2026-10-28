@@ -1,0 +1,43 @@
+meta {
+  name: 04-create-blank-app
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{serviceURL}}/workspaces/{{bkmsAppWorkspaceID}}/appmodel-apps
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "{{bkmsAppBlankID}}",
+    "id": "{{bkmsAppBlankID}}",
+    "framework": "blank",
+    "language": "go",
+    "appModelSpec": {
+      "command": ["sleep"],
+      "args": ["3600"],
+      "envVars": [{"key": "BLANK_VAR", "value": "blank"}]
+    },
+    "buildConfig": {"sourceType": "imageRegistry", "imageBuildConfig": {"name": "app"}}
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should create a bkmsApp with the blank framework", () => {
+    expect(res.body.data.id).to.equal(bru.getVar("bkmsAppBlankID"));
+    expect(res.body.data.type).to.equal("bkmsApp");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

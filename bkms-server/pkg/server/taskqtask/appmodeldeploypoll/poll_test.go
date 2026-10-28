@@ -35,6 +35,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/testutil"
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
+	envmodel "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/env/model"
 	appmodeldeploy "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/appmodel"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/deploy/batchrelease"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/taskq"
@@ -377,4 +379,15 @@ var _ = Describe("stableAuditOptions", func() {
 		Entry("polling broken", appmodeldeploy.StatusPollingBroken, audit.ResultFailed),
 		Entry("superseded by a new deploy", appmodeldeploy.StatusCanceled, audit.ResultFailed),
 	)
+})
+
+var _ = Describe("newApmServiceConfigRequest", func() {
+	It("skips apps that do not support apm service name before reading any data", func() {
+		app := &bkmsapp.Application{
+			ID: "blank-app", Type: bkmsapp.AppTypeBKMSApp, Framework: "blank", Language: "go",
+		}
+		// registry 为 nil：一旦读库就会 panic，用于确认在读取框架配置之前就已跳过
+		req := newApmServiceConfigRequest(context.Background(), nil, app, &envmodel.Environment{}, nil, "", "")
+		Expect(req).To(BeNil())
+	})
 })
