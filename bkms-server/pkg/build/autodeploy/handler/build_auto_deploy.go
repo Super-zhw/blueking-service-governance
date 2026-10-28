@@ -113,9 +113,6 @@ func (h *Handler) CreateTafBuildDeploy(c *gin.Context) {
 	h.createAppModelBuildDeploy(c, appruntime.FrameworkTAF)
 }
 
-// anyFramework 统一接口不限制应用框架，适用于所有 AppModel 应用。
-const anyFramework = ""
-
 // CreateAppModelBuildDeploy 触发 AppModel 应用构建，并在构建成功后自动部署到指定环境，不限框架。
 //
 //	@ID				CreateAppModelBuildDeploy
@@ -134,11 +131,11 @@ const anyFramework = ""
 //	@Failure		500		{object}	bkerrs.GinErrorOutput
 //	@Router			/apps/{appID}/envs/{envName}/appmodel-build-deploys [post]
 func (h *Handler) CreateAppModelBuildDeploy(c *gin.Context) {
-	h.createAppModelBuildDeploy(c, anyFramework)
+	h.createAppModelBuildDeploy(c, "")
 }
 
 // createAppModelBuildDeploy 触发构建并自动部署。expectedFramework 为旧 trpc / taf 专属接口要求的应用框架，
-// 统一接口传 anyFramework
+// 统一接口传空字符串，不校验框架
 func (h *Handler) createAppModelBuildDeploy(c *gin.Context, expectedFramework string) {
 	// 绑定路径和请求体，并合并新旧修订字段；失败已写响应
 	uriInput, input, rev, ok := bindBuildDeployRequest(c)
@@ -221,7 +218,7 @@ func (h *Handler) prepareBuildAutoDeploy(
 
 	// 统一接口只要求是 AppModel 应用，旧专属接口还要求框架一致
 	if !appruntime.IsAppModelType(app.Type) ||
-		(expectedFramework != anyFramework && mods.Of(app).Stack.Framework != expectedFramework) {
+		(expectedFramework != "" && mods.Of(app).Stack.Framework != expectedFramework) {
 		bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "invalid app type: %s", app.Type))
 		return nil, false
 	}

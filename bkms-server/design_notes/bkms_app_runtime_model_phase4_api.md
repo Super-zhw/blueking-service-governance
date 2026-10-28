@@ -36,7 +36,7 @@
 | frameworkConfig | 新建时写 `{}` 与版本 1。trpc / taf 的 `Config` 去掉已收敛到 def 的 fileName / filePath；blank 只接受 `{}` |
 | 新建应用的 language | 必填，按框架目录校验；TAF 只接受 `cpp` |
 | 存量 TAF 的 language | 已核对：正式环境 1 个应用，确认是 C++；测试环境 13 个为测试数据。由 M8 回填为 `cpp`，不手工修复 |
-| 集群组件登记值 | YAML 中 trpc / taf 改为 `bkmsApp`；AppModel 应用一律按 `bkmsApp` 匹配，查询兼容旧值；前端集群组件页补充 `bkmsApp` 分组名 |
+| 集群组件登记值 | YAML 在 trpc / taf 之后追加 `bkmsApp`，旧值标为待废弃，M9 删除；AppModel 应用按 `bkmsApp` 与框架匹配，命中任一即可；前端暂时隐藏 `bkmsApp` 分组，界面不变 |
 
 ---
 
@@ -86,7 +86,7 @@
 | 事项 | 改动 |
 | --- | --- |
 | APM 服务名同步 | 部署轮询先判断应用是否支持 `apmServiceName`，再读框架文件；否则 blank 每次部署都会记一条 Error |
-| 集群组件 | 内置 YAML 改为 `bkmsApp`，启动时同步到库；匹配时 AppModel 应用取 `bkmsApp` 与框架，命中任一即可，兼容仍按 trpc / taf 登记的旧定义；前端集群组件页 `bkmsApp` 分组显示为"tRPC / TAF 应用" |
+| 集群组件 | 内置 YAML 追加 `bkmsApp`、保留 trpc / taf，启动时同步到库。新旧版本都能匹配，滚动发布与回滚期间不会漏查必装组件；前端暂时隐藏 `bkmsApp` 分组，M7 开放 bkmsApp 应用时切换为只按 `bkmsApp` 分组 |
 | frameworkConfig 类型 | trpc / taf 的 `Config` 改为空结构；新增 blank 的解码 |
 | 文档 | 里程碑合并 M5、M6，删除"MongoDB 事务保护"，M4.5 标为 ✅ #311；阶段 0 文档记录 TAF 存量核对结果 |
 

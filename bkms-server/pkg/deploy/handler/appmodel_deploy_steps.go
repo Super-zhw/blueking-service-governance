@@ -102,7 +102,7 @@ func (h *Handler) listAppModelDeployRecords(c *gin.Context) {
 }
 
 // preCheckDeploy runs AppModel deployment pre-checks (undefined env vars and required cluster addons).
-// expectedFramework 为旧 trpc / taf 专属接口要求的应用框架；统一接口传 anyFramework，不检查框架。
+// expectedFramework 为旧 trpc / taf 专属接口要求的应用框架；统一接口传空字符串，不检查框架。
 func (h *Handler) preCheckDeploy(c *gin.Context, expectedFramework string) {
 	var uriInput serializer.AppEnvURIInput
 	if err := ginutils.BindURI(c, &uriInput); err != nil {
@@ -394,7 +394,7 @@ func (h *Handler) getAppModelResourceSnapshot(c *gin.Context) {
 }
 
 // getLatestAppModelDeployStatus 应用最新一次部署的状态（含应用框架检查、自动区分手动部署/构建后自动部署）
-// expectedFramework 为旧 trpc / taf 专属接口要求的应用框架；统一接口传 anyFramework，不检查框架。
+// expectedFramework 为旧 trpc / taf 专属接口要求的应用框架；统一接口传空字符串，不检查框架。
 func (h *Handler) getLatestAppModelDeployStatus(c *gin.Context, expectedFramework string) {
 	var uriInput serializer.AppEnvURIInput
 	var input serializer.GetLatestAppModelDeployStatusInput

@@ -232,9 +232,8 @@
     unknown: t('未知'),
   };
 
-  // 应用类型展示名称映射；bkmsApp 涵盖 tRPC、TAF 等平台托管的应用，trpc / taf 为旧登记值
+  // 应用类型展示名称映射
   const appTypeLabelMap: Record<string, string> = {
-    bkmsApp: t('tRPC / TAF 应用'),
     helm: t('Helm 应用'),
     taf: t('TAF 应用'),
     trpc: t('tRPC 应用'),
@@ -300,6 +299,9 @@
   // 展开的应用类型分组集合
   const expandedGroups = ref<Set<string>>(new Set());
 
+  // 组件定义同时登记了旧值 trpc / taf 与 bkmsApp，暂时只按旧值分组展示，开放 bkmsApp 应用后再切换
+  const hiddenAppTypes = new Set(['bkmsApp']);
+
   // 按应用类型分组的计算属性
   const appTypeGroups = computed<AppTypeGroup[]>(() => {
     // 收集所有出现过的应用类型
@@ -312,6 +314,7 @@
         appTypeSet.add(at);
       }
     }
+    hiddenAppTypes.forEach(at => appTypeSet.delete(at));
 
     // 为每个应用类型构建分组
     const groups: AppTypeGroup[] = [];

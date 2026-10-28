@@ -30,17 +30,6 @@ import (
 // 占位声明，用于让 swag 能在本文件解析 swagger 注释中引用的 serializer 类型
 var _ = serializer.EmptyOutput{}
 
-// anyFramework 统一接口不限制应用框架，适用于所有 AppModel 应用（含 bkmsApp 与旧 trpc / taf）。
-const anyFramework = ""
-
-// appMatchesFramework 判断应用能否使用某组 AppModel 部署接口：须为 AppModel 应用，旧专属接口还要求框架一致。
-func appMatchesFramework(app *bkmsapp.Application, expectedFramework string) bool {
-	if !appruntime.IsAppModelType(app.Type) {
-		return false
-	}
-	return expectedFramework == anyFramework || mods.Of(app).Stack.Framework == expectedFramework
-}
-
 // ListAppModelDeployRecords 获取 AppModel 应用部署记录列表
 //
 //	@ID			ListAppModelDeployRecords
@@ -77,7 +66,7 @@ func (h *Handler) ListAppModelDeployRecords(c *gin.Context) {
 //	@Failure	404		{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/envs/{envName}/appmodel-deploys/precheck [get]
 func (h *Handler) PreCheckAppModelDeploy(c *gin.Context) {
-	h.preCheckDeploy(c, anyFramework)
+	h.preCheckDeploy(c, "")
 }
 
 // CreateAppModelDeploy 创建 AppModel 应用部署
@@ -171,5 +160,14 @@ func (h *Handler) GetAppModelResourceSnapshot(c *gin.Context) {
 //	@Failure	400				{object}	bkerrs.GinErrorOutput
 //	@Router		/apps/{appID}/envs/{envName}/appmodel-deploys/latest-status [get]
 func (h *Handler) GetLatestAppModelDeployStatus(c *gin.Context) {
-	h.getLatestAppModelDeployStatus(c, anyFramework)
+	h.getLatestAppModelDeployStatus(c, "")
+}
+
+// appMatchesFramework 判断应用能否使用某组 AppModel 部署接口：须为 AppModel 应用；
+// expectedFramework 为旧 trpc / taf 专属接口要求的框架，统一接口传空字符串，不校验框架。
+func appMatchesFramework(app *bkmsapp.Application, expectedFramework string) bool {
+	if !appruntime.IsAppModelType(app.Type) {
+		return false
+	}
+	return expectedFramework == "" || mods.Of(app).Stack.Framework == expectedFramework
 }

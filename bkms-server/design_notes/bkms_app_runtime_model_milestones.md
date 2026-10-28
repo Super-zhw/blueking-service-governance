@@ -127,7 +127,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 状态：实施中。方案见 [新 API 与 blank 闭环](./bkms_app_runtime_model_phase4_api.md)。
 
-**范围：** 新增 bkmsApp 创建、修改、能力查询、统一部署与一键构建部署接口，新应用只写新字段；详情、列表增量返回 `framework` / `language`；集群组件登记值改为 `bkmsApp`；旧 spec 更新接口拒绝 bkmsApp 应用；用新接口跑通 tRPC、TAF、blank 的完整链路。
+**范围：** 新增 bkmsApp 创建、修改、能力查询、统一部署与一键构建部署接口，新应用只写新字段；详情返回 `frameworkConfig`；集群组件定义追加 `bkmsApp`（trpc / taf 待废弃）；旧 spec 更新接口拒绝 bkmsApp 应用；用新接口跑通 tRPC、TAF、blank 的完整链路。
 
 **不做（相对原规划）：** 旧 API 改薄适配层、新旧字段双写、跨集合事务、旧路由埋点、合并管理命令接口。原因见方案 §6。
 
@@ -139,7 +139,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M7 前端接入
 
-**范围：** UI 改读能力集合与能力目录，配置、部署、构建部署改用新 API，`type` 三值识别；门槛满足后服务端输出 `type=bkmsApp` 并开放 blank 创建。
+**范围：** UI 改读能力集合与能力目录，配置、部署、构建部署改用新 API，`type` 三值识别；集群组件页改为只按 `bkmsApp` 分组（不再展示 trpc / taf 旧值）；门槛满足后服务端输出 `type=bkmsApp` 并开放 blank 创建。
 
 **门槛：** CLI 新版本已发布。
 
@@ -175,7 +175,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M9 下线与清理
 
-**范围：** 总体方案阶段 6：删除旧路由、旧字段（含 `Workload.TrpcConfig/TafConfig`）、旧类型常量、BRIDGE-ONLY 代码与扫描命令；清理测试工厂、Bruno、Swagger、UI 类型；提供库内旧字段清理的 mongosh 脚本。
+**范围：** 总体方案阶段 6：删除旧路由、旧字段（含 `Workload.TrpcConfig/TafConfig`）、旧类型常量、BRIDGE-ONLY 代码与扫描命令、集群组件定义中的 trpc / taf 旧登记值；清理测试工厂、Bruno、Swagger、UI 类型；提供库内旧字段清理的 mongosh 脚本。
 
 **门槛：** 旧路由调用量在完整发布周期内归零；CLI 旧版本已淘汰。
 
