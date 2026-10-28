@@ -37,7 +37,7 @@ type FrameworkDef struct {
 var catalog = []FrameworkDef{
 	{
 		Name:               FrameworkBlank,
-		SupportedLanguages: []string{LanguageCpp, LanguageGo},
+		SupportedLanguages: []string{LanguageCpp, LanguageGo, LanguageNodeJS, LanguagePython},
 		ConfigVersion:      FrameworkConfigVersionV1,
 	},
 	{
@@ -57,7 +57,7 @@ var catalogByName = lo.SliceToMap(catalog, func(def FrameworkDef) (string, Frame
 })
 
 // KnownLanguages is the product language set shared by validation and normalization.
-var KnownLanguages = set.From([]string{LanguageGo, LanguageCpp})
+var KnownLanguages = set.From([]string{LanguageGo, LanguageCpp, LanguageNodeJS, LanguagePython})
 
 // Catalog returns a stable-sorted deep copy of framework definitions.
 func Catalog() []FrameworkDef {

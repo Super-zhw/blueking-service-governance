@@ -136,16 +136,22 @@ var _ = Describe("Lifecycle", func() {
 			Entry("taf + cpp", appruntime.FrameworkTAF, appruntime.LanguageCpp, appcfg.FileFormatTAF),
 		)
 
-		It("creates a blank app without a framework config file", func() {
-			app := newApp(appruntime.FrameworkBlank, appruntime.LanguageGo)
-			Expect(svc.Create(ctx, app, &lifecycle.CreateParams{Command: []string{"/app/server"}})).To(Succeed())
+		DescribeTable("creates a blank app without a framework config file",
+			func(language string) {
+				app := newApp(appruntime.FrameworkBlank, language)
+				Expect(svc.Create(ctx, app, &lifecycle.CreateParams{Command: []string{"/app/server"}})).To(Succeed())
 
-			Expect(frameworkDefs(app.ID)).To(BeEmpty())
-			model, err := store.Of(db, appmodel.AppModelMeta).Get(ctx, appmodel.ByApp(app.ID))
-			Expect(err).NotTo(HaveOccurred())
-			Expect(model.Workload.FrameworkConfig).To(BeEmpty())
-			Expect(model.Workload.FrameworkConfigVersion).To(Equal(appruntime.FrameworkConfigVersionV1))
-		})
+				Expect(frameworkDefs(app.ID)).To(BeEmpty())
+				model, err := store.Of(db, appmodel.AppModelMeta).Get(ctx, appmodel.ByApp(app.ID))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(model.Workload.FrameworkConfig).To(BeEmpty())
+				Expect(model.Workload.FrameworkConfigVersion).To(Equal(appruntime.FrameworkConfigVersionV1))
+			},
+			Entry("go", appruntime.LanguageGo),
+			Entry("cpp", appruntime.LanguageCpp),
+			Entry("nodejs", appruntime.LanguageNodeJS),
+			Entry("python", appruntime.LanguagePython),
+		)
 
 		DescribeTable("rejects invalid params without writing anything",
 			func(mutate func(app *bkmsapp.Application, params *lifecycle.CreateParams)) {
@@ -168,6 +174,9 @@ var _ = Describe("Lifecycle", func() {
 			}),
 			Entry("unsupported combination", func(app *bkmsapp.Application, _ *lifecycle.CreateParams) {
 				app.Framework = appruntime.FrameworkTAF
+			}),
+			Entry("language only open to blank", func(app *bkmsapp.Application, _ *lifecycle.CreateParams) {
+				app.Language = appruntime.LanguagePython
 			}),
 			Entry("missing language", func(app *bkmsapp.Application, _ *lifecycle.CreateParams) {
 				app.Language = ""

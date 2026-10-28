@@ -23,7 +23,7 @@
 
 `supported` 表示 **今天代码真实开放的路径**。blank 仅目录合法，阶段 1 不创建。
 
-| 能力 | trpc+go | trpc+cpp | taf（无 language） | blank+go/cpp | helm | agones |
+| 能力 | trpc+go | trpc+cpp | taf（无 language） | blank+go/cpp/nodejs/python | helm | agones |
 | --- | --- | --- | --- | --- | --- | --- |
 | 管理方式 AppModel | 是 | 是 | 是 | 目标 | 否 | 否 |
 | `appModelDeploy` 部署/状态/实例 | 是 | 是 | 是 | 阶段 3 | Helm 独立链路 | Agones 独立链路 |
@@ -39,7 +39,7 @@
 | 组件引用查询 | 仅 `type=trpc` | 同左 | **未查** | 否 | 否 | 否 |
 | 集群 addon `requiredForAppTypes` | `trpc`,`taf` | 同左 | 同左 | 阶段 3E | 部分 addon 含 helm/agones | 同左 |
 
-合法组合（阶段 1 目录）：`trpc+go`、`trpc+cpp`、`taf+cpp`、`blank+go`、`blank+cpp`。合法不等于功能全开：`blank+go` 不自动获得 platformBuild。
+合法组合（阶段 1 目录）：`trpc+go`、`trpc+cpp`、`taf+cpp`、`blank+go`、`blank+cpp`。合法不等于功能全开：`blank+go` 不自动获得 platformBuild。M5 + M6 起目录新增 `blank+nodejs`、`blank+python`。
 
 ## 3. 旧分支消费清单（分类）
 
@@ -145,7 +145,7 @@
 | --- | --- |
 | `language_conflict` | Application / TrpcSpec / TrpcConfig 语言非空且不一致 |
 | `type_framework_conflict` | App type、Application.Framework、非空 Workload.Type 指向不同框架 |
-| `unknown_language` | 非 go/cpp（含 java/node/python 存量） |
+| `unknown_language` | 不在语言目录中（go/cpp/nodejs/python 之外，如 java）。nodejs、python 于 M5 + M6 加入目录，与 trpc / taf 组合时报 `invalid_combination` |
 | `unknown_framework` / `unknown_app_type` | 目录外取值 |
 | `invalid_combination` | 如 taf+go |
 | `incomplete_language` | 无有效 language；TAF 为 advisory，tRPC/blank/新 bkmsApp 为 blocking |

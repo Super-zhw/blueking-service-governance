@@ -34,7 +34,7 @@
 | 旧 spec 更新接口遇到 bkmsApp 应用 | `PUT trpc-spec`、`PUT taf-spec` 拒绝 `type=bkmsApp`，避免把旧字段写回新应用 |
 | 框架差异如何提供 | 不引入框架适配器接口。是否创建框架文件及其格式读能力 `frameworkFile`；frameworkConfig 按框架查表调用对应的 `DecodeConfig` |
 | frameworkConfig | 新建时写 `{}` 与版本 1。trpc / taf 的 `Config` 去掉已收敛到 def 的 fileName / filePath；blank 只接受 `{}` |
-| 新建应用的 language | 必填，按框架目录校验；TAF 只接受 `cpp` |
+| 新建应用的 language | 必填，按框架目录校验；TAF 只接受 `cpp`。语言目录新增 nodejs、python，只对 blank 开放（blank 支持 go、cpp、nodejs、python），blank 没有任何框架特性，与语言无关 |
 | 存量 TAF 的 language | 已核对：正式环境 1 个应用，确认是 C++；测试环境 13 个为测试数据。由 M8 回填为 `cpp`，不手工修复 |
 | 集群组件登记值 | YAML 在 trpc / taf 之后追加 `bkmsApp`，旧值标为待废弃，M9 删除；AppModel 应用按 `bkmsApp` 与框架匹配，命中任一即可；前端暂时隐藏 `bkmsApp` 分组，界面不变 |
 

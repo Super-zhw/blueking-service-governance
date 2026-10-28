@@ -146,21 +146,30 @@ var _ = Describe("Resolve", func() {
 		Expect(admincommand.Spec.Resolve(appruntime.FrameworkTRPC, appruntime.LanguageJava).Props.ConfigLayout).
 			To(Equal(admincommand.TrpcLayoutNestedPrefixed))
 
-		for _, language := range []string{
-			appruntime.LanguageJava, appruntime.LanguageNodeJS, appruntime.LanguagePython,
-		} {
-			_, err := mods.Resolve(appruntime.Stack{
+		// java 不在语言目录中；nodejs / python 只对 blank 开放，tRPC 组合不合法
+		_, err := mods.Resolve(appruntime.Stack{
+			Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguageJava,
+		})
+		Expect(errors.Is(err, appruntime.ErrUnknownLanguage)).To(BeTrue())
+		for _, language := range []string{appruntime.LanguageNodeJS, appruntime.LanguagePython} {
+			_, err = mods.Resolve(appruntime.Stack{
 				Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkTRPC, Language: language,
 			})
-			Expect(errors.Is(err, appruntime.ErrUnknownLanguage)).To(BeTrue(), language)
+			Expect(errors.Is(err, appruntime.ErrInvalidCombination)).To(BeTrue(), language)
 		}
 	})
 
-	It("treats blank as a framework without framework capabilities", func() {
-		set := mustResolve(appruntime.FrameworkBlank, appruntime.LanguageGo)
-		Expect(set.FrameworkFile.Supported).To(BeFalse())
-		Expect(set.DevMode.Supported).To(BeFalse())
-	})
+	DescribeTable("treats blank as a framework without framework capabilities",
+		func(language string) {
+			for id, mod := range mustResolve(appruntime.FrameworkBlank, language).Public().Mods {
+				Expect(mod.Supported).To(BeFalse(), string(id))
+			}
+		},
+		Entry("go", appruntime.LanguageGo),
+		Entry("cpp", appruntime.LanguageCpp),
+		Entry("nodejs", appruntime.LanguageNodeJS),
+		Entry("python", appruntime.LanguagePython),
+	)
 
 	It("does not let a caller mutate later results through returned props", func() {
 		first := mustResolve(appruntime.FrameworkTRPC, appruntime.LanguageGo)
@@ -289,7 +298,9 @@ var _ = Describe("Matrix", func() {
 		for _, view := range matrix {
 			combinations = append(combinations, view.Framework+"+"+view.Language)
 		}
-		Expect(combinations).To(Equal([]string{"blank+cpp", "blank+go", "taf+cpp", "trpc+cpp", "trpc+go"}))
+		Expect(combinations).To(Equal([]string{
+			"blank+cpp", "blank+go", "blank+nodejs", "blank+python", "taf+cpp", "trpc+cpp", "trpc+go",
+		}))
 	})
 
 	It("agrees with resolving each combination individually", func() {
