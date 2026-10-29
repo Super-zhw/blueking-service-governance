@@ -90,6 +90,7 @@
 | 集群组件 | 内置 YAML 追加 `bkmsApp`、保留 trpc / taf，启动时同步到库。新旧版本都能匹配，滚动发布与回滚期间不会漏查必装组件；前端暂时隐藏 `bkmsApp` 分组，M7 开放 bkmsApp 应用时切换为只按 `bkmsApp` 分组 |
 | frameworkConfig 类型 | trpc / taf 的 `Config` 改为空结构；新增 blank 的解码 |
 | 空间组件引用检查 | 原来只统计 trpc 应用，改为统计全部 AppModel 应用（含 taf、bkmsApp），被引用的组件不能删除 |
+| 配置文件定义 | `POST /apps/:appID/app-config-file-defs` 拒绝为 `frameworkFile` 不支持的 AppModel 应用（blank）新建 framework 文件，返回 400；Helm、trpc、taf 不受影响。旧 `app-config-files` 即将下架，不再改动 |
 | 旧 CreateApp | 抽出创建前校验、写构建配置、创建后异步任务三段公共逻辑供新接口复用，行为不变 |
 | 文档 | 里程碑合并 M5、M6，删除"MongoDB 事务保护"，M4.5 标为 ✅ #311；阶段 0 文档记录 TAF 存量核对结果 |
 
@@ -116,9 +117,10 @@
   - 非法技术栈、blank 传入框架配置文件、frameworkConfig 含未知 key 时被拒绝；
   - 修改接口的 frameworkConfig 语义；
   - 集群组件按新值与旧值匹配；
-  - 空间组件引用检查覆盖 trpc、taf、blank。
+  - 空间组件引用检查覆盖 trpc、taf、blank；
+  - 配置文件定义按应用类型与 `frameworkFile` 能力校验 configKind。
 - 能力查询接口、旧 spec 接口拒绝 bkmsApp 由 Bruno 用例覆盖。
-- Bruno：新增 `tests/apis/appmodel-apps`。`api` 目录覆盖创建、详情、能力查询、修改及各类拒绝场景；`{blank,trpc,taf}-lifecycle` 走统一接口完成预检 → 部署 → 资源快照 → 最新状态 → 下架，blank 另外先创建 plain 配置文件。部署类用例由 `RUN_APPMODEL_DEPLOY_API_TESTS` 控制，默认跳过。
+- Bruno：新增 `tests/apis/appmodel-apps`。`api` 目录覆盖创建、详情、能力查询、修改及各类拒绝场景（含 blank 新建 framework 文件被拒）；`{blank,trpc,taf}-lifecycle` 走统一接口完成预检 → 部署 → 资源快照 → 最新状态 → 下架，blank 另外先创建 plain 配置文件。部署类用例由 `RUN_APPMODEL_DEPLOY_API_TESTS` 控制，默认跳过。
 - 回归：旧 API 的 Bruno 用例、`make lint`、`make test`。
 - Swagger：新接口只在测试环境使用，本次不生成文档（代码中保留注解），M7 前端接入时再执行 `make apidocs`。
 

@@ -117,7 +117,7 @@ pkg/core/appruntime/capability/bscpworkloadmeta/  BSCP 元信息自动填充
 | L-7 ✅ | 北极星服务名校验 | 已处理：校验与 tRPC 服务名解析移入 `polaris.CheckServiceName`；addon 只保留 immediate 判断与应用加载 | M4.5：解析移入 `framework/trpc/trpcconf`，执行函数移到 `extension/addon/polaris`（避免 `core` 依赖 `workload`） | M3 | `rg -n 'ParseServiceNames' pkg` 只出现在 `trpcconf` 与 `extension/addon/polaris` |
 | L-8 ✅ | 北极星注册信息注入 | 已处理（M4.5）：补丁器随 `framework/trpc/patcher` 移动；开关已由能力声明控制 | — | M4.5 | `rg -l 'package patcher' pkg/workload` 无结果 |
 | L-9 | BSCP 元信息自动填充 | `extension/bscpcfg/handler/metadata.go`、`cmd/migration/app_bscpcfg_mgr.go` | 执行代码留在 `extension/bscpcfg`，通过 `mods.Of(app).BSCPWorkloadMeta` 取 props；工作负载类型按渲染结果取值 | 有使用方时，不晚于 M9（目前只影响展示） | `rg -n 'k8skind.GameDeploy' pkg/extension/bscpcfg cmd` 无结果 |
-| L-10 | frameworkFile 无执行端读取 | 内容校验按存储的 `FileFormat` 分派（`core/app/appcfg`），未读能力声明 | 前端改读能力集合；后端校验按需接入 | M7 | `rg --no-ignore-vcs -n '\.FrameworkFile\.' pkg` 有消费方 |
+| L-10 | frameworkFile 无执行端读取 | 内容校验按存储的 `FileFormat` 分派（`core/app/appcfg`）；M5 + M6 起新建应用按能力决定是否建框架文件，`app-config-file-defs` 拒绝为 blank 新建 framework 文件 | 前端改读能力集合 | M7 | `rg --no-ignore-vcs -n '\.FrameworkFile\.' pkg` 有消费方 |
 | L-11 ✅ | 框架协议实现未拆分 | 已处理（M4.5）：`appmodelcore/{trpc,taf}` 移到 `pkg/workload/appmodelcore/framework/{trpc,taf}`；standard 插件删除，blank 不走插件 | — | M4.5 | `ls pkg/workload/appmodelcore/framework` 存在且 `appmodelcore/{trpc,taf}` 已移除 |
 
 遗留项同步登记到里程碑文档的"遗留项"一节，处理后在两处同时标记完成。

@@ -30,10 +30,27 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"gopkg.in/yaml.v3"
 
+	bkmsapp "github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
+	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/cloudapi/bscp"
 )
+
+// validateConfigKindForApp 校验应用能否新建该种类的配置文件：
+//   - plain 只在 AppModel 渲染链路中挂载，Helm / Agones 创建后不会生效；
+//   - AppModel 应用的 framework 文件由框架渲染插件挂载，不支持框架配置文件的技术栈（如 blank）创建后不会生效。
+func validateConfigKindForApp(app *bkmsapp.Application, kind appcfg.ConfigKind) error {
+	isAppModel := appruntime.IsAppModelType(app.Type)
+	switch {
+	case kind == appcfg.ConfigKindPlain && !isAppModel:
+		return stderrors.New("plain config file is only supported for appmodel applications")
+	case kind == appcfg.ConfigKindFramework && isAppModel && !mods.Of(app).FrameworkFile.Supported:
+		return errors.Errorf("framework %q does not support framework config file", mods.Of(app).Stack.Framework)
+	}
+	return nil
+}
 
 // validateBaseAppConfigFileID 校验 overlay 文件的 base 引用。
 // 非 overlay 类型直接返回 nil；overlay 必须指定合法的同应用 normal 文件。

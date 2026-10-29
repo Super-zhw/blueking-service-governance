@@ -198,7 +198,7 @@ M3 移动了能力声明并处理了 L-2、L-4、L-7，其余执行代码仍在�
 | L-7 | 北极星服务名校验迁移（M4.5 起执行函数位于 `extension/addon/polaris`） | M3 | ✅ |
 | L-8 | 北极星补丁器进 `pkg/workload/appmodelcore/framework/trpc` | M4.5 | ✅ |
 | L-9 | BSCP 工作负载类型按渲染结果取值（目前只影响展示，留意） | 有使用方时，不晚于 M9 | ⬜ |
-| L-10 | frameworkFile 声明尚无执行端读取 | M7 | ⬜ |
+| L-10 | frameworkFile 后端已接入：新建应用按能力决定是否建框架文件，`app-config-file-defs` 拒绝为不支持的技术栈（blank）新建 framework 文件（M5 + M6）；前端改读能力集合 | M7 | 🚧 |
 | L-11 | 框架协议实现拆分到 `pkg/workload/appmodelcore/framework/*`；standard 插件删除，blank 不走插件 | M4.5 | ✅ |
 
 各项的当前位置、目标与检查命令见 M3 文档 §5。
