@@ -1,6 +1,6 @@
 # 阶段 3B / 3F / 4：新 API 与 blank 闭环（M5 + M6）
 
-状态：已实现，待提 PR。
+状态：已提 PR #320。
 
 对应 [里程碑](./bkms_app_runtime_model_milestones.md) M5、M6 合并实施，总体方案阶段 3B、3F、4（服务端）。前置为 M4.5（PR #311）合入。
 
@@ -21,7 +21,8 @@
 | 合并 `admin-cmds` / `taf-admin-cmds` | 两者已按能力判断协议（M2），bkmsApp 应用可直接使用 |
 | 环境级能力接口 `envs/:envName/runtime-mods` | 总体方案标注"若产品需要"，目前无需求 |
 | `appmodel-spec` 并发写冲突检查 | AppModel 没有版本号，旧更新接口也没有；单独评估 |
-| 前端改用新 API、输出 `type=bkmsApp` 给旧客户端 | M7 |
+| 前端改用新 API、输出 `type=bkmsApp` 给旧客户端 | M7；CLI 需同步识别 `bkmsApp` 并改用新接口 |
+| 修改 AppModel 的审计记录含敏感环境变量明文 | 旧 trpc-spec / taf-spec 与新 appmodel-spec 都存在，环境变量接口同样存在；单独 PR 修复并清理历史记录 |
 
 ---
 
@@ -67,7 +68,7 @@
 
 ## 4. 创建流程
 
-编排服务位于 `workload/appmodelcore`（暂名 `lifecycle`），只服务新 API：
+编排服务位于 `workload/appmodelcore/lifecycle`，只服务新 API：
 
 1. 校验技术栈、frameworkConfig、框架配置文件输入，全部通过后再写库。
 2. 写构建配置（与旧接口相同的校验）。
@@ -88,6 +89,8 @@
 | APM 服务名同步 | 部署轮询先判断应用是否支持 `apmServiceName`，再读框架文件；否则 blank 每次部署都会记一条 Error |
 | 集群组件 | 内置 YAML 追加 `bkmsApp`、保留 trpc / taf，启动时同步到库。新旧版本都能匹配，滚动发布与回滚期间不会漏查必装组件；前端暂时隐藏 `bkmsApp` 分组，M7 开放 bkmsApp 应用时切换为只按 `bkmsApp` 分组 |
 | frameworkConfig 类型 | trpc / taf 的 `Config` 改为空结构；新增 blank 的解码 |
+| 空间组件引用检查 | 原来只统计 trpc 应用，改为统计全部 AppModel 应用（含 taf、bkmsApp），被引用的组件不能删除 |
+| 旧 CreateApp | 抽出创建前校验、写构建配置、创建后异步任务三段公共逻辑供新接口复用，行为不变 |
 | 文档 | 里程碑合并 M5、M6，删除"MongoDB 事务保护"，M4.5 标为 ✅ #311；阶段 0 文档记录 TAF 存量核对结果 |
 
 ---
@@ -112,9 +115,9 @@
   - 三种框架经编排服务创建后的字段正确，没有旧字段；
   - 非法技术栈、blank 传入框架配置文件、frameworkConfig 含未知 key 时被拒绝；
   - 修改接口的 frameworkConfig 语义；
-  - 旧 spec 接口拒绝 bkmsApp 应用；
   - 集群组件按新值与旧值匹配；
-  - 能力查询接口。
+  - 空间组件引用检查覆盖 trpc、taf、blank。
+- 能力查询接口、旧 spec 接口拒绝 bkmsApp 由 Bruno 用例覆盖。
 - Bruno：新增 `tests/apis/appmodel-apps`。`api` 目录覆盖创建、详情、能力查询、修改及各类拒绝场景；`{blank,trpc,taf}-lifecycle` 走统一接口完成预检 → 部署 → 资源快照 → 最新状态 → 下架，blank 另外先创建 plain 配置文件。部署类用例由 `RUN_APPMODEL_DEPLOY_API_TESTS` 控制，默认跳过。
 - 回归：旧 API 的 Bruno 用例、`make lint`、`make test`。
 - Swagger：新接口只在测试环境使用，本次不生成文档（代码中保留注解），M7 前端接入时再执行 `make apidocs`。

@@ -25,7 +25,7 @@
 | M8 | 存量回填，切换主读写 | 5 | 4 | ⬜ |
 | M9 | 下线旧接口，删除旧模型与兼容代码 | 6 | 5 | ⬜ |
 
-CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
+CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布：识别 `type=bkmsApp` 及 `framework` / `language`，部署、构建部署改用 `appmodel-deploys` / `appmodel-build-deploys`。与前端接入同期安排。
 
 ---
 
@@ -125,7 +125,7 @@ CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布。
 
 ## M5 + M6 新 API 与 blank 闭环
 
-状态：实施中。方案见 [新 API 与 blank 闭环](./bkms_app_runtime_model_phase4_api.md)。
+状态：已提 PR #320。方案见 [新 API 与 blank 闭环](./bkms_app_runtime_model_phase4_api.md)。
 
 **范围：** 新增 bkmsApp 创建、修改、能力查询、统一部署与一键构建部署接口，新应用只写新字段；详情返回 `frameworkConfig`；集群组件定义追加 `bkmsApp`（trpc / taf 待废弃）；旧 spec 更新接口拒绝 bkmsApp 应用；用新接口跑通 tRPC、TAF、blank 的完整链路。
 

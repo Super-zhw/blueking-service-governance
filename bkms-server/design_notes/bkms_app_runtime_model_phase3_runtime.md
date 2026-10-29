@@ -41,6 +41,8 @@
 
 `AppModel.Workload.Type` 创建时照常写入，渲染不再读取，M9 删除。
 
+> M5 + M6 起 `AddonAppTypeOf` 改为 `AddonAppTypesOf`，AppModel 应用按 `bkmsApp` 与框架匹配，见 [新 API 与 blank 闭环](./bkms_app_runtime_model_phase4_api.md)。
+
 ---
 
 ## 3. 存量影响

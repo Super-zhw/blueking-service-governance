@@ -75,6 +75,13 @@ func ByName(workspaceID, name string) store.Opt {
 	return store.Combine(InWorkspace(workspaceID), store.Where("name", name))
 }
 
+// OfAppModelTypes 匹配 AppModel 管理的应用，与 appruntime.IsAppModelType 一致（含旧 trpc / taf 与 bkmsApp）
+func OfAppModelTypes() store.Opt {
+	return store.Where("type", bson.M{"$in": bson.A{
+		appruntime.AppTypeTRPC, appruntime.AppTypeTAF, appruntime.AppTypeBKMSApp,
+	}})
+}
+
 // OfType 按应用类型匹配，如 AppTypeTRPC、AppTypeHelm。
 // type=trpc/taf 同时匹配 framework 对应的 type=bkmsApp 应用
 func OfType(appType string) store.Opt {
