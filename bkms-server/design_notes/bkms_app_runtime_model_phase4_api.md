@@ -124,7 +124,7 @@
 - 能力查询接口、旧 spec 接口拒绝 bkmsApp 由 Bruno 用例覆盖。
 - Bruno：新增 `tests/apis/bkmsapps`。`api` 目录覆盖创建、详情、能力查询、修改及各类拒绝场景（含 blank 新建 framework 文件被拒）；`{blank,trpc,taf}-lifecycle` 走 `bkmsapp-deploys` 完成预检 → 部署 → 资源快照 → 最新状态 → 下架，blank 另外先创建 plain 配置文件。部署类用例由 `RUN_BKMSAPP_DEPLOY_API_TESTS` 控制，默认跳过。
 - 回归：旧 API 的 Bruno 用例、`make lint`、`make test`。
-- Swagger：新接口只在测试环境使用，本次不生成文档（代码中保留注解），M7 前端接入时再执行 `make apidocs`。
+- Swagger：已执行 `make apidocs`，新接口均已生成；旧接口不变。
 
 ---
 
