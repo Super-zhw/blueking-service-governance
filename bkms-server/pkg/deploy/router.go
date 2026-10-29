@@ -71,20 +71,20 @@ type HelmDeployHandler interface {
 	// GetLatestTafDeployStatus 获取 TAF 应用最新一次部署的状态
 	GetLatestTafDeployStatus(c *gin.Context)
 
-	// ListAppModelDeployRecords 获取 AppModel 应用部署记录列表，不限框架
-	ListAppModelDeployRecords(c *gin.Context)
-	// PreCheckAppModelDeploy AppModel 部署前检查，不限框架
-	PreCheckAppModelDeploy(c *gin.Context)
-	// CreateAppModelDeploy 部署 AppModel 应用，不限框架
-	CreateAppModelDeploy(c *gin.Context)
-	// DeleteAppModelDeploy 删除 AppModel 应用部署，不限框架
-	DeleteAppModelDeploy(c *gin.Context)
-	// ListAppModelResourceSnapshots 获取 AppModel 应用资源快照列表，不限框架
-	ListAppModelResourceSnapshots(c *gin.Context)
-	// GetAppModelResourceSnapshot 获取 AppModel 应用部署记录下某个资源的快照详情，不限框架
-	GetAppModelResourceSnapshot(c *gin.Context)
-	// GetLatestAppModelDeployStatus 获取 AppModel 应用最新一次部署的状态，不限框架
-	GetLatestAppModelDeployStatus(c *gin.Context)
+	// ListBKMSDeployRecords 获取 bkmsApp 应用部署记录列表
+	ListBKMSDeployRecords(c *gin.Context)
+	// PreCheckBKMSDeploy bkmsApp 应用部署前检查
+	PreCheckBKMSDeploy(c *gin.Context)
+	// CreateBKMSDeploy 部署 bkmsApp 应用
+	CreateBKMSDeploy(c *gin.Context)
+	// DeleteBKMSDeploy 删除 bkmsApp 应用部署
+	DeleteBKMSDeploy(c *gin.Context)
+	// ListBKMSResourceSnapshots 获取 bkmsApp 应用资源快照列表
+	ListBKMSResourceSnapshots(c *gin.Context)
+	// GetBKMSResourceSnapshot 获取 bkmsApp 应用部署记录下某个资源的快照详情
+	GetBKMSResourceSnapshot(c *gin.Context)
+	// GetLatestBKMSDeployStatus 获取 bkmsApp 应用最新一次部署的状态
+	GetLatestBKMSDeployStatus(c *gin.Context)
 
 	// GetBatchReleaseProgress 获取应用模型应用最新一次部署的分批发布进度
 	GetBatchReleaseProgress(c *gin.Context)
@@ -146,17 +146,17 @@ func Register(rg *gin.RouterGroup, h HelmDeployHandler) {
 	// 获取 TAF 应用最新一次部署的状态
 	rg.GET("/apps/:appID/envs/:envName/taf-deploys/latest-status", h.GetLatestTafDeployStatus)
 
-	// AppModel 应用统一部署接口，不限框架（bkmsApp 与旧 trpc / taf 应用均可使用）
-	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys", h.ListAppModelDeployRecords)
-	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys/precheck", h.PreCheckAppModelDeploy)
-	rg.POST("/apps/:appID/envs/:envName/appmodel-deploys", h.CreateAppModelDeploy)
-	rg.DELETE("/apps/:appID/envs/:envName/appmodel-deploys", h.DeleteAppModelDeploy)
-	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys/:deployID/resource-snapshots", h.ListAppModelResourceSnapshots)
+	// bkmsApp 应用部署接口，旧 trpc / taf 应用也可使用
+	rg.GET("/apps/:appID/envs/:envName/bkms-deploys", h.ListBKMSDeployRecords)
+	rg.GET("/apps/:appID/envs/:envName/bkms-deploys/precheck", h.PreCheckBKMSDeploy)
+	rg.POST("/apps/:appID/envs/:envName/bkms-deploys", h.CreateBKMSDeploy)
+	rg.DELETE("/apps/:appID/envs/:envName/bkms-deploys", h.DeleteBKMSDeploy)
+	rg.GET("/apps/:appID/envs/:envName/bkms-deploys/:deployID/resource-snapshots", h.ListBKMSResourceSnapshots)
 	rg.GET(
-		"/apps/:appID/envs/:envName/appmodel-deploys/:deployID/resource-snapshots/:snapshotID",
-		h.GetAppModelResourceSnapshot,
+		"/apps/:appID/envs/:envName/bkms-deploys/:deployID/resource-snapshots/:snapshotID",
+		h.GetBKMSResourceSnapshot,
 	)
-	rg.GET("/apps/:appID/envs/:envName/appmodel-deploys/latest-status", h.GetLatestAppModelDeployStatus)
+	rg.GET("/apps/:appID/envs/:envName/bkms-deploys/latest-status", h.GetLatestBKMSDeployStatus)
 
 	// 获取应用最新一次部署的分批发布进度
 	rg.GET("/apps/:appID/envs/:envName/batch-release", h.GetBatchReleaseProgress)

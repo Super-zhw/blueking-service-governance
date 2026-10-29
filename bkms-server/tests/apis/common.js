@@ -887,21 +887,21 @@ async function createAppModelDeploy(options = {}) {
 }
 
 /**
- * Create a bkmsApp app through the unified create API.
+ * Create a bkmsApp app through the bkms-apps API.
  * This helper is idempotent per app ID.
  *
  * @param {Object} options
  * @param {string} options.id - Application ID (required).
  * @param {string} options.workspaceID - Workspace ID (required).
  * @param {string} options.framework - trpc / taf / blank (required).
- * @param {string} options.language - go / cpp (required).
+ * @param {string} options.language - go / cpp / nodejs / python (required).
  * @param {string} [options.name] - Application name (defaults to id).
  * @param {Object} [options.appModelSpec] - App model spec.
  * @param {Object} [options.frameworkConfigFile] - Framework config file, required by trpc / taf.
  * @param {Object} [options.buildConfig] - Build config.
  * @returns {Promise<{id: string, name: string}>}
  */
-async function createAppModelApp(options = {}) {
+async function createBKMSApp(options = {}) {
   const serviceURL = bru.getEnvVar('serviceURL');
   for (const field of ['id', 'workspaceID', 'framework', 'language']) {
     if (!options[field]) {
@@ -932,7 +932,7 @@ async function createAppModelApp(options = {}) {
   }
 
   try {
-    const response = await axios.post(`${serviceURL}/workspaces/${options.workspaceID}/appmodel-apps`, body, {
+    const response = await axios.post(`${serviceURL}/workspaces/${options.workspaceID}/bkms-apps`, body, {
       headers: AUTH_HEADERS
     });
     bru.setVar(appKey, true);
@@ -955,7 +955,7 @@ module.exports = {
   createEnvironment,
   createTrpcApp,
   createTafApp,
-  createAppModelApp,
+  createBKMSApp,
   updateDefaultAppSpecResources,
   ensureWorkspaceComponent,
   ensureGlobalVolumeSecretWorkspaceComponent,

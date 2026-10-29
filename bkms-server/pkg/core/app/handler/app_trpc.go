@@ -70,9 +70,9 @@ func (h *Handler) UpdateAppTrpcSpec(c *gin.Context) {
 		return
 	}
 
-	// 新接口创建的 bkmsApp 应用只能通过 appmodel-spec 修改，避免把旧字段写回新应用
+	// 新接口创建的 bkmsApp 应用只能通过 startup-config 修改，避免把旧字段写回新应用
 	if app.Type == bkmsapp.AppTypeBKMSApp {
-		bkerrs.AbortWithErr(c, bkerrs.New(bkerrs.ErrCodeInvalidRequest, "bkmsApp app must use appmodel-spec"))
+		bkerrs.AbortWithErr(c, bkerrs.New(bkerrs.ErrCodeInvalidRequest, "bkmsApp app must use startup-config"))
 		return
 	}
 

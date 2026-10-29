@@ -24,7 +24,7 @@ import "github.com/gin-gonic/gin"
 type Handler interface {
 	CreateTrpcBuildDeploy(c *gin.Context)
 	CreateTafBuildDeploy(c *gin.Context)
-	CreateAppModelBuildDeploy(c *gin.Context)
+	CreateBuildDeploy(c *gin.Context)
 }
 
 // Register registers Gin build auto deploy routes.
@@ -32,6 +32,6 @@ func Register(rg *gin.RouterGroup, h Handler) {
 	apps := rg.Group("/apps/:appID")
 	apps.POST("/envs/:envName/trpc-build-deploys", h.CreateTrpcBuildDeploy)
 	apps.POST("/envs/:envName/taf-build-deploys", h.CreateTafBuildDeploy)
-	// 统一接口，不限框架
-	apps.POST("/envs/:envName/appmodel-build-deploys", h.CreateAppModelBuildDeploy)
+	// bkmsApp 应用构建部署接口，旧 trpc / taf 应用也可使用
+	apps.POST("/envs/:envName/build-deploys", h.CreateBuildDeploy)
 }

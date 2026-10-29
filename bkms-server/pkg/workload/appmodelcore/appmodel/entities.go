@@ -362,3 +362,15 @@ func (am *AppModel) EnsureComponentsName() {
 		comp.EnsureName()
 	}
 }
+
+// GetFrameworkConfig 返回框架扩展配置。ok 为 false 表示未写入版本（旧接口创建、尚未回填的应用）；
+// 已写入版本但内容为空时返回空对象。
+func (w Workload) GetFrameworkConfig() (cfg map[string]any, ok bool) {
+	if w.FrameworkConfigVersion == 0 {
+		return nil, false
+	}
+	if w.FrameworkConfig == nil {
+		return map[string]any{}, true
+	}
+	return w.FrameworkConfig, true
+}

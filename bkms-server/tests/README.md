@@ -35,11 +35,11 @@ RUN_HELM_DEPLOY_API_TESTS=1 bru run --env-file ./environments/{YOUR_ENV_FILE}.br
 # 启用 Trpc / TAF AppModel 部署生命周期测试
 RUN_TRPC_DEPLOY_API_TESTS=1 RUN_TAF_DEPLOY_API_TESTS=1 bru run --env-file ./environments/{YOUR_ENV_FILE}.bru
 
-# 启用 bkmsApp 统一接口（tRPC / TAF / blank）部署生命周期测试
-RUN_APPMODEL_DEPLOY_API_TESTS=1 bru run --env-file ./environments/{YOUR_ENV_FILE}.bru
+# 启用 bkmsApp 接口（tRPC / TAF / blank）部署生命周期测试
+RUN_BKMS_DEPLOY_API_TESTS=1 bru run --env-file ./environments/{YOUR_ENV_FILE}.bru
 
 # 启用全部真实部署类 API 测试
-RUN_HELM_DEPLOY_API_TESTS=1 RUN_TRPC_DEPLOY_API_TESTS=1 RUN_TAF_DEPLOY_API_TESTS=1 RUN_APPMODEL_DEPLOY_API_TESTS=1 \
+RUN_HELM_DEPLOY_API_TESTS=1 RUN_TRPC_DEPLOY_API_TESTS=1 RUN_TAF_DEPLOY_API_TESTS=1 RUN_BKMS_DEPLOY_API_TESTS=1 \
   bru run --env-file ./environments/{YOUR_ENV_FILE}.bru
 ```
 
@@ -53,7 +53,7 @@ helm install bcs-gamedeployment-operator -n bcs-system bcs-gamedeployment-operat
 helm install bcs-hook-operator -n bcs-system bcs-hook-operator-1.31.0-alpha.27.tgz
 ```
 
-Helm / Trpc / TAF 部署生命周期测试都需要拉取工作负载镜像。启用 `RUN_HELM_DEPLOY_API_TESTS`、`RUN_TRPC_DEPLOY_API_TESTS`、`RUN_TAF_DEPLOY_API_TESTS` 或 `RUN_APPMODEL_DEPLOY_API_TESTS` 中任一变量时，必须通过 `BKMS_APITEST_WORKLOAD_IMAGE` 提供一个目标集群节点可拉取的镜像仓库地址，**格式为不带 tag 的 `<registry>/<name>`**，例如 `example.com/bkms/apitest-workload`。
+Helm / Trpc / TAF 部署生命周期测试都需要拉取工作负载镜像。启用 `RUN_HELM_DEPLOY_API_TESTS`、`RUN_TRPC_DEPLOY_API_TESTS`、`RUN_TAF_DEPLOY_API_TESTS` 或 `RUN_BKMS_DEPLOY_API_TESTS` 中任一变量时，必须通过 `BKMS_APITEST_WORKLOAD_IMAGE` 提供一个目标集群节点可拉取的镜像仓库地址，**格式为不带 tag 的 `<registry>/<name>`**，例如 `example.com/bkms/apitest-workload`。
 
 要求：
 

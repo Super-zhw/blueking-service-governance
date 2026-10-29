@@ -311,9 +311,7 @@ func (o *AppModelSpecOutputObj) FromModel(
 			FileContent: am.Workload.TafConfig.FileContent,
 		}
 	}
-	// 只有新接口创建的应用写了 frameworkConfig 版本
-	if am.Workload.FrameworkConfigVersion != 0 {
-		cfg := lo.Ternary(am.Workload.FrameworkConfig == nil, map[string]any{}, am.Workload.FrameworkConfig)
+	if cfg, ok := am.Workload.GetFrameworkConfig(); ok {
 		o.FrameworkConfig = &cfg
 	}
 	return o

@@ -1,0 +1,42 @@
+meta {
+  name: 05-delete
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{serviceURL}}/apps/{{trpcLcAppID}}/envs/{{trpcLcEnvName}}/bkms-deploys
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+script:post-response {
+  if (res.status !== 200) {
+    return;
+  }
+  const appmodel = require("./helpers/appmodel");
+  const record = await appmodel.waitForAppModelDeployTerminal({
+    kind: "bkms",
+    appID: bru.getVar("trpcLcAppID"),
+    envName: bru.getVar("trpcLcEnvName"),
+    expectedStatus: "uninstalled",
+    imageTag: bru.getVar("trpcLcImageTag")
+  });
+  bru.setVar("trpcLcUninstalledStatus", record.status);
+}
+
+tests {
+  test("should uninstall the trpc app", () => {
+    expect(bru.getVar("trpcLcUninstalledStatus")).to.equal("uninstalled");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 130000
+}

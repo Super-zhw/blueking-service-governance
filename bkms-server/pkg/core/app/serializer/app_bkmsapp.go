@@ -29,11 +29,11 @@ import (
 )
 
 // -----------------------------------------------------------------------------
-// CreateAppModelApp
+// CreateBKMSApp
 // -----------------------------------------------------------------------------
 
-// CreateAppModelAppInput is the JSON body for creating a bkmsApp application.
-type CreateAppModelAppInput struct {
+// CreateBKMSAppInput is the JSON body for creating a bkmsApp application.
+type CreateBKMSAppInput struct {
 	// 应用名称. 长度范围 1~63 个字符，以小写字母开头，可包含小写字母、数字、中划线，不能以中划线结尾
 	Name string `json:"name" binding:"required,app_id"`
 	// 应用 ID. 应用在全局范围内的唯一标识，默认情况下基于 name 自动生成，在 name 后追加后缀。
@@ -76,7 +76,7 @@ type FrameworkConfigFileInput struct {
 }
 
 // ToCreateParams converts the input into lifecycle create params.
-func (input *CreateAppModelAppInput) ToCreateParams() *lifecycle.CreateParams {
+func (input *CreateBKMSAppInput) ToCreateParams() *lifecycle.CreateParams {
 	spec := input.AppModelSpec
 	params := &lifecycle.CreateParams{
 		Command:         spec.Command,
@@ -96,11 +96,11 @@ func (input *CreateAppModelAppInput) ToCreateParams() *lifecycle.CreateParams {
 }
 
 // -----------------------------------------------------------------------------
-// UpdateAppModelSpec
+// UpdateAppStartupConfig
 // -----------------------------------------------------------------------------
 
-// UpdateBKMSAppModelSpecInput is the JSON body for updating the app model spec of a bkmsApp application.
-type UpdateBKMSAppModelSpecInput struct {
+// UpdateAppStartupConfigInput is the JSON body for updating the startup config of a bkmsApp application.
+type UpdateAppStartupConfigInput struct {
 	// 容器启动命令，整体替换
 	Command []string `json:"command"`
 	// 容器启动参数，整体替换
@@ -111,9 +111,9 @@ type UpdateBKMSAppModelSpecInput struct {
 	FrameworkConfig json.RawMessage `json:"frameworkConfig,omitempty" swaggertype:"object"`
 }
 
-// ToUpdateSpecParams converts the input into lifecycle update params.
-func (input *UpdateBKMSAppModelSpecInput) ToUpdateSpecParams() (*lifecycle.UpdateSpecParams, error) {
-	params := &lifecycle.UpdateSpecParams{
+// ToUpdateStartupConfigParams converts the input into lifecycle update params.
+func (input *UpdateAppStartupConfigInput) ToUpdateStartupConfigParams() (*lifecycle.UpdateStartupConfigParams, error) {
+	params := &lifecycle.UpdateStartupConfigParams{
 		Command:   input.Command,
 		Args:      input.Args,
 		ShCommand: input.ShCommand,

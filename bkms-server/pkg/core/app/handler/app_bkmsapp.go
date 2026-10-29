@@ -38,9 +38,9 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/workload/appmodelcore/lifecycle"
 )
 
-// CreateAppModelApp 创建 bkmsApp 应用。
+// CreateBKMSApp 创建 bkmsApp 应用。
 //
-//	@ID			CreateAppModelApp
+//	@ID			CreateBKMSApp
 //	@Summary	创建 bkmsApp 应用
 //	@Tags		app
 //	@Accept		json
@@ -48,13 +48,13 @@ import (
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential
 //	@Param		workspaceID	path		string							true	"工作空间 ID"
-//	@Param		body		body		serializer.CreateAppModelAppInput	true	"创建 bkmsApp 应用请求"
+//	@Param		body		body		serializer.CreateBKMSAppInput	true	"创建 bkmsApp 应用请求"
 //	@Success	200			{object}	serializer.CreateAppOutput
 //	@Failure	400			{object}	bkerrs.GinErrorOutput
-//	@Router		/workspaces/{workspaceID}/appmodel-apps [post]
-func (h *Handler) CreateAppModelApp(c *gin.Context) {
+//	@Router		/workspaces/{workspaceID}/bkms-apps [post]
+func (h *Handler) CreateBKMSApp(c *gin.Context) {
 	var uriInput serializer.WorkspaceURIInput
-	var input serializer.CreateAppModelAppInput
+	var input serializer.CreateBKMSAppInput
 	if err := ginutils.BindURIJSON(c, &uriInput, &input); err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -105,23 +105,23 @@ func (h *Handler) CreateAppModelApp(c *gin.Context) {
 	})
 }
 
-// UpdateAppModelSpec 修改 bkmsApp 应用的启动配置与框架扩展配置。
+// UpdateAppStartupConfig 修改 bkmsApp 应用的启动配置：启动命令、参数、脚本与框架扩展配置。
 //
-//	@ID			UpdateAppModelSpec
-//	@Summary	修改 bkmsApp 应用的启动配置与框架扩展配置
+//	@ID			UpdateAppStartupConfig
+//	@Summary	修改 bkmsApp 应用的启动配置
 //	@Tags		app
 //	@Accept		json
 //	@Produce	json
 //	@Security	BkUserInfo
 //	@Security	BkUserCredential
 //	@Param		appID	path		string									true	"应用 ID"
-//	@Param		body	body		serializer.UpdateBKMSAppModelSpecInput	true	"修改请求"
+//	@Param		body	body		serializer.UpdateAppStartupConfigInput	true	"修改请求"
 //	@Success	200		{object}	serializer.EmptyOutput
 //	@Failure	400		{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/appmodel-spec [put]
-func (h *Handler) UpdateAppModelSpec(c *gin.Context) {
+//	@Router		/apps/{appID}/startup-config [put]
+func (h *Handler) UpdateAppStartupConfig(c *gin.Context) {
 	var uriInput serializer.AppURIInput
-	var input serializer.UpdateBKMSAppModelSpecInput
+	var input serializer.UpdateAppStartupConfigInput
 	if err := ginutils.BindURIJSON(c, &uriInput, &input); err != nil {
 		bkerrs.AbortWithErr(c, err)
 		return
@@ -135,20 +135,20 @@ func (h *Handler) UpdateAppModelSpec(c *gin.Context) {
 	}
 	if app.Type != bkmsapp.AppTypeBKMSApp {
 		bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeInvalidRequest,
-			"app type %s does not support appmodel spec, use trpc-spec or taf-spec", app.Type))
+			"app type %s does not support startup-config, use trpc-spec or taf-spec", app.Type))
 		return
 	}
-	params, err := input.ToUpdateSpecParams()
+	params, err := input.ToUpdateStartupConfigParams()
 	if err != nil {
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "parse appmodel spec"))
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidRequest, "parse startup config"))
 		return
 	}
 
-	oldModel, newModel, err := lifecycle.NewService(h.registry.DB).UpdateSpec(ctx, app, params)
+	oldModel, newModel, err := lifecycle.NewService(h.registry.DB).UpdateStartupConfig(ctx, app, params)
 	if err != nil {
 		code := lo.Ternary(errors.Is(err, lifecycle.ErrInvalidParams),
 			bkerrs.ErrCodeInvalidRequest, bkerrs.ErrCodeInternalServerError)
-		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, code, "update appmodel spec"))
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, code, "update startup config"))
 		return
 	}
 

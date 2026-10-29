@@ -196,7 +196,7 @@ var _ = Describe("Lifecycle", func() {
 		)
 	})
 
-	Describe("UpdateSpec", func() {
+	Describe("UpdateStartupConfig", func() {
 		var app *bkmsapp.Application
 
 		BeforeEach(func() {
@@ -208,7 +208,11 @@ var _ = Describe("Lifecycle", func() {
 		})
 
 		It("replaces the start config and keeps frameworkConfig when it is omitted", func() {
-			oldModel, newModel, err := svc.UpdateSpec(ctx, app, &lifecycle.UpdateSpecParams{ShCommand: "./start.sh"})
+			oldModel, newModel, err := svc.UpdateStartupConfig(
+				ctx,
+				app,
+				&lifecycle.UpdateStartupConfigParams{ShCommand: "./start.sh"},
+			)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(oldModel.Workload.Command).To(Equal([]string{"/app/server"}))
 			Expect(newModel.Workload.Command).To(BeEmpty())
@@ -222,7 +226,7 @@ var _ = Describe("Lifecycle", func() {
 		})
 
 		It("rejects an invalid frameworkConfig without changing the model", func() {
-			_, _, err := svc.UpdateSpec(ctx, app, &lifecycle.UpdateSpecParams{
+			_, _, err := svc.UpdateStartupConfig(ctx, app, &lifecycle.UpdateStartupConfigParams{
 				ShCommand:       "./start.sh",
 				FrameworkConfig: map[string]any{"image": "nginx"},
 			})
@@ -236,7 +240,7 @@ var _ = Describe("Lifecycle", func() {
 		It("rejects legacy apps", func() {
 			legacy := *app
 			legacy.Type = bkmsapp.AppTypeTRPC
-			_, _, err := svc.UpdateSpec(ctx, &legacy, &lifecycle.UpdateSpecParams{})
+			_, _, err := svc.UpdateStartupConfig(ctx, &legacy, &lifecycle.UpdateStartupConfigParams{})
 			Expect(err).To(MatchError(lifecycle.ErrInvalidParams))
 		})
 	})

@@ -29,8 +29,7 @@ const TERMINAL_STATUSES = ['deployed', 'failed', 'uninstalled'];
 function kindToPathSegment(kind) {
   if (kind === 'trpc') return 'trpc-deploys';
   if (kind === 'taf') return 'taf-deploys';
-  // 统一接口，不限框架
-  if (kind === 'appmodel') return 'appmodel-deploys';
+  if (kind === 'bkms') return 'bkms-deploys';
   throw new Error(`unsupported appmodel deploy kind: ${kind}`);
 }
 
@@ -155,7 +154,7 @@ async function getResourceSnapshot(options = {}) {
  * when a deploy clearly failed).
  *
  * @param {Object} options
- * @param {('trpc'|'taf'|'appmodel')} options.kind - Deploy API kind (required); appmodel is the unified API.
+ * @param {('trpc'|'taf'|'bkms')} options.kind - Deploy API kind (required); bkms uses the bkms-deploys API.
  * @param {string} options.appID - Application ID (required).
  * @param {string} options.envName - Environment name (required).
  * @param {string|string[]} [options.expectedStatus]

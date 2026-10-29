@@ -24,7 +24,6 @@ package lifecycle
 import (
 	"context"
 
-	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
@@ -63,18 +62,6 @@ type FrameworkFileParams struct {
 	MountDir string
 	// Content 文件内容，为空时只创建文件定义。
 	Content string
-}
-
-// UpdateSpecParams 修改 bkmsApp 应用启动配置的参数。
-type UpdateSpecParams struct {
-	// Command 容器启动命令，整体替换。
-	Command []string
-	// Args 容器启动参数，整体替换。
-	Args []string
-	// ShCommand 容器启动脚本，整体替换。
-	ShCommand string
-	// FrameworkConfig 框架扩展配置。为 nil 时不修改，否则整体替换并重新校验。
-	FrameworkConfig map[string]any
 }
 
 // Service bkmsApp 应用的创建与修改。
@@ -174,42 +161,4 @@ func (s *Service) createFrameworkFile(
 		return errors.Wrapf(err, "create framework config file of app %s", app.ID)
 	}
 	return nil
-}
-
-// UpdateSpec 修改 bkmsApp 应用的启动配置与 frameworkConfig，不修改框架与语言。
-// 返回修改前后的 AppModel，供调用方审计。
-func (s *Service) UpdateSpec(
-	ctx context.Context,
-	app *bkmsapp.Application,
-	params *UpdateSpecParams,
-) (*appmodel.AppModel, *appmodel.AppModel, error) {
-	if err := ValidateStack(app); err != nil {
-		return nil, nil, err
-	}
-	if params.FrameworkConfig != nil {
-		if err := validateFrameworkConfig(app.Framework, params.FrameworkConfig); err != nil {
-			return nil, nil, err
-		}
-	}
-
-	appModel, err := store.Of(s.db, appmodel.AppModelMeta).Get(ctx, appmodel.ByApp(app.ID))
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "get model of app %s", app.ID)
-	}
-	var oldAppModel appmodel.AppModel
-	if err = copier.CopyWithOption(&oldAppModel, appModel, copier.Option{DeepCopy: true}); err != nil {
-		return nil, nil, errors.Wrapf(err, "copy model of app %s", app.ID)
-	}
-
-	appModel.Workload.Command = params.Command
-	appModel.Workload.Args = params.Args
-	appModel.Workload.ShCommand = params.ShCommand
-	if params.FrameworkConfig != nil {
-		appModel.Workload.FrameworkConfig = datatype.CloneMap(params.FrameworkConfig)
-		appModel.Workload.FrameworkConfigVersion = appruntime.FrameworkConfigVersionV1
-	}
-	if err = appmodel.UpdateAppModel(ctx, s.db, appModel); err != nil {
-		return nil, nil, errors.Wrapf(err, "update model of app %s", app.ID)
-	}
-	return &oldAppModel, appModel, nil
 }

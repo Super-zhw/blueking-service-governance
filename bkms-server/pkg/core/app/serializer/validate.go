@@ -51,7 +51,7 @@ func init() {
 		v.RegisterStructValidation(validateCreateAppInputStruct, CreateAppInput{})
 		v.RegisterStructValidation(validateAppModelSpecInputStruct, AppModelSpecInput{})
 		v.RegisterStructValidation(validateBKMSAppModelSpecInputStruct, BKMSAppModelSpecInput{})
-		v.RegisterStructValidation(validateUpdateBKMSAppModelSpecInputStruct, UpdateBKMSAppModelSpecInput{})
+		v.RegisterStructValidation(validateUpdateAppStartupConfigInputStruct, UpdateAppStartupConfigInput{})
 		v.RegisterStructValidation(validateCreateAppComponentInputStruct, CreateAppComponentInput{})
 		// Register struct-level validator for HelmSourceInput to enforce
 		// the matching repo config based on RepoType. This applies to both
@@ -219,8 +219,8 @@ func validateBKMSAppModelSpecInputStruct(sl validator.StructLevel) {
 	validateEnvVarsUnique(sl, input.EnvVars)
 }
 
-// validateUpdateBKMSAppModelSpecInputStruct 校验 bkmsApp 修改请求中的启动配置。
-func validateUpdateBKMSAppModelSpecInputStruct(sl validator.StructLevel) {
-	input := sl.Current().Interface().(UpdateBKMSAppModelSpecInput)
+// validateUpdateAppStartupConfigInputStruct 校验 bkmsApp 修改请求中的启动配置。
+func validateUpdateAppStartupConfigInputStruct(sl validator.StructLevel) {
+	input := sl.Current().Interface().(UpdateAppStartupConfigInput)
 	validateStartCommand(sl, input.Command, input.Args, input.ShCommand)
 }

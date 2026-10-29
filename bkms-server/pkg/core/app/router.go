@@ -46,9 +46,9 @@ type AppHandler interface {
 	// 更新应用 Taf 配置
 	UpdateAppTafSpec(c *gin.Context)
 	// 创建 bkmsApp 应用
-	CreateAppModelApp(c *gin.Context)
-	// 修改 bkmsApp 应用的启动配置与框架扩展配置
-	UpdateAppModelSpec(c *gin.Context)
+	CreateBKMSApp(c *gin.Context)
+	// 修改 bkmsApp 应用的启动配置（启动命令、参数、脚本与框架扩展配置）
+	UpdateAppStartupConfig(c *gin.Context)
 	// 查询框架目录与能力矩阵
 	GetAppRuntimeDefinitions(c *gin.Context)
 	// 查询应用的能力集合
@@ -93,9 +93,9 @@ func Register(rg *gin.RouterGroup, h AppHandler) {
 	// 更新应用 Taf 配置
 	rg.PUT("/apps/:appID/taf-spec", h.UpdateAppTafSpec)
 	// 创建 bkmsApp 应用
-	rg.POST("/workspaces/:workspaceID/appmodel-apps", h.CreateAppModelApp)
-	// 修改 bkmsApp 应用的启动配置与框架扩展配置
-	rg.PUT("/apps/:appID/appmodel-spec", h.UpdateAppModelSpec)
+	rg.POST("/workspaces/:workspaceID/bkms-apps", h.CreateBKMSApp)
+	// 修改 bkmsApp 应用的启动配置（启动命令、参数、脚本与框架扩展配置）
+	rg.PUT("/apps/:appID/startup-config", h.UpdateAppStartupConfig)
 	// 查询框架目录与能力矩阵
 	rg.GET("/app-runtime-definitions", h.GetAppRuntimeDefinitions)
 	// 查询应用的能力集合

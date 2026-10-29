@@ -1,0 +1,35 @@
+meta {
+  name: 09-trpc-spec-rejects-bkmsapp
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{serviceURL}}/apps/{{bkmsAppBlankID}}/trpc-spec
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "appModelSpec": {
+      "trpcSpec": {"language": "go"}
+    }
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body: isJson
+}
+
+tests {
+  test("should ask bkmsApp apps to use startup-config", () => {
+    expect(JSON.stringify(res.body)).to.include("bkmsApp app must use startup-config");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

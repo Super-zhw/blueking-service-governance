@@ -29,40 +29,40 @@ import (
 )
 
 var _ = Describe("bkmsApp serializers", func() {
-	Describe("UpdateBKMSAppModelSpecInput.ToUpdateSpecParams", func() {
-		decode := func(body string) *serializer.UpdateBKMSAppModelSpecInput {
-			var input serializer.UpdateBKMSAppModelSpecInput
+	Describe("UpdateAppStartupConfigInput.ToUpdateStartupConfigParams", func() {
+		decode := func(body string) *serializer.UpdateAppStartupConfigInput {
+			var input serializer.UpdateAppStartupConfigInput
 			Expect(json.Unmarshal([]byte(body), &input)).To(Succeed())
 			return &input
 		}
 
 		It("keeps frameworkConfig when it is omitted", func() {
-			params, err := decode(`{"command":["/app/server"]}`).ToUpdateSpecParams()
+			params, err := decode(`{"command":["/app/server"]}`).ToUpdateStartupConfigParams()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(params.Command).To(Equal([]string{"/app/server"}))
 			Expect(params.FrameworkConfig).To(BeNil())
 		})
 
 		It("replaces frameworkConfig with an explicit empty object", func() {
-			params, err := decode(`{"frameworkConfig":{}}`).ToUpdateSpecParams()
+			params, err := decode(`{"frameworkConfig":{}}`).ToUpdateStartupConfigParams()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(params.FrameworkConfig).To(Equal(map[string]any{}))
 		})
 
 		It("rejects a null frameworkConfig", func() {
-			_, err := decode(`{"frameworkConfig":null}`).ToUpdateSpecParams()
+			_, err := decode(`{"frameworkConfig":null}`).ToUpdateStartupConfigParams()
 			Expect(err).To(MatchError(ContainSubstring("must not be null")))
 		})
 
 		It("rejects a non-object frameworkConfig", func() {
-			_, err := decode(`{"frameworkConfig":[1]}`).ToUpdateSpecParams()
+			_, err := decode(`{"frameworkConfig":[1]}`).ToUpdateStartupConfigParams()
 			Expect(err).To(MatchError(ContainSubstring("must be an object")))
 		})
 	})
 
-	Describe("CreateAppModelAppInput validation", func() {
-		newInput := func() *serializer.CreateAppModelAppInput {
-			return &serializer.CreateAppModelAppInput{
+	Describe("CreateBKMSAppInput validation", func() {
+		newInput := func() *serializer.CreateBKMSAppInput {
+			return &serializer.CreateBKMSAppInput{
 				Name:         "demo",
 				ID:           "demo-abc",
 				Framework:    "blank",
