@@ -5,7 +5,7 @@ meta {
 }
 
 delete {
-  url: {{serviceURL}}/apps/{{trpcLcAppID}}/envs/{{trpcLcEnvName}}/bkms-deploys
+  url: {{serviceURL}}/apps/{{tafLcAppID}}/envs/{{tafLcEnvName}}/bkmsapp-deploys
   body: none
   auth: inherit
 }
@@ -21,18 +21,18 @@ script:post-response {
   }
   const appmodel = require("./helpers/appmodel");
   const record = await appmodel.waitForAppModelDeployTerminal({
-    kind: "bkms",
-    appID: bru.getVar("trpcLcAppID"),
-    envName: bru.getVar("trpcLcEnvName"),
+    kind: "bkmsapp",
+    appID: bru.getVar("tafLcAppID"),
+    envName: bru.getVar("tafLcEnvName"),
     expectedStatus: "uninstalled",
-    imageTag: bru.getVar("trpcLcImageTag")
+    imageTag: bru.getVar("tafLcImageTag")
   });
-  bru.setVar("trpcLcUninstalledStatus", record.status);
+  bru.setVar("tafLcUninstalledStatus", record.status);
 }
 
 tests {
-  test("should uninstall the trpc app", () => {
-    expect(bru.getVar("trpcLcUninstalledStatus")).to.equal("uninstalled");
+  test("should uninstall the taf app", () => {
+    expect(bru.getVar("tafLcUninstalledStatus")).to.equal("uninstalled");
   });
 }
 

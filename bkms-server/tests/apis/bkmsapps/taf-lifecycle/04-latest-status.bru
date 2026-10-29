@@ -1,11 +1,11 @@
 meta {
-  name: 05-latest-status
+  name: 04-latest-status
   type: http
-  seq: 5
+  seq: 4
 }
 
 get {
-  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/bkms-deploys/latest-status
+  url: {{serviceURL}}/apps/{{tafLcAppID}}/envs/{{tafLcEnvName}}/bkmsapp-deploys/latest-status
   body: none
   auth: inherit
 }
@@ -17,7 +17,7 @@ assert {
 
 tests {
   test("should expose the deploy record via latest-status", () => {
-    expect(res.body.data.deployID).to.equal(bru.getVar("blankLcDeployID"));
+    expect(res.body.data.deployID).to.equal(bru.getVar("tafLcDeployID"));
     expect(res.body.data.status).to.equal("deployed");
   });
 }

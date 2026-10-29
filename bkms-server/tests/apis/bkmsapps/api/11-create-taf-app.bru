@@ -1,11 +1,11 @@
 meta {
-  name: 03-create-taf-go-rejected
+  name: 11-create-taf-app
   type: http
-  seq: 3
+  seq: 11
 }
 
 post {
-  url: {{serviceURL}}/workspaces/{{bkmsAppWorkspaceID}}/bkms-apps
+  url: {{serviceURL}}/workspaces/{{bkmsAppWorkspaceID}}/bkmsapps
   body: json
   auth: inherit
 }
@@ -15,21 +15,21 @@ body:json {
     "name": "{{bkmsAppTafID}}",
     "id": "{{bkmsAppTafID}}",
     "framework": "taf",
-    "language": "go",
+    "language": "cpp",
     "appModelSpec": {"command": ["sleep"], "args": ["3600"]},
-    "frameworkConfigFile": {"name": "app.conf", "mountDir": "/etc/app"},
+    "frameworkConfigFile": {"name": "app.conf", "mountDir": "/usr/local/app/conf"},
     "buildConfig": {"sourceType": "imageRegistry", "imageBuildConfig": {"name": "app"}}
   }
 }
 
 assert {
-  res.status: eq 400
+  res.status: eq 200
   res.body: isJson
 }
 
 tests {
-  test("should reject a language the framework does not support", () => {
-    expect(JSON.stringify(res.body)).to.include("does not support language");
+  test("should create a bkmsApp with the taf framework", () => {
+    expect(res.body.data.type).to.equal("bkmsApp");
   });
 }
 

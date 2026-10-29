@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/bkms-deploys/precheck
+  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/bkmsapp-deploys/precheck
   body: none
   auth: inherit
 }
@@ -16,7 +16,7 @@ assert {
 }
 
 tests {
-  test("should pass the deploy pre-check through the bkms-deploys API", () => {
+  test("should pass the deploy pre-check through the bkmsapp-deploys API", () => {
     expect(res.body.data).to.be.an("object");
   });
 }

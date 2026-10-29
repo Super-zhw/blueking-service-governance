@@ -1,6 +1,6 @@
 meta {
-  name: trpc-lifecycle
-  seq: 3
+  name: taf-lifecycle
+  seq: 4
 }
 
 auth {
@@ -8,17 +8,17 @@ auth {
 }
 
 script:pre-request {
-  // 通过 bkms-apps 接口创建 trpc 应用并真实部署到 kind 集群，耗时较长，
-  // 由 RUN_BKMS_DEPLOY_API_TESTS 控制，未设置时跳过整个目录。
-  if (!bru.getProcessEnv("RUN_BKMS_DEPLOY_API_TESTS")) {
-    console.log("trpc-lifecycle skipped: RUN_BKMS_DEPLOY_API_TESTS not set");
+  // 通过 bkmsapps 接口创建 taf 应用并真实部署到 kind 集群，耗时较长，
+  // 由 RUN_BKMSAPP_DEPLOY_API_TESTS 控制，未设置时跳过整个目录。
+  if (!bru.getProcessEnv("RUN_BKMSAPP_DEPLOY_API_TESTS")) {
+    console.log("taf-lifecycle skipped: RUN_BKMSAPP_DEPLOY_API_TESTS not set");
     bru.runner.skipRequest();
     return;
   }
 
   const common = require("./common");
 
-  if (!bru.getVar("trpcLcReady")) {
+  if (!bru.getVar("tafLcReady")) {
     const suffix = bru.getVar("randomSuffix");
     // BKMS_APITEST_WORKLOAD_IMAGE 为不带 tag 的 <registry>/<name>，需提供 1.0.0 且镜像内有 sleep
     const imageRepository = bru.getProcessEnv("BKMS_APITEST_WORKLOAD_IMAGE");
@@ -28,27 +28,27 @@ script:pre-request {
     const slashIdx = imageRepository.lastIndexOf("/");
     const registry = imageRepository.slice(0, slashIdx);
     const imageName = imageRepository.slice(slashIdx + 1);
-    const envName = `trpclc-env-${suffix}`;
+    const envName = `taflc-env-${suffix}`;
 
     const ws = await common.createWorkspace({
-      id: `trpclc-ws-${suffix}`,
+      id: `taflc-ws-${suffix}`,
       imageRegistry: {registry, username: "registry-user", password: "registry-foo-password"}
     });
     await common.createEnvironment({
       name: envName,
       workspaceID: ws.id,
       type: "test",
-      description: "bkmsApp trpc deploy lifecycle suite",
+      description: "bkmsApp taf deploy lifecycle suite",
       cluster: {clusterID: "BCS-K8S-00002", clusterType: "single", namespace: "default"}
     });
     const app = await common.createBKMSApp({
-      id: `trpclc-app-${suffix}`,
+      id: `taflc-app-${suffix}`,
       name: imageName,
       workspaceID: ws.id,
-      framework: "trpc",
-      language: "go",
+      framework: "taf",
+      language: "cpp",
       appModelSpec: {command: ["sleep"], args: ["3600"], envVars: []},
-      frameworkConfigFile: {name: "trpc_go.yaml", mountDir: "/tmp/", content: "dGVzdAo="},
+      frameworkConfigFile: {name: "app.conf", mountDir: "/tmp/", content: "dGVzdAo="},
       buildConfig: {sourceType: "imageRegistry", imageBuildConfig: {name: imageName}}
     });
     // 降低资源请求，保证单节点 kind 集群能调度
@@ -57,9 +57,9 @@ script:pre-request {
       resources: {replicas: 1, cpuRequests: "100m", cpuLimits: "200m", memoryRequests: "128Mi", memoryLimits: "256Mi"}
     });
 
-    bru.setVar("trpcLcAppID", app.id);
-    bru.setVar("trpcLcEnvName", envName);
-    bru.setVar("trpcLcImageTag", "1.0.0");
-    bru.setVar("trpcLcReady", true);
+    bru.setVar("tafLcAppID", app.id);
+    bru.setVar("tafLcEnvName", envName);
+    bru.setVar("tafLcImageTag", "1.0.0");
+    bru.setVar("tafLcReady", true);
   }
 }

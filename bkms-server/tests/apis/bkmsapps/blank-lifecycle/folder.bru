@@ -8,10 +8,10 @@ auth {
 }
 
 script:pre-request {
-  // 通过 bkms-apps 接口创建 blank 应用并真实部署到 kind 集群，耗时较长，
-  // 由 RUN_BKMS_DEPLOY_API_TESTS 控制，未设置时跳过整个目录。
-  if (!bru.getProcessEnv("RUN_BKMS_DEPLOY_API_TESTS")) {
-    console.log("blank-lifecycle skipped: RUN_BKMS_DEPLOY_API_TESTS not set");
+  // 通过 bkmsapps 接口创建 blank 应用并真实部署到 kind 集群，耗时较长，
+  // 由 RUN_BKMSAPP_DEPLOY_API_TESTS 控制，未设置时跳过整个目录。
+  if (!bru.getProcessEnv("RUN_BKMSAPP_DEPLOY_API_TESTS")) {
+    console.log("blank-lifecycle skipped: RUN_BKMSAPP_DEPLOY_API_TESTS not set");
     bru.runner.skipRequest();
     return;
   }

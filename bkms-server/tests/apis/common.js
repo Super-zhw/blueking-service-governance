@@ -887,7 +887,7 @@ async function createAppModelDeploy(options = {}) {
 }
 
 /**
- * Create a bkmsApp app through the bkms-apps API.
+ * Create a bkmsApp app through the bkmsapps API.
  * This helper is idempotent per app ID.
  *
  * @param {Object} options
@@ -932,7 +932,7 @@ async function createBKMSApp(options = {}) {
   }
 
   try {
-    const response = await axios.post(`${serviceURL}/workspaces/${options.workspaceID}/bkms-apps`, body, {
+    const response = await axios.post(`${serviceURL}/workspaces/${options.workspaceID}/bkmsapps`, body, {
       headers: AUTH_HEADERS
     });
     bru.setVar(appKey, true);

@@ -5,7 +5,7 @@ meta {
 }
 
 delete {
-  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/bkms-deploys
+  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/bkmsapp-deploys
   body: none
   auth: inherit
 }
@@ -21,7 +21,7 @@ script:post-response {
   }
   const appmodel = require("./helpers/appmodel");
   const record = await appmodel.waitForAppModelDeployTerminal({
-    kind: "bkms",
+    kind: "bkmsapp",
     appID: bru.getVar("blankLcAppID"),
     envName: bru.getVar("blankLcEnvName"),
     expectedStatus: "uninstalled",

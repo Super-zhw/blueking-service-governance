@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{serviceURL}}/apps/{{trpcLcAppID}}/envs/{{trpcLcEnvName}}/bkms-deploys
+  url: {{serviceURL}}/apps/{{trpcLcAppID}}/envs/{{trpcLcEnvName}}/bkmsapp-deploys
   body: json
   auth: inherit
 }
@@ -28,7 +28,7 @@ script:post-response {
   }
   const appmodel = require("./helpers/appmodel");
   const record = await appmodel.waitForAppModelDeployTerminal({
-    kind: "bkms",
+    kind: "bkmsapp",
     appID: bru.getVar("trpcLcAppID"),
     envName: bru.getVar("trpcLcEnvName"),
     expectedStatus: "deployed",

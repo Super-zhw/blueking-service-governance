@@ -251,7 +251,7 @@ AppSpec.DevMode 保留 Enabled 等用户配置；模块 props 为平台定义的
 
 ### 5.1 目标接口
 
-以下是路由建议，均相对于现有 API 路由前缀。正式发布前固定命名并补充 Swagger。实际实施与本表的差异（新开 `POST /workspaces/:workspaceID/bkms-apps`、旧入口不改、路由改名）见 [新 API 与 blank 闭环](./bkms_app_runtime_model_phase4_api.md) §6。
+以下是路由建议，均相对于现有 API 路由前缀。正式发布前固定命名并补充 Swagger。实际实施与本表的差异（新开 `POST /workspaces/:workspaceID/bkmsapps`、旧入口不改、路由改名）见 [新 API 与 blank 闭环](./bkms_app_runtime_model_phase4_api.md) §6。
 
 | 接口 | 行为 |
 | --- | --- |

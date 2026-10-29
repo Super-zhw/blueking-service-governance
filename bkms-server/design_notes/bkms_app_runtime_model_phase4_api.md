@@ -31,8 +31,8 @@
 | 问题 | 结论 |
 | --- | --- |
 | 新 API 是否加开关 | 不加。正式环境不主动调用，只在测试环境使用 |
-| 新建应用入口 | 新开路由 `POST /workspaces/:workspaceID/bkms-apps`，旧入口不变 |
-| 路由命名 | AppModel 是内部概念，对外按 `bkms` 命名：`bkms-apps`、`bkms-deploys`；构建部署只有平台托管应用才有，用 `build-deploys`；修改接口覆盖启动命令、参数、脚本与 frameworkConfig，用 `startup-config` |
+| 新建应用入口 | 新开路由 `POST /workspaces/:workspaceID/bkmsapps`，旧入口不变 |
+| 路由命名 | AppModel 是内部概念，对外按应用类型 `bkmsApp` 命名：`bkmsapps`、`bkmsapp-deploys`（`bkms` 是整个项目的名字，单独使用有歧义）；构建部署只有平台托管应用才有，用 `build-deploys`；修改接口覆盖启动命令、参数、脚本与 frameworkConfig，用 `startup-config` |
 | 旧 spec 更新接口遇到 bkmsApp 应用 | `PUT trpc-spec`、`PUT taf-spec` 拒绝 `type=bkmsApp`，避免把旧字段写回新应用 |
 | 框架差异如何提供 | 不引入框架适配器接口。是否创建框架文件及其格式读能力 `frameworkFile`；frameworkConfig 按框架查表调用对应的 `DecodeConfig` |
 | frameworkConfig | 新建时写 `{}` 与版本 1。trpc / taf 的 `Config` 去掉已收敛到 def 的 fileName / filePath；blank 只接受 `{}` |
@@ -46,11 +46,11 @@
 
 | 接口 | 说明 |
 | --- | --- |
-| `POST /workspaces/:workspaceID/bkms-apps` | 创建 bkmsApp 应用 |
+| `POST /workspaces/:workspaceID/bkmsapps` | 创建 bkmsApp 应用 |
 | `PUT /apps/:appID/startup-config` | 修改启动命令、参数、脚本与 frameworkConfig，不能修改 framework / language |
 | `GET /app-runtime-definitions` | 框架目录（框架、支持的语言）与能力矩阵 |
 | `GET /apps/:appID/runtime-mods` | 应用的能力集合及公开参数 |
-| `/apps/:appID/envs/:envName/bkms-deploys` | 部署记录、预检、部署、下架、资源快照列表与详情、最新状态；复用现有通用 handler，只要求是 AppModel 应用（trpc、taf、bkmsApp），不校验框架 |
+| `/apps/:appID/envs/:envName/bkmsapp-deploys` | 部署记录、预检、部署、下架、资源快照列表与详情、最新状态；复用现有通用 handler，只要求是 AppModel 应用（trpc、taf、bkmsApp），不校验框架 |
 | `POST /apps/:appID/envs/:envName/build-deploys` | 一键构建部署；同上 |
 | 详情 `GET /apps/:appID`、列表 `GET /workspaces/:workspaceID/apps` | `framework`、`language` 已由 M0 的兼容投影返回；bkmsApp 应用的详情另外返回 `appModelSpec.frameworkConfig` |
 
@@ -101,13 +101,13 @@
 
 | 原规划 | 本方案 | 原因 |
 | --- | --- | --- |
-| §5.1 复用 `POST /workspaces/:workspaceID/apps` | 新开 `bkms-apps` | 旧 API 不接收新参数，避免回归验证 |
+| §5.1 复用 `POST /workspaces/:workspaceID/apps` | 新开 `bkmsapps` | 旧 API 不接收新参数，避免回归验证 |
 | §5.3 旧 create / spec 接口转换为统一领域命令；M6 旧接口改薄适配层 | 旧接口不改 | 同上 |
 | M5 新旧字段双写 | 不双写 | 新接口只写新字段，旧数据由 M8 统一 |
 | M5 MongoDB 事务保护 | 不做 | 与本需求无关，见 §1 |
 | M5 旧路由埋点 | 不做 | 切换时统一下线 |
 | M6 合并管理命令接口 | 不合并 | 现有接口已按能力分派 |
-| §5.1 路由 `appmodel-spec`、`appmodel-deploys[...]`、`appmodel-build-deploys` | `startup-config`、`bkms-deploys[...]`、`build-deploys` | 见 §2 路由命名 |
+| §5.1 路由 `appmodel-spec`、`appmodel-deploys[...]`、`appmodel-build-deploys` | `startup-config`、`bkmsapp-deploys[...]`、`build-deploys` | 见 §2 路由命名 |
 | §2.2 框架适配器提供差异 | 能力声明加各框架的 `DecodeConfig` | 新接口不写旧投影后，剩余差异不足以构成接口 |
 
 ---
@@ -122,7 +122,7 @@
   - 空间组件引用检查覆盖 trpc、taf、blank；
   - 配置文件定义按应用类型与 `frameworkFile` 能力校验 configKind。
 - 能力查询接口、旧 spec 接口拒绝 bkmsApp 由 Bruno 用例覆盖。
-- Bruno：新增 `tests/apis/bkms-apps`。`api` 目录覆盖创建、详情、能力查询、修改及各类拒绝场景（含 blank 新建 framework 文件被拒）；`{blank,trpc,taf}-lifecycle` 走 `bkms-deploys` 完成预检 → 部署 → 资源快照 → 最新状态 → 下架，blank 另外先创建 plain 配置文件。部署类用例由 `RUN_BKMS_DEPLOY_API_TESTS` 控制，默认跳过。
+- Bruno：新增 `tests/apis/bkmsapps`。`api` 目录覆盖创建、详情、能力查询、修改及各类拒绝场景（含 blank 新建 framework 文件被拒）；`{blank,trpc,taf}-lifecycle` 走 `bkmsapp-deploys` 完成预检 → 部署 → 资源快照 → 最新状态 → 下架，blank 另外先创建 plain 配置文件。部署类用例由 `RUN_BKMSAPP_DEPLOY_API_TESTS` 控制，默认跳过。
 - 回归：旧 API 的 Bruno 用例、`make lint`、`make test`。
 - Swagger：新接口只在测试环境使用，本次不生成文档（代码中保留注解），M7 前端接入时再执行 `make apidocs`。
 

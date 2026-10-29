@@ -93,7 +93,7 @@ func Register(rg *gin.RouterGroup, h AppHandler) {
 	// 更新应用 Taf 配置
 	rg.PUT("/apps/:appID/taf-spec", h.UpdateAppTafSpec)
 	// 创建 bkmsApp 应用
-	rg.POST("/workspaces/:workspaceID/bkms-apps", h.CreateBKMSApp)
+	rg.POST("/workspaces/:workspaceID/bkmsapps", h.CreateBKMSApp)
 	// 修改 bkmsApp 应用的启动配置（启动命令、参数、脚本与框架扩展配置）
 	rg.PUT("/apps/:appID/startup-config", h.UpdateAppStartupConfig)
 	// 查询框架目录与能力矩阵

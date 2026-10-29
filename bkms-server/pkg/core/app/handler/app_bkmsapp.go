@@ -51,7 +51,7 @@ import (
 //	@Param		body		body		serializer.CreateBKMSAppInput	true	"创建 bkmsApp 应用请求"
 //	@Success	200			{object}	serializer.CreateAppOutput
 //	@Failure	400			{object}	bkerrs.GinErrorOutput
-//	@Router		/workspaces/{workspaceID}/bkms-apps [post]
+//	@Router		/workspaces/{workspaceID}/bkmsapps [post]
 func (h *Handler) CreateBKMSApp(c *gin.Context) {
 	var uriInput serializer.WorkspaceURIInput
 	var input serializer.CreateBKMSAppInput

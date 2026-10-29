@@ -30,9 +30,9 @@ import (
 // 占位声明，用于让 swag 能在本文件解析 swagger 注释中引用的 serializer 类型
 var _ = serializer.EmptyOutput{}
 
-// ListBKMSDeployRecords 获取 bkmsApp 应用部署记录列表
+// ListBKMSAppDeployRecords 获取 bkmsApp 应用部署记录列表
 //
-//	@ID			ListBKMSDeployRecords
+//	@ID			ListBKMSAppDeployRecords
 //	@Summary	获取 bkmsApp 应用部署记录列表
 //	@Tags		deploy
 //	@Produce	json
@@ -46,14 +46,14 @@ var _ = serializer.EmptyOutput{}
 //	@Param		pageSize		query		int		true	"分页大小"
 //	@Success	200				{object}	serializer.ListAppModelDeployRecordsOutput
 //	@Failure	400				{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/bkms-deploys [get]
-func (h *Handler) ListBKMSDeployRecords(c *gin.Context) {
+//	@Router		/apps/{appID}/envs/{envName}/bkmsapp-deploys [get]
+func (h *Handler) ListBKMSAppDeployRecords(c *gin.Context) {
 	h.listAppModelDeployRecords(c)
 }
 
-// PreCheckBKMSDeploy bkmsApp 应用部署前检查
+// PreCheckBKMSAppDeploy bkmsApp 应用部署前检查
 //
-//	@ID			PreCheckBKMSDeploy
+//	@ID			PreCheckBKMSAppDeploy
 //	@Summary	bkmsApp 应用部署前检查
 //	@Tags		deploy
 //	@Produce	json
@@ -64,14 +64,14 @@ func (h *Handler) ListBKMSDeployRecords(c *gin.Context) {
 //	@Success	200		{object}	serializer.DeployPreCheckOutput
 //	@Failure	400		{object}	bkerrs.GinErrorOutput
 //	@Failure	404		{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/bkms-deploys/precheck [get]
-func (h *Handler) PreCheckBKMSDeploy(c *gin.Context) {
+//	@Router		/apps/{appID}/envs/{envName}/bkmsapp-deploys/precheck [get]
+func (h *Handler) PreCheckBKMSAppDeploy(c *gin.Context) {
 	h.preCheckDeploy(c, "")
 }
 
-// CreateBKMSDeploy 创建 bkmsApp 应用部署
+// CreateBKMSAppDeploy 创建 bkmsApp 应用部署
 //
-//	@ID			CreateBKMSDeploy
+//	@ID			CreateBKMSAppDeploy
 //	@Summary	创建 bkmsApp 应用部署
 //	@Tags		deploy
 //	@Accept		json
@@ -83,14 +83,14 @@ func (h *Handler) PreCheckBKMSDeploy(c *gin.Context) {
 //	@Param		body	body		serializer.CreateAppModelDeployInput	true	"创建部署请求"
 //	@Success	200		{object}	serializer.EmptyOutput
 //	@Failure	400		{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/bkms-deploys [post]
-func (h *Handler) CreateBKMSDeploy(c *gin.Context) {
+//	@Router		/apps/{appID}/envs/{envName}/bkmsapp-deploys [post]
+func (h *Handler) CreateBKMSAppDeploy(c *gin.Context) {
 	h.createAppModelDeploy(c)
 }
 
-// DeleteBKMSDeploy 删除 bkmsApp 应用部署（下架当前环境最新版本）
+// DeleteBKMSAppDeploy 删除 bkmsApp 应用部署（下架当前环境最新版本）
 //
-//	@ID			DeleteBKMSDeploy
+//	@ID			DeleteBKMSAppDeploy
 //	@Summary	删除 bkmsApp 应用部署（下架当前环境最新版本）
 //	@Tags		deploy
 //	@Produce	json
@@ -101,14 +101,14 @@ func (h *Handler) CreateBKMSDeploy(c *gin.Context) {
 //	@Param		trafficLaneName	query		string	false	"部署的泳道名称（空字符串表示不使用泳道）"
 //	@Success	200				{object}	serializer.EmptyOutput
 //	@Failure	400				{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/bkms-deploys [delete]
-func (h *Handler) DeleteBKMSDeploy(c *gin.Context) {
+//	@Router		/apps/{appID}/envs/{envName}/bkmsapp-deploys [delete]
+func (h *Handler) DeleteBKMSAppDeploy(c *gin.Context) {
 	h.deleteAppModelDeploy(c)
 }
 
-// ListBKMSResourceSnapshots 获取 bkmsApp 应用资源快照列表
+// ListBKMSAppResourceSnapshots 获取 bkmsApp 应用资源快照列表
 //
-//	@ID			ListBKMSResourceSnapshots
+//	@ID			ListBKMSAppResourceSnapshots
 //	@Summary	获取 bkmsApp 应用资源快照列表
 //	@Tags		deploy
 //	@Produce	json
@@ -121,14 +121,14 @@ func (h *Handler) DeleteBKMSDeploy(c *gin.Context) {
 //	@Param		pageSize	query		int		true	"分页大小"
 //	@Success	200			{object}	serializer.ListAppModelResourceSnapshotsOutput
 //	@Failure	400			{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/bkms-deploys/{deployID}/resource-snapshots [get]
-func (h *Handler) ListBKMSResourceSnapshots(c *gin.Context) {
+//	@Router		/apps/{appID}/envs/{envName}/bkmsapp-deploys/{deployID}/resource-snapshots [get]
+func (h *Handler) ListBKMSAppResourceSnapshots(c *gin.Context) {
 	h.listAppModelResourceSnapshots(c)
 }
 
-// GetBKMSResourceSnapshot 获取 bkmsApp 应用部署记录下某个资源的快照详情（具体 k8s 资源的 Manifest 等）
+// GetBKMSAppResourceSnapshot 获取 bkmsApp 应用部署记录下某个资源的快照详情（具体 k8s 资源的 Manifest 等）
 //
-//	@ID			GetBKMSResourceSnapshot
+//	@ID			GetBKMSAppResourceSnapshot
 //	@Summary	获取 bkmsApp 应用部署记录下某个资源的快照详情（具体 k8s 资源的 Manifest 等）
 //	@Tags		deploy
 //	@Produce	json
@@ -140,14 +140,14 @@ func (h *Handler) ListBKMSResourceSnapshots(c *gin.Context) {
 //	@Param		snapshotID	path		string	true	"资源清单快照 ID"
 //	@Success	200			{object}	serializer.GetAppModelResourceSnapshotOutput
 //	@Failure	400			{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/bkms-deploys/{deployID}/resource-snapshots/{snapshotID} [get]
-func (h *Handler) GetBKMSResourceSnapshot(c *gin.Context) {
+//	@Router		/apps/{appID}/envs/{envName}/bkmsapp-deploys/{deployID}/resource-snapshots/{snapshotID} [get]
+func (h *Handler) GetBKMSAppResourceSnapshot(c *gin.Context) {
 	h.getAppModelResourceSnapshot(c)
 }
 
-// GetLatestBKMSDeployStatus 获取 bkmsApp 应用最新一次部署的状态
+// GetLatestBKMSAppDeployStatus 获取 bkmsApp 应用最新一次部署的状态
 //
-//	@ID			GetLatestBKMSDeployStatus
+//	@ID			GetLatestBKMSAppDeployStatus
 //	@Summary	获取 bkmsApp 应用最新一次部署的状态
 //	@Tags		deploy
 //	@Produce	json
@@ -158,13 +158,13 @@ func (h *Handler) GetBKMSResourceSnapshot(c *gin.Context) {
 //	@Param		trafficLaneName	query		string	false	"部署的泳道名称（空字符串表示不使用泳道）"
 //	@Success	200				{object}	serializer.GetLatestAppModelDeployStatusOutput
 //	@Failure	400				{object}	bkerrs.GinErrorOutput
-//	@Router		/apps/{appID}/envs/{envName}/bkms-deploys/latest-status [get]
-func (h *Handler) GetLatestBKMSDeployStatus(c *gin.Context) {
+//	@Router		/apps/{appID}/envs/{envName}/bkmsapp-deploys/latest-status [get]
+func (h *Handler) GetLatestBKMSAppDeployStatus(c *gin.Context) {
 	h.getLatestAppModelDeployStatus(c, "")
 }
 
 // appMatchesFramework 判断应用能否使用某组部署接口：须为 AppModel 应用（trpc、taf、bkmsApp）；
-// expectedFramework 为旧 trpc / taf 专属接口要求的框架，bkms-deploys 接口传空字符串，不校验框架。
+// expectedFramework 为旧 trpc / taf 专属接口要求的框架，bkmsapp-deploys 接口传空字符串，不校验框架。
 func appMatchesFramework(app *bkmsapp.Application, expectedFramework string) bool {
 	if !appruntime.IsAppModelType(app.Type) {
 		return false

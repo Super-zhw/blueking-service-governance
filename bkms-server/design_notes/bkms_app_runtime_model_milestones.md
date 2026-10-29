@@ -25,7 +25,7 @@
 | M8 | 存量回填，切换主读写 | 5 | 4 | ⬜ |
 | M9 | 下线旧接口，删除旧模型与兼容代码 | 6 | 5 | ⬜ |
 
-CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布：识别 `type=bkmsApp` 及 `framework` / `language`，部署、构建部署改用 `bkms-deploys` / `build-deploys`。与前端接入同期安排。
+CLI 的双识别与升级由用户跟进，需在 M7 切换 type 前发布：识别 `type=bkmsApp` 及 `framework` / `language`，部署、构建部署改用 `bkmsapp-deploys` / `build-deploys`。与前端接入同期安排。
 
 ---
 
