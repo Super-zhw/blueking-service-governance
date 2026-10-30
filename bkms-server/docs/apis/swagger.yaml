@@ -1303,6 +1303,50 @@ definitions:
     type: object
   github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_workload_networking_serializer.EmptyOutput:
     type: object
+  runtimemod.PublicModView:
+    properties:
+      props:
+        description: Props 对外参数，没有时省略。
+      reasonCode:
+        allOf:
+        - $ref: '#/definitions/runtimemod.ReasonCode'
+        description: ReasonCode 不支持的原因，支持时省略。
+      supported:
+        description: Supported 是否支持。
+        type: boolean
+    type: object
+  runtimemod.PublicView:
+    properties:
+      framework:
+        description: Framework 框架，helm、agones 应用为空。
+        type: string
+      language:
+        description: Language 语言，未记录时为空。
+        type: string
+      mods:
+        additionalProperties:
+          $ref: '#/definitions/runtimemod.PublicModView'
+        description: Mods 能力 ID 到能力的映射，包含全部能力；新增能力只会增加 key。
+        type: object
+      schemaVersion:
+        description: SchemaVersion 结构版本号。
+        type: integer
+      type:
+        description: Type 应用类型，如 bkmsApp、helm。
+        type: string
+    type: object
+  runtimemod.ReasonCode:
+    enum:
+    - unsupported_app_type
+    - unsupported_stack
+    - invalid_stack
+    - incomplete_language
+    type: string
+    x-enum-varnames:
+    - ReasonUnsupportedAppType
+    - ReasonUnsupportedStack
+    - ReasonInvalidStack
+    - ReasonIncompleteLanguage
   serializer.AddWorkspaceUserInput:
     properties:
       userIDs:
@@ -1997,6 +2041,10 @@ definitions:
         items:
           $ref: '#/definitions/serializer.VariableOutputObj'
         type: array
+      frameworkConfig:
+        additionalProperties: {}
+        description: 框架扩展配置，仅 bkmsApp 应用返回
+        type: object
       shCommand:
         description: 容器启动脚本，以 /bin/sh 执行
         type: string
@@ -2026,6 +2074,19 @@ definitions:
       workspaceID:
         description: 工作空间 ID
         type: string
+    type: object
+  serializer.AppRuntimeDefinitionsOutputObj:
+    properties:
+      frameworks:
+        description: 框架目录
+        items:
+          $ref: '#/definitions/serializer.FrameworkDefOutputObj'
+        type: array
+      matrix:
+        description: 每个合法技术栈组合的能力集合
+        items:
+          $ref: '#/definitions/runtimemod.PublicView'
+        type: array
     type: object
   serializer.AppServiceOutput:
     properties:
@@ -2353,6 +2414,31 @@ definitions:
         type: string
       repoName:
         description: 仓库名称
+        type: string
+    type: object
+  serializer.BKMSAppModelSpecInput:
+    properties:
+      args:
+        description: 容器启动参数
+        items:
+          type: string
+        type: array
+      command:
+        description: 容器启动命令
+        items:
+          type: string
+        type: array
+      envVars:
+        description: 容器环境变量
+        items:
+          $ref: '#/definitions/serializer.VariableInput'
+        type: array
+      frameworkConfig:
+        additionalProperties: {}
+        description: 框架扩展配置，按框架严格校验；缺省为空对象
+        type: object
+      shCommand:
+        description: 容器启动脚本，以 /bin/sh 执行，与 command、args 互斥，不能为纯空白
         type: string
     type: object
   serializer.BSCPAppConfigFileConfig:
@@ -3554,6 +3640,42 @@ definitions:
       trafficLaneEnabled:
         type: boolean
     required:
+    - name
+    type: object
+  serializer.CreateBKMSAppInput:
+    properties:
+      appModelSpec:
+        allOf:
+        - $ref: '#/definitions/serializer.BKMSAppModelSpecInput'
+        description: 应用模型规范
+      buildConfig:
+        allOf:
+        - $ref: '#/definitions/serializer.BuildConfigInput'
+        description: 构建配置
+      framework:
+        description: 框架：trpc、taf、blank，可选值见 /app-runtime-definitions
+        type: string
+      frameworkConfigFile:
+        allOf:
+        - $ref: '#/definitions/serializer.FrameworkConfigFileInput'
+        description: 框架配置文件。框架支持框架配置文件时必填，blank 不能传
+      id:
+        description: |-
+          应用 ID. 应用在全局范围内的唯一标识，默认情况下基于 name 自动生成，在 name 后追加后缀。
+          长度范围 1~63 个字符，以小写字母开头，可包含小写字母、数字、中划线，不能以中划线结尾
+        type: string
+      language:
+        description: 语言：go、cpp、nodejs、python，须为框架支持的语言（nodejs、python 仅 blank 支持）
+        type: string
+      name:
+        description: 应用名称. 长度范围 1~63 个字符，以小写字母开头，可包含小写字母、数字、中划线，不能以中划线结尾
+        type: string
+    required:
+    - appModelSpec
+    - buildConfig
+    - framework
+    - id
+    - language
     - name
     type: object
   serializer.CreateBindingInput:
@@ -4950,6 +5072,35 @@ definitions:
       value:
         type: string
     type: object
+  serializer.FrameworkConfigFileInput:
+    properties:
+      content:
+        description: 文件内容
+        type: string
+      mountDir:
+        description: 挂载目录
+        type: string
+      name:
+        description: 文件名
+        type: string
+    required:
+    - mountDir
+    - name
+    type: object
+  serializer.FrameworkDefOutputObj:
+    properties:
+      configVersion:
+        description: frameworkConfig 的 schema 版本
+        type: integer
+      name:
+        description: 框架名
+        type: string
+      supportedLanguages:
+        description: 支持的语言
+        items:
+          type: string
+        type: array
+    type: object
   serializer.GPAConfigOutputObj:
     properties:
       appID:
@@ -5168,6 +5319,16 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/serializer.AppDetailOutputObj'
+    type: object
+  serializer.GetAppRuntimeDefinitionsOutput:
+    properties:
+      data:
+        $ref: '#/definitions/serializer.AppRuntimeDefinitionsOutputObj'
+    type: object
+  serializer.GetAppRuntimeModsOutput:
+    properties:
+      data:
+        $ref: '#/definitions/runtimemod.PublicView'
     type: object
   serializer.GetAppSpecOverviewOutput:
     properties:
@@ -9616,6 +9777,25 @@ definitions:
       trafficLaneEnabled:
         type: boolean
     type: object
+  serializer.UpdateAppStartupConfigInput:
+    properties:
+      args:
+        description: 容器启动参数，整体替换
+        items:
+          type: string
+        type: array
+      command:
+        description: 容器启动命令，整体替换
+        items:
+          type: string
+        type: array
+      frameworkConfig:
+        description: 框架扩展配置：缺省不修改，null 拒绝，对象（含 {}）整体替换并重新校验
+        type: object
+      shCommand:
+        description: 容器启动脚本，整体替换；与 command、args 互斥，不能为纯空白
+        type: string
+    type: object
   serializer.UpdateAppVisibleEnvsInput:
     properties:
       visibleEnvNames:
@@ -10274,6 +10454,22 @@ info:
   title: bkms-server Gin API
   version: "1.0"
 paths:
+  /app-runtime-definitions:
+    get:
+      operationId: GetAppRuntimeDefinitions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.GetAppRuntimeDefinitionsOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 查询框架目录与能力矩阵
+      tags:
+      - app
   /apps/{appID}:
     delete:
       operationId: DeleteApp
@@ -15397,6 +15593,331 @@ paths:
       summary: 查询实例监控指标时序数据
       tags:
       - bkintegrations-bkmonitor
+  /apps/{appID}/envs/{envName}/bkmsapp-deploys:
+    delete:
+      operationId: DeleteBKMSAppDeploy
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 部署的泳道名称（空字符串表示不使用泳道）
+        in: query
+        name: trafficLaneName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_deploy_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 删除 bkmsApp 应用部署（下架当前环境最新版本）
+      tags:
+      - deploy
+    get:
+      operationId: ListBKMSAppDeployRecords
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 部署的泳道名称（空字符串表示不使用泳道）
+        in: query
+        name: trafficLaneName
+        type: string
+      - description: 搜索关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 分页页码（从 1 开始）
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListAppModelDeployRecordsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取 bkmsApp 应用部署记录列表
+      tags:
+      - deploy
+    post:
+      consumes:
+      - application/json
+      operationId: CreateBKMSAppDeploy
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 创建部署请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.CreateAppModelDeployInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_deploy_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 创建 bkmsApp 应用部署
+      tags:
+      - deploy
+  /apps/{appID}/envs/{envName}/bkmsapp-deploys/{deployID}/resource-snapshots:
+    get:
+      operationId: ListBKMSAppResourceSnapshots
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 部署记录 ID
+        in: path
+        name: deployID
+        required: true
+        type: string
+      - description: 分页页码（从 1 开始）
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.ListAppModelResourceSnapshotsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取 bkmsApp 应用资源快照列表
+      tags:
+      - deploy
+  /apps/{appID}/envs/{envName}/bkmsapp-deploys/{deployID}/resource-snapshots/{snapshotID}:
+    get:
+      operationId: GetBKMSAppResourceSnapshot
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 部署记录 ID
+        in: path
+        name: deployID
+        required: true
+        type: string
+      - description: 资源清单快照 ID
+        in: path
+        name: snapshotID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.GetAppModelResourceSnapshotOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取 bkmsApp 应用部署记录下某个资源的快照详情（具体 k8s 资源的 Manifest 等）
+      tags:
+      - deploy
+  /apps/{appID}/envs/{envName}/bkmsapp-deploys/latest-status:
+    get:
+      operationId: GetLatestBKMSAppDeployStatus
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 部署的泳道名称（空字符串表示不使用泳道）
+        in: query
+        name: trafficLaneName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.GetLatestAppModelDeployStatusOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 获取 bkmsApp 应用最新一次部署的状态
+      tags:
+      - deploy
+  /apps/{appID}/envs/{envName}/bkmsapp-deploys/precheck:
+    get:
+      operationId: PreCheckBKMSAppDeploy
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 部署环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.DeployPreCheckOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: bkmsApp 应用部署前检查
+      tags:
+      - deploy
+  /apps/{appID}/envs/{envName}/build-deploys:
+    post:
+      consumes:
+      - application/json
+      operationId: CreateBuildDeploy
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 环境名称
+        in: path
+        name: envName
+        required: true
+        type: string
+      - description: 构建自动部署请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.CreateAppModelBuildDeployInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_autodeploy_serializer.CreateBuildOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 触发 bkmsApp 应用构建并自动部署
+      tags:
+      - build-autodeploy
   /apps/{appID}/envs/{envName}/deployable-image-tags:
     get:
       operationId: ListDeployableImageTags
@@ -17682,6 +18203,32 @@ paths:
       summary: 获取应用推荐的镜像 Tag
       tags:
       - builds
+  /apps/{appID}/runtime-mods:
+    get:
+      operationId: GetAppRuntimeMods
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.GetAppRuntimeModsOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 查询应用的能力集合
+      tags:
+      - app
   /apps/{appID}/services:
     get:
       operationId: ListAppServices
@@ -17826,6 +18373,40 @@ paths:
       summary: 更新应用下的 Service
       tags:
       - app-networking
+  /apps/{appID}/startup-config:
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateAppStartupConfig
+      parameters:
+      - description: 应用 ID
+        in: path
+        name: appID
+        required: true
+        type: string
+      - description: 修改请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.UpdateAppStartupConfigInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_core_app_serializer.EmptyOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 修改 bkmsApp 应用的启动配置
+      tags:
+      - app
   /apps/{appID}/taf-spec:
     put:
       consumes:
@@ -21519,6 +22100,40 @@ paths:
       summary: 更新告警组
       tags:
       - bkintegrations-bkmonitor
+  /workspaces/{workspaceID}/bkmsapps:
+    post:
+      consumes:
+      - application/json
+      operationId: CreateBKMSApp
+      parameters:
+      - description: 工作空间 ID
+        in: path
+        name: workspaceID
+        required: true
+        type: string
+      - description: 创建 bkmsApp 应用请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.CreateBKMSAppInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/serializer.CreateAppOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/bkerrs.GinErrorOutput'
+      security:
+      - BkUserInfo: []
+      - BkUserCredential: []
+      summary: 创建 bkmsApp 应用
+      tags:
+      - app
   /workspaces/{workspaceID}/components:
     get:
       operationId: ListWorkspaceComponents

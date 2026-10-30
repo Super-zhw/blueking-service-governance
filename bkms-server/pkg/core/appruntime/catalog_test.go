@@ -59,6 +59,12 @@ var _ = Describe("Catalog", func() {
 		Entry("blank cpp", appruntime.Stack{
 			Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkBlank, Language: appruntime.LanguageCpp,
 		}),
+		Entry("blank nodejs", appruntime.Stack{
+			Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkBlank, Language: appruntime.LanguageNodeJS,
+		}),
+		Entry("blank python", appruntime.Stack{
+			Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkBlank, Language: appruntime.LanguagePython,
+		}),
 		Entry("helm", appruntime.Stack{Type: appruntime.AppTypeHelm}),
 		Entry("agones", appruntime.Stack{Type: appruntime.AppTypeAgones}),
 	)
@@ -74,6 +80,13 @@ var _ = Describe("Catalog", func() {
 		}, "framework is required"),
 		Entry("taf go", appruntime.Stack{
 			Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkTAF, Language: appruntime.LanguageGo,
+		}, "does not support language"),
+		// nodejs / python 目前只对 blank 开放
+		Entry("trpc nodejs", appruntime.Stack{
+			Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkTRPC, Language: appruntime.LanguageNodeJS,
+		}, "does not support language"),
+		Entry("taf python", appruntime.Stack{
+			Type: appruntime.AppTypeBKMSApp, Framework: appruntime.FrameworkTAF, Language: appruntime.LanguagePython,
 		}, "does not support language"),
 		Entry("unknown framework", appruntime.Stack{
 			Type: appruntime.AppTypeBKMSApp, Framework: "spring", Language: appruntime.LanguageGo,

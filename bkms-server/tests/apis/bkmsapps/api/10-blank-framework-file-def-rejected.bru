@@ -1,0 +1,39 @@
+meta {
+  name: 10-blank-framework-file-def-rejected
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{serviceURL}}/apps/{{bkmsAppBlankID}}/app-config-file-defs
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "app.yaml",
+    "configKind": "framework",
+    "fileFormat": "yaml",
+    "fileType": "normal",
+    "contentSourceType": "local",
+    "content": "key: value\n",
+    "description": "framework file is not supported by blank"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body: isJson
+}
+
+tests {
+  test("should reject framework config files for blank apps", () => {
+    expect(JSON.stringify(res.body)).to.include("does not support framework config file");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

@@ -71,6 +71,21 @@ type HelmDeployHandler interface {
 	// GetLatestTafDeployStatus 获取 TAF 应用最新一次部署的状态
 	GetLatestTafDeployStatus(c *gin.Context)
 
+	// ListBKMSAppDeployRecords 获取 bkmsApp 应用部署记录列表
+	ListBKMSAppDeployRecords(c *gin.Context)
+	// PreCheckBKMSAppDeploy bkmsApp 应用部署前检查
+	PreCheckBKMSAppDeploy(c *gin.Context)
+	// CreateBKMSAppDeploy 部署 bkmsApp 应用
+	CreateBKMSAppDeploy(c *gin.Context)
+	// DeleteBKMSAppDeploy 删除 bkmsApp 应用部署
+	DeleteBKMSAppDeploy(c *gin.Context)
+	// ListBKMSAppResourceSnapshots 获取 bkmsApp 应用资源快照列表
+	ListBKMSAppResourceSnapshots(c *gin.Context)
+	// GetBKMSAppResourceSnapshot 获取 bkmsApp 应用部署记录下某个资源的快照详情
+	GetBKMSAppResourceSnapshot(c *gin.Context)
+	// GetLatestBKMSAppDeployStatus 获取 bkmsApp 应用最新一次部署的状态
+	GetLatestBKMSAppDeployStatus(c *gin.Context)
+
 	// GetBatchReleaseProgress 获取应用模型应用最新一次部署的分批发布进度
 	GetBatchReleaseProgress(c *gin.Context)
 	// OperateBatchRelease 对进行中的分批发布执行手动操作（继续、暂停、回退上一批、跳过剩余批次、回滚）
@@ -132,6 +147,18 @@ func Register(rg *gin.RouterGroup, h HelmDeployHandler) {
 	rg.GET("/apps/:appID/envs/:envName/taf-deploys/:deployID/resource-snapshots/:snapshotID", h.GetTafResourceSnapshot)
 	// 获取 TAF 应用最新一次部署的状态
 	rg.GET("/apps/:appID/envs/:envName/taf-deploys/latest-status", h.GetLatestTafDeployStatus)
+
+	// bkmsApp 应用部署接口，旧 trpc / taf 应用也可使用
+	rg.GET("/apps/:appID/envs/:envName/bkmsapp-deploys", h.ListBKMSAppDeployRecords)
+	rg.GET("/apps/:appID/envs/:envName/bkmsapp-deploys/precheck", h.PreCheckBKMSAppDeploy)
+	rg.POST("/apps/:appID/envs/:envName/bkmsapp-deploys", h.CreateBKMSAppDeploy)
+	rg.DELETE("/apps/:appID/envs/:envName/bkmsapp-deploys", h.DeleteBKMSAppDeploy)
+	rg.GET("/apps/:appID/envs/:envName/bkmsapp-deploys/:deployID/resource-snapshots", h.ListBKMSAppResourceSnapshots)
+	rg.GET(
+		"/apps/:appID/envs/:envName/bkmsapp-deploys/:deployID/resource-snapshots/:snapshotID",
+		h.GetBKMSAppResourceSnapshot,
+	)
+	rg.GET("/apps/:appID/envs/:envName/bkmsapp-deploys/latest-status", h.GetLatestBKMSAppDeployStatus)
 
 	// 获取应用最新一次部署的分批发布进度
 	rg.GET("/apps/:appID/envs/:envName/batch-release", h.GetBatchReleaseProgress)

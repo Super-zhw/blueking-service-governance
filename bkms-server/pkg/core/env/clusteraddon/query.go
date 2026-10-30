@@ -126,25 +126,28 @@ func ApplicableAddonDefs(defs []*ClusterAddonDef, env *envmodel.Environment) []*
 	})
 }
 
-// AddonAppTypeOf 返回应用匹配 requiredForAppTypes / optionalForAppTypes 时使用的取值，与 app.Type 无关。
+// AddonAppTypesOf 返回应用匹配 requiredForAppTypes / optionalForAppTypes 时使用的取值，命中任一即匹配。
 //
-// 组件定义里按 trpc / taf / helm / agones 登记。AppModel 类应用按框架匹配（trpc / taf / blank），
-// type 切到 bkmsApp 后结果不变；Helm 类应用按类型匹配（helm / agones）。blank 目前没有登记，匹配不到任何组件。
-func AddonAppTypeOf(app *bkmsapp.Application) string {
-	if appruntime.IsAppModelType(app.Type) {
-		return mods.Of(app).Stack.Framework
+// AppModel 类应用（含旧 trpc / taf）按 bkmsApp 匹配；同时带上框架，兼容仍按 trpc / taf 登记的组件定义。
+// Helm 类应用按类型匹配（helm / agones）。
+func AddonAppTypesOf(app *bkmsapp.Application) []string {
+	if !appruntime.IsAppModelType(app.Type) {
+		return []string{app.Type}
 	}
-	return app.Type
+	if framework := mods.Of(app).Stack.Framework; framework != "" {
+		return []string{bkmsapp.AppTypeBKMSApp, framework}
+	}
+	return []string{bkmsapp.AppTypeBKMSApp}
 }
 
 // InspectRequiredAddons 查询必选组件状态。缺失作为检查结果，查询失败作为错误返回。
-// addonAppType 为 AddonAppTypeOf 的结果，不是应用类型。
+// addonAppTypes 为 AddonAppTypesOf 的结果，不是应用类型。
 // namespace 的取值与组件列表、安装和卸载接口保持一致：优先使用传入值，为空时取各组件的 defaultNamespace，再回退到 bcs-system。
 // 当前部署预检和创建部署均传空值，保留按 namespace 复用查询，不因前端安装表单固定使用 bcs-system 而在此写死。
 func InspectRequiredAddons(
 	ctx context.Context,
 	defs []*ClusterAddonDef,
-	addonAppType string,
+	addonAppTypes []string,
 	env *envmodel.Environment,
 	namespace string,
 ) ([]AddonReference, error) {
@@ -153,7 +156,7 @@ func InspectRequiredAddons(
 	releasesByNamespace := make(map[string][]*helm.Release)
 	// 只检查适用于目标环境、且当前应用必选的组件。
 	for _, def := range ApplicableAddonDefs(defs, env) {
-		if !lo.Contains(def.RequiredForAppTypes, addonAppType) {
+		if !lo.Some(def.RequiredForAppTypes, addonAppTypes) {
 			continue
 		}
 		addon := AddonReference{Name: def.Name, DisplayName: def.DisplayName}

@@ -232,6 +232,8 @@ type AppModelSpecOutputObj struct {
 	TrpcSpec *TrpcSpecOutputObj `json:"trpcSpec,omitempty"`
 	// TAF 框架配置
 	TafSpec *TafSpecOutputObj `json:"tafSpec,omitempty"`
+	// 框架扩展配置，仅 bkmsApp 应用返回
+	FrameworkConfig *map[string]any `json:"frameworkConfig,omitempty"`
 }
 
 // VariableOutputObj is the env var output.
@@ -308,6 +310,9 @@ func (o *AppModelSpecOutputObj) FromModel(
 			FilePath:    filePath,
 			FileContent: am.Workload.TafConfig.FileContent,
 		}
+	}
+	if cfg, ok := am.Workload.GetFrameworkConfig(); ok {
+		o.FrameworkConfig = &cfg
 	}
 	return o
 }

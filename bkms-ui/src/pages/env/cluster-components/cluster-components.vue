@@ -299,6 +299,9 @@
   // 展开的应用类型分组集合
   const expandedGroups = ref<Set<string>>(new Set());
 
+  // 组件定义同时登记了旧值 trpc / taf 与 bkmsApp，暂时只按旧值分组展示，开放 bkmsApp 应用后再切换
+  const hiddenAppTypes = new Set(['bkmsApp']);
+
   // 按应用类型分组的计算属性
   const appTypeGroups = computed<AppTypeGroup[]>(() => {
     // 收集所有出现过的应用类型
@@ -311,6 +314,7 @@
         appTypeSet.add(at);
       }
     }
+    hiddenAppTypes.forEach(at => appTypeSet.delete(at));
 
     // 为每个应用类型构建分组
     const groups: AppTypeGroup[] = [];

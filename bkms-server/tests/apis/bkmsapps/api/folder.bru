@@ -1,0 +1,21 @@
+meta {
+  name: api
+  seq: 1
+}
+
+auth {
+  mode: inherit
+}
+
+script:pre-request {
+  // 新接口的基础用例：只创建应用，不触发真实部署
+  const common = require("./common");
+
+  if (!bru.getVar("bkmsAppWorkspaceID")) {
+    const suffix = bru.getVar("randomSuffix");
+    const ws = await common.createWorkspace({id: `bkmsapp-ws-${suffix}`});
+    bru.setVar("bkmsAppWorkspaceID", ws.id);
+    bru.setVar("bkmsAppBlankID", `bkmsapp-blank-${suffix}`);
+    bru.setVar("bkmsAppTafID", `bkmsapp-taf-${suffix}`);
+  }
+}

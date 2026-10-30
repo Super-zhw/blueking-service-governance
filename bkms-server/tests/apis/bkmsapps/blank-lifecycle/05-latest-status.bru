@@ -1,0 +1,28 @@
+meta {
+  name: 05-latest-status
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{serviceURL}}/apps/{{blankLcAppID}}/envs/{{blankLcEnvName}}/bkmsapp-deploys/latest-status
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should expose the deploy record via latest-status", () => {
+    expect(res.body.data.deployID).to.equal(bru.getVar("blankLcDeployID"));
+    expect(res.body.data.status).to.equal("deployed");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

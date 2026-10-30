@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | BKMSApp 持久化字面值 | `bkmsApp` | JSON/BSON/API 第一份新字段起使用该值，不再讨论驼峰或连字符变体 |
 | 框架配置字段 | `frameworkConfig`（对象）、`frameworkConfigVersion`（int，初始 1） | 只存框架扩展；`fileContent` 不进 map。`fileName` / `filePath` 原定首期放 map，**已改为收敛到框架 def**，见总体方案 §3.4 |
-| TAF 支持语言 | 目录声明 **仅 cpp** | 现有模型/API/Bruno 均无 TAF language 字段。存量未扫描前 **不得** 批量写 `language=cpp`。兼容读取可将 framework 投影为 `taf`，language 留空并记 `incomplete_language` |
+| TAF 支持语言 | 目录声明 **仅 cpp** | 现有模型/API/Bruno 均无 TAF language 字段。存量未扫描前 **不得** 批量写 `language=cpp`。兼容读取可将 framework 投影为 `taf`，language 留空并记 `incomplete_language`。**2026-10-28 已核对：** 正式环境 1 个 TAF 应用，确认为 C++；测试环境 13 个为测试数据。M8 回填为 `cpp` |
 | 技术栈可变性 | 普通更新 **不可变** | `PUT /trpc-spec` 今日会改 `Workload.TrpcConfig.Language` 但不改 `Application.TrpcSpec`。兼容窗口内：旧入口若提交与当前生效 language **不同** 的值，返回明确的“不支持切换技术栈”错误（该校验落在后续写路径收拢批次，不在阶段 1 读模型里改写行为） |
 | 兼容发布 | 桥接版本 → 客户端同时识别新旧 → 数据切换 → 删旧入口 | 窗口内详情/列表 **继续输出存量 `type=trpc\|taf`**；只增量返回 `language` / `framework`。窗口内 **不开放 blank 创建**，不把 type 切成 `bkmsApp` |
 | 客户端兼容窗口 | 阶段 4 切换 type 响应前，UI/CLI 必须同时识别 `trpc` / `taf` / `bkmsApp` | 未完成客户端迁移前，服务端创建仍写旧 type。阶段 1 不改创建入口 oneof |
@@ -23,7 +23,7 @@
 
 `supported` 表示 **今天代码真实开放的路径**。blank 仅目录合法，阶段 1 不创建。
 
-| 能力 | trpc+go | trpc+cpp | taf（无 language） | blank+go/cpp | helm | agones |
+| 能力 | trpc+go | trpc+cpp | taf（无 language） | blank+go/cpp/nodejs/python | helm | agones |
 | --- | --- | --- | --- | --- | --- | --- |
 | 管理方式 AppModel | 是 | 是 | 是 | 目标 | 否 | 否 |
 | `appModelDeploy` 部署/状态/实例 | 是 | 是 | 是 | 阶段 3 | Helm 独立链路 | Agones 独立链路 |
@@ -39,7 +39,7 @@
 | 组件引用查询 | 仅 `type=trpc` | 同左 | **未查** | 否 | 否 | 否 |
 | 集群 addon `requiredForAppTypes` | `trpc`,`taf` | 同左 | 同左 | 阶段 3E | 部分 addon 含 helm/agones | 同左 |
 
-合法组合（阶段 1 目录）：`trpc+go`、`trpc+cpp`、`taf+cpp`、`blank+go`、`blank+cpp`。合法不等于功能全开：`blank+go` 不自动获得 platformBuild。
+合法组合（阶段 1 目录）：`trpc+go`、`trpc+cpp`、`taf+cpp`、`blank+go`、`blank+cpp`。合法不等于功能全开：`blank+go` 不自动获得 platformBuild。M5 + M6 起目录新增 `blank+nodejs`、`blank+python`。
 
 ## 3. 旧分支消费清单（分类）
 
@@ -145,7 +145,7 @@
 | --- | --- |
 | `language_conflict` | Application / TrpcSpec / TrpcConfig 语言非空且不一致 |
 | `type_framework_conflict` | App type、Application.Framework、非空 Workload.Type 指向不同框架 |
-| `unknown_language` | 非 go/cpp（含 java/node/python 存量） |
+| `unknown_language` | 不在语言目录中（go/cpp/nodejs/python 之外，如 java）。nodejs、python 于 M5 + M6 加入目录，与 trpc / taf 组合时报 `invalid_combination` |
 | `unknown_framework` / `unknown_app_type` | 目录外取值 |
 | `invalid_combination` | 如 taf+go |
 | `incomplete_language` | 无有效 language；TAF 为 advisory，tRPC/blank/新 bkmsApp 为 blocking |

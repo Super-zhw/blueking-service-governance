@@ -1,0 +1,32 @@
+meta {
+  name: 06-get-blank-runtime-mods
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{serviceURL}}/apps/{{bkmsAppBlankID}}/runtime-mods
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should not support any framework capability", () => {
+    const data = res.body.data;
+    expect(data.type).to.equal("bkmsApp");
+    expect(data.framework).to.equal("blank");
+    Object.entries(data.mods).forEach(([id, mod]) => {
+      expect(mod.supported, id).to.equal(false);
+    });
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

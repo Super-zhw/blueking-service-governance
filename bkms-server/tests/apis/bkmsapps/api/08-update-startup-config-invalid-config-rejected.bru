@@ -1,0 +1,34 @@
+meta {
+  name: 08-update-startup-config-invalid-config-rejected
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{serviceURL}}/apps/{{bkmsAppBlankID}}/startup-config
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "shCommand": "sleep 7200",
+    "frameworkConfig": {"fileName": "app.yaml"}
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body: isJson
+}
+
+tests {
+  test("should reject unknown frameworkConfig keys", () => {
+    expect(JSON.stringify(res.body)).to.include("invalid keys: fileName");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

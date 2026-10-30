@@ -33,7 +33,7 @@
 5. **把旧 Workload.Type、隐式 tRPC 默认值、存量配置和客户端纳入迁移。** 单纯替换 AppType 常量会漏掉真实的渲染分派与产品入口。
 6. **新 API 发布与旧 API 删除分为两个阶段。** 已确认采用分阶段兼容迁移：先兼容读写，再迁移调用方与数据，满足退出条件后删除旧入口。具体兼容窗口与各发布批次在阶段 0 确定。
 
-本期保留 Helm/Agones 现有模型与行为。BKMSApp 成为新建默认类型，不意味着所有应用类型都改用 AppModel。`language` 目前表示 Go/C++ 技术栈，不承载语言版本、ABI、构建镜像、CPU 架构等信息。
+本期保留 Helm/Agones 现有模型与行为。BKMSApp 成为新建默认类型，不意味着所有应用类型都改用 AppModel。`language` 目前表示 Go/C++/Node.js/Python 技术栈（Node.js、Python 仅 blank 支持），不承载语言版本、ABI、构建镜像、CPU 架构等信息。
 
 实施顺序概览：
 
@@ -87,7 +87,7 @@ UI 的技术栈分支分布在应用类型 composable、store、表单、部署�
 | 对象 | 字段 | 约束 |
 | --- | --- | --- |
 | Application | `type` | 新创建请求缺省为 bkmsApp；未知值报错。数据库旧记录缺 type 不按新建默认值自动补齐 |
-| Application | `language` | BKMSApp 必填：go/cpp；Helm/Agones 暂不要求填写，不自动填 go |
+| Application | `language` | BKMSApp 必填：go/cpp/nodejs/python，须为框架支持的语言；Helm/Agones 暂不要求填写，不自动填 go |
 | Application | `framework` | BKMSApp 必填：trpc/taf/blank；blank 是显式字面值，不是空字符串 |
 | AppModel.Workload | `frameworkConfig` | `map[string]any`，只保存框架专属配置（目前无）；不存放配置文件挂载信息，见 §3.4 |
 | AppModel.Workload | `frameworkConfigVersion` | 初始为 1，描述该框架 map 的 schema 版本；不等于框架软件版本 |
@@ -121,9 +121,9 @@ type Workload struct {
 | --- | --- | --- |
 | trpc | go、cpp | 当前创建 API 已支持 |
 | taf | cpp（待存量核对） | 现有 TAF 模型没有 language，不能仅凭代码证明线上全为 C++；迁移前核对样本及产品约束 |
-| blank | go、cpp | 新能力目标；先支持用户提供镜像/已有可用构建路径，再逐项开放框架无关特性 |
+| blank | go、cpp、nodejs、python | 新能力目标；先支持用户提供镜像/已有可用构建路径，再逐项开放框架无关特性。nodejs、python 于 M5 + M6 加入 |
 
-TAF 若有 Go 存量，不静默标为 cpp：补齐 taf+go 的测试与声明，或将该批记录列为待处理。管理命令代码中出现的 java/node/python 分支不代表本期新增这些语言。
+TAF 若有 Go 存量，不静默标为 cpp：补齐 taf+go 的测试与声明，或将该批记录列为待处理。管理命令代码中出现的 java/node/python 分支不代表 tRPC 支持这些语言；nodejs、python 只对 blank 开放，java 不在目录中。
 
 框架和语言组合合法不代表支持全部功能。比如 blank+go 合法，首期仍不自动支持平台 Dockerfile 构建。
 
@@ -251,7 +251,7 @@ AppSpec.DevMode 保留 Enabled 等用户配置；模块 props 为平台定义的
 
 ### 5.1 目标接口
 
-以下是路由建议，均相对于现有 API 路由前缀。正式发布前固定命名并补充 Swagger。
+以下是路由建议，均相对于现有 API 路由前缀。正式发布前固定命名并补充 Swagger。实际实施与本表的差异（新开 `POST /workspaces/:workspaceID/bkmsapps`、旧入口不改、路由改名）见 [新 API 与 blank 闭环](./bkms_app_runtime_model_phase4_api.md) §6。
 
 | 接口 | 行为 |
 | --- | --- |

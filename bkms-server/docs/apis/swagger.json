@@ -12,6 +12,34 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/app-runtime-definitions": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "查询框架目录与能力矩阵",
+                "operationId": "GetAppRuntimeDefinitions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.GetAppRuntimeDefinitionsOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/auto-id-suffix": {
             "get": {
                 "security": [
@@ -8207,6 +8235,517 @@
                 }
             }
         },
+        "/apps/{appID}/envs/{envName}/bkmsapp-deploys": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "获取 bkmsApp 应用部署记录列表",
+                "operationId": "ListBKMSAppDeployRecords",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署的泳道名称（空字符串表示不使用泳道）",
+                        "name": "trafficLaneName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键字",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页页码（从 1 开始）",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ListAppModelDeployRecordsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "创建 bkmsApp 应用部署",
+                "operationId": "CreateBKMSAppDeploy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "创建部署请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.CreateAppModelDeployInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_deploy_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "删除 bkmsApp 应用部署（下架当前环境最新版本）",
+                "operationId": "DeleteBKMSAppDeploy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署的泳道名称（空字符串表示不使用泳道）",
+                        "name": "trafficLaneName",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_deploy_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/bkmsapp-deploys/latest-status": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "获取 bkmsApp 应用最新一次部署的状态",
+                "operationId": "GetLatestBKMSAppDeployStatus",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署的泳道名称（空字符串表示不使用泳道）",
+                        "name": "trafficLaneName",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.GetLatestAppModelDeployStatusOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/bkmsapp-deploys/precheck": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "bkmsApp 应用部署前检查",
+                "operationId": "PreCheckBKMSAppDeploy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.DeployPreCheckOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/bkmsapp-deploys/{deployID}/resource-snapshots": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "获取 bkmsApp 应用资源快照列表",
+                "operationId": "ListBKMSAppResourceSnapshots",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署记录 ID",
+                        "name": "deployID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页页码（从 1 开始）",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ListAppModelResourceSnapshotsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/bkmsapp-deploys/{deployID}/resource-snapshots/{snapshotID}": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deploy"
+                ],
+                "summary": "获取 bkmsApp 应用部署记录下某个资源的快照详情（具体 k8s 资源的 Manifest 等）",
+                "operationId": "GetBKMSAppResourceSnapshot",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "部署记录 ID",
+                        "name": "deployID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源清单快照 ID",
+                        "name": "snapshotID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.GetAppModelResourceSnapshotOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/envs/{envName}/build-deploys": {
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "build-autodeploy"
+                ],
+                "summary": "触发 bkmsApp 应用构建并自动部署",
+                "operationId": "CreateBuildDeploy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "环境名称",
+                        "name": "envName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "构建自动部署请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.CreateAppModelBuildDeployInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_build_autodeploy_serializer.CreateBuildOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/{appID}/envs/{envName}/deployable-image-tags": {
             "get": {
                 "security": [
@@ -11790,6 +12329,49 @@
                 }
             }
         },
+        "/apps/{appID}/runtime-mods": {
+            "get": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "查询应用的能力集合",
+                "operationId": "GetAppRuntimeMods",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.GetAppRuntimeModsOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/apps/{appID}/services": {
             "get": {
                 "security": [
@@ -12013,6 +12595,61 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{appID}/startup-config": {
+            "put": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "修改 bkmsApp 应用的启动配置",
+                "operationId": "UpdateAppStartupConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用 ID",
+                        "name": "appID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "修改请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.UpdateAppStartupConfigInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_core_app_serializer.EmptyOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/bkerrs.GinErrorOutput"
                         }
@@ -17928,6 +18565,61 @@
                 }
             }
         },
+        "/workspaces/{workspaceID}/bkmsapps": {
+            "post": {
+                "security": [
+                    {
+                        "BkUserInfo": []
+                    },
+                    {
+                        "BkUserCredential": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app"
+                ],
+                "summary": "创建 bkmsApp 应用",
+                "operationId": "CreateBKMSApp",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作空间 ID",
+                        "name": "workspaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "创建 bkmsApp 应用请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.CreateBKMSAppInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/serializer.CreateAppOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/bkerrs.GinErrorOutput"
+                        }
+                    }
+                }
+            }
+        },
         "/workspaces/{workspaceID}/components": {
             "get": {
                 "security": [
@@ -21637,6 +22329,69 @@
         "github_com_TencentBlueKing_blueking-service-governance_bkms-server_pkg_workload_networking_serializer.EmptyOutput": {
             "type": "object"
         },
+        "runtimemod.PublicModView": {
+            "type": "object",
+            "properties": {
+                "props": {
+                    "description": "Props 对外参数，没有时省略。"
+                },
+                "reasonCode": {
+                    "description": "ReasonCode 不支持的原因，支持时省略。",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/runtimemod.ReasonCode"
+                        }
+                    ]
+                },
+                "supported": {
+                    "description": "Supported 是否支持。",
+                    "type": "boolean"
+                }
+            }
+        },
+        "runtimemod.PublicView": {
+            "type": "object",
+            "properties": {
+                "framework": {
+                    "description": "Framework 框架，helm、agones 应用为空。",
+                    "type": "string"
+                },
+                "language": {
+                    "description": "Language 语言，未记录时为空。",
+                    "type": "string"
+                },
+                "mods": {
+                    "description": "Mods 能力 ID 到能力的映射，包含全部能力；新增能力只会增加 key。",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/runtimemod.PublicModView"
+                    }
+                },
+                "schemaVersion": {
+                    "description": "SchemaVersion 结构版本号。",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type 应用类型，如 bkmsApp、helm。",
+                    "type": "string"
+                }
+            }
+        },
+        "runtimemod.ReasonCode": {
+            "type": "string",
+            "enum": [
+                "unsupported_app_type",
+                "unsupported_stack",
+                "invalid_stack",
+                "incomplete_language"
+            ],
+            "x-enum-varnames": [
+                "ReasonUnsupportedAppType",
+                "ReasonUnsupportedStack",
+                "ReasonInvalidStack",
+                "ReasonIncompleteLanguage"
+            ]
+        },
         "serializer.AddWorkspaceUserInput": {
             "type": "object",
             "required": [
@@ -22659,6 +23414,11 @@
                         "$ref": "#/definitions/serializer.VariableOutputObj"
                     }
                 },
+                "frameworkConfig": {
+                    "description": "框架扩展配置，仅 bkmsApp 应用返回",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
                 "shCommand": {
                     "description": "容器启动脚本，以 /bin/sh 执行",
                     "type": "string"
@@ -22703,6 +23463,25 @@
                 "workspaceID": {
                     "description": "工作空间 ID",
                     "type": "string"
+                }
+            }
+        },
+        "serializer.AppRuntimeDefinitionsOutputObj": {
+            "type": "object",
+            "properties": {
+                "frameworks": {
+                    "description": "框架目录",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.FrameworkDefOutputObj"
+                    }
+                },
+                "matrix": {
+                    "description": "每个合法技术栈组合的能力集合",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/runtimemod.PublicView"
+                    }
                 }
             }
         },
@@ -23202,6 +23981,41 @@
                 },
                 "repoName": {
                     "description": "仓库名称",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.BKMSAppModelSpecInput": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "description": "容器启动参数",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "command": {
+                    "description": "容器启动命令",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "envVars": {
+                    "description": "容器环境变量",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/serializer.VariableInput"
+                    }
+                },
+                "frameworkConfig": {
+                    "description": "框架扩展配置，按框架严格校验；缺省为空对象",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "shCommand": {
+                    "description": "容器启动脚本，以 /bin/sh 执行，与 command、args 互斥，不能为纯空白",
                     "type": "string"
                 }
             }
@@ -24956,6 +25770,59 @@
                 },
                 "trafficLaneEnabled": {
                     "type": "boolean"
+                }
+            }
+        },
+        "serializer.CreateBKMSAppInput": {
+            "type": "object",
+            "required": [
+                "appModelSpec",
+                "buildConfig",
+                "framework",
+                "id",
+                "language",
+                "name"
+            ],
+            "properties": {
+                "appModelSpec": {
+                    "description": "应用模型规范",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.BKMSAppModelSpecInput"
+                        }
+                    ]
+                },
+                "buildConfig": {
+                    "description": "构建配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.BuildConfigInput"
+                        }
+                    ]
+                },
+                "framework": {
+                    "description": "框架：trpc、taf、blank，可选值见 /app-runtime-definitions",
+                    "type": "string"
+                },
+                "frameworkConfigFile": {
+                    "description": "框架配置文件。框架支持框架配置文件时必填，blank 不能传",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/serializer.FrameworkConfigFileInput"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "应用 ID. 应用在全局范围内的唯一标识，默认情况下基于 name 自动生成，在 name 后追加后缀。\n长度范围 1~63 个字符，以小写字母开头，可包含小写字母、数字、中划线，不能以中划线结尾",
+                    "type": "string"
+                },
+                "language": {
+                    "description": "语言：go、cpp、nodejs、python，须为框架支持的语言（nodejs、python 仅 blank 支持）",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "应用名称. 长度范围 1~63 个字符，以小写字母开头，可包含小写字母、数字、中划线，不能以中划线结尾",
+                    "type": "string"
                 }
             }
         },
@@ -26957,6 +27824,47 @@
                 }
             }
         },
+        "serializer.FrameworkConfigFileInput": {
+            "type": "object",
+            "required": [
+                "mountDir",
+                "name"
+            ],
+            "properties": {
+                "content": {
+                    "description": "文件内容",
+                    "type": "string"
+                },
+                "mountDir": {
+                    "description": "挂载目录",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "文件名",
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.FrameworkDefOutputObj": {
+            "type": "object",
+            "properties": {
+                "configVersion": {
+                    "description": "frameworkConfig 的 schema 版本",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "框架名",
+                    "type": "string"
+                },
+                "supportedLanguages": {
+                    "description": "支持的语言",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "serializer.GPAConfigOutputObj": {
             "type": "object",
             "properties": {
@@ -27253,6 +28161,22 @@
             "properties": {
                 "data": {
                     "$ref": "#/definitions/serializer.AppDetailOutputObj"
+                }
+            }
+        },
+        "serializer.GetAppRuntimeDefinitionsOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/serializer.AppRuntimeDefinitionsOutputObj"
+                }
+            }
+        },
+        "serializer.GetAppRuntimeModsOutput": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/runtimemod.PublicView"
                 }
             }
         },
@@ -33796,6 +34720,33 @@
                 },
                 "trafficLaneEnabled": {
                     "type": "boolean"
+                }
+            }
+        },
+        "serializer.UpdateAppStartupConfigInput": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "description": "容器启动参数，整体替换",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "command": {
+                    "description": "容器启动命令，整体替换",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "frameworkConfig": {
+                    "description": "框架扩展配置：缺省不修改，null 拒绝，对象（含 {}）整体替换并重新校验",
+                    "type": "object"
+                },
+                "shCommand": {
+                    "description": "容器启动脚本，整体替换；与 command、args 互斥，不能为纯空白",
+                    "type": "string"
                 }
             }
         },

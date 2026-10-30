@@ -67,7 +67,7 @@ type Stack struct {
 	Type string
 	// Framework is trpc, taf or blank. Empty for Helm/Agones.
 	Framework string
-	// Language is go or cpp. Empty when incomplete and not guessed.
+	// Language is go, cpp, nodejs or python. Empty when incomplete and not guessed.
 	Language string
 }
 

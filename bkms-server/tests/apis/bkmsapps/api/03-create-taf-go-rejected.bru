@@ -1,0 +1,39 @@
+meta {
+  name: 03-create-taf-go-rejected
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{serviceURL}}/workspaces/{{bkmsAppWorkspaceID}}/bkmsapps
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "{{bkmsAppTafID}}",
+    "id": "{{bkmsAppTafID}}",
+    "framework": "taf",
+    "language": "go",
+    "appModelSpec": {"command": ["sleep"], "args": ["3600"]},
+    "frameworkConfigFile": {"name": "app.conf", "mountDir": "/etc/app"},
+    "buildConfig": {"sourceType": "imageRegistry", "imageBuildConfig": {"name": "app"}}
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body: isJson
+}
+
+tests {
+  test("should reject a language the framework does not support", () => {
+    expect(JSON.stringify(res.body)).to.include("does not support language");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

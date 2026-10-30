@@ -25,7 +25,6 @@ import (
 
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/common/bkerrs"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/app/appcfg"
-	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/core/appruntime/runtimemod/mods"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/infras/account/auth"
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-server/pkg/misc/audit"
@@ -169,12 +168,8 @@ func (h *Handler) CreateAppConfigFileDef(c *gin.Context) {
 	fileType := appcfg.AppConfigFileType(input.FileType)
 	fileFormat := appcfg.FileFormat(input.FileFormat)
 
-	// plain 配置文件只在 AppModel 渲染链路中挂载，Helm / Agones 创建后不会生效
-	if appcfg.ConfigKind(input.ConfigKind) == appcfg.ConfigKindPlain && !appruntime.IsAppModelType(app.Type) {
-		bkerrs.AbortWithErr(
-			c,
-			bkerrs.New(bkerrs.ErrCodeInvalidArgument, "plain config file is only supported for appmodel applications"),
-		)
+	if err = validateConfigKindForApp(app, appcfg.ConfigKind(input.ConfigKind)); err != nil {
+		bkerrs.AbortWithErr(c, bkerrs.Wrap(err, bkerrs.ErrCodeInvalidArgument, "validating config kind"))
 		return
 	}
 

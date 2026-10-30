@@ -1,0 +1,51 @@
+meta {
+  name: 02-create-deploy
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{serviceURL}}/apps/{{tafLcAppID}}/envs/{{tafLcEnvName}}/bkmsapp-deploys
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "imageTag": "{{tafLcImageTag}}",
+    "replicas": 1
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+script:post-response {
+  if (res.status !== 200) {
+    return;
+  }
+  const appmodel = require("./helpers/appmodel");
+  const record = await appmodel.waitForAppModelDeployTerminal({
+    kind: "bkmsapp",
+    appID: bru.getVar("tafLcAppID"),
+    envName: bru.getVar("tafLcEnvName"),
+    expectedStatus: "deployed",
+    imageTag: bru.getVar("tafLcImageTag")
+  });
+  bru.setVar("tafLcDeployID", record.id);
+  bru.setVar("tafLcDeployStatus", record.status);
+}
+
+tests {
+  test("should deploy the taf app and converge to deployed", () => {
+    expect(bru.getVar("tafLcDeployID")).to.be.a("string").and.not.empty;
+    expect(bru.getVar("tafLcDeployStatus")).to.equal("deployed");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 130000
+}

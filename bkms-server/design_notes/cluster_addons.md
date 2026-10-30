@@ -28,8 +28,8 @@
 | `chartInfo.defaultChartVersion` | string | | 默认使用的 Chart 版本 |
 | `chartInfo.defaultNamespace` | string | | 默认安装命名空间（若未指定，使用 `bcs-system`） |
 | `chartInfo.exampleValues` | string | | 安装示例参数（YAML 格式字符串，包含注释说明） |
-| `requiredForAppTypes` | []string | | 应装插件的应用类型列表（e.g., `["trpc"]`） |
-| `optionalForAppTypes` | []string | | 可选安装该插件的应用类型列表（e.g., `["taf"]`） |
+| `requiredForAppTypes` | []string | | 应装插件的应用类型列表（e.g., `["trpc", "taf", "bkmsApp"]`）。AppModel 应用按 `bkmsApp` 与框架匹配，命中任一即可；trpc / taf 为旧登记值，保留以兼容旧版本，M9 删除 |
+| `optionalForAppTypes` | []string | | 可选安装该插件的应用类型列表（e.g., `["trpc", "taf", "bkmsApp"]`） |
 
 注意，在 DB 中存储的实际上只是插件的定义，用户获取插件列表时，后台实际会根据 DB 中的定义列表，分别在预置的 Helm 仓库中获取对应 Chart 的列表（用于拼装可选的版本号等信息），然后在用户集群中获取是否有对应安装的 Helm Release 信息（用于拼装当前版本、部署参数、部署状态等信息）
 

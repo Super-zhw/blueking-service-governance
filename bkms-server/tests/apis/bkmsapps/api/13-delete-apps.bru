@@ -1,0 +1,34 @@
+meta {
+  name: 13-delete-apps
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{serviceURL}}/apps/{{bkmsAppBlankID}}
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const axios = require("axios");
+  const {AUTH_HEADERS} = require("./common");
+  const resp = await axios.delete(`${bru.getEnvVar("serviceURL")}/apps/${bru.getVar("bkmsAppTafID")}`,
+    {headers: AUTH_HEADERS, validateStatus: () => true});
+  bru.setVar("bkmsAppTafDeleteStatus", resp.status);
+}
+
+tests {
+  test("should delete both bkmsApp apps", () => {
+    expect(bru.getVar("bkmsAppTafDeleteStatus")).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

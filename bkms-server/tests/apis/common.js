@@ -886,6 +886,65 @@ async function createAppModelDeploy(options = {}) {
   }
 }
 
+/**
+ * Create a bkmsApp app through the bkmsapps API.
+ * This helper is idempotent per app ID.
+ *
+ * @param {Object} options
+ * @param {string} options.id - Application ID (required).
+ * @param {string} options.workspaceID - Workspace ID (required).
+ * @param {string} options.framework - trpc / taf / blank (required).
+ * @param {string} options.language - go / cpp / nodejs / python (required).
+ * @param {string} [options.name] - Application name (defaults to id).
+ * @param {Object} [options.appModelSpec] - App model spec.
+ * @param {Object} [options.frameworkConfigFile] - Framework config file, required by trpc / taf.
+ * @param {Object} [options.buildConfig] - Build config.
+ * @returns {Promise<{id: string, name: string}>}
+ */
+async function createBKMSApp(options = {}) {
+  const serviceURL = bru.getEnvVar('serviceURL');
+  for (const field of ['id', 'workspaceID', 'framework', 'language']) {
+    if (!options[field]) {
+      throw new Error(`${field} is required`);
+    }
+  }
+  const appID = options.id;
+  const appName = options.name || appID;
+  const appKey = `BKMSAppCreated_${appID}`;
+  if (bru.getVar(appKey)) {
+    console.error(`bkmsApp ${appID} already created, skip creation`);
+    return {id: appID, name: appName};
+  }
+
+  const body = {
+    id: appID,
+    name: appName,
+    framework: options.framework,
+    language: options.language,
+    appModelSpec: options.appModelSpec || {command: [], args: [], envVars: []},
+    buildConfig: options.buildConfig || {
+      sourceType: 'imageRegistry',
+      imageBuildConfig: {name: appName}
+    }
+  };
+  if (options.frameworkConfigFile) {
+    body.frameworkConfigFile = options.frameworkConfigFile;
+  }
+
+  try {
+    const response = await axios.post(`${serviceURL}/workspaces/${options.workspaceID}/bkmsapps`, body, {
+      headers: AUTH_HEADERS
+    });
+    bru.setVar(appKey, true);
+    const created = response.data?.data || {};
+    return {id: created.id || appID, name: created.name || appName};
+  } catch (error) {
+    console.error('=== bkmsApp Creation Error ===');
+    console.error('Error response:', error.response?.data);
+    throw error;
+  }
+}
+
 module.exports = {
   AUTH_HEADERS,
   sleep,
@@ -896,6 +955,7 @@ module.exports = {
   createEnvironment,
   createTrpcApp,
   createTafApp,
+  createBKMSApp,
   updateDefaultAppSpecResources,
   ensureWorkspaceComponent,
   ensureGlobalVolumeSecretWorkspaceComponent,

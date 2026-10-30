@@ -1,0 +1,34 @@
+meta {
+  name: 05-get-blank-app
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{serviceURL}}/apps/{{bkmsAppBlankID}}
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should return the new model fields", () => {
+    const data = res.body.data;
+    expect(data.type).to.equal("bkmsApp");
+    expect(data.framework).to.equal("blank");
+    expect(data.language).to.equal("go");
+    expect(data.appModelSpec.command).to.deep.equal(["sleep"]);
+    expect(data.appModelSpec.frameworkConfig).to.deep.equal({});
+    expect(data.appModelSpec.trpcSpec).to.be.undefined;
+    expect(data.appModelSpec.tafSpec).to.be.undefined;
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

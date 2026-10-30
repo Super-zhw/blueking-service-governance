@@ -1,0 +1,40 @@
+meta {
+  name: 01-create-plain-file
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{serviceURL}}/apps/{{blankLcAppID}}/app-config-file-defs
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "app.yaml",
+    "configKind": "plain",
+    "mountDir": "/etc/blank-app",
+    "fileFormat": "yaml",
+    "fileType": "normal",
+    "contentSourceType": "local",
+    "content": "greeting: hello\n",
+    "description": "plain file for blank app"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should create a plain config file for the blank app", () => {
+    expect(res.body.item.configKind).to.equal("plain");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 10000
+}

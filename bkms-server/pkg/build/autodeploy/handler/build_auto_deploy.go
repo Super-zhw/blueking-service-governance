@@ -113,7 +113,29 @@ func (h *Handler) CreateTafBuildDeploy(c *gin.Context) {
 	h.createAppModelBuildDeploy(c, appruntime.FrameworkTAF)
 }
 
-// createAppModelBuildDeploy 触发构建并自动部署。expectedFramework 为旧 trpc / taf 专属接口要求的应用框架
+// CreateBuildDeploy 触发 bkmsApp 应用构建，并在构建成功后自动部署到指定环境；旧 trpc / taf 应用也可使用。
+//
+//	@ID				CreateBuildDeploy
+//	@Summary		触发 bkmsApp 应用构建并自动部署
+//	@Tags			build-autodeploy
+//	@Accept			json
+//	@Produce		json
+//	@Security		BkUserInfo
+//	@Security		BkUserCredential
+//	@Param			appID	path		string										true	"应用 ID"
+//	@Param			envName	path		string										true	"环境名称"
+//	@Param			body	body		serializer.CreateAppModelBuildDeployInput	true	"构建自动部署请求"
+//	@Success		200		{object}	serializer.CreateBuildOutput
+//	@Failure		400		{object}	bkerrs.GinErrorOutput
+//	@Failure		404		{object}	bkerrs.GinErrorOutput
+//	@Failure		500		{object}	bkerrs.GinErrorOutput
+//	@Router			/apps/{appID}/envs/{envName}/build-deploys [post]
+func (h *Handler) CreateBuildDeploy(c *gin.Context) {
+	h.createAppModelBuildDeploy(c, "")
+}
+
+// createAppModelBuildDeploy 触发构建并自动部署。expectedFramework 为旧 trpc / taf 专属接口要求的应用框架，
+// build-deploys 接口传空字符串，不校验框架
 func (h *Handler) createAppModelBuildDeploy(c *gin.Context, expectedFramework string) {
 	// 绑定路径和请求体，并合并新旧修订字段；失败已写响应
 	uriInput, input, rev, ok := bindBuildDeployRequest(c)
@@ -194,7 +216,9 @@ func (h *Handler) prepareBuildAutoDeploy(
 		return nil, false
 	}
 
-	if mods.Of(app).Stack.Framework != expectedFramework {
+	// build-deploys 接口只要求是 AppModel 应用，旧专属接口还要求框架一致
+	if !appruntime.IsAppModelType(app.Type) ||
+		(expectedFramework != "" && mods.Of(app).Stack.Framework != expectedFramework) {
 		bkerrs.AbortWithErr(c, bkerrs.Errorf(bkerrs.ErrCodeInvalidArgument, "invalid app type: %s", app.Type))
 		return nil, false
 	}
