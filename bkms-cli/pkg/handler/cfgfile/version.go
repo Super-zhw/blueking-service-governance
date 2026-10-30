@@ -54,25 +54,6 @@ type VersionOutput struct {
 	OverlayContent      *string `json:"overlayContent,omitempty" yaml:"overlayContent,omitempty" table:"-"`
 }
 
-func toVersionOutput(v *client.AppConfigFileVersion, currentVersion int64) VersionOutput {
-	return VersionOutput{
-		Version:             v.Version,
-		OperationType:       v.OperationType,
-		RollbackFromVersion: v.RollbackFromVersion,
-		Description:         v.Description,
-		Creator:             v.Creator,
-		CreatedAt:           v.CreatedAt,
-		IsCurrent:           v.Version == currentVersion,
-		Name:                v.Name,
-		EnvName:             formatEnvName(v.EnvName),
-		Type:                v.Type,
-		ID:                  v.ID,
-		AppConfigFileID:     v.AppConfigFileID,
-		Content:             v.Content,
-		OverlayContent:      v.OverlayContent,
-	}
-}
-
 // VersionsResult 是历史版本类命令的公共结果。
 type VersionsResult struct {
 	target *fileTarget
@@ -81,67 +62,6 @@ type VersionsResult struct {
 // SharesDefault 表示指定了环境，但该环境没有独立实例，版本记录属于默认文件。
 func (r *VersionsResult) SharesDefault() bool {
 	return r.target.SharesDefault()
-}
-
-// loadVersionTarget 定位版本类命令操作的文件；写操作要求指定环境必须有独立实例，避免误改默认文件。
-func loadVersionTarget(
-	ctx context.Context,
-	cli client.Client,
-	appID string,
-	ref FileRef,
-	envName string,
-	write bool,
-) (*fileTarget, error) {
-	target, err := loadTarget(ctx, cli, appID, ref, envName)
-	if err != nil {
-		return nil, err
-	}
-	if write && target.SharesDefault() {
-		return nil, errors.Errorf(
-			"env %s of config file %s has no independent config, its versions belong to the default file; "+
-				"omit --env to operate on the default file",
-			envName, target.Def.Name,
-		)
-	}
-	return target, nil
-}
-
-// resolveVersion 按 VersionRef 获取目标文件的某个历史版本，并校验版本属于该文件。
-func resolveVersion(
-	ctx context.Context,
-	cli client.Client,
-	appID, fileID string,
-	ref VersionRef,
-) (*client.AppConfigFileVersion, error) {
-	if (ref.VersionID == "") == (ref.Version == nil) {
-		return nil, errors.New("exactly one of version or version ID must be specified")
-	}
-
-	if ref.VersionID != "" {
-		version, err := cli.GetAppConfigFileVersion(ctx, appID, ref.VersionID)
-		if err != nil {
-			return nil, errors.Wrap(err, "get app config file version")
-		}
-		if version.AppConfigFileID != fileID {
-			return nil, errors.Errorf("version %s does not belong to the selected config file", ref.VersionID)
-		}
-		return version, nil
-	}
-
-	resp, err := cli.ListAppConfigFileVersions(ctx, appID, client.ListAppConfigFileVersionsOptions{
-		AppConfigFileID: fileID,
-		Version:         ref.Version,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "list app config file versions")
-	}
-	version, found := lo.Find(resp.Results, func(item client.AppConfigFileVersion) bool {
-		return item.Version == *ref.Version
-	})
-	if !found {
-		return nil, errors.Errorf("version %d not found", *ref.Version)
-	}
-	return &version, nil
 }
 
 // ListVersionsResult 是历史版本列表结果。
@@ -285,4 +205,84 @@ func DeleteVersion(
 		return nil, errors.Wrap(err, "delete app config file version")
 	}
 	return version, nil
+}
+
+func toVersionOutput(v *client.AppConfigFileVersion, currentVersion int64) VersionOutput {
+	return VersionOutput{
+		Version:             v.Version,
+		OperationType:       v.OperationType,
+		RollbackFromVersion: v.RollbackFromVersion,
+		Description:         v.Description,
+		Creator:             v.Creator,
+		CreatedAt:           v.CreatedAt,
+		IsCurrent:           v.Version == currentVersion,
+		Name:                v.Name,
+		EnvName:             formatEnvName(v.EnvName),
+		Type:                v.Type,
+		ID:                  v.ID,
+		AppConfigFileID:     v.AppConfigFileID,
+		Content:             v.Content,
+		OverlayContent:      v.OverlayContent,
+	}
+}
+
+// loadVersionTarget 定位版本类命令操作的文件；写操作要求指定环境必须有独立实例，避免误改默认文件。
+func loadVersionTarget(
+	ctx context.Context,
+	cli client.Client,
+	appID string,
+	ref FileRef,
+	envName string,
+	write bool,
+) (*fileTarget, error) {
+	target, err := loadTarget(ctx, cli, appID, ref, envName)
+	if err != nil {
+		return nil, err
+	}
+	if write && target.SharesDefault() {
+		return nil, errors.Errorf(
+			"env %s of config file %s has no independent config, its versions belong to the default file; "+
+				"omit --env to operate on the default file",
+			envName, target.Def.Name,
+		)
+	}
+	return target, nil
+}
+
+// resolveVersion 按 VersionRef 获取目标文件的某个历史版本，并校验版本属于该文件。
+func resolveVersion(
+	ctx context.Context,
+	cli client.Client,
+	appID, fileID string,
+	ref VersionRef,
+) (*client.AppConfigFileVersion, error) {
+	if (ref.VersionID == "") == (ref.Version == nil) {
+		return nil, errors.New("exactly one of version or version ID must be specified")
+	}
+
+	if ref.VersionID != "" {
+		version, err := cli.GetAppConfigFileVersion(ctx, appID, ref.VersionID)
+		if err != nil {
+			return nil, errors.Wrap(err, "get app config file version")
+		}
+		if version.AppConfigFileID != fileID {
+			return nil, errors.Errorf("version %s does not belong to the selected config file", ref.VersionID)
+		}
+		return version, nil
+	}
+
+	resp, err := cli.ListAppConfigFileVersions(ctx, appID, client.ListAppConfigFileVersionsOptions{
+		AppConfigFileID: fileID,
+		Version:         ref.Version,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "list app config file versions")
+	}
+	version, found := lo.Find(resp.Results, func(item client.AppConfigFileVersion) bool {
+		return item.Version == *ref.Version
+	})
+	if !found {
+		return nil, errors.Errorf("version %d not found", *ref.Version)
+	}
+	return &version, nil
 }

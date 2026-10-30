@@ -33,27 +33,6 @@ import (
 const versionEnvNote = `Without --env, this command works on the default file. With --env, it works on that
 environment's own content; an environment without its own content has no versions of its own.`
 
-// addVersionRefFlags 注册定位历史版本的参数：--version 或 --version-id。
-func addVersionRefFlags(cmd *cobra.Command, version *int64, versionID *string) {
-	cmd.Flags().Int64Var(version, "version", 0, "version number")
-	cmd.Flags().StringVar(versionID, "version-id", "", "version record ID")
-	cmd.MarkFlagsOneRequired("version", "version-id")
-	cmd.MarkFlagsMutuallyExclusive("version", "version-id")
-}
-
-func toVersionRef(cmd *cobra.Command, version int64, versionID string) handler.VersionRef {
-	if cmd.Flags().Changed("version") {
-		return handler.VersionRef{Version: &version}
-	}
-	return handler.VersionRef{VersionID: versionID}
-}
-
-func tipsSharesDefault(result *handler.VersionsResult, envName string) {
-	if result.SharesDefault() {
-		console.Tips("Env %s has no content of its own, showing versions of the default file", envName)
-	}
-}
-
 // NewListVersionsCmd returns a Command instance for 'app config-file list-versions' sub command.
 func NewListVersionsCmd() *cobra.Command {
 	var appID, envName, outputFormat string
@@ -196,4 +175,27 @@ func NewDeleteVersionCmd() *cobra.Command {
 	_ = cmd.MarkFlagRequired("app")
 
 	return cmd
+}
+
+// addVersionRefFlags 注册定位历史版本的参数：--version 或 --version-id。
+func addVersionRefFlags(cmd *cobra.Command, version *int64, versionID *string) {
+	cmd.Flags().Int64Var(version, "version", 0, "version number")
+	cmd.Flags().StringVar(versionID, "version-id", "", "version record ID")
+	cmd.MarkFlagsOneRequired("version", "version-id")
+	cmd.MarkFlagsMutuallyExclusive("version", "version-id")
+}
+
+// toVersionRef 根据用户实际指定的 flag 构造版本定位参数。
+func toVersionRef(cmd *cobra.Command, version int64, versionID string) handler.VersionRef {
+	if cmd.Flags().Changed("version") {
+		return handler.VersionRef{Version: &version}
+	}
+	return handler.VersionRef{VersionID: versionID}
+}
+
+// tipsSharesDefault 在环境没有独立内容、展示的是默认文件版本时给出提示。
+func tipsSharesDefault(result *handler.VersionsResult, envName string) {
+	if result.SharesDefault() {
+		console.Tips("Env %s has no content of its own, showing versions of the default file", envName)
+	}
 }

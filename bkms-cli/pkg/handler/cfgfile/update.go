@@ -105,6 +105,20 @@ func PlanUpdate(
 	return plan, nil
 }
 
+// ApplyUpdate 执行更新计划。
+func ApplyUpdate(
+	ctx context.Context,
+	cli client.Client,
+	appID string,
+	plan *UpdatePlan,
+) (*client.AppConfigFileDef, error) {
+	def, err := cli.UpdateAppConfigFileDef(ctx, appID, plan.Def.ID, plan.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "update app config file")
+	}
+	return def, nil
+}
+
 // resolveUpdateMountEnvNames 计算要提交的挂载环境列表，返回 nil 表示不修改。
 //
 // 后端无法把挂载范围改回「所有环境」（nil），--mount-all-envs 只能提交应用当前所有环境的快照，
@@ -145,18 +159,4 @@ func removedEnvInstances(instances []string, body client.UpdateAppConfigFileDefB
 	return lo.Filter(instances, func(envName string, _ int) bool {
 		return !slices.Contains(*body.MountedEnvNames, envName)
 	})
-}
-
-// ApplyUpdate 执行更新计划。
-func ApplyUpdate(
-	ctx context.Context,
-	cli client.Client,
-	appID string,
-	plan *UpdatePlan,
-) (*client.AppConfigFileDef, error) {
-	def, err := cli.UpdateAppConfigFileDef(ctx, appID, plan.Def.ID, plan.Body)
-	if err != nil {
-		return nil, errors.Wrap(err, "update app config file")
-	}
-	return def, nil
 }

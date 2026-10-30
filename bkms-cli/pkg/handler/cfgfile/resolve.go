@@ -101,6 +101,21 @@ func (r FileRef) String() string {
 	return fmt.Sprintf("name=%s", r.Name)
 }
 
+// fileTarget 是某个配置文件在指定环境下实际生效的文件。
+type fileTarget struct {
+	// Def 配置文件定义（来自列表接口，带默认文件信息）。
+	Def *client.AppConfigFileDef
+	// Detail 指定环境下的详情，FileID / CurrentVersion 指向实际生效的文件。
+	Detail *client.AppConfigFileDef
+	// EnvName 环境名，空字符串表示默认文件。
+	EnvName string
+}
+
+// SharesDefault 表示指定了环境，但该环境没有独立实例，生效的是默认文件。
+func (t *fileTarget) SharesDefault() bool {
+	return t.EnvName != "" && !lo.FromPtr(t.Detail.HasEnvInstance)
+}
+
 func formatDefCandidates(defs []client.AppConfigFileDef) string {
 	if len(defs) == 0 {
 		return "<none>"
@@ -199,21 +214,6 @@ func formatEnvMode(def *client.AppConfigFileDef) string {
 		return envModeUnified
 	}
 	return envModePerEnv
-}
-
-// fileTarget 是某个配置文件在指定环境下实际生效的文件。
-type fileTarget struct {
-	// Def 配置文件定义（来自列表接口，带默认文件信息）。
-	Def *client.AppConfigFileDef
-	// Detail 指定环境下的详情，FileID / CurrentVersion 指向实际生效的文件。
-	Detail *client.AppConfigFileDef
-	// EnvName 环境名，空字符串表示默认文件。
-	EnvName string
-}
-
-// SharesDefault 表示指定了环境，但该环境没有独立实例，生效的是默认文件。
-func (t *fileTarget) SharesDefault() bool {
-	return t.EnvName != "" && !lo.FromPtr(t.Detail.HasEnvInstance)
 }
 
 // loadTarget 定位配置文件，并加载其在指定环境下实际生效的文件详情。

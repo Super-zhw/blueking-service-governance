@@ -44,6 +44,15 @@ type DefOutput struct {
 	FileID             string `json:"fileId" yaml:"fileId" table:"-"`
 }
 
+// List 返回应用下所有配置文件定义。
+func List(ctx context.Context, cli client.Client, appID string) ([]DefOutput, error) {
+	defs, err := cli.ListAppConfigFileDefs(ctx, appID)
+	if err != nil {
+		return nil, errors.Wrap(err, "list app config files")
+	}
+	return lo.Map(defs, func(def client.AppConfigFileDef, _ int) DefOutput { return toDefOutput(&def) }), nil
+}
+
 func toDefOutput(def *client.AppConfigFileDef) DefOutput {
 	return DefOutput{
 		Name:               def.Name,
@@ -60,13 +69,4 @@ func toDefOutput(def *client.AppConfigFileDef) DefOutput {
 		ID:                 def.ID,
 		FileID:             def.FileID,
 	}
-}
-
-// List 返回应用下所有配置文件定义。
-func List(ctx context.Context, cli client.Client, appID string) ([]DefOutput, error) {
-	defs, err := cli.ListAppConfigFileDefs(ctx, appID)
-	if err != nil {
-		return nil, errors.Wrap(err, "list app config files")
-	}
-	return lo.Map(defs, func(def client.AppConfigFileDef, _ int) DefOutput { return toDefOutput(&def) }), nil
 }

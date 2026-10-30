@@ -31,12 +31,25 @@ import (
 	"github.com/TencentBlueKing/blueking-service-governance/bkms-cli/pkg/utils/console"
 )
 
+// updateFlags 保存 'app config-file update' 绑定的原始参数值。
+// 是否修改某项由 flag 是否被显式指定决定，因此需要保留 flag 原值而不直接绑定到 UpdateOptions。
+type updateFlags struct {
+	newName            string
+	newMountDir        string
+	mountEnvNames      []string
+	envContentStrategy string
+	perEnv             bool
+	unified            bool
+	mountAllEnvs       bool
+	enableEnvVarRender bool
+	yes                bool
+}
+
 // NewUpdateCmd returns a Command instance for 'app config-file update' sub command.
 func NewUpdateCmd() *cobra.Command {
-	var appID, newName, newMountDir, envContentStrategy string
+	var appID string
 	var ref handler.FileRef
-	var opts handler.UpdateOptions
-	var perEnv, unified, enableEnvVarRender, yes bool
+	var flags updateFlags
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -67,67 +80,59 @@ later are not mounted automatically.`,
   # Change how a framework file applies environment content
   bkms-cli app config-file update --app demo --name trpc_go.yaml --env-content-strategy overwrite`,
 		Args: cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return validateUpdateArgs(cmd, args, flags.envContentStrategy)
+		},
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			flags := cmd.Flags()
-			if flags.Changed("new-name") {
-				opts.NewName = &newName
-			}
-			if flags.Changed("new-mount-dir") {
-				opts.NewMountDir = &newMountDir
-			}
-			if !flags.Changed("mount-envs") {
-				opts.MountEnvNames = nil
-			}
-			if perEnv || unified {
-				opts.IsUnifiedConfig = &unified
-			}
-			if flags.Changed("enable-env-var-render") {
-				opts.EnableEnvVarRender = &enableEnvVarRender
-			}
-			if flags.Changed("env-content-strategy") {
-				opts.EnvContentStrategy = &envContentStrategy
-			}
-
-			cli := client.New()
-			plan, err := handler.PlanUpdate(cmd.Context(), cli, appID, ref, opts)
-			if err != nil {
-				return errors.Wrap(err, "plan app config file update")
-			}
-			if !plan.HasChanges() {
-				console.Info("Config file %s is already up to date", plan.Def.Name)
-				return nil
-			}
-			if len(plan.RemovedEnvInstances) > 0 {
-				if err = requireYes(yes, fmt.Sprintf(
-					"Content of envs [%s] in config file %s will be deleted, including version history.",
-					joinEnvNames(plan.RemovedEnvInstances), plan.Def.Name,
-				)); err != nil {
-					return err
-				}
-			}
-
-			def, err := handler.ApplyUpdate(cmd.Context(), cli, appID, plan)
-			if err != nil {
-				return errors.Wrap(err, "update app config file")
-			}
-			console.Info("✓ Config file %s updated (id: %s)", def.Name, def.ID)
-			return nil
+			return runUpdate(cmd, appID, ref, flags.toUpdateOptions(cmd), flags.yes)
 		},
 	}
 
-	cmdutil.AddAppFlags(cmd, &appID)
-	addFileRefFlags(cmd, &ref)
-	cmd.Flags().StringVar(&newName, "new-name", "", "new file name")
-	cmd.Flags().StringVar(&newMountDir, "new-mount-dir", "", "new absolute mount directory")
-	cmd.Flags().StringSliceVar(&opts.MountEnvNames, "mount-envs", nil, "mount on these environments only")
-	cmd.Flags().BoolVar(&opts.MountAllEnvs, "mount-all-envs", false, "mount on all current environments")
-	cmd.Flags().BoolVar(&perEnv, "per-env", false, "allow environment-specific content")
-	cmd.Flags().BoolVar(&unified, "unified", false, "share the default content across all environments")
-	cmd.Flags().BoolVar(&enableEnvVarRender, "enable-env-var-render", false, "enable environment variable rendering")
+	addUpdateFlags(cmd, &appID, &ref, &flags)
+
+	return cmd
+}
+
+// toUpdateOptions 把显式指定的 flag 转换为更新参数，未指定的项保持不修改。
+func (f *updateFlags) toUpdateOptions(cmd *cobra.Command) handler.UpdateOptions {
+	flags := cmd.Flags()
+	opts := handler.UpdateOptions{MountAllEnvs: f.mountAllEnvs}
+	if flags.Changed("new-name") {
+		opts.NewName = &f.newName
+	}
+	if flags.Changed("new-mount-dir") {
+		opts.NewMountDir = &f.newMountDir
+	}
+	if flags.Changed("mount-envs") {
+		opts.MountEnvNames = f.mountEnvNames
+	}
+	if f.perEnv || f.unified {
+		opts.IsUnifiedConfig = &f.unified
+	}
+	if flags.Changed("enable-env-var-render") {
+		opts.EnableEnvVarRender = &f.enableEnvVarRender
+	}
+	if flags.Changed("env-content-strategy") {
+		opts.EnvContentStrategy = &f.envContentStrategy
+	}
+	return opts
+}
+
+// addUpdateFlags 注册更新参数以及与参数组合相关的约束。
+func addUpdateFlags(cmd *cobra.Command, appID *string, ref *handler.FileRef, f *updateFlags) {
+	cmdutil.AddAppFlags(cmd, appID)
+	addFileRefFlags(cmd, ref)
+	cmd.Flags().StringVar(&f.newName, "new-name", "", "new file name")
+	cmd.Flags().StringVar(&f.newMountDir, "new-mount-dir", "", "new absolute mount directory")
+	cmd.Flags().StringSliceVar(&f.mountEnvNames, "mount-envs", nil, "mount on these environments only")
+	cmd.Flags().BoolVar(&f.mountAllEnvs, "mount-all-envs", false, "mount on all current environments")
+	cmd.Flags().BoolVar(&f.perEnv, "per-env", false, "allow environment-specific content")
+	cmd.Flags().BoolVar(&f.unified, "unified", false, "share the default content across all environments")
+	cmd.Flags().BoolVar(&f.enableEnvVarRender, "enable-env-var-render", false, "enable environment variable rendering")
 	cmd.Flags().StringVar(
-		&envContentStrategy, "env-content-strategy", "", "framework files only: overlay (patch) or overwrite (full)",
+		&f.envContentStrategy, "env-content-strategy", "", "framework files only: overlay (patch) or overwrite (full)",
 	)
-	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "confirm deleting environment-specific content")
+	cmd.Flags().BoolVarP(&f.yes, "yes", "y", false, "confirm deleting environment-specific content")
 	cmd.MarkFlagsMutuallyExclusive("mount-envs", "mount-all-envs")
 	cmd.MarkFlagsMutuallyExclusive("per-env", "unified")
 	cmd.MarkFlagsOneRequired(
@@ -138,13 +143,41 @@ later are not mounted automatically.`,
 	_ = cmd.RegisterFlagCompletionFunc("env-content-strategy", cobra.FixedCompletions(
 		[]string{"overlay", "overwrite"}, cobra.ShellCompDirectiveNoFileComp,
 	))
-	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
-		if cmd.Flags().Changed("env-content-strategy") &&
-			envContentStrategy != "overlay" && envContentStrategy != "overwrite" {
-			return clierr.Usagef("--env-content-strategy must be overlay or overwrite")
+}
+
+// validateUpdateArgs 校验参数取值，并在解析应用 ID 后执行前置检查。
+func validateUpdateArgs(cmd *cobra.Command, args []string, envContentStrategy string) error {
+	if cmd.Flags().Changed("env-content-strategy") &&
+		envContentStrategy != "overlay" && envContentStrategy != "overwrite" {
+		return clierr.Usagef("--env-content-strategy must be overlay or overwrite")
+	}
+	return cmdutil.ResolveAppPreRunE(cmd, args)
+}
+
+// runUpdate 生成并执行更新计划，会删除环境内容时要求 --yes 确认。
+func runUpdate(cmd *cobra.Command, appID string, ref handler.FileRef, opts handler.UpdateOptions, yes bool) error {
+	cli := client.New()
+	plan, err := handler.PlanUpdate(cmd.Context(), cli, appID, ref, opts)
+	if err != nil {
+		return errors.Wrap(err, "plan app config file update")
+	}
+	if !plan.HasChanges() {
+		console.Info("Config file %s is already up to date", plan.Def.Name)
+		return nil
+	}
+	if len(plan.RemovedEnvInstances) > 0 {
+		if err = requireYes(yes, fmt.Sprintf(
+			"Content of envs [%s] in config file %s will be deleted, including version history.",
+			joinEnvNames(plan.RemovedEnvInstances), plan.Def.Name,
+		)); err != nil {
+			return err
 		}
-		return cmdutil.ResolveAppPreRunE(cmd, args)
 	}
 
-	return cmd
+	def, err := handler.ApplyUpdate(cmd.Context(), cli, appID, plan)
+	if err != nil {
+		return errors.Wrap(err, "update app config file")
+	}
+	console.Info("✓ Config file %s updated (id: %s)", def.Name, def.ID)
+	return nil
 }
