@@ -41,7 +41,7 @@
             <span class="font-bold">{{ $t('构建管理') }}</span>
           </i18n-t>
           <Table
-            v-bkloading="{ loading: isLoading }"
+            v-bkloading="{ loading: isLoading, zIndex: 8 }"
             class="mt-[10px]"
             :data="variablesData"
             row-class-name="group"

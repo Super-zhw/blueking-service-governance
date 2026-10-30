@@ -75,7 +75,7 @@
       </FlexRow>
       <Table
         ref="tableRef"
-        v-bkloading="{ loading: filterLoading || loading }"
+        v-bkloading="{ loading: filterLoading || loading, zIndex: 8 }"
         class="bg-[#fff] mt-[16px]"
         :data="list"
         :filter-config="{ remote: true }"

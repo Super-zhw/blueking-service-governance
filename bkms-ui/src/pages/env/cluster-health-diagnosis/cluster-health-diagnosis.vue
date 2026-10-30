@@ -218,7 +218,7 @@
             </template>
           </FlexRow>
           <Table
-            v-bkloading="{ loading: filterLoading }"
+            v-bkloading="{ loading: filterLoading, zIndex: 8 }"
             :data="filteredList"
             :expand-config="expandConfig"
             :max-height="maxHeight"

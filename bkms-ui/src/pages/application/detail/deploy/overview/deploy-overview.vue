@@ -157,7 +157,7 @@
         >
           <Table
             ref="tableRef"
-            v-bkloading="{ loading: isLoading }"
+            v-bkloading="{ loading: isLoading, zIndex: 8 }"
             :data="visibleRows"
             :filter-config="{ remote: true }"
             :max-height="tableHeight"

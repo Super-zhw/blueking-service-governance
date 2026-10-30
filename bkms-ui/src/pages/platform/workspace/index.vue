@@ -57,7 +57,7 @@
     </div>
 
     <Table
-      v-bkloading="{ loading: isLoading }"
+      v-bkloading="{ loading: isLoading, zIndex: 8 }"
       auto-resize
       class="flex-1 w-full min-h-0"
       :data="workspaceList"

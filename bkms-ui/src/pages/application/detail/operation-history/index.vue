@@ -61,7 +61,10 @@
           </SearchSelect>
         </template>
       </FlexRow>
-      <Loading :loading="isLoading">
+      <Loading
+        :loading="isLoading"
+        z-index="8"
+      >
         <Table
           :data="list"
           :filter-config="{ remote: true }"

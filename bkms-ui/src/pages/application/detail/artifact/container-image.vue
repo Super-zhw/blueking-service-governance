@@ -92,7 +92,7 @@
         </Button>
       </Alert>
       <Table
-        v-bkloading="{ loading: isLoading }"
+        v-bkloading="{ loading: isLoading, zIndex: 8 }"
         auto-resize
         class="mt-[16px] w-full artifact-table"
         :data="artifactList"

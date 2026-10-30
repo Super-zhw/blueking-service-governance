@@ -46,7 +46,7 @@
 
       <!-- 管理员列表 -->
       <Table
-        v-bkloading="{ loading: isLoading }"
+        v-bkloading="{ loading: isLoading, zIndex: 8 }"
         class="flex-1"
         :data="tableData"
         :pagination="pagination"

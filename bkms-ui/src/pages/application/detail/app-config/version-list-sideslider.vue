@@ -78,7 +78,7 @@
 
       <!-- 版本列表表格 -->
       <Table
-        v-bkloading="{ loading: versionListLoading }"
+        v-bkloading="{ loading: versionListLoading, zIndex: 8 }"
         :data="versionListWithCurrent"
         :pagination="pagination"
         @page-limit-change="pageSizeChange"

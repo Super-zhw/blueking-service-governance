@@ -59,7 +59,7 @@
         class="flex-1"
       >
         <Table
-          v-bkloading="{ loading: isLoading }"
+          v-bkloading="{ loading: isLoading, zIndex: 8 }"
           :data="tableData"
           :max-height="eventTableContentHeight"
           :pagination="pagination"
